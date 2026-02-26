@@ -1,0 +1,5 @@
+format = "[󰣇](bold blue) [kash](bold cyan) $character"
+
+[character]
+success_symbol = "[❯](bold magenta)"
+error_symbol = "[❯](bold red)"
