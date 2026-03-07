@@ -1,4 +1,5 @@
 import json
+import sys
 import colorsys
 from pathlib import Path
 from PIL import Image
@@ -18,6 +19,7 @@ def _score_color(r, g, b):
     return chroma + warm_bonus - blue_penalty - brightness_penalty
 
 def _extract_vibrant(image_path: str):
+    print("VIBRANT EXTRACTOR HIT", file=sys.stderr)
     from materialyoucolor.hct import Hct
     open("/tmp/vibrant_called.log", "w").write(str(image_path))
     FALLBACK = "6750A4"
@@ -38,9 +40,7 @@ def _extract_vibrant(image_path: str):
                 best_hex = f"{r:02x}{g:02x}{b:02x}"
         hex_color = best_hex or FALLBACK
     except Exception as e:
-        open("/tmp/vibrant_error.log", "w").write(str(e))
         hex_color = FALLBACK
-        open("/tmp/vibrant_color.log", "w").write(hex_color)
     return Hct.from_int(int(f"0xFF{hex_color}", 16))
 
 def get_score_for_image(image: Path | str, cache_base: Path):

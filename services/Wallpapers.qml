@@ -28,7 +28,7 @@ Searcher {
         previewPath = path;
         showPreview = true;
         
-        if (false)
+        if (Colours.scheme === "dynamic")
             getPreviewColoursProc.running = true;
     }
 
@@ -84,10 +84,10 @@ Searcher {
 
         command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
         stdout: StdioCollector {
-            onStreamFinished: {
-                Colours.load(text, true);
-                Colours.showPreview = true;
-            }
+           onStreamFinished: {
+               Colours.load(text, true);
+               Colours.showPreview = true;
+           }
         }
     }
 }
