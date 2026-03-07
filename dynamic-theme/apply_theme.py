@@ -10,8 +10,8 @@ from PIL import Image
 
 FALLBACK_HEX = "6750A4"
 NUM_COLORS   = 16
-MODE         = "dark"
-VARIANT      = "vibrant"  #"expressive" for contrast on color,  "vibrant" for a similar hue
+#MODE         = "dark"
+#VARIANT      = "vibrant"  #"expressive" for contrast on color,  "vibrant" for a similar hue
 
 
 def score_color(r, g, b):
@@ -60,10 +60,10 @@ def main():
 
     # Get current scheme and override settings
     scheme = get_scheme()
-    scheme._mode    = MODE
-    scheme._variant = VARIANT
+    scheme._mode    = "dark"
     scheme._name    = "dynamic"
-
+    # keep scheme._variant as-is — respect whatever user has set
+    
     # Generate colours using caelestia's own generator
     colours = gen_scheme(scheme, primary)
     scheme._colours = colours
