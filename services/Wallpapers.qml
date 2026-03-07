@@ -27,8 +27,8 @@ Searcher {
     function preview(path: string): void {
         previewPath = path;
         showPreview = true;
-
-        if (Colours.scheme === "dynamic")
+        
+        if (false)
             getPreviewColoursProc.running = true;
     }
 
