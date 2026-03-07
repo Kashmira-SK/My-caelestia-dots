@@ -107,7 +107,7 @@ def get_colours_for_wall(wall: Path | str, no_smart: bool) -> None:
             {
                 "name": name,
                 "flavour": scheme.flavour,
-                "mode": smart_opts["mode"],
+                "mode": "dark",
                 "variant": smart_opts["variant"],
                 "colours": scheme.colours,
             }
