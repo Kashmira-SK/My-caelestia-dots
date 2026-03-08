@@ -73,7 +73,7 @@ def main():
     print(f"[apply_theme] Scheme saved.")
 
     # Apply colours to all theme files — this is what actually updates the UI
-    apply_colours(colours, MODE)
+    apply_colours(colours, "dark")
     print(f"[apply_theme] Colours applied.")
 
 
