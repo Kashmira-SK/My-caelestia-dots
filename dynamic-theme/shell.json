@@ -29,8 +29,8 @@
     },
     "transparency": {
       "enabled": false,
-      "base": 0.851220132512521,
-      "layers": 0.4218521755008347
+      "base": 0.9543314378130218,
+      "layers": 0.6005875678213689
     }
   },
   "general": {
@@ -111,16 +111,16 @@
       },
       "shadow": {
         "enabled": true,
-        "opacity": 0.7011965534747293,
-        "blur": 0.4
+        "opacity": 0.6988168434115525,
+        "blur": 0.20440828068592057
       }
     },
     "visualiser": {
       "enabled": true,
       "autoHide": true,
       "blur": false,
-      "rounding": 1,
-      "spacing": 1
+      "rounding": 10,
+      "spacing": 1.6270411623539234
     }
   },
   "bar": {
@@ -218,8 +218,8 @@
     "excludedScreens": []
   },
   "border": {
-    "thickness": 11,
-    "rounding": 8
+    "thickness": 2,
+    "rounding": 9
   },
   "dashboard": {
     "enabled": true,
@@ -545,37 +545,34 @@
     }
   },
   "sidebar": {
-      "enabled": true,
-      "dragThreshold": 80,
-      "sizes": {
-        "width": 430
-      }
-    },
-    "services": {
-      "weatherLocation": "",
-      "useFahrenheit": true,
-      "useFahrenheitPerformance": true,
-      "useTwelveHourClock": true,
-      "gpuType": "",
-      "visualiserBars": 45,
-      "audioIncrement": 0.1,
-      "brightnessIncrement": 0.1,
-      "maxVolume": 1,
-      "smartScheme": true,
-      "defaultPlayer": "Spotify",
-      "playerAliases": [
-        {
-          "from": "com.github.th_ch.youtube_music",
-          "to": "YT Music"
-        }
-      ]
-    },
-    "wallpaper": {
-      "postHook": "micro ~/.config/caelestia/shell.json"
-    },
-    "paths": {
-      "wallpaperDir": "~/Pictures/Wallpapers",
-      "sessionGif": "root:/assets/kurukuru.gif",
-      "mediaGif": "root:/assets/bongocat.gif"
+    "enabled": true,
+    "dragThreshold": 80,
+    "sizes": {
+      "width": 430
     }
+  },
+  "services": {
+    "weatherLocation": "",
+    "useFahrenheit": true,
+    "useFahrenheitPerformance": true,
+    "useTwelveHourClock": true,
+    "gpuType": "",
+    "visualiserBars": 45,
+    "audioIncrement": 0.1,
+    "brightnessIncrement": 0.1,
+    "maxVolume": 1,
+    "smartScheme": true,
+    "defaultPlayer": "Spotify",
+    "playerAliases": [
+      {
+        "from": "com.github.th_ch.youtube_music",
+        "to": "YT Music"
+      }
+    ]
+  },
+  "paths": {
+    "wallpaperDir": "~/Pictures/Wallpapers",
+    "sessionGif": "root:/assets/kurukuru.gif",
+    "mediaGif": "root:/assets/bongocat.gif"
   }
+}
