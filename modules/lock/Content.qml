@@ -142,7 +142,6 @@ RowLayout {
 
             property int msgIndex: Math.floor(Math.random() * 4)
 
-            }
 
             StyledText {
                 Layout.alignment: Qt.AlignLeft
