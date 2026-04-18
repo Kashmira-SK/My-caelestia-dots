@@ -3,11 +3,13 @@ import qs.services
 import qs.config
 import qs.utils
 import Caelestia.Services
+import Quickshell
 import QtQuick
 import QtQuick.Shapes
 
 Item {
     id: root
+    required property PersistentProperties state
 
     property real playerProgress: {
         const active = Players.active;
@@ -214,7 +216,15 @@ Item {
 
         playing: Players.active?.isPlaying ?? false
         speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment
-        source: Paths.absolutePath(Config.paths.mediaGif)
+        source: [
+            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
+        ][root.state.gifIndex]
         asynchronous: true
         fillMode: AnimatedImage.PreserveAspectFit
     }

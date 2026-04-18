@@ -16,6 +16,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    required property PersistentProperties state
 
     property real playerProgress: {
         const active = Players.active;
@@ -365,18 +366,66 @@ Item {
         implicitWidth: visualiser.width
         implicitHeight: visualiser.height
 
-        AnimatedImage {
-            anchors.centerIn: parent
 
+        
+        AnimatedImage {
+            id: gifImg
+            anchors.centerIn: parent
             width: visualiser.width * 0.75
             height: visualiser.height * 0.75
-
             playing: Players.active?.isPlaying ?? false
             speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
-            source: Paths.absolutePath(Config.paths.mediaGif)
-            asynchronous: true
-            fillMode: AnimatedImage.PreserveAspectFit
+            source: [
+            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
+           ][root.state.gifIndex]
+          
+           asynchronous: true
+           fillMode: AnimatedImage.PreserveAspectFit
         }
+
+        property var gifList: [
+            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
+            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
+        ]
+
+        Rectangle {
+           id: swapButton
+           anchors.horizontalCenter: parent.horizontalCenter
+           anchors.bottom: parent.bottom
+           anchors.bottomMargin: Appearance.padding.large
+           width: 40
+           height: 24
+           radius: 12
+           color: Colours.palette.m3surfaceContainerHigh
+
+         MouseArea {
+           anchors.fill: parent
+           z: 10
+           onClicked: {
+             root.state.gifIndex = (root.state.gifIndex + 1) % bongocat.gifList.length
+           }
+         }
+
+         Text {
+            anchors.centerIn: parent
+            text: "⇄"
+            color: "white"
+            font.pixelSize: 12
+         }
+        }
+
+
     }
 
     component PlayerItem: MenuItem {

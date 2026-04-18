@@ -95,7 +95,8 @@ GridLayout {
         radius: Appearance.rounding.large * 2
 
         Media {
-            id: media
+          id: media
+          state: root.state
         }
     }
 

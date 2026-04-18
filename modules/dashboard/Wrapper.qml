@@ -14,6 +14,7 @@ Item {
     required property PersistentProperties visibilities
     readonly property PersistentProperties dashState: PersistentProperties {
         property int currentTab
+        property int gifIndex: 0
         property date currentDate: new Date()
 
         reloadableId: "dashboardState"

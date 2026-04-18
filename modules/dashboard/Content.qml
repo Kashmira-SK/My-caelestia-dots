@@ -98,7 +98,8 @@ Item {
                 Pane {
                     index: 1
                     sourceComponent: Media {
-                        visibilities: root.visibilities
+                      visibilities: root.visibilities
+                      state: root.state
                     }
                 }
 
