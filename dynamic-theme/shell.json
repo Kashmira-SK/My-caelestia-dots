@@ -28,9 +28,9 @@
       }
     },
     "transparency": {
-      "enabled": false,
-      "base": 0.9543314378130218,
-      "layers": 0.6005875678213689
+      "enabled": true,
+      "base": 0.7996693708263775,
+      "layers": 0.47522237583472454
     }
   },
   "general": {
@@ -46,7 +46,7 @@
         "mpv"
       ],
       "explorer": [
-        "dolphin"
+        "nautilus"
       ]
     },
     "idle": {
@@ -55,12 +55,12 @@
       "timeouts": [
         {
           "idleAction": "lock",
-          "timeout": 180
+          "timeout": 120
         },
         {
           "idleAction": "dpms off",
           "returnAction": "dpms on",
-          "timeout": 300
+          "timeout": 180
         },
         {
           "idleAction": [
@@ -106,11 +106,11 @@
       "invertColors": false,
       "background": {
         "enabled": false,
-        "opacity": 0.701080212093863,
+        "opacity": 0.6533062105144406,
         "blur": true
       },
       "shadow": {
-        "enabled": true,
+        "enabled": false,
         "opacity": 0.6988168434115525,
         "blur": 0.20440828068592057
       }
@@ -140,11 +140,11 @@
     "workspaces": {
       "shown": 4,
       "activeIndicator": true,
-      "occupiedBg": true,
+      "occupiedBg": false,
       "showWindows": false,
       "showWindowsOnSpecialWorkspaces": false,
       "activeTrail": false,
-      "perMonitorWorkspaces": true,
+      "perMonitorWorkspaces": false,
       "label": "  ",
       "occupiedLabel": "󰮯",
       "activeLabel": "󰮯",
@@ -165,7 +165,7 @@
       "showWifi": true,
       "showBluetooth": true,
       "showBattery": true,
-      "showLockStatus": true
+      "showLockStatus": false
     },
     "clock": {
       "showIcon": false

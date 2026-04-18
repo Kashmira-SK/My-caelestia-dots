@@ -9,28 +9,65 @@ SAVEHIST=10000
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 
-# History substring search (up/down arrow searches history by what you've typed)
+# History substring search
 source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-alias hyprconf="micro ~/.config/hypr/hyprland.conf"
-alias caeconf="micro ~/.config/caelestia/shell.json"
-alias fetchconf="micro ~/.config/fastfetch/config.jsonc"
-alias caefiles="cd ~/.config/quickshell/caelestia"
-alias matrix="unimatrix -c cyan -s 93 -f -l kkns -a"
-alias matrixb="cmatrix -C blue -u 7"
-alias matrixc="cmatrix -C cyan -u 8 -s"
-alias unmount='udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda'
+# Plugins
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# Editor
+export EDITOR=nvim
+export VISUAL=nvim
+
+# Path
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$PATH:/opt/windscribe"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Qt
 export QT_QPA_PLATFORMTHEME=qt6ct
 export XDG_MENU_PREFIX=arch-
 
+# Aliases - configs
+alias hyprconf="nvim ~/.config/hypr/hyprland.conf"
+alias fetchconf="nvim ~/.config/fastfetch/config.jsonc"
+alias zshconf="nvim ~/.zshrc"
+
+# Aliases - caelestia (remove after switching)
+alias caeconf="nvim ~/.config/caelestia/shell.json"
+alias caefiles="cd ~/.config/quickshell/caelestia"
+
+# Aliases - utils
+alias unmount='udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda'
+alias matrix="unimatrix -c cyan -s 93 -f -l kkns -a"
+alias matrixb="cmatrix -C blue -u 7"
+alias matrixc="cmatrix -C cyan -u 8 -s"
+
+# Functions
+ytmp3() {
+  if [[ $# -eq 2 ]]; then
+    yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --embed-metadata \
+      -P "/home/kashmira/Songs/New" \
+      -o "${1}.%(ext)s" \
+      --postprocessor-args "ffmpeg:-metadata title=\"${1}\"" \
+      "${2}"
+  else
+    yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --embed-metadata \
+      -P "/home/kashmira/Songs/New" \
+      -o "%(title)s.%(ext)s" \
+      "${1}"
+  fi
+}
+
+function cheat() { curl "cheat.sh/$1" }
+
+# Prompt
 eval "$(starship init zsh)"
 
-export EDITOR=micro
-export VISUAL=micro
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-alias cheat='f() {curl "cheat.sh/$1" }; f'
+# Caelestia (remove after switching)
 cat ~/.local/state/caelestia/sequences.txt 2>/dev/null
+
+fastfetch
