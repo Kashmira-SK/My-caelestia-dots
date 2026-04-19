@@ -74,3 +74,10 @@ Newest entries at the top.
   - Lock: 300s
   - DPMS off: 600s
   - Suspend-then-hibernate: 1800s
+
+## Firefox Dynamic Theming (CaelestiaFox)
+- Installed CaelestiaFox extension (addons.mozilla.org/en-US/firefox/addon/caelestiafox)
+- Set up native messaging host: `~/.mozilla/native-messaging-hosts/caelestiafox.json`
+- Native app script at `~/.local/lib/caelestia/caelestiafox` (sourced from caelestia-dots/caelestia zen/native_app/app.fish)
+- Added `sleep 0.3` debounce to the inotifywait loop to prevent Firefox freezing on theme change
+- Firefox now recolors live (toolbar, tabs, URL bar) whenever wallpaper/theme changes via apply_theme.py → scheme.save()
