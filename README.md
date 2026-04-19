@@ -64,6 +64,35 @@ Editing either path edits the same file — git always sees the latest version.
 
 ---
 
+## Firefox dynamic theming (CaelestiaFox)
+
+Firefox recolors live (toolbar, tabs, URL bar) whenever the wallpaper/theme changes.
+
+**Install the extension:** https://addons.mozilla.org/en-US/firefox/addon/caelestiafox
+
+**Set up the native messaging host** (one-time, after cloning):
+
+```bash
+mkdir -p ~/.mozilla/native-messaging-hosts ~/.local/lib/caelestia
+
+cp dotfiles/caelestiafox ~/.local/lib/caelestia/caelestiafox
+chmod +x ~/.local/lib/caelestia/caelestiafox
+
+cat > ~/.mozilla/native-messaging-hosts/caelestiafox.json << 'EOF'
+{
+    "name": "caelestiafox",
+    "description": "Native app for CaelestiaFox extension.",
+    "path": "/home/kashmira/.local/lib/caelestia/caelestiafox",
+    "type": "stdio",
+    "allowed_extensions": ["caelestiafox@caelestia.org"]
+}
+EOF
+```
+
+> The `caelestiafox` script has a `sleep 0.3` debounce added to prevent Firefox freezing on rapid theme changes. Restart Firefox after replacing the script.
+
+---
+
 ## Useful commands
 
 ```bash
