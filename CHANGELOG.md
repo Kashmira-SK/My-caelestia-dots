@@ -1,21 +1,76 @@
 # Changelog
 
-## [Unreleased] - 2026-04-19
+Newest entries at the top.
+
+---
+
+## [2026-04-19] — Repo cleanup
 
 ### Added
-- **Gif switcher for dashboard media tabs**
-  - Added `gifIndex` to persistent dashboard state in `Wrapper.qml` so the selected gif survives tab switches and dashboard close/reopen
-  - Added swap button (small pill overlay) to the media tab (`modules/dashboard/Media.qml`) — click cycles through gifs
-  - Gif list stored on the `bongocat` Item, source bound to `root.state.gifIndex`
-  - Dash tab (`modules/dashboard/dash/Media.qml`) now renders the same gif via inline array indexed by `root.state.gifIndex` — no button needed, stays in sync with media tab
-  - Added 6 new gifs to `assets/`: Citlali, EvernightGlass, rikka, yeee, Cartwheel, Miku (cycle order: Citlali → EvernightGlass → rikka → yeee → Cartwheel → Miku → bongocat1)
+- `dotfiles/` subfolder to organise personal configs
+- Symlinks for `hyprland.conf`, `starship.toml`, `zshrc` → repo is now source of truth
+- `dotfiles/APPS.md` — full app list
+- This CHANGELOG
 
 ### Changed
-- `modules/dashboard/Content.qml` — passes `state` prop to Media component
-- `modules/dashboard/Dash.qml` — passes `state` prop to dash Media component
-- `modules/dashboard/dash/Media.qml` — added `required property PersistentProperties state` and `import Quickshell`
+- Moved `hyprland.conf`, `starship.toml`, `zshrc`, `japanese_aesthetic.conf` into `dotfiles/`
+- Rewrote README to be personal rather than upstream docs
+
+---
+
+## [2026-04-19] — Dashboard gif switcher
+
+### Added
+- Swap button (pill overlay) on media tab cycles through gifs
+- `gifIndex` added to persistent dashboard state in `Wrapper.qml` — selection survives tab switches and dashboard reopen
+- Dash tab syncs to same gif via inline array indexed by `gifIndex`
+- New gifs in `assets/`: Citlali, EvernightGlass, rikka, yeee, Cartwheel, Miku (cycle order ends at bongocat1)
 
 ### Fixed
-- Swap button MouseArea not receiving clicks (z-order issue with parent container)
-- Gif resetting to bongocat on dashboard reopen (was using local property, now uses persistent state)
-- `dash/Media.qml` crash on load — `PersistentProperties` type was unresolved due to missing `import Quickshell`
+- Swap button MouseArea not receiving clicks (z-order issue)
+- Gif resetting to bongocat on dashboard reopen (was local property, now persistent state)
+- `dash/Media.qml` crash on load — missing `import Quickshell` for `PersistentProperties`
+
+---
+
+## [2026-03-08] — Dynamic theming
+
+### Added
+- Material You vibrant color extractor replacing caelestia's default color picker
+- `dynamic-theme/patches/__init__.py` — quantizes image to 16 colors, scores by HSV chroma
+- `dynamic-theme/patches/wallpaper.py` — forces dark mode, passes original wall not thumbnail
+- `~/.config/caelestia/apply_theme.py` — extracts color, generates and applies scheme
+- `~/.config/caelestia/apply_theme.sh` — entrypoint registered as wallpaper postHook
+- Terminal colors now update on wallpaper change via `sequences.txt` in zshrc
+
+### Known limitation
+- Patches live in `/usr/lib/python3.14/site-packages/caelestia/` and get wiped on caelestia package updates — re-apply with commands in README
+
+---
+
+## [2026-02-xx] — Lock screen customisation
+
+### Added
+- Custom right panel in `modules/lock/Content.qml` alongside original left side
+- Glitch clock top-right — Rubik Bold, white ghost layers, subtle x/y offset
+- Time-of-day greeting (good morning / afternoon / evening / night)
+- Name "Kashmira" in Great Vibes cursive, tilted -8°
+- Cycling poems — 4 per time of day, random index on each lock (`Math.floor(Math.random() * 4)`)
+- Media player fades in when music playing, greeting fades out
+
+### Fixed
+- Ghost layers must use `x: 0` / `y: 0` directly, not `anchors` — anchors ignore x/y changes
+- `StyledText` required instead of `Text` for transparency to work
+- QML does not allow `x: 0; y: 0` on one line — must be separate
+- QML cache must be cleared after adding new fonts
+
+---
+
+## [2026-01-xx] — Idle/lock timeouts
+
+### Changed
+- Staggered idle timeouts in `shell.json` to fix simultaneous lock + dpms off + hibernate
+  causing black screen with no input:
+  - Lock: 300s
+  - DPMS off: 600s
+  - Suspend-then-hibernate: 1800s
