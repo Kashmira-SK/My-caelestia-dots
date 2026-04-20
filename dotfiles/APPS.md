@@ -44,3 +44,4 @@
 | pavucontrol | Audio control |
 | playerctl | Media control (used by quickshell under the hood) |
 | fish | Required by caelestia-shell |
+| mpd-mpris | Bridges MPD → MPRIS2 for dashboard widget — enable with `systemctl --user enable --now mpd-mpris` |
