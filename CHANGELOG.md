@@ -81,3 +81,9 @@ Newest entries at the top.
 - Native app script at `~/.local/lib/caelestia/caelestiafox` (sourced from caelestia-dots/caelestia zen/native_app/app.fish)
 - Added `sleep 0.3` debounce to the inotifywait loop to prevent Firefox freezing on theme change
 - Firefox now recolors live (toolbar, tabs, URL bar) whenever wallpaper/theme changes via apply_theme.py → scheme.save()
+
+## MPRIS / Music Widget Fix
+- `mpd-mpris` runs as a systemd user service (`systemctl --user enable --now mpd-mpris`) to bridge MPD → MPRIS2 so rmpc shows up in the dashboard
+- Fixed player auto-switching logic in `services/Players.qml` to prefer whichever player is **actively playing** instead of hardcoded defaultPlayer
+- MPD will always appear in the dropdown as long as the service runs — this is normal, ignore it
+- `rustic` broadcasts MPRIS2 natively as `Rusic`, no bridge needed
