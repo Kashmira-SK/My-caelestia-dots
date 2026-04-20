@@ -64,6 +64,18 @@ ytmp3() {
 
 function cheat() { curl "cheat.sh/$1" }
 
+# fzf
+eval "$(fzf --zsh)"
+
+# eza (ls replacement)
+alias ls="eza --icons=always"
+alias ll="eza -lh --icons=always --git"
+alias la="eza -lah --icons=always --git"
+alias lt="eza --tree --icons=always --level=2"
+
+# zoxide
+eval "$(zoxide init zsh)"
+
 # Prompt
 eval "$(starship init zsh)"
 
