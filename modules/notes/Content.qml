@@ -43,11 +43,19 @@ Item {
         }
     }
 
+    Timer {
+        interval: 10000
+        running: root.visibilities.notes
+        repeat: true
+        onTriggered: saveProcess.running = true
+    }
+    
+
     StyledRect {
         anchors.fill: parent
         anchors.margins: root.padding
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3surface
+        color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
             anchors.fill: parent

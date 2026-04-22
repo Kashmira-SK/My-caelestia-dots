@@ -62,7 +62,7 @@ Shape {
     Notes.Background {
         wrapper: root.panels.notes
 
-        startX: 0
+        startX: -Config.border.rounding
         startY: 0
     }
 
