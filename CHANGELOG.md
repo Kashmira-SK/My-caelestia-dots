@@ -87,3 +87,17 @@ Newest entries at the top.
 - Fixed player auto-switching logic in `services/Players.qml` to prefer whichever player is **actively playing** instead of hardcoded defaultPlayer
 - MPD will always appear in the dropdown as long as the service runs — this is normal, ignore it
 - `rustic` broadcasts MPRIS2 natively as `Rusic`, no bridge needed
+
+## Notes Panel
+- Created `modules/notes/` with `Wrapper.qml` and `Content.qml`
+- Floating notes panel toggled via `Super+G` (drops from top-left)
+- Notes saved to `~/.local/share/caelestia/notes.txt` on close
+- Registered in `modules/drawers/Panels.qml` and `Drawers.qml`
+- Added `property bool notes` to PersistentProperties in Drawers.qml
+- Added `Super+G` keybind in hyprland.conf via `caelestia shell drawers toggle notes`
+
+### Known issues / TODO
+- Font size slightly too small (target ~13-14px)
+- Notes not persisting on reopen (FileView/save process needs fixing)
+- Panel transparency doesn't match other components
+- No visual border connection to system border like other panels
