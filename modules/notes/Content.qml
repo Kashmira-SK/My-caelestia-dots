@@ -11,23 +11,25 @@ import QtQuick.Controls
 Item {
     id: root
     required property var visibilities
-    implicitWidth: 380
-    implicitHeight: 440
-    readonly property string notesDir: StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.local/share/caelestia"
-    readonly property string notesPath: root.notesDir + "/notes.txt"
+    property bool isVisible: false
+    readonly property string notesPath: StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.local/share/caelestia/notes.txt"
+    readonly property int padding: Appearance.padding.large
+    implicitWidth: isVisible ? 380 + padding * 2 : 0
+    implicitHeight: isVisible ? 440 + padding * 2 : 0
 
     FileView {
         id: fileView
         path: root.notesPath
+        onTextChanged: {
+            if (textArea.text === "" && fileView.text !== "")
+                textArea.text = fileView.text
+        }
     }
 
     Process {
         id: saveProcess
-        command: ["bash", "-c", "mkdir -p '" + root.notesDir + "' && cat > '" + root.notesPath + "'"]
-        onStarted: {
-            stdin.write(textArea.text)
-            stdin.close()
-        }
+        command: ["bash", "-c", "mkdir -p '" + StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.local/share/caelestia' && printf '%s' \"$NOTES\" > '" + root.notesPath + "'"]
+        environment: ({ "NOTES": textArea.text })
     }
 
     Connections {
@@ -35,19 +37,17 @@ Item {
         function onNotesChanged() {
             if (root.visibilities.notes) {
                 fileView.reload()
-                textArea.text = fileView.text
             } else {
                 saveProcess.running = true
             }
         }
     }
 
-    Component.onCompleted: textArea.text = fileView.text
-
     StyledRect {
         anchors.fill: parent
+        anchors.margins: root.padding
         radius: Appearance.rounding.normal
-        color: Colours.tPalette.m3surfaceContainerLow
+        color: Colours.palette.m3surface
 
         ColumnLayout {
             anchors.fill: parent
@@ -108,7 +108,7 @@ Item {
                     placeholderText: "Write something..."
                     placeholderTextColor: Colours.palette.m3onSurfaceVariant
                     font.family: Appearance.font.family.sans
-                    font.pixelSize: Appearance.font.size.small
+                    font.pixelSize: 14
                     selectionColor: Qt.alpha(Colours.palette.m3primary, 0.3)
                     selectedTextColor: Colours.palette.m3onSurface
                 }

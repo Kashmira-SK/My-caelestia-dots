@@ -86,13 +86,12 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-    }
+     }
 
     Notes.Wrapper {
         id: notes
         visibilities: root.visibilities
         anchors.top: parent.top
-        anchors.left: parent.left
     }
 
     BarPopouts.Wrapper {
