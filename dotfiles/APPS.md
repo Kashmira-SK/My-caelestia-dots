@@ -34,6 +34,8 @@
 | Firefox | Daily browser |
 | Discord | Chat |
 | Cloudflare WARP | Full tunnel VPN — bypasses uni WiFi blocks for Steam/downloads |
+| KDE Connect | Phone↔laptop notifications, file sharing over LAN |
+| LocalSend | Cross-device file drop over LAN (no account) |
 
 ## System tools
 
