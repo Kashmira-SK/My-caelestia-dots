@@ -101,3 +101,18 @@ Newest entries at the top.
 - Notes not persisting on reopen (FileView/save process needs fixing)
 - Panel transparency doesn't match other components
 - No visual border connection to system border like other panels
+
+## Notes Panel Refinements
+- Added `modules/notes/Background.qml` — ShapePath that connects panel to border like other components
+- Registered Notes.Background in `modules/drawers/Backgrounds.qml`
+- Fixed notes persistence: `FileView` now reacts to `onTextChanged` instead of `Component.onCompleted`
+- Save uses bash process with `printf` instead of stdin assignment
+- Fixed panel visibility: `isVisible` bool prop in Content.qml drives implicit size
+- Fixed gap issue: caused by stale PersistentProperties cache, resolved by reboot
+- Font size set to 14px
+- Panel drops from top-left on `Super+G`
+- Notes saved to `~/.local/share/caelestia/notes.txt`
+
+### Remaining known issues
+- `Cannot assign JavaScript function to QString` warning on save process (cosmetic, save works)
+- OpacityMask warning (unrelated to notes)
