@@ -116,3 +116,10 @@ Newest entries at the top.
 ### Remaining known issues
 - `Cannot assign JavaScript function to QString` warning on save process (cosmetic, save works)
 - OpacityMask warning (unrelated to notes)
+
+## Notes panel polish
+
+- Inner textarea now uses `tPalette.m3surfaceContainer` matching notification card style
+- Fixed background shape misalignment (startX: -Config.border.rounding)
+- Added 10s autosave timer while panel is open to prevent data loss on restart
+- Rebound toggle from Super+G to Super+X
