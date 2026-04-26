@@ -123,3 +123,15 @@ Newest entries at the top.
 - Fixed background shape misalignment (startX: -Config.border.rounding)
 - Added 10s autosave timer while panel is open to prevent data loss on restart
 - Rebound toggle from Super+G to Super+X
+
+## 2026-04-26
+### Added
+- Immich self-hosted photo library via Docker
+- Imported Google Photos takeout for kash, daham, zane using immich-go with correct metadata/dates
+- DB on SSD (`~/immich-db`), media library on Pirate Ship (`immich-library`)
+- Immich open/close routine documented in APPS.md
+- Docker and docker.socket disabled from autostart (manual start only)
+
+### Fixed
+- Google Photos metadata dates (was showing everything as 2026) — fixed by switching from exiftool to immich-go which handles truncated `.supplemen.json` sidecars automatically
+- PostgreSQL corruption from running DB on NTFS — moved to SSD

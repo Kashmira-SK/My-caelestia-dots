@@ -47,3 +47,7 @@
 | playerctl | Media control (used by quickshell under the hood) |
 | fish | Required by caelestia-shell |
 | mpd-mpris | Bridges MPD → MPRIS2 for dashboard widget — enable with `systemctl --user enable --now mpd-mpris` |
+## Self-hosted
+| App | Purpose | Notes |
+|---|---|---|
+| Immich | Photo library | Docker, DB on SSD (`~/immich-db`), media on Pirate Ship. Start: `sudo systemctl start docker && sudo ntfsfix /dev/sda1 && sudo mount /dev/sda1 "/run/media/kashmira/Pirate Ship" && cd ~/git/immich && docker compose up -d`. Stop: `cd ~/git/immich && docker compose down && sudo systemctl stop docker && sudo umount "/run/media/kashmira/Pirate Ship"` |
