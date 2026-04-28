@@ -2,6 +2,58 @@
 
 Newest entries at the top.
 
+## [2026-04-29] — Notes module redesign (multi-note, WIP)
+### Added
+- modules/notes/NoteCard.qml — individual note card component with compact and expanded states
+  - Compact: shows first line of content, type label (Normal/Important/Todo), date, tags
+  - Expanded: full editable TextArea, bottom toolbar with Delete and Done buttons
+  - Three note types with Material You color tokens:
+    - Normal → tPalette.m3surfaceContainer
+    - Important → palette.m3tertiaryContainer
+    - Todo → palette.m3secondaryContainer
+  - Todo type renders each line as a checkbox; checked items get strikethrough
+  - Click anywhere on compact card to expand; Done/collapse arrow to collapse
+  - collapseCounter prop — incrementing from parent collapses all cards at once
+  - noteChanged and noteDeleted signals bubble up to Content.qml
+- modules/notes/NoteEditor.qml — new note creation form
+  - Type selector: three icon buttons (notes / priority_high / check_box) toggle selectedType
+  - TextArea input, placeholder changes based on type
+  - Done button: serializes todo lines with [ ] prefix, emits noteSaved signal
+  - Close button: discards and emits editorClosed
+  - currentTimestamp() helper formats date as "29 April at 3:07 pm"
+
+### Changed
+- modules/notes/Content.qml — full rewrite from single textarea to multi-note panel
+  - Storage changed from notes.txt (flat string) to notes.json (JSON array)
+  - notes.json schema: id (unix timestamp), type, content, created, tags[], archived bool
+  - FileView for reactive file reads; isSaving flag with onExited hook prevents read/write race
+  - saveNotes() sets environment imperatively before triggering saveProcess
+  - addNote() prepends to array (newest first); updateNote() and deleteNote() (sets archived: true) splice by index
+  - Header now has: edit_note icon, "Notes" title, unfold_less (collapse all), add (toggle editor)
+  - NoteEditor slides in/out below header with animated height transition
+  - ScrollView contains a Column+Repeater over root.notes; archived notes hidden via visible/height:0
+  - Empty state text shown when all notes are archived and editor is closed
+  - Panel height increased from 440 to 520 to accommodate list
+  - Removed delete_sweep (clear all) button from old single-note design
+
+### Fixed
+- import qs.services missing from NoteCard.qml and NoteEditor.qml (Colours not defined)
+- import QtQuick.Controls missing from NoteCard.qml (TextArea not a type)
+- import Quickshell.Io missing after refactor (SplitParser not a type)
+- fileView.text called as property — is actually a function in this Quickshell version, must be fileView.text()
+- Duplicate saveNotes() function definition left over from incremental edits
+
+### Known issues (pick up here next session)
+- saveProcess not reliably writing notes.json — environment binding not re-evaluated with current notes at time of save; notes appear on first open but are gone after close/reopen
+- Root cause likely: Process environment needs to be set imperatively in saveNotes() but current Quickshell version behaviour around property assignment before running = true is inconsistent
+- Suggested next step: test writing notes.json directly via a Python or Node one-liner called from Process instead of relying on environment variable passing
+- Todo checklist editing (checkbox toggle) not yet tested end to end
+- No animation on card add/remove yet (ListView.onRemove pattern from notifications not yet applied)
+- Archive viewer not implemented (phase 2)
+- Fullscreen mode stub only (phase 2)
+
+---
+
 ## [2026-04-26] — Immich self-hosted photo library
 ### Added
 - Immich via Docker
@@ -127,53 +179,3 @@ Newest entries at the top.
   - Suspend-then-hibernate: 1800s
 
 ---
-
-## [2026-04-29] — Notes module redesign (multi-note, WIP)
-### Added
-- modules/notes/NoteCard.qml — individual note card component with compact and expanded states
-  - Compact: shows first line of content, type label (Normal/Important/Todo), date, tags
-  - Expanded: full editable TextArea, bottom toolbar with Delete and Done buttons
-  - Three note types with Material You color tokens:
-    - Normal → tPalette.m3surfaceContainer
-    - Important → palette.m3tertiaryContainer
-    - Todo → palette.m3secondaryContainer
-  - Todo type renders each line as a checkbox; checked items get strikethrough
-  - Click anywhere on compact card to expand; Done/collapse arrow to collapse
-  - collapseCounter prop — incrementing from parent collapses all cards at once
-  - noteChanged and noteDeleted signals bubble up to Content.qml
-- modules/notes/NoteEditor.qml — new note creation form
-  - Type selector: three icon buttons (notes / priority_high / check_box) toggle selectedType
-  - TextArea input, placeholder changes based on type
-  - Done button: serializes todo lines with [ ] prefix, emits noteSaved signal
-  - Close button: discards and emits editorClosed
-  - currentTimestamp() helper formats date as "29 April at 3:07 pm"
-
-### Changed
-- modules/notes/Content.qml — full rewrite from single textarea to multi-note panel
-  - Storage changed from notes.txt (flat string) to notes.json (JSON array)
-  - notes.json schema: id (unix timestamp), type, content, created, tags[], archived bool
-  - FileView for reactive file reads; isSaving flag with onExited hook prevents read/write race
-  - saveNotes() sets environment imperatively before triggering saveProcess
-  - addNote() prepends to array (newest first); updateNote() and deleteNote() (sets archived: true) splice by index
-  - Header now has: edit_note icon, "Notes" title, unfold_less (collapse all), add (toggle editor)
-  - NoteEditor slides in/out below header with animated height transition
-  - ScrollView contains a Column+Repeater over root.notes; archived notes hidden via visible/height:0
-  - Empty state text shown when all notes are archived and editor is closed
-  - Panel height increased from 440 to 520 to accommodate list
-  - Removed delete_sweep (clear all) button from old single-note design
-
-### Fixed
-- import qs.services missing from NoteCard.qml and NoteEditor.qml (Colours not defined)
-- import QtQuick.Controls missing from NoteCard.qml (TextArea not a type)
-- import Quickshell.Io missing after refactor (SplitParser not a type)
-- fileView.text called as property — is actually a function in this Quickshell version, must be fileView.text()
-- Duplicate saveNotes() function definition left over from incremental edits
-
-### Known issues (pick up here next session)
-- saveProcess not reliably writing notes.json — environment binding not re-evaluated with current notes at time of save; notes appear on first open but are gone after close/reopen
-- Root cause likely: Process environment needs to be set imperatively in saveNotes() but current Quickshell version behaviour around property assignment before running = true is inconsistent
-- Suggested next step: test writing notes.json directly via a Python or Node one-liner called from Process instead of relying on environment variable passing
-- Todo checklist editing (checkbox toggle) not yet tested end to end
-- No animation on card add/remove yet (ListView.onRemove pattern from notifications not yet applied)
-- Archive viewer not implemented (phase 2)
-- Fullscreen mode stub only (phase 2)
