@@ -2,6 +2,19 @@
 
 Newest entries at the top.
 
+## [2026-05-01] — Theme menu de-bloating
+### Changed
+- modules/launcher/services/Schemes.qml — Refactored the scheme loading logic to prevent UI bloat
+  - Added a whitelist filter (`allowedThemes`) to show only Dynamic, Catppuccin, and Rosé Pine
+  - Added a blacklist filter (`blockedFlavours`) to aggressively remove "hard", "soft", and "medium" variants from the menu
+  - Modified the `getSchemes` Process block to intercept and sanitize the JSON output from the `caelestia scheme list` backend command before it reaches the UI
+  - Menu now only renders high-quality, relevant theme options, significantly reducing launcher scroll length
+
+### Fixed
+- "Hard Dynamic" and "Soft Dynamic" variants no longer clutter the scheme switcher, leaving only the primary Material You logic active
+
+---
+
 ## [2026-04-29] — Notes module redesign (multi-note, WIP)
 ### Added
 - modules/notes/NoteCard.qml — individual note card component with compact and expanded states
