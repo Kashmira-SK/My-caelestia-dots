@@ -51,9 +51,37 @@ Searcher {
                             })));
 
                 const flat = [];
-                for (const s of list)
-                    for (const f of s)
-                        flat.push(f);
+                
+                // --- YOUR CUSTOM FILTERS ---
+                // Only these themes will show up:
+                const allowedThemes = ["dynamic", "catppuccin", "rose pine"];
+                
+                // These flavours will be killed (doesn't affect mocha, frappe, etc.):
+                const blockedFlavours = ["hard", "soft", "medium"];
+
+                for (const s of list) {
+                    for (const f of s) {
+                        const themeName = f.name.toLowerCase();
+                        const flv = f.flavour.toLowerCase();
+                        
+                        // 1. Is it a theme we actually want?
+                        let keepTheme = false;
+                        for (let i = 0; i < allowedThemes.length; i++) {
+                            if (themeName.includes(allowedThemes[i])) keepTheme = true;
+                        }
+
+                        // 2. Is it free of the bloat?
+                        let hasBloat = false;
+                        for (let i = 0; i < blockedFlavours.length; i++) {
+                            if (flv.includes(blockedFlavours[i])) hasBloat = true;
+                        }
+
+                        // If it passes both tests, add it to the menu
+                        if (keepTheme && !hasBloat) {
+                            flat.push(f);
+                        }
+                    }
+                }
 
                 schemes.model = flat.sort((a, b) => (a.name + a.flavour).localeCompare((b.name + b.flavour)));
             }
