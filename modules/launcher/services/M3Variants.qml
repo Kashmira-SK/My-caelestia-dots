@@ -15,58 +15,34 @@ Searcher {
 
     list: [
         Variant {
-            variant: "vibrant"
-            icon: "sentiment_very_dissatisfied"
-            name: qsTr("Vibrant")
-            description: qsTr("A high chroma palette. The primary palette's chroma is at maximum.")
-        },
-        Variant {
             variant: "tonalspot"
-            icon: "android"
+            icon: "lens" 
             name: qsTr("Tonal Spot")
-            description: qsTr("Default for Material theme colours. A pastel palette with a low chroma.")
+            description: qsTr("A balanced, pastel palette that is easy on the eyes.")
         },
         Variant {
             variant: "expressive"
             icon: "compare_arrows"
             name: qsTr("Expressive")
-            description: qsTr("A medium chroma palette. The primary palette's hue is different from the seed colour, for variety.")
+            description: qsTr("Brings in complementary colors for a more varied UI.")
         },
         Variant {
             variant: "fidelity"
             icon: "compare"
             name: qsTr("Fidelity")
-            description: qsTr("Matches the seed colour, even if the seed colour is very bright (high chroma).")
+            description: qsTr("Tries to perfectly match the exact color of your wallpaper.")
         },
         Variant {
-            variant: "content"
-            icon: "sentiment_calm"
-            name: qsTr("Content")
-            description: qsTr("Almost identical to fidelity.")
-        },
-        Variant {
-            variant: "fruitsalad"
-            icon: "nutrition"
-            name: qsTr("Fruit Salad")
-            description: qsTr("A playful theme - the seed colour's hue does not appear in the theme.")
-        },
-        Variant {
-            variant: "rainbow"
-            icon: "looks"
-            name: qsTr("Rainbow")
-            description: qsTr("A playful theme - the seed colour's hue does not appear in the theme.")
+            variant: "vibrant"
+            icon: "palette"
+            name: qsTr("Vibrant")
+            description: qsTr("Maximum color intensity. Good for very dull wallpapers.")
         },
         Variant {
             variant: "neutral"
             icon: "contrast"
             name: qsTr("Neutral")
-            description: qsTr("Close to grayscale, a hint of chroma.")
-        },
-        Variant {
-            variant: "monochrome"
-            icon: "filter_b_and_w"
-            name: qsTr("Monochrome")
-            description: qsTr("All colours are grayscale, no chroma.")
+            description: qsTr("Washes out most of the color. Great for focus.")
         }
     ]
     useFuzzy: Config.launcher.useFuzzy.variants
