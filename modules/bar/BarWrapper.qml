@@ -16,8 +16,13 @@ Item {
 
     readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
     readonly property int contentWidth: Config.bar.sizes.innerWidth + padding * 2
-    readonly property int exclusiveZone: !disabled && (Config.bar.persistent || visibilities.bar) ? contentWidth : Config.border.thickness
-    readonly property bool shouldBeVisible: !disabled && (Config.bar.persistent || visibilities.bar || isHovered)
+    
+    // Reserve physical screen space only when pinned
+    readonly property int exclusiveZone: !disabled && visibilities.bar ? contentWidth : Config.border.thickness
+    
+    // Render the bar if pinned or actively hovered
+    readonly property bool shouldBeVisible: !disabled && (visibilities.bar || isHovered)
+    
     property bool isHovered
 
     function closeTray(): void {

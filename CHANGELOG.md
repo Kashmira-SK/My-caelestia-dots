@@ -2,6 +2,24 @@
 
 Newest entries at the top.
 
+## [2026-05-01] — Bar behavior refactor
+### Changed
+- modules/bar/BarWrapper.qml — Rewrote bar visibility and exclusive zone logic
+  - Detached `Config.bar.persistent` override to allow dynamic toggling via IPC
+  - Modified `exclusiveZone` to only trigger when the bar is explicitly pinned (scoots windows)
+  - Allowed `isHovered` to bypass `exclusiveZone`, creating a clean overlay effect for quick peeking without resizing active windows
+
+---
+
+## [2026-05-01] — M3 Variant menu refinement
+### Changed
+- modules/launcher/services/M3Variants.qml — Curated the Material You variants to 5 usable profiles
+  - Kept Tonal Spot (default), Expressive, Fidelity, Vibrant, and Neutral
+  - Rewrote UI descriptions to clearly explain what each color engine does
+  - Cleaned up icons for a more cohesive menu look
+
+---
+
 ## [2026-05-01] — Theme menu de-bloating
 ### Changed
 - modules/launcher/services/Schemes.qml — Refactored the scheme loading logic to prevent UI bloat
