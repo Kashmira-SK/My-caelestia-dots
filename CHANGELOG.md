@@ -2,7 +2,7 @@
 
 Newest entries at the top.
 
-## [Unreleased] - 2026-05-02
+## [2026-05-02] - Animation flicker Special workspaces
 ### Fixed
 - Special workspace flicker when switching between `magic` and `term` — disabled specialWorkspace animation (`animation = specialWorkspace, 0, 1, default, fade`)
 ### Changed
