@@ -2,6 +2,14 @@
 
 Newest entries at the top.
 
+## [Unreleased] - 2026-05-02
+### Fixed
+- Special workspace flicker when switching between `magic` and `term` — disabled specialWorkspace animation (`animation = specialWorkspace, 0, 1, default, fade`)
+### Changed
+- Updated animations block: added `spring` bezier, `windowsIn` uses `spring` + `popin 80%`, `windowsOut` uses `popin 90%` for snappier window animations
+
+---
+
 ## [2026-05-01] — Bar behavior refactor
 ### Changed
 - modules/bar/BarWrapper.qml — Rewrote bar visibility and exclusive zone logic

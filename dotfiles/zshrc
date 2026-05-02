@@ -35,6 +35,7 @@ export XDG_MENU_PREFIX=arch-
 alias hyprconf="nvim ~/.config/hypr/hyprland.conf"
 alias fetchconf="nvim ~/.config/fastfetch/config.jsonc"
 alias zshconf="nvim ~/.zshrc"
+alias changelog='nvim ~/.config/quickshell/caelestia/CHANGELOG.md'
 
 # Aliases - caelestia (remove after switching)
 alias caeconf="nvim ~/.config/caelestia/shell.json"
