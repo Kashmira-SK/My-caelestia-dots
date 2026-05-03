@@ -2,6 +2,18 @@
 
 Newest entries at the top.
 
+## [2026-05-03] - GTK/Qt Theming Setup
+### Added
+- Cloned `caelestia-dots/gtk` and `caelestia-dots/qt` to `~/git/`
+- Installed `adw-gtk-theme`, `qt5ct`, `qt6ct`, `darkly`
+- Wrote `~/.local/bin/caelestia-theme-watch.fish` to bridge new CLI's `scheme.json` format to the `scheme/current.txt` format expected by the monitor scripts
+- Created systemd user service `caelestia-theme.service` (`WantedBy=default.target`) to auto-run the watcher on login
+- Set `gtk-theme` to `adw-gtk3-dark` and `color-scheme` to `prefer-dark` via gsettings
+### Fixed
+- Word boundary bug in both `gtk/monitor/update.fish` and `qt/monitor/update.fish` — `$surface` was clobbering `$surface0`/`$surface1` producing invalid 7-digit hex values
+
+---
+
 ## [2026-05-02] - Animation flicker Special workspaces
 ### Fixed
 - Special workspace flicker when switching between `magic` and `term` — disabled specialWorkspace animation (`animation = specialWorkspace, 0, 1, default, fade`)
