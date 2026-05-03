@@ -75,6 +75,9 @@ def main():
     # Apply colours to all theme files — this is what actually updates the UI
     apply_colours(colours, "dark")
     print(f"[apply_theme] Colours applied.")
+    import subprocess
+    subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])
+    print(f"[apply_theme] GTK portal restarted.")
 
 
 if __name__ == "__main__":

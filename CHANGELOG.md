@@ -2,6 +2,15 @@
 
 Newest entries at the top.
 
+## [2026-05-03] - GTK portal theme fix
+### Fixed
+- xdg-desktop-portal-gtk file picker not reflecting updated Material You colors after wallpaper change
+- Root cause: GTK portal caches theme at process startup and does not hot-reload gtk.css
+- Fix: added `subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])` at the end of `main()` in `~/.config/caelestia/apply_theme.py`
+- Portal now restarts automatically on every wallpaper change, picking up fresh gtk.css colors
+
+---
+
 ## [2026-05-03] - GTK/Qt Theming Setup
 ### Added
 - Cloned `caelestia-dots/gtk` and `caelestia-dots/qt` to `~/git/`
