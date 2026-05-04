@@ -19,10 +19,9 @@
   "modules": [
     "break",
     "break",
-    "break",
     {
       "type": "custom",
-      "format": "                \u001b[35m誰も見ない美しさ\u001b[0m"
+      "format": "               \u001b[35m誰も見ない美しさ\u001b[0m"
     },
     "break",
     {
@@ -46,6 +45,7 @@
       "key": "\u001b[35m  └─ \uf120\u001b[0m"
     },
     "break",
+    "break",
     {
       "type": "host",
       "key": "\u001b[32m  ├─ \uf109\u001b[0m",
@@ -68,7 +68,7 @@
     "break",
     {
       "type": "custom",
-      "format": "                \u001b[31m○\u001b[0m  \u001b[33m○\u001b[0m  \u001b[32m○\u001b[0m  \u001b[36m○\u001b[0m  \u001b[34m○\u001b[0m  \u001b[35m○\u001b[0m"
+      "format": "              \u001b[31m○\u001b[0m  \u001b[33m○\u001b[0m  \u001b[32m○\u001b[0m  \u001b[36m○\u001b[0m  \u001b[34m○\u001b[0m  \u001b[35m○\u001b[0m"
     }
   ]
 }
