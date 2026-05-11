@@ -96,5 +96,14 @@ Item {
         Behavior on opacity {
             Anim {}
         }
+    } 
+    
+    StateLayer {
+        anchors.fill: parent
+        radius: Appearance.rounding.normal
+        function onClicked(): void {
+            bar.triggerActiveWindowPopout();
+        }
     }
+
 }

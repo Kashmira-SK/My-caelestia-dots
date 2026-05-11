@@ -68,10 +68,23 @@ ColumnLayout {
                 popouts.hasCurrent = false;
                 item.expanded = true;
             }
-        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow) {
-            popouts.currentName = id.toLowerCase();
-            popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
-            popouts.hasCurrent = true;
+        } 
+    }
+    
+    function triggerActiveWindowPopout(): void {
+        for (let i = 0; i < repeater.count; i++) {
+            const ch = repeater.itemAt(i) as WrappedLoader;
+            if (ch?.id === "activeWindow" && Config.bar.popouts.activeWindow) {
+                const item = ch.item;
+                if (popouts.hasCurrent && popouts.currentName === "activewindow") {
+                    popouts.hasCurrent = false;
+                } else {
+                    popouts.currentName = "activewindow";
+                    popouts.currentCenter = item.mapToItem(root, 0, item.implicitHeight / 2).y;
+                    popouts.hasCurrent = true;
+                }
+                return;
+            }
         }
     }
 
