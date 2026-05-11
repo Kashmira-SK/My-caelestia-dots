@@ -2,12 +2,33 @@
 
 Newest entries at the top.
 
+## [2026-05-11] - Active window popout click-based
+### Changed
+- `Bar.qml`: removed hover trigger for active window from `checkPopout`, added `triggerActiveWindowPopout()` toggle function
+- `components/ActiveWindow.qml`: added `StateLayer` click handler that calls `triggerActiveWindowPopout()`
+
+---
+
 ## [2026-05-03] - GTK portal theme fix
 ### Fixed
 - xdg-desktop-portal-gtk file picker not reflecting updated Material You colors after wallpaper change
 - Root cause: GTK portal caches theme at process startup and does not hot-reload gtk.css
 - Fix: added `subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])` at the end of `main()` in `~/.config/caelestia/apply_theme.py`
 - Portal now restarts automatically on every wallpaper change, picking up fresh gtk.css colors
+
+---
+
+## [2026-05-09] - Firefox & startpage dynamic theming
+### Added
+- `apply_theme.py`: `patch_firefox_vars()` — patches `--zen-bg-dark`, `--zen-bg-base`, `--zen-accent` in `zen-modules/_variables.css` from scheme on every wallpaper change
+- `apply_theme.py`: `apply_startpage()` — patches `--bg`, `--fg`, `--accent`, `--dim`, `--card`, `--border` in `~/.config/startpage/index.html` and `uni.html`
+
+---
+
+## [2026-05-05] - zshrc: pipes alias + chat function
+### Added
+- `pipes` alias: runs `pipes.sh` then respawns zsh
+- `chat()` function: activates venv and runs Serena AI Terminal Chat from `~/AI_Projects/TerminalChat`
 
 ---
 

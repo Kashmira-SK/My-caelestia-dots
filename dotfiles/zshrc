@@ -46,6 +46,7 @@ alias unmount='udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda
 alias matrix="unimatrix -c cyan -s 93 -f -l kkns -a"
 alias matrixb="cmatrix -C blue -u 7"
 alias matrixc="cmatrix -C cyan -u 8 -s"
+alias pipes='pipes.sh; exec zsh'
 
 # Functions
 ytmp3() {
@@ -64,6 +65,21 @@ ytmp3() {
 }
 
 function cheat() { curl "cheat.sh/$1" }
+
+# Serena AI Terminal Chat
+chat() {
+    # Go to the project folder
+    cd ~/AI_Projects/TerminalChat
+    
+    # Activate the virtual environment
+    source venv/bin/activate
+    
+    # Clear the screen for a clean aesthetic (optional, but looks nice)
+    clear
+    
+    # Run the bot
+    python main.py
+}
 
 # fzf
 eval "$(fzf --zsh)"
