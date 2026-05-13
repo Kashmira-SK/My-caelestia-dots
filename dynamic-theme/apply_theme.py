@@ -4,13 +4,11 @@ Directly generates and applies a caelestia dynamic scheme from a wallpaper,
 using own vibrant color extractor instead of caelestia's default scorer.
 """
 import sys
+import subprocess
 import colorsys
 from PIL import Image
 FALLBACK_HEX = "6750A4"
 NUM_COLORS   = 16
-
-#MODE         = "dark"
-#VARIANT      = "vibrant"  #"expressive" for contrast on color,  "vibrant" for a similar hue
 
 def score_color(r, g, b):
     h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
@@ -59,30 +57,36 @@ def main():
     from caelestia.utils.scheme import get_scheme
     from caelestia.utils.material.generator import gen_scheme
     from caelestia.utils.theme import apply_colours
-    # Build HCT from our chosen color
     primary = Hct.from_int(int(f"0xFF{hex_color}", 16))
-    # Get current scheme and override settings
     scheme = get_scheme()
     scheme._mode    = "dark"
     scheme._name    = "dynamic"
-    # keep scheme._variant as-is
-
-    # Generate colours using caelestia's own generator
     colours = gen_scheme(scheme, primary)
     scheme._colours = colours
-    # Save scheme state
     scheme.save()
     print(f"[apply_theme] Scheme saved.")
-    # Apply colours to all theme files — this is what actually updates the UI
     apply_colours(colours, "dark")
     print(f"[apply_theme] Colours applied.")
+
+    # Hyprland border colors
+    active = colours["primary"]
+    subprocess.run(["hyprctl", "keyword", "general:col.active_border", f"rgba({active}ff)"])
+    subprocess.run(["hyprctl", "keyword", "general:col.inactive_border", "rgba(00000000)"])
+    print(f"[apply_theme] Hyprland borders updated.")
+
+    # Persist border colors for startup
+    with open("/home/kashmira/.config/hypr/border_colors.conf", "w") as f:
+        f.write(f"general {{\n")
+        f.write(f"    col.active_border = rgba({active}ff)\n")
+        f.write(f"    col.inactive_border = rgba(00000000)\n")
+        f.write(f"}}\n")
+    print("[apply_theme] Border colors persisted.")
+
     apply_startpage(colours)
-    # Patch Firefox userChrome vars to match scheme
     patch_firefox_vars(
         "/home/kashmira/.local/state/caelestia/scheme.json",
         "/home/kashmira/.config/mozilla/firefox/kkyzicg3.default-release/chrome/zen-modules/_variables.css"
     )
-    import subprocess
     subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])
     print(f"[apply_theme] GTK portal restarted.")
 

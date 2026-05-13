@@ -2,6 +2,18 @@
 
 Newest entries at the top.
 
+## [2026-05-13] - Dynamic Hyprland border colors
+### Added
+- `apply_theme.py`: on every wallpaper change, active window border is now set to the theme `primary` color via `hyprctl keyword`
+- `apply_theme.py`: inactive border set to invisible (`rgba(00000000)`) for a cleaner look
+- `apply_theme.py`: border colors persisted to `~/.config/hypr/border_colors.conf` after each change so they survive restarts
+- `~/.config/hypr/hyprland.conf`: added `source = ~/.config/hypr/border_colors.conf` after the `general {}` block; commented out `col.active_border` and `col.inactive_border` from `general {}` since they are now managed by the sourced file
+
+### Notes
+- `border_colors.conf` lives outside this repo at `~/.config/hypr/` — requires manual setup (see README)
+- Must run `apply_theme.py` once manually after setup to populate the file before reloading Hyprland
+---
+
 ## [2026-05-11] - Active window popout click-based
 ### Changed
 - `Bar.qml`: removed hover trigger for active window from `checkPopout`, added `triggerActiveWindowPopout()` toggle function

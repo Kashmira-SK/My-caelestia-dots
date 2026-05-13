@@ -93,6 +93,38 @@ EOF
 
 ---
 
+## Dynamic Hyprland border colors
+
+Active window border updates with the wallpaper theme (`primary` color). Inactive borders are invisible.
+
+**One-time setup:**
+
+```bash
+# Create the file Hyprland will source
+touch ~/.config/hypr/border_colors.conf
+```
+
+Then in `hyprland.conf`, inside `general {}`, comment out or remove:
+```
+col.active_border = ...
+col.inactive_border = ...
+```
+And add this line **after** the `general {}` block:
+```
+source = ~/.config/hypr/border_colors.conf
+```
+
+Then run the theme script once manually to populate it:
+```bash
+python3 ~/.config/quickshell/caelestia/dynamic-theme/apply_theme.py ~/Pictures/Wallpapers/yourwallpaper.jpg
+```
+
+After that, borders update automatically on every wallpaper change and persist across restarts.
+
+> `border_colors.conf` lives at `~/.config/hypr/` and is not tracked by this repo — it's generated at runtime.
+
+---
+
 ## Useful commands
 
 ```bash
