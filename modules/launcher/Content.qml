@@ -138,11 +138,6 @@ Item {
             Connections {
                 target: root.visibilities
 
-                function onLauncherChanged(): void {
-                    if (!root.visibilities.launcher)
-                        search.text = "";
-                }
-
                 function onSessionChanged(): void {
                     if (!root.visibilities.session)
                         search.forceActiveFocus();

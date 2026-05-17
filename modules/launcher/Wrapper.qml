@@ -42,13 +42,33 @@ Item {
     SequentialAnimation {
         id: showAnim
 
-        Anim {
-            target: root
-            property: "implicitHeight"
-            to: root.contentHeight
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        ScriptAction {
+            script: {
+                root.implicitHeight = root.contentHeight;
+                content.visible = true;
+                content.opacity = 0;
+                content.scale = 0.8;
+            }
         }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: content
+                property: "opacity"
+                to: 1
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutQuint
+            }
+
+            NumberAnimation {
+                target: content
+                property: "scale"
+                to: 1
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutBack
+            }
+        }
+
         ScriptAction {
             script: root.implicitHeight = Qt.binding(() => content.implicitHeight)
         }
@@ -57,14 +77,31 @@ Item {
     SequentialAnimation {
         id: hideAnim
 
-        ScriptAction {
-            script: root.implicitHeight = root.implicitHeight
+        ParallelAnimation {
+            NumberAnimation {
+                target: content
+                property: "opacity"
+                to: 0
+                duration: Appearance.anim.durations.small
+                easing.type: Easing.Linear
+            }
+
+            NumberAnimation {
+                target: content
+                property: "scale"
+                to: 0.9
+                duration: Appearance.anim.durations.small
+                easing.type: Easing.Linear
+            }
         }
-        Anim {
-            target: root
-            property: "implicitHeight"
-            to: 0
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+
+        ScriptAction {
+            script: {
+                content.visible = false;
+                root.implicitHeight = 0;
+                const c = content.item;
+                if (c) c.search.text = "";
+            }
         }
     }
 
@@ -93,6 +130,7 @@ Item {
         id: timer
 
         interval: Appearance.anim.durations.extraLarge
+
         onRunningChanged: {
             if (running && !root.shouldBeActive) {
                 content.visible = false;
@@ -117,6 +155,9 @@ Item {
 
         visible: false
         active: false
+        opacity: 0
+        scale: 0.8
+
         Component.onCompleted: timer.start()
 
         sourceComponent: Content {
