@@ -112,7 +112,7 @@ Item {
     Loader {
         id: content
 
-        anchors.top: parent.top
+        anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
         visible: false

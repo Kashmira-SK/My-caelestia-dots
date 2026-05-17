@@ -45,12 +45,16 @@ Shape {
         startY: (root.height - wrapper.height) / 2 - rounding
     }
 
-    Launcher.Background {
+    /* 
+
+       Launcher.Background {
         wrapper: root.panels.launcher
 
         startX: (root.width - wrapper.width) / 2 - rounding
-        startY: root.height
-    }
+        startY: root.height / 2 + wrapper.height / 2
+      } 
+
+    */ 
 
     Dashboard.Background {
         wrapper: root.panels.dashboard

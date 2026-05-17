@@ -19,7 +19,13 @@ Item {
     readonly property int rounding: Appearance.rounding.large
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+    implicitHeight: searchWrapper.height + listWrapper.height + padding * 3
+
+    StyledRect {
+      anchors.fill: parent
+      radius: Appearance.rounding.small
+      color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
+    }
 
     Item {
         id: listWrapper
@@ -28,8 +34,8 @@ Item {
         implicitHeight: list.height + root.padding
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: searchWrapper.top
-        anchors.bottomMargin: root.padding
+        anchors.top: searchWrapper.bottom
+        anchors.topMargin: root.padding
 
         ContentList {
             id: list
@@ -52,7 +58,7 @@ Item {
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
         anchors.margins: root.padding
 
         implicitHeight: Math.max(searchIcon.implicitHeight, search.implicitHeight, clearIcon.implicitHeight)
