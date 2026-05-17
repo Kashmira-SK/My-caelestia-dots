@@ -2,6 +2,33 @@
 
 Newest entries at the top.
 
+---
+
+## [2026-05-17] - Launcher moved to center screen with pop animation
+
+### Changed
+- `modules/drawers/Panels.qml`: changed launcher anchors from `horizontalCenter + bottom` to `anchors.centerIn: parent` — moves launcher to center of screen
+- `modules/drawers/Backgrounds.qml`: removed `Launcher.Background` block entirely — the shape-based background was designed to grow from the bottom and connect to the bar, making it impossible to cleanly sync with a centered launcher regardless of `startY` value
+- `modules/launcher/Content.qml`: flipped layout — `searchWrapper` now anchors to `parent.top`, `listWrapper` anchors to `searchWrapper.bottom` — search bar on top, results below
+- `modules/launcher/Content.qml`: added `StyledRect` as first child of root Item to replace the removed shape background — fully rounded, always in sync since it is part of the same component
+- `modules/launcher/Content.qml`: `implicitHeight` padding changed from `* 2` to `* 3` to prevent list item outlines clipping the bottom border
+- `modules/launcher/Content.qml`: removed timer-based search text clear — now handled in `Wrapper.qml` via `hideAnim`
+- `modules/launcher/Wrapper.qml`: replaced height-based show/hide animations with opacity + scale animations on the `content` Loader — open pops in from 0.8 scale with OutBack easing, close fades to 0.9 scale with Linear easing, matching Hyprland window animations
+- `modules/launcher/Wrapper.qml`: `implicitHeight` is set to `contentHeight` instantly at start of `showAnim` so the mask region exists immediately for `HyprlandFocusGrab` and input to work, then set back to 0 at end of `hideAnim` after animation finishes
+- `modules/launcher/Wrapper.qml`: `content` Loader anchored to `verticalCenter + horizontalCenter` so it stays centered as the wrapper height changes
+- `modules/launcher/Wrapper.qml`: search text clear moved into `hideAnim` ScriptAction after animation completes — eliminates the flash back to initial app list state before the launcher closed
+
+### Notes — things that can break
+- **The mask system in `Drawers.qml` depends on `root.implicitHeight > 0`** — if implicitHeight stays 0, the launcher has no clickable region and `HyprlandFocusGrab` will not activate. Never make the root Item invisible or zero-height while the launcher is active
+- **`visible: height > 0` on root must be kept** — changing this to `content.visible` breaks the mask and focus grab entirely, launcher becomes unlaunchable
+- **Background is now inside `Content.qml` not `Backgrounds.qml`** — if you ever re-add a `Launcher.Background` in `Backgrounds.qml` you will get a double background
+- **The wallpaper list `numItems` calculation in `WallpaperList.qml`** assumes the launcher is horizontally centered and uses `(barMargins + outerMargins) * 2` — this still works correctly since we are centered, but if you move the launcher off-center this will need to be updated
+- **`content.item?.search` access from Wrapper** — `content.item` can be null if the Loader is not active, always use null check before accessing
+- **Optional chain `?.` cannot be used on left-hand side of assignments in QML** — use `const c = content.item; if (c) c.search.text = ""` pattern instead
+- **StyledRect background transparency** — uses `Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)` — if the transparency system changes this will need updating
+
+---
+
 ## [2026-05-13] - Dynamic Hyprland border colors
 ### Added
 - `apply_theme.py`: on every wallpaper change, active window border is now set to the theme `primary` color via `hyprctl keyword`
