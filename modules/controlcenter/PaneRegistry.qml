@@ -7,6 +7,12 @@ QtObject {
 
     readonly property list<QtObject> panes: [
         QtObject {
+            readonly property string id: "cheatsheet"
+            readonly property string label: "cheatsheet"
+            readonly property string icon: "menu_book"
+            readonly property string component: "../cheatsheet/Content.qml"
+        },
+        QtObject {
             readonly property string id: "network"
             readonly property string label: "network"
             readonly property string icon: "router"
