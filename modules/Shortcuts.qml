@@ -120,15 +120,6 @@ Scope {
         }
     }
 
-    
-    IpcHandler {
-        target: "cheatsheet"
-
-        function open(): void {
-            WindowFactory.create(null, { active: "cheatsheet" }) 
-        }
-    }
-
     IpcHandler {
         target: "toaster"
 
