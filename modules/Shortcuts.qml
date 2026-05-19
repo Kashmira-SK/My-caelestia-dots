@@ -1,5 +1,6 @@
 import qs.components.misc
 import qs.modules.controlcenter
+import qs.modules.cheatsheet as Cheatsheet
 import qs.services
 import Caelestia
 import Quickshell
@@ -91,6 +92,12 @@ Scope {
             visibilities.utilities = !visibilities.utilities;
         }
     }
+    
+    CustomShortcut {
+        name: "cheatsheet"
+        description: "Open cheatsheet"
+        onPressed: Cheatsheet.Singleton.create()
+    }
 
     IpcHandler {
         target: "drawers"
@@ -117,6 +124,15 @@ Scope {
 
         function open(): void {
             WindowFactory.create();
+        }
+    }
+
+    
+    IpcHandler {
+        target: "cheatsheet"
+
+        function open(): void {
+            Cheatsheet.Singleton.create()
         }
     }
 

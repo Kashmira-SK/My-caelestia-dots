@@ -1,0 +1,126 @@
+{
+  "keybinds": [
+    {
+      "category": "apps",
+      "binds": [
+        { "keys": "Super+Q", "action": "terminal (kitty)" },
+        { "keys": "Super+E", "action": "file manager (nautilus)" },
+        { "keys": "Super+B", "action": "browser (firefox)" }
+      ]
+    },
+    {
+      "category": "shell",
+      "binds": [
+        { "keys": "Super+Space", "action": "launcher" },
+        { "keys": "Super+A", "action": "dashboard" },
+        { "keys": "Super+X", "action": "notes panel" },
+        { "keys": "Super+N", "action": "sidebar" },
+        { "keys": "Super+Z", "action": "session menu" },
+        { "keys": "Super+T", "action": "toggle bar" },
+        { "keys": "Super+L", "action": "lock screen" }
+      ]
+    },
+    {
+      "category": "window",
+      "binds": [
+        { "keys": "Super+C", "action": "close window" },
+        { "keys": "Super+V", "action": "toggle floating" },
+        { "keys": "Super+F", "action": "fullscreen" },
+        { "keys": "Super+arrows", "action": "move focus" },
+        { "keys": "Super+Shift+arrows", "action": "move window" },
+        { "keys": "Super+LMB drag", "action": "move window" },
+        { "keys": "Super+RMB drag", "action": "resize window" }
+      ]
+    },
+    {
+      "category": "workspace",
+      "binds": [
+        { "keys": "Super+1–9", "action": "switch to workspace N" },
+        { "keys": "Super+Shift+1–9", "action": "move window to workspace N" },
+        { "keys": "Super+S", "action": "toggle special workspace (magic)" },
+        { "keys": "Super+Shift+S", "action": "move window to special (magic)" },
+        { "keys": "Super+W", "action": "toggle special workspace (term)" },
+        { "keys": "Super+Shift+W", "action": "move window to special (term)" },
+        { "keys": "Super+Scroll", "action": "cycle workspaces" }
+      ]
+    },
+    {
+      "category": "tools",
+      "binds": [
+        { "keys": "Super+D", "action": "clipboard history (cliphist + fuzzel)" },
+        { "keys": "Super+/", "action": "combo snippets picker" },
+        { "keys": "Super+=", "action": "emoji / kaomoji picker" },
+        { "keys": "Super+P", "action": "screenshot area (grimblast copy)" },
+        { "keys": "Print", "action": "screenshot area (grimblast save)" }
+      ]
+    },
+    {
+      "category": "media",
+      "binds": [
+        { "keys": "XF86AudioPlay/Pause", "action": "play / pause (playerctl)" },
+        { "keys": "XF86AudioNext", "action": "next track" },
+        { "keys": "XF86AudioPrev", "action": "previous track" },
+        { "keys": "XF86AudioRaiseVolume", "action": "volume +5% (wpctl)" },
+        { "keys": "XF86AudioLowerVolume", "action": "volume -5% (wpctl)" },
+        { "keys": "XF86AudioMute", "action": "mute toggle (wpctl)" },
+        { "keys": "XF86AudioMicMute", "action": "mic mute toggle" },
+        { "keys": "XF86MonBrightnessUp", "action": "brightness +5% (brightnessctl)" },
+        { "keys": "XF86MonBrightnessDown", "action": "brightness -5% (brightnessctl)" }
+      ]
+    },
+    {
+      "category": "zsh",
+      "binds": [
+        { "keys": "Up/Down arrows", "action": "history substring search" },
+        { "keys": "Tab", "action": "menu completion" }
+      ]
+    }
+  ],
+  "tools": [
+    { "cmd": "bat", "desc": "cat with syntax highlighting", "example": "bat file.txt" },
+    { "cmd": "duf", "desc": "disk usage with pretty output", "example": "duf" },
+    { "cmd": "eza", "desc": "ls replacement with icons", "example": "eza -lah --icons=always --git" },
+    { "cmd": "fzf", "desc": "fuzzy finder", "example": "cat list | fzf" },
+    { "cmd": "zoxide", "desc": "smarter cd (z)", "example": "z caelestia" },
+    { "cmd": "thefuck", "desc": "corrects previous failed command", "example": "fuck" },
+    { "cmd": "jq", "desc": "JSON processor / filter", "example": "jq '.color' scheme.json" },
+    { "cmd": "inotifywait", "desc": "watch filesystem events", "example": "inotifywait -m -e modify <file>" },
+    { "cmd": "pipes.sh", "desc": "animated pipes screensaver", "example": "pipes.sh" },
+    { "cmd": "unimatrix", "desc": "matrix rain (cyan)", "example": "unimatrix -c cyan -s 93 -f -l kkns -a" },
+    { "cmd": "cmatrix", "desc": "matrix rain (classic)", "example": "cmatrix -C cyan -u 8 -s" },
+    { "cmd": "grimblast", "desc": "screenshot tool", "example": "grimblast copy area" },
+    { "cmd": "cliphist", "desc": "clipboard history", "example": "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy" },
+    { "cmd": "wl-copy", "desc": "copy to Wayland clipboard", "example": "echo text | wl-copy" },
+    { "cmd": "playerctl", "desc": "MPRIS media control", "example": "playerctl play-pause" },
+    { "cmd": "wpctl", "desc": "PipeWire audio control", "example": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+" },
+    { "cmd": "brightnessctl", "desc": "screen brightness control", "example": "brightnessctl set 5%+" },
+    { "cmd": "yt-dlp", "desc": "video/audio downloader", "example": "ytmp3 'title' 'url'" },
+    { "cmd": "cheat", "desc": "cheat.sh lookup (function)", "example": "cheat tar" },
+    { "cmd": "chat", "desc": "Serena AI terminal chat (function)", "example": "chat" },
+    { "cmd": "git-filter-repo", "desc": "rewrite git history", "example": "git filter-repo --invert-paths --path FILE" }
+  ],
+  "aliases": [
+    { "alias": "ls", "cmd": "eza --icons=always" },
+    { "alias": "ll", "cmd": "eza -lh --icons=always --git" },
+    { "alias": "la", "cmd": "eza -lah --icons=always --git" },
+    { "alias": "lt", "cmd": "eza --tree --icons=always --level=2" },
+    { "alias": "hyprconf", "cmd": "nvim ~/.config/hypr/hyprland.conf" },
+    { "alias": "zshconf", "cmd": "nvim ~/.zshrc" },
+    { "alias": "fetchconf", "cmd": "nvim ~/.config/fastfetch/config.jsonc" },
+    { "alias": "changelog", "cmd": "nvim ~/.config/quickshell/caelestia/CHANGELOG.md" },
+    { "alias": "caeconf", "cmd": "nvim ~/.config/caelestia/shell.json" },
+    { "alias": "caefiles", "cmd": "cd ~/.config/quickshell/caelestia" },
+    { "alias": "unmount", "cmd": "udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda" },
+    { "alias": "matrix", "cmd": "unimatrix -c cyan -s 93 -f -l kkns -a" },
+    { "alias": "matrixb", "cmd": "cmatrix -C blue -u 7" },
+    { "alias": "matrixc", "cmd": "cmatrix -C cyan -u 8 -s" },
+    { "alias": "pipes", "cmd": "pipes.sh; exec zsh" }
+  ],
+  "repos": [
+    { "name": "My-caelestia-dots", "path": "~/.config/quickshell/caelestia", "remote": "https://github.com/Kashmira-SK/My-caelestia-dots.git", "desc": "main Quickshell/Hyprland desktop config" },
+    { "name": "firefox-dots", "path": "~/git/firefox-dots", "remote": "https://github.com/Kashmira-SK/firefox-dots.git", "desc": "CaelestiaFox dynamic theming pipeline" },
+    { "name": "caelestia-gtk", "path": "~/git/caelestia-gtk", "remote": "", "desc": "GTK theme for Caelestia" },
+    { "name": "caelestia-qt", "path": "~/git/caelestia-qt", "remote": "", "desc": "Qt/qt6ct theme for Caelestia" },
+    { "name": "dotfiles", "path": "~/git/dotfiles", "remote": "", "desc": "zshrc, hyprland.conf, starship.toml symlinks" }
+  ]
+}
