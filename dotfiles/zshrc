@@ -1,5 +1,12 @@
+#zmodload zsh/zprof
+
 # Created by kash
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit          # full init + audit (runs if dump is >24h old)
+else
+    compinit -C       # skip audit, use cached dump
+fi
 zstyle ':completion:*' menu select
 
 # History
@@ -96,10 +103,9 @@ eval "$(zoxide init zsh)"
 # Prompt
 eval "$(starship init zsh)"
 
-# Fuck
-eval "$(thefuck --alias)"
-
 # Caelestia (remove after switching)
 cat ~/.local/state/caelestia/sequences.txt 2>/dev/null
 
 fastfetch
+
+#zprof
