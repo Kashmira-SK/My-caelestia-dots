@@ -1,126 +1,304 @@
 {
-  "keybinds": [
+  "tabs": [
     {
-      "category": "apps",
-      "binds": [
-        { "keys": "Super+Q", "action": "terminal (kitty)" },
-        { "keys": "Super+E", "action": "file manager (nautilus)" },
-        { "keys": "Super+B", "action": "browser (firefox)" }
+      "id": "cli-games",
+      "label": "cli games",
+      "type": "list",
+      "columns": ["command", "description"],
+      "items": [
+        { "command": "2048-cli", "description": "2048 in terminal" },
+        { "command": "ascii-patrol", "description": "side-scrolling ASCII shooter" },
+        { "command": "asciiquarium", "description": "aquarium animation" },
+        { "command": "astroterm", "description": "star map in terminal" },
+        { "command": "bastet", "description": "evil tetris" },
+        { "command": "cbonsai", "description": "growing bonsai tree" },
+        { "command": "nsnake", "description": "snake" },
+        { "command": "tty-clock", "description": "terminal clock" },
+        { "command": "tty-solitaire", "description": "solitaire" },
+        { "command": "ttyper", "description": "typing practice" },
+        { "command": "vitetris", "description": "tetris clone" },
+        { "command": "pokemon-colorscripts -r", "description": "random pokemon sprite" }
       ]
     },
     {
-      "category": "shell",
-      "binds": [
-        { "keys": "Super+Space", "action": "launcher" },
-        { "keys": "Super+A", "action": "dashboard" },
-        { "keys": "Super+X", "action": "notes panel" },
-        { "keys": "Super+N", "action": "sidebar" },
-        { "keys": "Super+Z", "action": "session menu" },
-        { "keys": "Super+T", "action": "toggle bar" },
-        { "keys": "Super+L", "action": "lock screen" }
+      "id": "cli-visual",
+      "label": "cli visual",
+      "type": "list",
+      "columns": ["command", "description"],
+      "items": [
+        { "command": "cmatrix -C cyan -u 8 -s", "description": "matrix rain (classic)" },
+        { "command": "unimatrix -c cyan -s 93 -f -l kkns -a", "description": "matrix rain (unicode)" },
+        { "command": "pipes.sh", "description": "animated pipes" },
+        { "command": "figlet <text>", "description": "ASCII text art" },
+        { "command": "toilet -f mono12 -F gay <text>", "description": "coloured ASCII text" },
+        { "command": "cowsay <text>", "description": "cow speech bubble" },
+        { "command": "no-more-secrets", "description": "movie hacking effect (pipe text into it)" },
+        { "command": "fastfetch", "description": "system info with logo" },
+        { "command": "anifetch", "description": "animated system fetch" },
+        { "command": "ascii-image-converter <file>", "description": "convert image to ASCII" },
+        { "command": "cava", "description": "audio visualizer" }
       ]
     },
     {
-      "category": "window",
-      "binds": [
-        { "keys": "Super+C", "action": "close window" },
-        { "keys": "Super+V", "action": "toggle floating" },
-        { "keys": "Super+F", "action": "fullscreen" },
-        { "keys": "Super+arrows", "action": "move focus" },
-        { "keys": "Super+Shift+arrows", "action": "move window" },
-        { "keys": "Super+LMB drag", "action": "move window" },
-        { "keys": "Super+RMB drag", "action": "resize window" }
+      "id": "cli-tools",
+      "label": "cli tools",
+      "type": "list",
+      "columns": ["command", "description"],
+      "items": [
+        { "command": "bat <file>", "description": "cat with syntax highlighting" },
+        { "command": "duf", "description": "disk usage with pretty output" },
+        { "command": "fd <pattern>", "description": "fast file finder (find replacement)" },
+        { "command": "fzf", "description": "fuzzy finder" },
+        { "command": "eza -lah --icons --git", "description": "ls replacement with icons" },
+        { "command": "z <dir>", "description": "smart cd with zoxide" },
+        { "command": "fuck", "description": "correct last failed command" },
+        { "command": "jq '.<key>' <file>", "description": "JSON processor" },
+        { "command": "gum", "description": "shell script UI components" },
+        { "command": "pastel <color>", "description": "color tool and converter" },
+        { "command": "tldr <cmd>", "description": "simplified man pages" },
+        { "command": "inxi -Fz", "description": "full system info" },
+        { "command": "ncdu", "description": "interactive disk usage navigator" },
+        { "command": "btop", "description": "resource monitor" },
+        { "command": "htop", "description": "process viewer" },
+        { "command": "nvtop", "description": "GPU process monitor" },
+        { "command": "termdown <time>", "description": "countdown timer (e.g. 10m)" },
+        { "command": "bc", "description": "terminal calculator" },
+        { "command": "hyprpicker", "description": "screen color picker" },
+        { "command": "imagemagick", "description": "image manipulation (convert, mogrify)" },
+        { "command": "cheat <cmd>", "description": "cheat.sh lookup (zsh function)" },
+        { "command": "stripe", "description": "Stripe CLI" },
+        { "command": "gh", "description": "GitHub CLI" }
       ]
     },
     {
-      "category": "workspace",
-      "binds": [
-        { "keys": "Super+1–9", "action": "switch to workspace N" },
-        { "keys": "Super+Shift+1–9", "action": "move window to workspace N" },
-        { "keys": "Super+S", "action": "toggle special workspace (magic)" },
-        { "keys": "Super+Shift+S", "action": "move window to special (magic)" },
-        { "keys": "Super+W", "action": "toggle special workspace (term)" },
-        { "keys": "Super+Shift+W", "action": "move window to special (term)" },
-        { "keys": "Super+Scroll", "action": "cycle workspaces" }
+      "id": "media",
+      "label": "media",
+      "type": "list",
+      "columns": ["command", "description"],
+      "items": [
+        { "command": "rmpc", "description": "TUI MPD client" },
+        { "command": "mpc play", "description": "play current MPD queue" },
+        { "command": "mpc toggle", "description": "play/pause MPD" },
+        { "command": "mpc next", "description": "next track" },
+        { "command": "mpc prev", "description": "previous track" },
+        { "command": "playerctl play-pause", "description": "MPRIS play/pause" },
+        { "command": "playerctl next", "description": "MPRIS next track" },
+        { "command": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+", "description": "volume up 5%" },
+        { "command": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle", "description": "mute toggle" },
+        { "command": "yt-dlp <url>", "description": "download video" },
+        { "command": "ytmp3 <url>", "description": "download as mp3 to ~/Songs/New" },
+        { "command": "ytmp3 'title' <url>", "description": "download as mp3 with custom title" },
+        { "command": "spicetify apply", "description": "apply Spotify theme" },
+        { "command": "mpv <file/url>", "description": "play media file or stream" }
       ]
     },
     {
-      "category": "tools",
-      "binds": [
-        { "keys": "Super+D", "action": "clipboard history (cliphist + fuzzel)" },
-        { "keys": "Super+/", "action": "combo snippets picker" },
-        { "keys": "Super+=", "action": "emoji / kaomoji picker" },
-        { "keys": "Super+P", "action": "screenshot area (grimblast copy)" },
-        { "keys": "Print", "action": "screenshot area (grimblast save)" }
+      "id": "apps",
+      "label": "apps",
+      "type": "list",
+      "columns": ["command", "description"],
+      "items": [
+        { "command": "obsidian", "description": "notes and knowledge base" },
+        { "command": "zotero", "description": "reference manager" },
+        { "command": "obs", "description": "screen recording / streaming" },
+        { "command": "krita", "description": "digital painting" },
+        { "command": "blender", "description": "3D modelling" },
+        { "command": "discord", "description": "chat" },
+        { "command": "localsend", "description": "local network file sharing" },
+        { "command": "idea", "description": "IntelliJ IDEA Community" },
+        { "command": "code", "description": "VS Code" },
+        { "command": "proton-pass", "description": "password manager" },
+        { "command": "syncthing", "description": "file sync daemon" },
+        { "command": "tailscale up", "description": "connect to VPN mesh" },
+        { "command": "tailscale down", "description": "disconnect from VPN mesh" },
+        { "command": "qalculate-gtk", "description": "calculator" },
+        { "command": "immich-go", "description": "Google Photos import to Immich" },
+        { "command": "chat", "description": "Serena AI terminal chat (zsh function)" }
       ]
     },
     {
-      "category": "media",
-      "binds": [
-        { "keys": "XF86AudioPlay/Pause", "action": "play / pause (playerctl)" },
-        { "keys": "XF86AudioNext", "action": "next track" },
-        { "keys": "XF86AudioPrev", "action": "previous track" },
-        { "keys": "XF86AudioRaiseVolume", "action": "volume +5% (wpctl)" },
-        { "keys": "XF86AudioLowerVolume", "action": "volume -5% (wpctl)" },
-        { "keys": "XF86AudioMute", "action": "mute toggle (wpctl)" },
-        { "keys": "XF86AudioMicMute", "action": "mic mute toggle" },
-        { "keys": "XF86MonBrightnessUp", "action": "brightness +5% (brightnessctl)" },
-        { "keys": "XF86MonBrightnessDown", "action": "brightness -5% (brightnessctl)" }
+      "id": "repos",
+      "label": "repos",
+      "type": "repos",
+      "items": [
+        { "name": "My-caelestia-dots", "path": "~/.config/quickshell/caelestia", "remote": "https://github.com/Kashmira-SK/My-caelestia-dots.git", "desc": "main Quickshell/Hyprland desktop config" },
+        { "name": "firefox-dots", "path": "~/git/firefox-dots", "remote": "https://github.com/Kashmira-SK/firefox-dots.git", "desc": "CaelestiaFox dynamic theming pipeline" },
+        { "name": "caelestia-gtk", "path": "~/git/caelestia-gtk", "remote": "", "desc": "GTK theme for Caelestia" },
+        { "name": "caelestia-qt", "path": "~/git/caelestia-qt", "remote": "", "desc": "Qt/qt6ct theme for Caelestia" },
+        { "name": "dotfiles", "path": "~/git/dotfiles", "remote": "", "desc": "zshrc, hyprland.conf, starship.toml symlinks" },
+        { "name": "TerminalChat", "path": "~/AI_Projects/TerminalChat", "remote": "", "desc": "Serena AI terminal chat (Python)" }
       ]
     },
     {
-      "category": "zsh",
-      "binds": [
-        { "keys": "Up/Down arrows", "action": "history substring search" },
-        { "keys": "Tab", "action": "menu completion" }
+      "id": "zsh",
+      "label": "zsh",
+      "type": "zsh",
+      "aliases": [
+        { "alias": "ls", "cmd": "eza --icons=always" },
+        { "alias": "ll", "cmd": "eza -lh --icons=always --git" },
+        { "alias": "la", "cmd": "eza -lah --icons=always --git" },
+        { "alias": "lt", "cmd": "eza --tree --icons=always --level=2" },
+        { "alias": "hyprconf", "cmd": "nvim ~/.config/hypr/hyprland.conf" },
+        { "alias": "zshconf", "cmd": "nvim ~/.zshrc" },
+        { "alias": "fetchconf", "cmd": "nvim ~/.config/fastfetch/config.jsonc" },
+        { "alias": "changelog", "cmd": "nvim ~/.config/quickshell/caelestia/CHANGELOG.md" },
+        { "alias": "caeconf", "cmd": "nvim ~/.config/caelestia/shell.json" },
+        { "alias": "caefiles", "cmd": "cd ~/.config/quickshell/caelestia" },
+        { "alias": "unmount", "cmd": "udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda" },
+        { "alias": "matrix", "cmd": "unimatrix -c cyan -s 93 -f -l kkns -a" },
+        { "alias": "matrixb", "cmd": "cmatrix -C blue -u 7" },
+        { "alias": "matrixc", "cmd": "cmatrix -C cyan -u 8 -s" },
+        { "alias": "pipes", "cmd": "pipes.sh; exec zsh" }
+      ],
+      "functions": [
+        { "name": "ytmp3", "usage": "ytmp3 <url>  or  ytmp3 'title' <url>", "desc": "download YouTube audio as mp3 to ~/Songs/New" },
+        { "name": "cheat", "usage": "cheat <cmd>", "desc": "curl cheat.sh/<cmd> for quick reference" },
+        { "name": "chat", "usage": "chat", "desc": "launch Serena AI terminal chat" }
+      ]
+    },
+    {
+      "id": "linux",
+      "label": "linux",
+      "type": "linux",
+      "categories": [
+        {
+          "category": "basic",
+          "items": [
+            { "command": "ls -lah", "description": "list files with details" },
+            { "command": "cd <dir>", "description": "change directory" },
+            { "command": "cp -r <src> <dst>", "description": "copy file or directory" },
+            { "command": "mv <src> <dst>", "description": "move or rename" },
+            { "command": "rm -rf <path>", "description": "remove file or directory" },
+            { "command": "mkdir -p <path>", "description": "create directory (with parents)" },
+            { "command": "cat <file>", "description": "print file contents" },
+            { "command": "grep -r <pattern> <dir>", "description": "search text in files" },
+            { "command": "find <dir> -name <pattern>", "description": "find files by name" },
+            { "command": "chmod +x <file>", "description": "make file executable" },
+            { "command": "ln -s <target> <link>", "description": "create symlink" },
+            { "command": "which <cmd>", "description": "find command location" }
+          ]
+        },
+        {
+          "category": "system",
+          "items": [
+            { "command": "systemctl status <service>", "description": "check service status" },
+            { "command": "systemctl --user enable --now <service>", "description": "enable and start user service" },
+            { "command": "journalctl --user -u <service> -n 50", "description": "view service logs" },
+            { "command": "pacman -S <pkg>", "description": "install package" },
+            { "command": "pacman -Rns <pkg>", "description": "remove package and deps" },
+            { "command": "pacman -Qe", "description": "list explicitly installed packages" },
+            { "command": "yay -S <pkg>", "description": "install AUR package" },
+            { "command": "ps aux | grep <name>", "description": "find running process" },
+            { "command": "kill -9 <pid>", "description": "force kill process" },
+            { "command": "df -h", "description": "disk space usage" },
+            { "command": "free -h", "description": "RAM usage" },
+            { "command": "lsblk", "description": "list block devices" }
+          ]
+        },
+        {
+          "category": "network",
+          "items": [
+            { "command": "ip a", "description": "show network interfaces" },
+            { "command": "ping -c 4 <host>", "description": "ping host" },
+            { "command": "curl -s <url>", "description": "fetch URL" },
+            { "command": "wget <url>", "description": "download file" },
+            { "command": "ssh <user>@<host>", "description": "SSH into remote machine" },
+            { "command": "rsync -avz <src> <dst>", "description": "sync files over SSH" },
+            { "command": "tailscale status", "description": "show VPN mesh status" },
+            { "command": "tailscale ip", "description": "show your Tailscale IP" }
+          ]
+        },
+        {
+          "category": "git",
+          "items": [
+            { "command": "git status", "description": "show working tree status" },
+            { "command": "git add -A", "description": "stage all changes" },
+            { "command": "git commit -m 'msg'", "description": "commit staged changes" },
+            { "command": "git push", "description": "push to remote" },
+            { "command": "git pull", "description": "pull from remote" },
+            { "command": "git log --oneline", "description": "compact commit history" },
+            { "command": "git diff", "description": "show unstaged changes" },
+            { "command": "git stash", "description": "stash working changes" },
+            { "command": "git stash pop", "description": "restore stashed changes" },
+            { "command": "git remote add origin <url>", "description": "add remote" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keybinds",
+      "label": "keybinds",
+      "type": "keybinds",
+      "categories": [
+        {
+          "category": "apps",
+          "binds": [
+            { "keys": "Super+Q", "action": "terminal (kitty)" },
+            { "keys": "Super+E", "action": "file manager (nautilus)" },
+            { "keys": "Super+B", "action": "browser (firefox)" }
+          ]
+        },
+        {
+          "category": "shell",
+          "binds": [
+            { "keys": "Super+Space", "action": "launcher" },
+            { "keys": "Super+A", "action": "dashboard" },
+            { "keys": "Super+X", "action": "notes panel" },
+            { "keys": "Super+N", "action": "sidebar" },
+            { "keys": "Super+Z", "action": "session menu" },
+            { "keys": "Super+T", "action": "toggle bar" },
+            { "keys": "Super+L", "action": "lock screen" },
+            { "keys": "Super+G", "action": "cheatsheet" }
+          ]
+        },
+        {
+          "category": "window",
+          "binds": [
+            { "keys": "Super+C", "action": "close window" },
+            { "keys": "Super+V", "action": "toggle floating" },
+            { "keys": "Super+F", "action": "fullscreen" },
+            { "keys": "Super+arrows", "action": "move focus" },
+            { "keys": "Super+Shift+arrows", "action": "move window" },
+            { "keys": "Super+LMB drag", "action": "move window" },
+            { "keys": "Super+RMB drag", "action": "resize window" }
+          ]
+        },
+        {
+          "category": "workspace",
+          "binds": [
+            { "keys": "Super+1–9", "action": "switch to workspace N" },
+            { "keys": "Super+Shift+1–9", "action": "move window to workspace N" },
+            { "keys": "Super+S", "action": "toggle special (magic)" },
+            { "keys": "Super+Shift+S", "action": "move to special (magic)" },
+            { "keys": "Super+W", "action": "toggle special (term)" },
+            { "keys": "Super+Shift+W", "action": "move to special (term)" },
+            { "keys": "Super+Scroll", "action": "cycle workspaces" }
+          ]
+        },
+        {
+          "category": "tools",
+          "binds": [
+            { "keys": "Super+D", "action": "clipboard history" },
+            { "keys": "Super+/", "action": "combo snippets" },
+            { "keys": "Super+=", "action": "emoji picker" },
+            { "keys": "Super+P", "action": "screenshot area (copy)" },
+            { "keys": "Print", "action": "screenshot area (save)" }
+          ]
+        },
+        {
+          "category": "media",
+          "binds": [
+            { "keys": "XF86AudioPlay", "action": "play/pause" },
+            { "keys": "XF86AudioNext", "action": "next track" },
+            { "keys": "XF86AudioPrev", "action": "previous track" },
+            { "keys": "XF86AudioRaiseVolume", "action": "volume +5%" },
+            { "keys": "XF86AudioLowerVolume", "action": "volume -5%" },
+            { "keys": "XF86AudioMute", "action": "mute toggle" },
+            { "keys": "XF86MonBrightnessUp", "action": "brightness +5%" },
+            { "keys": "XF86MonBrightnessDown", "action": "brightness -5%" }
+          ]
+        }
       ]
     }
-  ],
-  "tools": [
-    { "cmd": "bat", "desc": "cat with syntax highlighting", "example": "bat file.txt" },
-    { "cmd": "duf", "desc": "disk usage with pretty output", "example": "duf" },
-    { "cmd": "eza", "desc": "ls replacement with icons", "example": "eza -lah --icons=always --git" },
-    { "cmd": "fzf", "desc": "fuzzy finder", "example": "cat list | fzf" },
-    { "cmd": "zoxide", "desc": "smarter cd (z)", "example": "z caelestia" },
-    { "cmd": "thefuck", "desc": "corrects previous failed command", "example": "fuck" },
-    { "cmd": "jq", "desc": "JSON processor / filter", "example": "jq '.color' scheme.json" },
-    { "cmd": "inotifywait", "desc": "watch filesystem events", "example": "inotifywait -m -e modify <file>" },
-    { "cmd": "pipes.sh", "desc": "animated pipes screensaver", "example": "pipes.sh" },
-    { "cmd": "unimatrix", "desc": "matrix rain (cyan)", "example": "unimatrix -c cyan -s 93 -f -l kkns -a" },
-    { "cmd": "cmatrix", "desc": "matrix rain (classic)", "example": "cmatrix -C cyan -u 8 -s" },
-    { "cmd": "grimblast", "desc": "screenshot tool", "example": "grimblast copy area" },
-    { "cmd": "cliphist", "desc": "clipboard history", "example": "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy" },
-    { "cmd": "wl-copy", "desc": "copy to Wayland clipboard", "example": "echo text | wl-copy" },
-    { "cmd": "playerctl", "desc": "MPRIS media control", "example": "playerctl play-pause" },
-    { "cmd": "wpctl", "desc": "PipeWire audio control", "example": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+" },
-    { "cmd": "brightnessctl", "desc": "screen brightness control", "example": "brightnessctl set 5%+" },
-    { "cmd": "yt-dlp", "desc": "video/audio downloader", "example": "ytmp3 'title' 'url'" },
-    { "cmd": "cheat", "desc": "cheat.sh lookup (function)", "example": "cheat tar" },
-    { "cmd": "chat", "desc": "Serena AI terminal chat (function)", "example": "chat" },
-    { "cmd": "git-filter-repo", "desc": "rewrite git history", "example": "git filter-repo --invert-paths --path FILE" }
-  ],
-  "aliases": [
-    { "alias": "ls", "cmd": "eza --icons=always" },
-    { "alias": "ll", "cmd": "eza -lh --icons=always --git" },
-    { "alias": "la", "cmd": "eza -lah --icons=always --git" },
-    { "alias": "lt", "cmd": "eza --tree --icons=always --level=2" },
-    { "alias": "hyprconf", "cmd": "nvim ~/.config/hypr/hyprland.conf" },
-    { "alias": "zshconf", "cmd": "nvim ~/.zshrc" },
-    { "alias": "fetchconf", "cmd": "nvim ~/.config/fastfetch/config.jsonc" },
-    { "alias": "changelog", "cmd": "nvim ~/.config/quickshell/caelestia/CHANGELOG.md" },
-    { "alias": "caeconf", "cmd": "nvim ~/.config/caelestia/shell.json" },
-    { "alias": "caefiles", "cmd": "cd ~/.config/quickshell/caelestia" },
-    { "alias": "unmount", "cmd": "udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda" },
-    { "alias": "matrix", "cmd": "unimatrix -c cyan -s 93 -f -l kkns -a" },
-    { "alias": "matrixb", "cmd": "cmatrix -C blue -u 7" },
-    { "alias": "matrixc", "cmd": "cmatrix -C cyan -u 8 -s" },
-    { "alias": "pipes", "cmd": "pipes.sh; exec zsh" }
-  ],
-  "repos": [
-    { "name": "My-caelestia-dots", "path": "~/.config/quickshell/caelestia", "remote": "https://github.com/Kashmira-SK/My-caelestia-dots.git", "desc": "main Quickshell/Hyprland desktop config" },
-    { "name": "firefox-dots", "path": "~/git/firefox-dots", "remote": "https://github.com/Kashmira-SK/firefox-dots.git", "desc": "CaelestiaFox dynamic theming pipeline" },
-    { "name": "caelestia-gtk", "path": "~/git/caelestia-gtk", "remote": "", "desc": "GTK theme for Caelestia" },
-    { "name": "caelestia-qt", "path": "~/git/caelestia-qt", "remote": "", "desc": "Qt/qt6ct theme for Caelestia" },
-    { "name": "dotfiles", "path": "~/git/dotfiles", "remote": "", "desc": "zshrc, hyprland.conf, starship.toml symlinks" }
   ]
 }
