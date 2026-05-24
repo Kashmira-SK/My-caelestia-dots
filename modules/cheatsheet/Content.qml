@@ -122,70 +122,46 @@ Item {
                     required property int index
 
                     anchors.fill: parent
-                    anchors.margins: Appearance.padding.large
                     visible: root.activeTab === modelData.id
 
-                    Loader {
+                    ListSection {
                         anchors.fill: parent
-                        active: root.activeTab === modelData.id
-                        sourceComponent: {
-                            switch(modelData.type) {
-                                case "list":     return listView
-                                case "repos":    return reposView
-                                case "zsh":      return zshView
-                                case "linux":    return linuxView
-                                case "keybinds": return keybindsView
-                                default:         return listView
-                            }
-                        }
+                        visible: modelData.type === "list" || modelData.type === undefined
+                        tabData: modelData
+                        allTabs: root.tabs
+                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                    }
 
-                        property var tabData: modelData
+                    ReposSection {
+                        anchors.fill: parent
+                        visible: modelData.type === "repos"
+                        tabData: modelData
+                        allTabs: root.tabs
+                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                    }
 
-                        Component {
-                            id: listView
-                            ListSection {
-                                tabData: parent.parent.tabData
-                                onRequestSave: root.save()
-                                onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                                allTabs: root.tabs
-                            }
-                        }
+                    ZshSection {
+                        anchors.fill: parent
+                        visible: modelData.type === "zsh"
+                        tabData: modelData
+                        allTabs: root.tabs
+                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                    }
 
-                        Component {
-                            id: reposView
-                            ReposSection {
-                                tabData: parent.parent.tabData
-                                onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                                allTabs: root.tabs
-                            }
-                        }
+                    LinuxSection {
+                        anchors.fill: parent
+                        visible: modelData.type === "linux"
+                        tabData: modelData
+                        allTabs: root.tabs
+                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                    }
 
-                        Component {
-                            id: zshView
-                            ZshSection {
-                                tabData: parent.parent.tabData
-                                onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                                allTabs: root.tabs
-                            }
-                        }
-
-                        Component {
-                            id: linuxView
-                            LinuxSection {
-                                tabData: parent.parent.tabData
-                                onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                                allTabs: root.tabs
-                            }
-                        }
-
-                        Component {
-                            id: keybindsView
-                            KeybindsSection {
-                                tabData: parent.parent.tabData
-                                onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                                allTabs: root.tabs
-                            }
-                        }
+                    KeybindsSection {
+                        anchors.fill: parent
+                        visible: modelData.type === "keybinds"
+                        tabData: modelData
+                        allTabs: root.tabs
+                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
                     }
                 }
             }
@@ -697,6 +673,7 @@ Item {
             // sub-nav
             ColumnLayout {
                 Layout.preferredWidth: 100
+                Layout.fillWidth: false
                 Layout.fillHeight: true
                 spacing: 2
 
@@ -870,6 +847,7 @@ Item {
             // sub-nav
             ColumnLayout {
                 Layout.preferredWidth: 100
+                Layout.fillWidth: false
                 Layout.fillHeight: true
                 spacing: 2
 
