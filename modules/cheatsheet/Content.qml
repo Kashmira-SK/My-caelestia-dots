@@ -112,7 +112,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Appearance.rounding.normal
-            color: Colours.tPalette.m3surfaceContainerLow
+            color: Colours.tPalette.m3surfaceContainer
 
             Repeater {
                 model: root.tabs
