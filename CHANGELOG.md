@@ -4,6 +4,29 @@ Newest entries at the top.
 
 ---
 
+## [2026-05-27] - Cheatsheet panel control center refactor
+
+### Changed
+- `modules/controlcenter/PaneRegistry.qml`: added Cheatsheet as a control center pane with `menu_book` icon and route to `../cheatsheet/Content.qml`
+- `modules/cheatsheet/Content.qml`: replaced custom outer `RowLayout + StyledRect` layout with the native control center `SplitPaneLayout` pattern
+- `modules/cheatsheet/Content.qml`: changed the left sidebar to load from a dedicated `CheatNav.qml` component instead of keeping navigation inline
+- `modules/cheatsheet/Content.qml`: replaced inline reusable UI components with separate QML files
+- `modules/cheatsheet/CheatNav.qml`: added dedicated left navigation component for cheatsheet tabs
+- `modules/cheatsheet/CheatDataRow.qml`: added reusable row wrapper for cheatsheet table/list entries
+- `modules/cheatsheet/CheatFieldBackground.qml`: added reusable styled field background for edit/add text fields
+- `modules/cheatsheet/CheatSectionHeader.qml`: added reusable section header component for grouped cheatsheet sections
+
+### Notes
+- Visual output should remain mostly unchanged after this refactor
+- Main improvement is internal structure: `Content.qml` is now smaller and no longer owns every reusable UI piece
+- Cheatsheet now matches the control center background/pane style more closely
+- Quickshell must be restarted with `quickshell -c caelestia`; launching plain `quickshell` may fail because the config is not under the default path
+- Added/recommended `qsrestart` alias for faster reloads during QML editing:
+  ```bash
+  alias qsrestart='pkill quickshell; quickshell -c caelestia >/tmp/quickshell.log 2>&1 & disown'
+
+---
+
 ## [2026-05-17] - Launcher moved to center screen with pop animation
 
 ### Changed

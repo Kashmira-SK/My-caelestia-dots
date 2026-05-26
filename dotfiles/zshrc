@@ -47,6 +47,7 @@ alias changelog='nvim ~/.config/quickshell/caelestia/CHANGELOG.md'
 # Aliases - caelestia (remove after switching)
 alias caeconf="nvim ~/.config/caelestia/shell.json"
 alias caefiles="cd ~/.config/quickshell/caelestia"
+alias qsrestart="pkill quickshell; quickshell -c caelestia >/tmp/quickshell.log 2>&1 & disown"
 
 # Aliases - utils
 alias unmount='udisksctl unmount -b /dev/sda1 && udisksctl power-off -b /dev/sda'
