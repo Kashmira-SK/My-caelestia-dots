@@ -137,47 +137,6 @@ Item {
         }
     }
 
-    // ── FieldBg ───────────────────────────────────────────────────────────────
-
-    component FieldBg: StyledRect {
-        radius: Appearance.rounding.small
-        color: Colours.tPalette.m3surfaceContainerHighest
-    }
-
-    // ── DataRow ───────────────────────────────────────────────────────────────
-
-    component DataRow: Item {
-        property int rowIndex: 0
-        default property alias rowChildren: rowLayout.data
-        implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
-
-        StyledRect {
-            anchors.fill: parent
-            radius: Appearance.rounding.small
-            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, rowIndex % 2 === 0 ? 0.5 : 0.8)
-        }
-
-        RowLayout {
-            id: rowLayout
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: Appearance.padding.normal
-            spacing: Appearance.spacing.normal
-        }
-    }
-
-    // ── SectionHeader ─────────────────────────────────────────────────────────
-
-    component SectionHeader: StyledText {
-        font.pointSize: Appearance.font.size.small
-        font.weight: Font.Medium
-        font.capitalization: Font.AllUppercase
-        color: Colours.palette.m3outline
-        Layout.topMargin: Appearance.spacing.normal
-        Layout.bottomMargin: Appearance.spacing.smaller
-    }
-
     // ── ListSection (cli games, cli visual, cli tools, media, apps) ───────────
 
     component ListSection: Item {
@@ -220,7 +179,7 @@ Item {
                 Repeater {
                     model: tabData.items ?? []
 
-                    DataRow {
+                    CheatDataRow {
                         required property var modelData
                         required property int index
                         rowIndex: index
@@ -228,8 +187,8 @@ Item {
 
                         StyledText { visible: editIdx !== index; text: modelData.command; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 280; elide: Text.ElideRight }
                         StyledText { visible: editIdx !== index; text: modelData.description; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                        TextField { visible: editIdx === index; text: editIdx === index ? editCmd : ""; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: FieldBg {} }
-                        TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: FieldBg {} }
+                        TextField { visible: editIdx === index; text: editIdx === index ? editCmd : ""; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: CheatFieldBackground {} }
+                        TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: CheatFieldBackground {} }
 
                         StyledText { visible: editIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -268,8 +227,8 @@ Item {
                     StyledText { visible: !addListRow.expanded; text: "+ add entry"; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3primary
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: addListRow.expanded = true }
                     }
-                    TextField { id: lCmd; visible: addListRow.expanded; placeholderText: "command"; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                    TextField { id: lDesc; visible: addListRow.expanded; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                    TextField { id: lCmd; visible: addListRow.expanded; placeholderText: "command"; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                    TextField { id: lDesc; visible: addListRow.expanded; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                     StyledText { visible: addListRow.expanded; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                             onClicked: {
@@ -334,16 +293,16 @@ Item {
                         width: rCol.width
                         spacing: 2
 
-                        DataRow {
+                        CheatDataRow {
                             rowIndex: index
                             width: rCol.width
 
                             StyledText { visible: editIdx !== index; text: modelData.name; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 160; elide: Text.ElideRight }
                             StyledText { visible: editIdx !== index; text: modelData.path; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.preferredWidth: 220; elide: Text.ElideRight }
                             StyledText { visible: editIdx !== index; text: modelData.desc; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurfaceVariant; Layout.fillWidth: true; elide: Text.ElideRight }
-                            TextField { visible: editIdx === index; text: editIdx === index ? editName : ""; Layout.preferredWidth: 160; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editName = text; background: FieldBg {} }
-                            TextField { visible: editIdx === index; text: editIdx === index ? editPath : ""; Layout.preferredWidth: 220; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editPath = text; background: FieldBg {} }
-                            TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: FieldBg {} }
+                            TextField { visible: editIdx === index; text: editIdx === index ? editName : ""; Layout.preferredWidth: 160; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editName = text; background: CheatFieldBackground {} }
+                            TextField { visible: editIdx === index; text: editIdx === index ? editPath : ""; Layout.preferredWidth: 220; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editPath = text; background: CheatFieldBackground {} }
+                            TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: CheatFieldBackground {} }
 
                             StyledText { visible: editIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -375,7 +334,7 @@ Item {
                         RowLayout {
                             visible: editIdx === index
                             width: rCol.width
-                            TextField { placeholderText: "remote URL"; text: editIdx === index ? editRemote : ""; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editRemote = text; background: FieldBg {} }
+                            TextField { placeholderText: "remote URL"; text: editIdx === index ? editRemote : ""; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editRemote = text; background: CheatFieldBackground {} }
                         }
                     }
                 }
@@ -393,13 +352,13 @@ Item {
                         visible: addRepoRow.expanded; Layout.fillWidth: true; spacing: Appearance.spacing.small
                         RowLayout {
                             spacing: Appearance.spacing.small
-                            TextField { id: rn; placeholderText: "name"; Layout.preferredWidth: 160; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                            TextField { id: rp; placeholderText: "path"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                            TextField { id: rn; placeholderText: "name"; Layout.preferredWidth: 160; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                            TextField { id: rp; placeholderText: "path"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                         }
                         RowLayout {
                             spacing: Appearance.spacing.small
-                            TextField { id: rr; placeholderText: "remote URL"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                            TextField { id: rd; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                            TextField { id: rr; placeholderText: "remote URL"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                            TextField { id: rd; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                             StyledText { text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                     onClicked: {
@@ -451,7 +410,7 @@ Item {
 
                 StyledText { text: "Zsh"; font.pointSize: Appearance.font.size.large; font.weight: 500; Layout.bottomMargin: Appearance.spacing.small }
 
-                SectionHeader { text: "aliases" }
+                CheatSectionHeader { text: "aliases" }
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -463,7 +422,7 @@ Item {
                 Repeater {
                     model: tabData.aliases ?? []
 
-                    DataRow {
+                    CheatDataRow {
                         required property var modelData
                         required property int index
                         rowIndex: index
@@ -471,8 +430,8 @@ Item {
 
                         StyledText { visible: editAliasIdx !== index; text: modelData.alias; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 140; elide: Text.ElideRight }
                         StyledText { visible: editAliasIdx !== index; text: modelData.cmd; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.fillWidth: true; elide: Text.ElideRight }
-                        TextField { visible: editAliasIdx === index; text: editAliasIdx === index ? editAlias : ""; Layout.preferredWidth: 140; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editAlias = text; background: FieldBg {} }
-                        TextField { visible: editAliasIdx === index; text: editAliasIdx === index ? editCmd : ""; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: FieldBg {} }
+                        TextField { visible: editAliasIdx === index; text: editAliasIdx === index ? editAlias : ""; Layout.preferredWidth: 140; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editAlias = text; background: CheatFieldBackground {} }
+                        TextField { visible: editAliasIdx === index; text: editAliasIdx === index ? editCmd : ""; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: CheatFieldBackground {} }
 
                         StyledText { visible: editAliasIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -507,8 +466,8 @@ Item {
                     StyledText { visible: !addAliasRow.expanded; text: "+ add alias"; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3primary
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: addAliasRow.expanded = true }
                     }
-                    TextField { id: aaF; visible: addAliasRow.expanded; placeholderText: "alias"; Layout.preferredWidth: 140; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                    TextField { id: acF; visible: addAliasRow.expanded; placeholderText: "command"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                    TextField { id: aaF; visible: addAliasRow.expanded; placeholderText: "alias"; Layout.preferredWidth: 140; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                    TextField { id: acF; visible: addAliasRow.expanded; placeholderText: "command"; Layout.fillWidth: true; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                     StyledText { visible: addAliasRow.expanded; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                             onClicked: {
@@ -525,7 +484,7 @@ Item {
                     }
                 }
 
-                SectionHeader { text: "functions"; Layout.topMargin: Appearance.spacing.large }
+                CheatSectionHeader { text: "functions"; Layout.topMargin: Appearance.spacing.large }
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -538,7 +497,7 @@ Item {
                 Repeater {
                     model: tabData.functions ?? []
 
-                    DataRow {
+                    CheatDataRow {
                         required property var modelData
                         required property int index
                         rowIndex: index
@@ -547,9 +506,9 @@ Item {
                         StyledText { visible: editFnIdx !== index; text: modelData.name; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 100; elide: Text.ElideRight }
                         StyledText { visible: editFnIdx !== index; text: modelData.usage; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.preferredWidth: 200; elide: Text.ElideRight }
                         StyledText { visible: editFnIdx !== index; text: modelData.desc; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurfaceVariant; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnName : ""; Layout.preferredWidth: 100; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnName = text; background: FieldBg {} }
-                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnUsage : ""; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnUsage = text; background: FieldBg {} }
-                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnDesc = text; background: FieldBg {} }
+                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnName : ""; Layout.preferredWidth: 100; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnName = text; background: CheatFieldBackground {} }
+                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnUsage : ""; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnUsage = text; background: CheatFieldBackground {} }
+                        TextField { visible: editFnIdx === index; text: editFnIdx === index ? editFnDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editFnDesc = text; background: CheatFieldBackground {} }
 
                         StyledText { visible: editFnIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -682,7 +641,7 @@ Item {
                             Repeater {
                                 model: modelData.items ?? []
 
-                                DataRow {
+                                CheatDataRow {
                                     required property var modelData
                                     required property int index
                                     readonly property int catIdx: parent.parent.index
@@ -691,8 +650,8 @@ Item {
 
                                     StyledText { visible: editIdx !== index; text: modelData.command; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 280; elide: Text.ElideRight }
                                     StyledText { visible: editIdx !== index; text: modelData.description; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                                    TextField { visible: editIdx === index; text: editIdx === index ? editCmd : ""; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: FieldBg {} }
-                                    TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: FieldBg {} }
+                                    TextField { visible: editIdx === index; text: editIdx === index ? editCmd : ""; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editCmd = text; background: CheatFieldBackground {} }
+                                    TextField { visible: editIdx === index; text: editIdx === index ? editDesc : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editDesc = text; background: CheatFieldBackground {} }
 
                                     StyledText { visible: editIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -729,8 +688,8 @@ Item {
                                 StyledText { visible: !addLinRow.expanded; text: "+ add entry"; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3primary
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: addLinRow.expanded = true }
                                 }
-                                TextField { id: lcF; visible: addLinRow.expanded; placeholderText: "command"; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                                TextField { id: ldF; visible: addLinRow.expanded; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                                TextField { id: lcF; visible: addLinRow.expanded; placeholderText: "command"; Layout.preferredWidth: 280; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                                TextField { id: ldF; visible: addLinRow.expanded; placeholderText: "description"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                                 StyledText { visible: addLinRow.expanded; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                         onClicked: {
@@ -835,7 +794,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: Appearance.spacing.smaller
 
-                    TextField { id: kbCatF; placeholderText: "name"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {}
+                    TextField { id: kbCatF; placeholderText: "name"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {}
                         onAccepted: addKbCatRow.commit()
                     }
                     StyledText { text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
@@ -889,7 +848,7 @@ Item {
                             Repeater {
                                 model: modelData.binds ?? []
 
-                                DataRow {
+                                CheatDataRow {
                                     required property var modelData
                                     required property int index
                                     readonly property int catIdx: parent.parent.index
@@ -898,8 +857,8 @@ Item {
 
                                     StyledText { visible: editIdx !== index; text: modelData.keys; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3secondary; Layout.preferredWidth: 200; elide: Text.ElideRight }
                                     StyledText { visible: editIdx !== index; text: modelData.action; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; Layout.fillWidth: true; elide: Text.ElideRight }
-                                    TextField { visible: editIdx === index; text: editIdx === index ? editKeys : ""; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editKeys = text; background: FieldBg {} }
-                                    TextField { visible: editIdx === index; text: editIdx === index ? editAction : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editAction = text; background: FieldBg {} }
+                                    TextField { visible: editIdx === index; text: editIdx === index ? editKeys : ""; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editKeys = text; background: CheatFieldBackground {} }
+                                    TextField { visible: editIdx === index; text: editIdx === index ? editAction : ""; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; onTextEdited: editAction = text; background: CheatFieldBackground {} }
 
                                     StyledText { visible: editIdx === index; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -936,8 +895,8 @@ Item {
                                 StyledText { visible: !addBindRow.expanded; text: "+ add bind"; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3primary
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: addBindRow.expanded = true }
                                 }
-                                TextField { id: bkF; visible: addBindRow.expanded; placeholderText: "Super+Key"; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
-                                TextField { id: baF; visible: addBindRow.expanded; placeholderText: "action"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: FieldBg {} }
+                                TextField { id: bkF; visible: addBindRow.expanded; placeholderText: "Super+Key"; Layout.preferredWidth: 200; font.family: Appearance.font.family.mono; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
+                                TextField { id: baF; visible: addBindRow.expanded; placeholderText: "action"; Layout.fillWidth: true; font.pointSize: Appearance.font.size.small; color: Colours.palette.m3onSurface; background: CheatFieldBackground {} }
                                 StyledText { visible: addBindRow.expanded; text: "check"; font.family: Appearance.font.family.material; font.pointSize: Appearance.font.size.normal; color: Colours.palette.m3primary
                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                         onClicked: {
