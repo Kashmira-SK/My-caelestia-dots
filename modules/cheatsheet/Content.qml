@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import "../controlcenter"
+import "../controlcenter/components" as Cc
 import qs.components
 import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import QtCore
@@ -59,37 +61,57 @@ Item {
 
     // ── layout ────────────────────────────────────────────────────────────────
 
-    RowLayout {
+    Cc.SplitPaneLayout {
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
-        spacing: Appearance.padding.normal
+        leftWidthRatio: 0.25
+        leftMinimumWidth: 220
 
-        // ── left rail ─────────────────────────────────────────────────────────
-        StyledRect {
-            Layout.preferredWidth: 150
-            Layout.fillHeight: true
-            radius: Appearance.rounding.normal
-            color: Colours.tPalette.m3surfaceContainer
-
-            Flickable {
+        leftContent: Component {
+            StyledFlickable {
                 id: leftFlick
-                anchors.fill: parent
-                anchors.margins: Appearance.padding.normal
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: leftCol.implicitHeight
-                clip: true
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: leftFlick
+                }
 
                 ColumnLayout {
                     id: leftCol
-                    width: leftFlick.width
-                    spacing: 2
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: Appearance.spacing.small
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacing.smaller
+
+                        StyledText {
+                            text: qsTr("Cheatsheet")
+                            font.pointSize: Appearance.font.size.large
+                            font.weight: 500
+                            color: Colours.palette.m3onSurface
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        IconButton {
+                            icon: root.isSaving ? "sync" : "menu_book"
+                            type: IconButton.Text
+                            label.animate: true
+                            enabled: false
+                        }
+                    }
 
                     StyledText {
-                        text: "Cheatsheet"
-                        font.pointSize: Appearance.font.size.normal
-                        font.weight: 500
-                        color: Colours.palette.m3onSurface
-                        Layout.bottomMargin: Appearance.spacing.normal
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: Appearance.spacing.small
+                        text: qsTr("Quick notes, commands, repos and binds")
+                        wrapMode: Text.WordWrap
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
                     }
 
                     Repeater {
@@ -107,61 +129,59 @@ Item {
             }
         }
 
-        // ── right content ─────────────────────────────────────────────────────
-        StyledRect {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            radius: Appearance.rounding.normal
-            color: Colours.tPalette.m3surfaceContainer
+        rightContent: Component {
+            Item {
+                anchors.fill: parent
 
-            Repeater {
-                model: root.tabs
+                Repeater {
+                    model: root.tabs
 
-                Item {
-                    required property var modelData
-                    required property int index
+                    Item {
+                        required property var modelData
+                        required property int index
 
-                    anchors.fill: parent
-                    visible: root.activeTab === modelData.id
-
-                    ListSection {
                         anchors.fill: parent
-                        visible: modelData.type === "list" || modelData.type === undefined
-                        tabData: modelData
-                        allTabs: root.tabs
-                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                    }
+                        visible: root.activeTab === modelData.id
 
-                    ReposSection {
-                        anchors.fill: parent
-                        visible: modelData.type === "repos"
-                        tabData: modelData
-                        allTabs: root.tabs
-                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                    }
+                        ListSection {
+                            anchors.fill: parent
+                            visible: modelData.type === "list" || modelData.type === undefined
+                            tabData: modelData
+                            allTabs: root.tabs
+                            onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        }
 
-                    ZshSection {
-                        anchors.fill: parent
-                        visible: modelData.type === "zsh"
-                        tabData: modelData
-                        allTabs: root.tabs
-                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                    }
+                        ReposSection {
+                            anchors.fill: parent
+                            visible: modelData.type === "repos"
+                            tabData: modelData
+                            allTabs: root.tabs
+                            onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        }
 
-                    LinuxSection {
-                        anchors.fill: parent
-                        visible: modelData.type === "linux"
-                        tabData: modelData
-                        allTabs: root.tabs
-                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
-                    }
+                        ZshSection {
+                            anchors.fill: parent
+                            visible: modelData.type === "zsh"
+                            tabData: modelData
+                            allTabs: root.tabs
+                            onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        }
 
-                    KeybindsSection {
-                        anchors.fill: parent
-                        visible: modelData.type === "keybinds"
-                        tabData: modelData
-                        allTabs: root.tabs
-                        onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        LinuxSection {
+                            anchors.fill: parent
+                            visible: modelData.type === "linux"
+                            tabData: modelData
+                            allTabs: root.tabs
+                            onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        }
+
+                        KeybindsSection {
+                            anchors.fill: parent
+                            visible: modelData.type === "keybinds"
+                            tabData: modelData
+                            allTabs: root.tabs
+                            onRequestUpdate: function(newTabs) { root.tabs = newTabs; root.save() }
+                        }
                     }
                 }
             }
@@ -326,7 +346,6 @@ Item {
                     }
                 }
 
-                // add row
                 RowLayout {
                     id: addListRow
                     property bool expanded: false
@@ -670,7 +689,6 @@ Item {
             anchors.fill: parent
             spacing: Appearance.padding.normal
 
-            // sub-nav
             ColumnLayout {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: false
@@ -718,7 +736,6 @@ Item {
                 Item { Layout.fillHeight: true }
             }
 
-            // content for selected sub-category
             Flickable {
                 id: linFlick
                 Layout.fillWidth: true
@@ -844,7 +861,6 @@ Item {
             anchors.fill: parent
             spacing: Appearance.padding.normal
 
-            // sub-nav
             ColumnLayout {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: false
@@ -927,7 +943,6 @@ Item {
                 Item { Layout.fillHeight: true }
             }
 
-            // binds content
             Flickable {
                 id: kbFlick
                 Layout.fillWidth: true
