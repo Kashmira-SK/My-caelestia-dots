@@ -67,64 +67,13 @@ Item {
         leftMinimumWidth: 220
 
         leftContent: Component {
-            StyledFlickable {
-                id: leftFlick
-                flickableDirection: Flickable.VerticalFlick
-                contentHeight: leftCol.implicitHeight
+            CheatNav {
+                tabs: root.tabs
+                activeTab: root.activeTab
+                isSaving: root.isSaving
 
-                StyledScrollBar.vertical: StyledScrollBar {
-                    flickable: leftFlick
-                }
-
-                ColumnLayout {
-                    id: leftCol
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    spacing: Appearance.spacing.small
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.spacing.smaller
-
-                        StyledText {
-                            text: qsTr("Cheatsheet")
-                            font.pointSize: Appearance.font.size.large
-                            font.weight: 500
-                            color: Colours.palette.m3onSurface
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        IconButton {
-                            icon: root.isSaving ? "sync" : "menu_book"
-                            type: IconButton.Text
-                            label.animate: true
-                            enabled: false
-                        }
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: Appearance.spacing.small
-                        text: qsTr("Quick notes, commands, repos and binds")
-                        wrapMode: Text.WordWrap
-                        font.pointSize: Appearance.font.size.small
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
-
-                    Repeater {
-                        model: root.tabs
-
-                        NavEntry {
-                            required property var modelData
-                            required property int index
-                            Layout.fillWidth: true
-                            label: modelData.label
-                            tabId: modelData.id
-                        }
-                    }
+                onTabSelected: function(tabId) {
+                    root.activeTab = tabId
                 }
             }
         }
@@ -185,42 +134,6 @@ Item {
                     }
                 }
             }
-        }
-    }
-
-    // ── NavEntry ──────────────────────────────────────────────────────────────
-
-    component NavEntry: Item {
-        property string label: ""
-        property string tabId: ""
-        readonly property bool active: root.activeTab === tabId
-        implicitHeight: navBg.implicitHeight
-
-        StyledRect {
-            id: navBg
-            anchors.left: parent.left
-            anchors.right: parent.right
-            radius: Appearance.rounding.full
-            color: active ? Colours.palette.m3secondaryContainer : "transparent"
-            implicitHeight: navLbl.implicitHeight + Appearance.padding.normal * 2
-
-            StateLayer {
-                color: active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                function onClicked() { root.activeTab = tabId }
-            }
-
-            StyledText {
-                id: navLbl
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: Appearance.padding.normal
-                text: label
-                font.pointSize: Appearance.font.size.small
-                font.capitalization: Font.Capitalize
-                color: active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            }
-
-            Behavior on color { Anim {} }
         }
     }
 
