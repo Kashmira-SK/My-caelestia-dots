@@ -8,7 +8,6 @@ import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
 import qs.modules.utilities.toasts as Toasts
 import qs.modules.sidebar as Sidebar
-import qs.modules.notes as Notes
 import Quickshell
 import QtQuick
 
@@ -28,7 +27,6 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
-    readonly property alias notes: notes
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
@@ -86,12 +84,6 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
      }
-
-    Notes.Wrapper {
-        id: notes
-        visibilities: root.visibilities
-        anchors.top: parent.top
-    }
 
     BarPopouts.Wrapper {
         id: popouts

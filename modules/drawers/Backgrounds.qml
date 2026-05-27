@@ -8,7 +8,6 @@ import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
 import qs.modules.sidebar as Sidebar
-import qs.modules.notes as Notes
 import QtQuick
 import QtQuick.Shapes
 
@@ -60,13 +59,6 @@ Shape {
         wrapper: root.panels.dashboard
 
         startX: (root.width - wrapper.width) / 2 - rounding
-        startY: 0
-    }
-
-    Notes.Background {
-        wrapper: root.panels.notes
-
-        startX: -Config.border.rounding
         startY: 0
     }
 
