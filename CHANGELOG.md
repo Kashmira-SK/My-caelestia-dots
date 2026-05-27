@@ -4,6 +4,21 @@ Newest entries at the top.
 
 ---
 
+## [2026-05-27] - Remove notes module
+
+### Removed
+- `modules/notes/` — entire folder deleted (Wrapper, Content, Background, NoteCard, NoteEditor)
+- `modules/drawers/Panels.qml` — removed Notes import, alias, and Notes.Wrapper block
+- `modules/drawers/Backgrounds.qml` — removed Notes import and Notes.Background block
+- `modules/drawers/Drawers.qml` — removed `property bool notes` from PersistentProperties, removed notes from focusGrab active condition and onCleared handler
+
+### Notes
+- Module was mid-rewrite (multi-note json-backed design, WIP) with known save reliability issues
+- Obsidian covers the use case; no functional gap
+- Recoverable from git history if needed
+
+---
+
 ## [2026-05-27] - Cheatsheet panel control center refactor
 
 ### Changed
