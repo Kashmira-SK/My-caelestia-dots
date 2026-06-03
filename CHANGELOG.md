@@ -2,6 +2,10 @@
 
 Newest entries at the top.
 
+## [2026-06-03] - Bluetooth audio volume fix
+### Fixed
+- `services/Audio.qml`: patched `setVolume` and `setSourceVolume` to use `wpctl` via `Quickshell.execDetached` — A2DP profile blocks PipeWire software volume writes on some BT speakers
+
 ---
 
 ## [2026-05-27] - Remove notes module

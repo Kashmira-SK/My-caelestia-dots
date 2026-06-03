@@ -47,10 +47,11 @@ Singleton {
     readonly property alias beatTracker: beatTracker
 
     function setVolume(newVolume: real): void {
-        if (sink?.ready && sink?.audio) {
+        const vol = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
+        if (sink?.audio) {
             sink.audio.muted = false;
-            sink.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
         }
+        Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", vol.toFixed(2)]);
     }
 
     function incrementVolume(amount: real): void {
@@ -62,10 +63,11 @@ Singleton {
     }
 
     function setSourceVolume(newVolume: real): void {
-        if (source?.ready && source?.audio) {
+        const vol = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
+        if (source?.audio) {
             source.audio.muted = false;
-            source.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
         }
+        Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", vol.toFixed(2)]);
     }
 
     function incrementSourceVolume(amount: real): void {
