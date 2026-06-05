@@ -89,6 +89,13 @@ chat() {
     python main.py
 }
 
+chat-ui() {
+    cd ~/AI_Projects/TerminalChat
+    source venv/bin/activate
+    clear
+    python -m interfaces.terminal.app
+}
+
 # fzf
 eval "$(fzf --zsh)"
 
