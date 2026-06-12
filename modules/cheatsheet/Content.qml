@@ -1,5 +1,3 @@
-pragma ComponentBehavior: Bound
-
 import "../controlcenter"
 import "../controlcenter/components" as Cc
 import qs.components
