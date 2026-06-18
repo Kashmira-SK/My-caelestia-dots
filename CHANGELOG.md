@@ -2,6 +2,15 @@
 
 Newest entries at the top.
 
+---
+
+## [2026-06-18] - Startpage theme updates on variant switch
+### Fixed
+- `~/.local/bin/caelestia-theme-watch.fish`: added `python ~/.config/caelestia/apply_theme.py --startpage-only` call inside `update_theme` — startpage now repatches on every `scheme.json` change, not just wallpaper changes
+- `~/.config/caelestia/apply_theme.py`: added `--startpage-only` flag to `__main__` block — reads `scheme.json` and calls `apply_startpage()` directly without running the full wallpaper pipeline
+
+---
+
 ## [2026-06-03] - Bluetooth audio volume fix
 ### Fixed
 - `services/Audio.qml`: patched `setVolume` and `setSourceVolume` to use `wpctl` via `Quickshell.execDetached` — A2DP profile blocks PipeWire software volume writes on some BT speakers

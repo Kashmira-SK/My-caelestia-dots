@@ -115,4 +115,11 @@ def apply_startpage(colours):
         print(f"[apply_theme] Updated {page.name}")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if "--startpage-only" in sys.argv:
+        import json
+        with open("/home/kashmira/.local/state/caelestia/scheme.json") as f:
+            scheme = json.load(f)
+        apply_startpage(scheme["colours"])
+    else:
+        main()
