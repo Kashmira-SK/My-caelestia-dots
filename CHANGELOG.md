@@ -2,6 +2,10 @@
 
 Newest entries at the top.
 
+## [2026-07-16] - Fix Hyprland 0.55 config error (dwindle:pseudotile removed)
+### Fixed
+- `dotfiles/hyprland.conf`: removed `dwindle:pseudotile` option (line 97), which Hyprland 0.55 dropped in favor of per-window `pseudo` dispatcher/windowrule
+
 ---
 
 ## [2026-06-18] - Startpage theme updates on variant switch
