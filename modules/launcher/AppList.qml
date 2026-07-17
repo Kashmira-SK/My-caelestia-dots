@@ -48,8 +48,7 @@ StyledListView {
         }
     }
 
-    state: {
-        const text = search.text;
+    function stateForText(text: string): string {
         const prefix = Config.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
             for (const action of ["calc", "scheme", "variant"])
@@ -61,6 +60,10 @@ StyledListView {
 
         return "apps";
     }
+
+    readonly property string currentState: stateForText(search.text)
+
+    state: currentState
 
     onStateChanged: {
         if (state === "scheme" || state === "variant")

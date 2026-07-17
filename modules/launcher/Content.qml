@@ -76,6 +76,7 @@ Item {
 
         StyledTextField {
             id: search
+            onTextChanged: console.log("[DEBUG] search.text is now:", JSON.stringify(text))
 
             anchors.left: searchIcon.right
             anchors.right: clearIcon.left
