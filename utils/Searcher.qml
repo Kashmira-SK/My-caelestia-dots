@@ -37,7 +37,6 @@ Singleton {
 
     function query(search: string): list<var> {
         search = transformSearch(search);
-        console.log("[DEBUG] query called, search:", JSON.stringify(search), "list.length:", list.length);
         if (!search)
             return [...list];
 

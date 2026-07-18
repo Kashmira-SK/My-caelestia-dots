@@ -2,6 +2,14 @@
 
 Newest entries at the top.
 
+---
+
+## [2026-07-18] - Launcher search filtering fix
+### Fixed
+- `modules/launcher/AppList.qml`: search results (`>wall`, `>variant`, etc.) weren't filtering live while typing — only updated on full mode switch. Backported fix from upstream caelestia-dots/shell commit 6d0fee09 (#1695), adapted to local pre-refactor API.
+
+---
+
 ## [2026-07-16] - Fix Hyprland 0.55 config error (dwindle:pseudotile removed)
 ### Fixed
 - `dotfiles/hyprland.conf`: removed `dwindle:pseudotile` option (line 97), which Hyprland 0.55 dropped in favor of per-window `pseudo` dispatcher/windowrule
