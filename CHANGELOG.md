@@ -4,6 +4,28 @@ Newest entries at the top.
 
 ---
 
+## [2026-07-25] - TV Setup: Workspace, Windowrules, and Crash Mitigation
+
+### Added
+- `hyprland.conf`: KDE Connect app floating windowrule (`org.kde.kdeconnect.app`), centered at 700x450
+- `hyprland.conf`: Dedicated TV workspace 11, pinned to `HDMI-A-1` via `default:true` monitor rule
+- `hyprland.conf`: `Super+Tab` bind to switch to workspace 11 (TV)
+- `hyprland.conf`: `Super+Shift+Tab` bind to move active window to workspace 11
+- `hyprland.conf`: Windowrule floating + sizing (1600x900) all windows on workspace 11 for TV readability
+
+### Changed
+- `modules/background/Visualiser.qml`: null-safe `exclusiveZone` check (`?.` + `?? 0`) to reduce hotplug-related crash surface
+
+### Fixed
+- PipeWire default audio sink correction for TV HDMI output (was defaulting to wrong HDMI port)
+
+### Known Issues
+- Quickshell crashes on TV hotplug (`wl_display error 0: invalid object`) — confirmed unresolved upstream bug (caelestia-dots/shell #471), maintainer unable to fix. No automated recovery in place; manual restart required: `pkill quickshell; quickshell -c caelestia >/tmp/quickshell.log 2>&1 & disown`
+- Tauon Music Box produces no audio on TV sink despite other apps (Spotify) working correctly — root cause not yet identified
+- TV brightness cannot be controlled via Caelestia OSD (hardware/DDC limitation, not a software bug)
+
+---
+
 ## [2026-07-18] - Launcher search filtering fix
 ### Fixed
 - `modules/launcher/AppList.qml`: search results (`>wall`, `>variant`, etc.) weren't filtering live while typing — only updated on full mode switch. Backported fix from upstream caelestia-dots/shell commit 6d0fee09 (#1695), adapted to local pre-refactor API.
