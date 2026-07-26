@@ -2,6 +2,11 @@
 
 Newest entries at the top.
 
+## [2026-07-26] - Alt-Tab floating window cycling
+
+### Added
+- `dotfiles/hyprland.conf`: Alt+Tab / Alt+Shift+Tab binds to cycle focus between floating windows (workspace 11), using `cyclenext`/`bringactivetotop` since Super+Tab was already taken by workspace switching
+
 ---
 
 ## [2026-07-25] - TV Setup: Workspace, Windowrules, and Crash Mitigation
