@@ -1,3 +1,5 @@
+:0put ='pragma ComponentBehavior: Bound'
+:normal! O
 import "../controlcenter"
 import "../controlcenter/components" as Cc
 import qs.components
