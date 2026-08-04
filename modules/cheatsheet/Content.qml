@@ -13,36 +13,89 @@ Item {
     required property Session session
     anchors.fill: parent
 
+    component InfoRow: RowLayout {
+        id: infoRow
+        required property string label
+        required property string value
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.normal
+
+        StyledText {
+            text: infoRow.label
+            color: Colours.palette.m3outline
+            Layout.preferredWidth: 90
+        }
+        StyledText {
+            text: infoRow.value
+            elide: Text.ElideRight
+            Layout.fillWidth: true
+        }
+    }
+
+    component Card: StyledRect {
+        id: card
+        required property string title
+        required property string icon
+        default property alias content: cardCol.data
+
+        radius: Appearance.rounding.normal
+        color: Colours.palette.m3surfaceContainer
+        implicitHeight: cardCol.implicitHeight + Appearance.padding.large * 2
+        Layout.fillWidth: true
+
+        ColumnLayout {
+            id: cardCol
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.small
+
+            RowLayout {
+                spacing: Appearance.spacing.small
+                MaterialIcon {
+                    text: card.icon
+                    font.pointSize: Appearance.font.size.large
+                }
+                StyledText {
+                    text: card.title
+                    font.pointSize: Appearance.font.size.larger
+                    font.bold: true
+                }
+            }
+        }
+    }
+
     StyledFlickable {
         id: flick
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
-        contentHeight: layout.implicitHeight
+        contentHeight: grid.implicitHeight
         flickableDirection: Flickable.VerticalFlick
 
-        ColumnLayout {
-            id: layout
+        GridLayout {
+            id: grid
             width: flick.width
-            spacing: Appearance.spacing.small
+            columns: flick.width > 900 ? 2 : 1
+            columnSpacing: Appearance.spacing.normal
+            rowSpacing: Appearance.spacing.normal
 
-            SectionHeader {
+            Card {
                 title: qsTr("CLI Tools")
+                icon: "terminal"
+                InfoRow { label: "eza"; value: "ls replacement" }
+                InfoRow { label: "zoxide"; value: "cd replacement (z)" }
+                InfoRow { label: "fzf"; value: "fuzzy finder" }
+                InfoRow { label: "starship"; value: "shell prompt" }
+                InfoRow { label: "nvim"; value: "editor" }
             }
 
-            StyledText { text: "eza      - ls replacement" }
-            StyledText { text: "zoxide   - cd replacement (z)" }
-            StyledText { text: "fzf      - fuzzy finder" }
-            StyledText { text: "starship - shell prompt" }
-            StyledText { text: "nvim     - editor" }
-
-            SectionHeader {
+            Card {
                 title: qsTr("Repos")
+                icon: "folder_code"
+                InfoRow { label: "caelestia"; value: "github.com/Kashmira-SK/My-caelestia-dots" }
+                InfoRow { label: "firefox-dots"; value: "github.com/Kashmira-SK/firefox-dots (private)" }
+                InfoRow { label: "ticket app"; value: "~/git/ticket-booking/" }
+                InfoRow { label: "termchat"; value: "~/git/ (python / cerebras)" }
             }
-
-            StyledText { text: "caelestia    - github.com/Kashmira-SK/My-caelestia-dots" }
-            StyledText { text: "firefox-dots - github.com/Kashmira-SK/firefox-dots (private)" }
-            StyledText { text: "ticket app   - ~/git/ticket-booking/" }
-            StyledText { text: "termchat     - ~/git/ (python / cerebras)" }
         }
     }
 }
