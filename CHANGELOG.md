@@ -2,6 +2,18 @@
 
 Newest entries at the top.
 
+---
+
+## [2026-08-04] - Cheatsheet keybind routing fix
+### Fixed
+- `modules/Shortcuts.qml`: `controlCenter` IPC handler's `open()` now accepts an optional `pane` name, passed to `WindowFactory.create()` as the initial `active` pane (defaults to `"network"` to preserve old behavior)
+- `dotfiles/hyprland.conf`: `Super+G` now calls `caelestia shell controlCenter open cheatsheet` instead of the old `caelestia shell cheatsheet open`
+
+### Notes
+- Root cause: two separate, unrelated systems both used the string `"cheatsheet"` — the control center pane system (`PaneRegistry.qml` → `Content.qml`, fully built) and the bar popout system (`modules/bar/popouts/Content.qml`, no `cheatsheet` entry ever added). `Super+G` was wired to the bar popout IPC target, which opened an empty, correctly-sized panel with nothing to render since no matching popout existed.
+- Confirmed fix by swapping `Content.qml` for a minimal red `Rectangle` test file — routing and Loader mounting both verified working via screenshot.
+- Real cheatsheet content (`Content.qml`'s actual layout/data.json) is still not restored yet — that's next.
+
 ## [2026-07-26] - Alt-Tab floating window cycling
 
 ### Added
