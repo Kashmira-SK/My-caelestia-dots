@@ -110,23 +110,50 @@ Item {
             rowSpacing: Appearance.spacing.normal
 
             Card {
-                title: qsTr("CLI Tools")
-                icon: "terminal"
-                InfoRow { label: "eza"; value: "ls replacement" }
-                InfoRow { label: "zoxide"; value: "cd replacement (z)" }
-                InfoRow { label: "fzf"; value: "fuzzy finder" }
-                InfoRow { label: "starship"; value: "shell prompt" }
-                InfoRow { label: "nvim"; value: "editor (never nano)" }
-                InfoRow { label: "kitty"; value: "terminal" }
+                title: qsTr("CLI Tools (easy to forget)")
+                icon: "build"
+                InfoRow { label: "speedtest-cli"; value: "network speed test" }
+                InfoRow { label: "ncdu"; value: "disk usage analyzer" }
+                InfoRow { label: "duf"; value: "df but readable" }
+                InfoRow { label: "tldr"; value: "simplified man pages" }
+                InfoRow { label: "most"; value: "pager, alt to less" }
+                InfoRow { label: "jq"; value: "json processor" }
+                InfoRow { label: "yt-dlp"; value: "download video/audio" }
+                InfoRow { label: "gh"; value: "github from terminal" }
+                InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
+                InfoRow { label: "ttyper"; value: "typing speed test" }
+                InfoRow { label: "exiftool"; value: "image/file metadata" }
+                InfoRow { label: "inxi"; value: "system info dump" }
+                InfoRow { label: "nvtop"; value: "gpu usage monitor" }
+                InfoRow { label: "termdown"; value: "countdown/stopwatch" }
+                InfoRow { label: "gum"; value: "shell script UI prompts" }
+                InfoRow { label: "epy"; value: "terminal ebook reader" }
             }
 
             Card {
-                title: qsTr("Repos")
-                icon: "folder_code"
-                InfoRow { label: "caelestia"; value: "github.com/Kashmira-SK/My-caelestia-dots" }
-                InfoRow { label: "firefox-dots"; value: "github.com/Kashmira-SK/firefox-dots (private)" }
-                InfoRow { label: "ticket app"; value: "~/git/ticket-booking/" }
-                InfoRow { label: "termchat"; value: "~/git/ (python / cerebras)" }
+                title: qsTr("Games")
+                icon: "sports_esports"
+                InfoRow { label: "nsnake"; value: "snake" }
+                InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
+                InfoRow { label: "bastet"; value: "tetris that hates you" }
+                InfoRow { label: "tty-solitaire"; value: "solitaire" }
+                InfoRow { label: "2048-cli-git"; value: "2048" }
+                InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
+            }
+
+            Card {
+                title: qsTr("Terminal Toys")
+                icon: "auto_awesome"
+                InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased, matrix rain" }
+                InfoRow { label: "pipes"; value: "aliased, animated pipes" }
+                InfoRow { label: "asciiquarium"; value: "aquarium animation" }
+                InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
+                InfoRow { label: "astroterm"; value: "starfield / space" }
+                InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
+                InfoRow { label: "tty-clock"; value: "big terminal clock" }
+                InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
+                InfoRow { label: "cowsay"; value: "cow says your text" }
+                InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
             }
 
             Card {
@@ -143,45 +170,34 @@ Item {
             }
 
             Card {
-                title: qsTr("Aliases & Shell")
-                icon: "terminal"
-                InfoRow { label: "spotify"; value: "flatpak run com.spotify.Client" }
-                InfoRow { label: "ls/ll/la"; value: "eza variants" }
-                InfoRow { label: "cd"; value: "zoxide (z)" }
-                InfoRow { label: "suggest"; value: "zsh-autosuggestions" }
-                InfoRow { label: "highlight"; value: "zsh-syntax-highlighting" }
-                InfoRow { label: "fuzzy"; value: "fzf" }
-                InfoRow { label: "prompt"; value: "starship" }
-            }
-
-            Card {
-                title: qsTr("Installed Apps")
-                icon: "apps"
-                InfoRow { label: "hyprland"; value: "pacman" }
-                InfoRow { label: "quickshell"; value: "aur-git" }
-                InfoRow { label: "spotify"; value: "flatpak · com.spotify.Client" }
-                InfoRow { label: "dbeaver"; value: "flatpak · io.dbeaver.DBeaverCommunity" }
-                InfoRow { label: "immich"; value: "docker · + postgres, /dev/sda1" }
-                InfoRow { label: "tauon"; value: "pacman" }
-                InfoRow { label: "code-oss"; value: "pacman" }
+                title: qsTr("Zsh Aliases")
+                icon: "bolt"
+                InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
+                InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
+                InfoRow { label: "zshconf"; value: "edit .zshrc" }
+                InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
+                InfoRow { label: "caeconf"; value: "edit shell.json" }
+                InfoRow { label: "caefiles"; value: "cd to dots repo" }
+                InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
+                InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
+                InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
+                InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
             }
 
             Card {
                 title: qsTr("Bluetooth")
                 icon: "bluetooth"
-                InfoRow { label: "buds2 pro"; value: "04:29:2E:D7:A3:E7" }
-                InfoRow { label: "shile spkr"; value: "41:42:D3:00:EA:42" }
-                InfoRow { label: "config"; value: "/etc/bluetooth/main.conf" }
+                CmdRow { label: "scan for devices"; cmd: "bluetoothctl scan on" }
+                CmdRow { label: "list paired"; cmd: "bluetoothctl devices" }
+                CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
             }
 
             Card {
                 Layout.columnSpan: grid.columns
                 title: qsTr("Important Commands")
                 icon: "code"
-                CmdRow { label: "quickshell restart"; cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown" }
+                CmdRow { label: "quickshell restart (safe)"; cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown" }
                 CmdRow { label: "clear qml cache"; cmd: "rm -rf ~/.cache/quickshell/qmlcache" }
-                CmdRow { label: "screenshot"; cmd: "grim -g \"$(slurp -c 00000000 -b 00000055)\"" }
-                CmdRow { label: "monitors"; cmd: "eDP-1 (laptop) · HDMI-A-1 (tv, ws11, float 1600x900)" }
             }
         }
     }
