@@ -1,6 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import "../controlcenter"
+import qs.components
+import qs.components.containers
+import qs.services
+import qs.config
 import QtQuick
 import QtQuick.Layouts
 
@@ -9,42 +13,36 @@ Item {
     required property Session session
     anchors.fill: parent
 
-    Rectangle {
+    StyledFlickable {
+        id: flick
         anchors.fill: parent
-        color: "#1e1e2e"
+        anchors.margins: Appearance.padding.large
+        contentHeight: layout.implicitHeight
+        flickableDirection: Flickable.VerticalFlick
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 8
+            id: layout
+            width: flick.width
+            spacing: Appearance.spacing.small
 
-            Text {
-                text: "CLI Tools"
-                color: "#f5e0dc"
-                font.pixelSize: 24
-                font.bold: true
+            SectionHeader {
+                title: qsTr("CLI Tools")
             }
 
-            Text { text: "eza      - ls replacement"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "zoxide   - cd replacement (z)"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "fzf      - fuzzy finder"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "starship - shell prompt"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "nvim     - editor"; color: "#cdd6f4"; font.pixelSize: 16 }
+            StyledText { text: "eza      - ls replacement" }
+            StyledText { text: "zoxide   - cd replacement (z)" }
+            StyledText { text: "fzf      - fuzzy finder" }
+            StyledText { text: "starship - shell prompt" }
+            StyledText { text: "nvim     - editor" }
 
-            Text {
-                text: "Repos"
-                color: "#f5e0dc"
-                font.pixelSize: 24
-                font.bold: true
-                Layout.topMargin: 16
+            SectionHeader {
+                title: qsTr("Repos")
             }
 
-            Text { text: "caelestia    - github.com/Kashmira-SK/My-caelestia-dots"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "firefox-dots - github.com/Kashmira-SK/firefox-dots (private)"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "ticket app   - ~/git/ticket-booking/"; color: "#cdd6f4"; font.pixelSize: 16 }
-            Text { text: "termchat     - ~/git/ (python / cerebras)"; color: "#cdd6f4"; font.pixelSize: 16 }
-
-            Item { Layout.fillHeight: true }
+            StyledText { text: "caelestia    - github.com/Kashmira-SK/My-caelestia-dots" }
+            StyledText { text: "firefox-dots - github.com/Kashmira-SK/firefox-dots (private)" }
+            StyledText { text: "ticket app   - ~/git/ticket-booking/" }
+            StyledText { text: "termchat     - ~/git/ (python / cerebras)" }
         }
     }
 }
