@@ -27,6 +27,7 @@ Singleton {
     IdleInhibitor {
         enabled: props.enabled
         window: PanelWindow {
+            screen: Quickshell.screens[0]
             implicitWidth: 0
             implicitHeight: 0
             color: "transparent"
