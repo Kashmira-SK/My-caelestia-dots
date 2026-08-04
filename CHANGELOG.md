@@ -2,6 +2,11 @@
 
 Newest entries at the top.
 
+## [2026-08-04] - Cheatsheet rebuild
+### Fixed
+- `modules/Shortcuts.qml` / `dotfiles/hyprland.conf`: Super+G was routed to a dead bar-popout IPC target with no matching popout registered — repointed to `controlCenter open cheatsheet`
+- `modules/cheatsheet/Content.qml`: old version never rendered (broken pragma + untested Repeater/FileView logic). Rebuilt from a bare hardcoded list, confirmed working, now adding sections back incrementally
+
 ---
 
 ## [2026-08-04] - Cheatsheet keybind routing fix
