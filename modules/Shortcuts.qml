@@ -115,8 +115,10 @@ Scope {
     IpcHandler {
         target: "controlCenter"
 
-        function open(): void {
-            WindowFactory.create();
+        function open(pane: string): void {
+            WindowFactory.create(null, {
+                active: pane || "network"
+            });
         }
     }
 
