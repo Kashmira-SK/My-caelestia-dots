@@ -3,8 +3,10 @@ pragma ComponentBehavior: Bound
 import "../controlcenter"
 import qs.components
 import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.config
+import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
@@ -13,21 +15,21 @@ Item {
     required property Session session
     anchors.fill: parent
 
-    component InfoRow: RowLayout {
+    component InfoRow: ColumnLayout {
         id: infoRow
         required property string label
         required property string value
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: 1
 
         StyledText {
             text: infoRow.label
             color: Colours.palette.m3outline
-            Layout.preferredWidth: 110
+            font.pointSize: Appearance.font.size.small
         }
         StyledText {
             text: infoRow.value
-            elide: Text.ElideRight
+            wrapMode: Text.Wrap
             Layout.fillWidth: true
         }
     }
@@ -42,23 +44,33 @@ Item {
         StyledText {
             text: cmdRow.label
             color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.small
         }
         StyledRect {
             Layout.fillWidth: true
             radius: Appearance.rounding.small
             color: Colours.palette.m3surface
-            implicitHeight: cmdText.implicitHeight + Appearance.padding.small * 2
-            implicitWidth: cmdText.implicitWidth + Appearance.padding.normal * 2
+            implicitHeight: Math.max(cmdText.implicitHeight, copyBtn.implicitHeight) + Appearance.padding.small * 2
 
-            StyledText {
-                id: cmdText
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.padding.normal
-                text: cmdRow.cmd
-                font.family: Appearance.font.family.mono
-                wrapMode: Text.WrapAnywhere
-                Layout.fillWidth: true
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.small
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    id: cmdText
+                    text: cmdRow.cmd
+                    font.family: Appearance.font.family.mono
+                    wrapMode: Text.WrapAnywhere
+                    Layout.fillWidth: true
+                }
+
+                IconButton {
+                    id: copyBtn
+                    type: IconButton.Text
+                    icon: "content_copy"
+                    onClicked: Quickshell.execDetached(["wl-copy", cmdRow.cmd])
+                }
             }
         }
     }
@@ -190,6 +202,15 @@ Item {
                 CmdRow { label: "scan for devices"; cmd: "bluetoothctl scan on" }
                 CmdRow { label: "list paired"; cmd: "bluetoothctl devices" }
                 CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
+            }
+
+            Card {
+                title: qsTr("WiFi")
+                icon: "wifi"
+                CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
+                CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
+                CmdRow { label: "saved connections"; cmd: "nmcli connection show" }
+                CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
             }
 
             Card {
