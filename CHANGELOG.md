@@ -2,6 +2,19 @@
 
 Newest entries at the top.
 
+## [2026-08-05] - Cheatsheet content pass
+### Added
+- WiFi card: `nmcli` list/connect/show/disconnect commands
+- Copy button on every command block (`wl-copy`, same pattern as launcher calc widget)
+- Real card data: forgettable CLI tools, games, terminal toys, key paths, actual zsh aliases, bluetooth (`bluetoothctl` commands instead of raw MACs)
+### Changed
+- `InfoRow` switched from fixed-width row layout to stacked (label above value) — fixed text overlap on long labels
+- Removed Repos and Installed Apps cards (not useful as reference)
+- Important Commands trimmed to quickshell restart + qml cache clear only
+- `~/.zshrc` `qsrestart` alias updated to the safer `qs -c caelestia kill && qs -c caelestia ...` IPC pattern instead of `pkill`
+
+---
+
 ## [2026-08-04] - Cheatsheet rebuild
 ### Fixed
 - `modules/Shortcuts.qml` / `dotfiles/hyprland.conf`: Super+G was routed to a dead bar-popout IPC target with no matching popout registered — repointed to `controlCenter open cheatsheet`
