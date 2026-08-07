@@ -111,110 +111,125 @@ Item {
         id: flick
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
-        contentHeight: grid.implicitHeight
+        contentHeight: mainCol.implicitHeight
         flickableDirection: Flickable.VerticalFlick
 
-        GridLayout {
-            id: grid
+        ColumnLayout {
+            id: mainCol
             width: flick.width
-            columns: flick.width > 900 ? 2 : 1
-            columnSpacing: Appearance.spacing.normal
-            rowSpacing: Appearance.spacing.normal
+            spacing: Appearance.spacing.normal
 
-            Card {
-                title: qsTr("CLI Tools (easy to forget)")
-                icon: "build"
-                InfoRow { label: "speedtest-cli"; value: "network speed test" }
-                InfoRow { label: "ncdu"; value: "disk usage analyzer" }
-                InfoRow { label: "duf"; value: "df but readable" }
-                InfoRow { label: "tldr"; value: "simplified man pages" }
-                InfoRow { label: "most"; value: "pager, alt to less" }
-                InfoRow { label: "jq"; value: "json processor" }
-                InfoRow { label: "yt-dlp"; value: "download video/audio" }
-                InfoRow { label: "gh"; value: "github from terminal" }
-                InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
-                InfoRow { label: "ttyper"; value: "typing speed test" }
-                InfoRow { label: "exiftool"; value: "image/file metadata" }
-                InfoRow { label: "inxi"; value: "system info dump" }
-                InfoRow { label: "nvtop"; value: "gpu usage monitor" }
-                InfoRow { label: "termdown"; value: "countdown/stopwatch" }
-                InfoRow { label: "gum"; value: "shell script UI prompts" }
-                InfoRow { label: "epy"; value: "terminal ebook reader" }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Appearance.spacing.normal
+
+                    Card {
+                        title: qsTr("CLI Tools (easy to forget)")
+                        icon: "build"
+                        InfoRow { label: "speedtest-cli"; value: "network speed test" }
+                        InfoRow { label: "ncdu"; value: "disk usage analyzer" }
+                        InfoRow { label: "duf"; value: "df but readable" }
+                        InfoRow { label: "tldr"; value: "simplified man pages" }
+                        InfoRow { label: "most"; value: "pager, alt to less" }
+                        InfoRow { label: "jq"; value: "json processor" }
+                        InfoRow { label: "yt-dlp"; value: "download video/audio" }
+                        InfoRow { label: "gh"; value: "github from terminal" }
+                        InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
+                        InfoRow { label: "ttyper"; value: "typing speed test" }
+                        InfoRow { label: "exiftool"; value: "image/file metadata" }
+                        InfoRow { label: "inxi"; value: "system info dump" }
+                        InfoRow { label: "nvtop"; value: "gpu usage monitor" }
+                        InfoRow { label: "termdown"; value: "countdown/stopwatch" }
+                        InfoRow { label: "gum"; value: "shell script UI prompts" }
+                        InfoRow { label: "epy"; value: "terminal ebook reader" }
+                    }
+
+                    Card {
+                        title: qsTr("Games")
+                        icon: "sports_esports"
+                        InfoRow { label: "nsnake"; value: "snake" }
+                        InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
+                        InfoRow { label: "bastet"; value: "tetris that hates you" }
+                        InfoRow { label: "tty-solitaire"; value: "solitaire" }
+                        InfoRow { label: "2048-cli-git"; value: "2048" }
+                        InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
+                    }
+
+                    Card {
+                        title: qsTr("WiFi")
+                        icon: "wifi"
+                        CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
+                        CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
+                        CmdRow { label: "saved connections"; cmd: "nmcli connection show" }
+                        CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Appearance.spacing.normal
+
+                    Card {
+                        title: qsTr("Terminal Toys")
+                        icon: "auto_awesome"
+                        InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased, matrix rain" }
+                        InfoRow { label: "pipes"; value: "aliased, animated pipes" }
+                        InfoRow { label: "asciiquarium"; value: "aquarium animation" }
+                        InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
+                        InfoRow { label: "astroterm"; value: "starfield / space" }
+                        InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
+                        InfoRow { label: "tty-clock"; value: "big terminal clock" }
+                        InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
+                        InfoRow { label: "cowsay"; value: "cow says your text" }
+                        InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
+                    }
+
+                    Card {
+                        title: qsTr("Zsh Aliases")
+                        icon: "bolt"
+                        InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
+                        InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
+                        InfoRow { label: "zshconf"; value: "edit .zshrc" }
+                        InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
+                        InfoRow { label: "caeconf"; value: "edit shell.json" }
+                        InfoRow { label: "caefiles"; value: "cd to dots repo" }
+                        InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
+                        InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
+                        InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
+                        InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
+                    }
+
+                    Card {
+                        title: qsTr("Key Paths")
+                        icon: "folder_open"
+                        InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
+                        InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
+                        InfoRow { label: "zshrc"; value: "~/.zshrc" }
+                        InfoRow { label: "starship"; value: "~/.config/starship.toml" }
+                        InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
+                        InfoRow { label: "startpage"; value: "~/.config/startpage/" }
+                        InfoRow { label: "immich db"; value: "~/immich-db" }
+                        InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
+                    }
+
+                    Card {
+                        title: qsTr("Bluetooth")
+                        icon: "bluetooth"
+                        CmdRow { label: "scan for devices"; cmd: "bluetoothctl scan on" }
+                        CmdRow { label: "list paired"; cmd: "bluetoothctl devices" }
+                        CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
+                    }
+                }
             }
 
             Card {
-                title: qsTr("Games")
-                icon: "sports_esports"
-                InfoRow { label: "nsnake"; value: "snake" }
-                InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
-                InfoRow { label: "bastet"; value: "tetris that hates you" }
-                InfoRow { label: "tty-solitaire"; value: "solitaire" }
-                InfoRow { label: "2048-cli-git"; value: "2048" }
-                InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
-            }
-
-            Card {
-                title: qsTr("Terminal Toys")
-                icon: "auto_awesome"
-                InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased, matrix rain" }
-                InfoRow { label: "pipes"; value: "aliased, animated pipes" }
-                InfoRow { label: "asciiquarium"; value: "aquarium animation" }
-                InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
-                InfoRow { label: "astroterm"; value: "starfield / space" }
-                InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
-                InfoRow { label: "tty-clock"; value: "big terminal clock" }
-                InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
-                InfoRow { label: "cowsay"; value: "cow says your text" }
-                InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
-            }
-
-            Card {
-                title: qsTr("Key Paths")
-                icon: "folder_open"
-                InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
-                InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
-                InfoRow { label: "zshrc"; value: "~/.zshrc" }
-                InfoRow { label: "starship"; value: "~/.config/starship.toml" }
-                InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
-                InfoRow { label: "startpage"; value: "~/.config/startpage/" }
-                InfoRow { label: "immich db"; value: "~/immich-db" }
-                InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
-            }
-
-            Card {
-                title: qsTr("Zsh Aliases")
-                icon: "bolt"
-                InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
-                InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
-                InfoRow { label: "zshconf"; value: "edit .zshrc" }
-                InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
-                InfoRow { label: "caeconf"; value: "edit shell.json" }
-                InfoRow { label: "caefiles"; value: "cd to dots repo" }
-                InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
-                InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
-                InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
-                InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
-            }
-
-            Card {
-                title: qsTr("Bluetooth")
-                icon: "bluetooth"
-                CmdRow { label: "scan for devices"; cmd: "bluetoothctl scan on" }
-                CmdRow { label: "list paired"; cmd: "bluetoothctl devices" }
-                CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
-            }
-
-            Card {
-                title: qsTr("WiFi")
-                icon: "wifi"
-                CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
-                CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
-                CmdRow { label: "saved connections"; cmd: "nmcli connection show" }
-                CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
-            }
-
-            Card {
-                Layout.columnSpan: grid.columns
+                Layout.fillWidth: true
                 title: qsTr("Important Commands")
                 icon: "code"
                 CmdRow { label: "quickshell restart (safe)"; cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown" }
