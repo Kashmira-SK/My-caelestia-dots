@@ -168,6 +168,17 @@ Item {
                         CmdRow { label: "saved connections"; cmd: "nmcli connection show" }
                         CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
                     }
+
+                    Card {
+                        title: qsTr("System Maintenance")
+                        icon: "update"
+                        CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
+                        CmdRow { label: "full update + AUR"; cmd: "yay -Syu" }
+                        CmdRow { label: "refresh mirrors"; cmd: "sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist" }
+                        CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
+                        CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
+                        CmdRow { label: "check .pacnew files"; cmd: "sudo pacdiff" }
+                    }
                 }
 
                 ColumnLayout {
