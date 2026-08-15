@@ -40,7 +40,7 @@ export QT_STYLE_OVERRIDE=Darkly
 export XDG_MENU_PREFIX=arch-
 
 # Aliases - configs
-alias hyprconf="nvim ~/.config/hypr/hyprland.conf"
+alias hyprconf="nvim ~/.config/hypr/hyprland.lua"
 alias fetchconf="nvim ~/.config/fastfetch/config.jsonc"
 alias zshconf="nvim ~/.zshrc"
 alias changelog='nvim ~/.config/quickshell/caelestia/CHANGELOG.md'
