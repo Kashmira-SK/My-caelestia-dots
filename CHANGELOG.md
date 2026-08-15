@@ -2,6 +2,16 @@
 
 Newest entries at the top.
 
+## [2026-08-15] - Migrate Hyprland config to Lua
+
+### Added
+- `dotfiles/hyprland.lua`: full Lua config migrated from hyprland.conf for Hyprland 0.57 compatibility; includes fixed bezier curves, animations, gesture, and alt-tab lambda binds
+
+### Changed
+- `dotfiles/zshrc`: updated `hyprconf` alias to point at `hyprland.lua`; `zshconf` alias now opens dotfiles zshrc directly instead of `~/.zshrc`
+
+---
+
 ## [2026-08-05] - Cheatsheet content pass
 ### Added
 - WiFi card: `nmcli` list/connect/show/disconnect commands
