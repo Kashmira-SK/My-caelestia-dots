@@ -10,7 +10,7 @@ Item {
 
     required property PersistentProperties visibilities
 
-    readonly property int pillH:       38
+    readonly property int pillH:       46
     readonly property int pillIdleW:   168
     readonly property int pillMusicW:  320
     readonly property int pillRecordW: 250
@@ -54,21 +54,35 @@ Item {
         idx = (idx + dir + modes.length) % modes.length
         manualIndex = idx
         pillMode = modes[idx]
-        revertTimer.restart()
     }
 
     onMusicPlayingChanged: recomputeModes()
     onIsRecordingChanged:  recomputeModes()
     Component.onCompleted: recomputeModes()
 
-    Timer {
-        id: revertTimer
-        interval: 4000
-        repeat: false
-        onTriggered: {
-            root.manualIndex = -1
-            root.pillMode = root.priorityMode()
+    // ── Wheel debounce ──────────────────────────────────────────────────────
+    // A single physical scroll notch can fire many wheel events with small
+    // deltas (esp. trackpads). Accumulate and only step once per notch,
+    // with a short cooldown so one gesture can't cause multiple steps.
+    property real wheelAccum: 0
+    property bool wheelCooldown: false
+
+    function handleWheel(delta) {
+        if (wheelCooldown) return
+        wheelAccum += delta
+        if (Math.abs(wheelAccum) >= 100) {
+            cycle(wheelAccum > 0 ? -1 : 1)
+            wheelAccum = 0
+            wheelCooldown = true
+            cooldownTimer.restart()
         }
+    }
+
+    Timer {
+        id: cooldownTimer
+        interval: 180
+        repeat: false
+        onTriggered: root.wheelCooldown = false
     }
 
     implicitWidth: {
@@ -88,7 +102,7 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: root.visibilities.dashboard = !root.visibilities.dashboard
-        onWheel: wheel => root.cycle(wheel.angleDelta.y > 0 ? -1 : 1)
+        onWheel: wheel => root.handleWheel(wheel.angleDelta.y)
     }
 
     // ── Vertical carousel viewport ──────────────────────────────────────────
@@ -109,9 +123,9 @@ Item {
                 NumberAnimation { duration: 320; easing.type: Easing.InOutExpo }
             }
 
-            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: clockComp } }
-            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: vizComp } }
-            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: recComp } }
+            Item { width: track.width; height: viewport.height; clip: true; Loader { anchors.fill: parent; sourceComponent: clockComp } }
+            Item { width: track.width; height: viewport.height; clip: true; Loader { anchors.fill: parent; sourceComponent: vizComp } }
+            Item { width: track.width; height: viewport.height; clip: true; Loader { anchors.fill: parent; sourceComponent: recComp } }
         }
     }
 
