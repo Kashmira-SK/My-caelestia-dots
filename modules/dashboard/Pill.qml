@@ -9,6 +9,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    required property PersistentProperties dashState
 
     readonly property int pillH:       46
     readonly property int pillIdleW:   168
@@ -51,7 +52,7 @@ Item {
         const modes = availableModes
         if (modes.length < 2) return
         let idx = modes.indexOf(pillMode)
-        idx = (idx + dir + modes.length) % modes.length
+        idx = Math.max(0, Math.min(modes.length - 1, idx + dir))
         manualIndex = idx
         pillMode = modes[idx]
     }
@@ -98,13 +99,6 @@ Item {
         NumberAnimation { duration: 320; easing.type: Easing.InOutExpo }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: root.visibilities.dashboard = !root.visibilities.dashboard
-        onWheel: wheel => root.handleWheel(wheel.angleDelta.y)
-    }
-
     // ── Vertical carousel viewport ──────────────────────────────────────────
     // All three views exist at fixed stacked positions; the track slides
     // vertically to bring the active one into frame instead of hot-swapping.
@@ -127,6 +121,19 @@ Item {
             Item { width: track.width; height: viewport.height; clip: true; Loader { anchors.fill: parent; sourceComponent: vizComp } }
             Item { width: track.width; height: viewport.height; clip: true; Loader { anchors.fill: parent; sourceComponent: recComp } }
         }
+    }
+
+    // MouseArea declared LAST so it's topmost and definitely receives every
+    // click/scroll across the full pill, regardless of what's rendered under it.
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            if (root.pillMode === "music")
+                root.dashState.currentTab = 1 // Media tab
+            root.visibilities.dashboard = !root.visibilities.dashboard
+        }
+        onWheel: wheel => root.handleWheel(wheel.angleDelta.y)
     }
 
     // ─────────────────────────────────────────────────────────────────────

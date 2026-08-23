@@ -107,6 +107,7 @@ Item {
         id: pill
 
         visibilities: root.visibilities
+        dashState: root.dashState
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
