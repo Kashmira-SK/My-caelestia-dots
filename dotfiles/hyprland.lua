@@ -296,3 +296,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("kdeconnectd")
 end)
+
+-- Brain_ShellKeybinds
+dofile("/home/kashmira/.config/Brain_Shell/Brain_ShellKeybinds.lua")
