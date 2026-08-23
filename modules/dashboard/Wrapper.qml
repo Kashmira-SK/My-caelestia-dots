@@ -35,7 +35,7 @@ Item {
     readonly property real nonAnimHeight: state === "visible" ? (content.item?.nonAnimHeight ?? 0) : pill.implicitHeight
 
     // Always visible now — the pill IS the collapsed dashboard, not a separate thing
-    visible: true
+    visible: !root.visibilities.islandHidden
     implicitWidth: pill.implicitWidth
     implicitHeight: pill.implicitHeight
 

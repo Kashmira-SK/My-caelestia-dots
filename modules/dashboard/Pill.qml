@@ -12,22 +12,61 @@ Item {
 
     readonly property int pillH:       38
     readonly property int pillIdleW:   168
-    readonly property int pillMusicW:  240
+    readonly property int pillMusicW:  290
     readonly property int pillRecordW: 285
 
-    property string pillMode:    "idle"
-    property var    activeModes: ["idle"]
-    property int    modeOffset:  0
-    property bool   musicPlaying: false
-    property bool   isRecording:  false
+    // ── Mode selection ───────────────────────────────────────────────────
+    // manualIndex: -1 means "auto" (always shows highest-priority live mode).
+    // Scrolling picks a concrete index and starts a revert timer so it
+    // doesn't get stuck away from the live status forever.
+    property var    availableModes: ["idle"]
+    property int    manualIndex:    -1
+    property string pillMode:       "idle"
 
-    function syncModes() {
-        let modes = []
+    readonly property bool musicPlaying: Players.active?.isPlaying ?? false
+    readonly property bool isRecording:  Recorder.running
+
+    function priorityMode() {
+        if (isRecording)  return "recording"
+        if (musicPlaying) return "music"
+        return "idle"
+    }
+
+    function recomputeModes() {
+        let modes = ["idle"]
         if (musicPlaying) modes.push("music")
         if (isRecording)  modes.push("recording")
-        if (modes.length === 0) modes.push("idle")
-        activeModes = modes
-        pillMode = modes[((modeOffset % modes.length) + modes.length) % modes.length]
+        availableModes = modes
+
+        if (manualIndex === -1 || manualIndex >= modes.length) {
+            pillMode = priorityMode()
+        } else {
+            pillMode = modes[manualIndex]
+        }
+    }
+
+    function cycle(dir) {
+        const modes = availableModes
+        if (modes.length < 2) return
+        let idx = modes.indexOf(pillMode)
+        idx = (idx + dir + modes.length) % modes.length
+        manualIndex = idx
+        pillMode = modes[idx]
+        revertTimer.restart()
+    }
+
+    onMusicPlayingChanged: recomputeModes()
+    onIsRecordingChanged:  recomputeModes()
+    Component.onCompleted: recomputeModes()
+
+    Timer {
+        id: revertTimer
+        interval: 4000
+        repeat: false
+        onTriggered: {
+            root.manualIndex = -1
+            root.pillMode = root.priorityMode()
+        }
     }
 
     implicitWidth: {
@@ -39,51 +78,22 @@ Item {
     }
     implicitHeight: pillH
 
-    // ── Music via playerctl follow mode ────────────────────────────────────
-    Process {
-        id: playerctlWatch
-        command: ["playerctl", "-F", "status"]
-        running: true
-        stdout: SplitParser {
-            onRead: data => {
-                root.musicPlaying = data.trim().toLowerCase() === "playing"
-                root.syncModes()
-            }
-        }
-        onExited: {
-            root.musicPlaying = false
-            root.syncModes()
-            retryTimer.restart()
-        }
-    }
-    Timer { id: retryTimer; interval: 5000; repeat: false; onTriggered: playerctlWatch.running = true }
-
-    // ── Recording via pgrep poll ────────────────────────────────────────────
-    Timer { interval: 3000; running: true; repeat: true; triggeredOnStart: true; onTriggered: recordPoll.running = true }
-    Process {
-        id: recordPoll
-        command: ["pgrep", "-x", "wf-recorder"]
-        running: false
-        onExited: (code, _) => { root.isRecording = code === 0; root.syncModes() }
-    }
-
     // ── Scroll dots ───────────────────────────────────────────────────────
     Row {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 3
         spacing: 5
-        visible: root.activeModes.length > 1
+        visible: root.availableModes.length > 1
 
         Repeater {
-            model: root.activeModes.length
+            model: root.availableModes.length
             Rectangle {
                 required property int index
                 width: 4; height: 4; radius: 2
-                color: {
-                    const cur = ((root.modeOffset % root.activeModes.length) + root.activeModes.length) % root.activeModes.length
-                    return index === cur ? Colours.palette.m3primary : Colours.palette.m3surfaceVariant
-                }
+                color: root.availableModes[index] === root.pillMode
+                    ? Colours.palette.m3primary
+                    : Colours.palette.m3surfaceVariant
                 Behavior on color { ColorAnimation { duration: 200 } }
             }
         }
@@ -106,12 +116,7 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: root.visibilities.dashboard = !root.visibilities.dashboard
-        onWheel: wheel => {
-            if (root.activeModes.length > 1) {
-                root.modeOffset += wheel.angleDelta.y > 0 ? -1 : 1
-                root.syncModes()
-            }
-        }
+        onWheel: wheel => root.cycle(wheel.angleDelta.y > 0 ? -1 : 1)
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -150,27 +155,22 @@ Item {
         id: vizComp
         Item {
             id: vizRoot
-            property var    barH:  [0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45]
-            property string title: ""
+            property var barH: [0.35, 0.6, 0.4, 0.8, 0.5, 0.9, 0.45, 0.7, 0.55]
 
             Timer {
-                interval: 110; running: root.musicPlaying; repeat: true
+                interval: 100; running: root.musicPlaying; repeat: true
                 onTriggered: {
                     let h = []
-                    for (let i = 0; i < 7; i++) h.push(0.15 + Math.random() * 0.8)
+                    for (let i = 0; i < 9; i++) h.push(0.12 + Math.random() * 0.85)
                     vizRoot.barH = h
                 }
             }
-            Process {
-                command: ["playerctl", "-F", "metadata", "--format", "{{title}}"]
-                running: true
-                stdout: SplitParser { onRead: data => vizRoot.title = data.trim() }
-            }
 
             Row {
-                anchors.centerIn: parent
-                spacing: 4
+                anchors.fill: parent
+                spacing: 8
 
+                // Fuller visualizer cluster
                 Row {
                     spacing: 3
                     anchors.verticalCenter: parent.verticalCenter
@@ -179,24 +179,41 @@ Item {
                         Rectangle {
                             required property int index
                             width: 3
-                            height: vizRoot.barH[index] * 22
+                            height: vizRoot.barH[index] * 24
                             radius: 2
                             color: Colours.palette.m3primary
+                            opacity: 0.55 + vizRoot.barH[index] * 0.45
                             anchors.verticalCenter: parent.verticalCenter
                             Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.InOutSine } }
+                            Behavior on opacity { NumberAnimation { duration: 100 } }
                         }
                     }
                 }
 
-                Text {
-                    text: vizRoot.title
-                    color: Colours.palette.m3onSurface
-                    font.pixelSize: 11
-                    font.family: "JetBrainsMono Nerd Font"
-                    elide: Text.ElideRight
-                    width: 138
+                // Title / artist stacked
+                Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    leftPadding: 6
+                    width: 148
+                    spacing: 1
+
+                    Text {
+                        text: (Players.active?.trackTitle ?? "") || qsTr("Nothing playing")
+                        color: Colours.palette.m3onSurface
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        font.family: "JetBrainsMono Nerd Font"
+                        elide: Text.ElideRight
+                        width: parent.width
+                    }
+                    Text {
+                        text: Players.active?.trackArtist ?? ""
+                        color: Colours.palette.m3secondary
+                        font.pixelSize: 9
+                        font.family: "JetBrainsMono Nerd Font"
+                        elide: Text.ElideRight
+                        width: parent.width
+                        visible: text.length > 0
+                    }
                 }
             }
         }
@@ -208,44 +225,55 @@ Item {
             id: recRoot
             property var waveH: [0.3, 0.7, 0.5, 0.9, 0.4, 0.8, 0.35]
 
+            readonly property bool paused: Recorder.paused
+
+            function fmtElapsed(secs) {
+                const m = Math.floor(secs / 60)
+                const s = Math.floor(secs % 60)
+                return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
+            }
+
             Timer {
-                interval: 130; running: true; repeat: true
+                interval: 130; running: !recRoot.paused; repeat: true
                 onTriggered: {
                     let h = []
                     for (let i = 0; i < 7; i++) h.push(0.15 + Math.random() * 0.78)
                     recRoot.waveH = h
                 }
             }
-            Process { id: stopRecProc; command: ["pkill", "wf-recorder"]; running: false }
 
             Row {
                 anchors.centerIn: parent
-                spacing: 10
+                spacing: 9
 
                 Rectangle {
                     width: 10; height: 10; radius: 5
                     color: Colours.palette.m3error
                     anchors.verticalCenter: parent.verticalCenter
+                    opacity: recRoot.paused ? 0.35 : 1
+
                     SequentialAnimation on opacity {
-                        running: true; loops: Animation.Infinite
+                        running: !recRoot.paused
+                        loops: Animation.Infinite
                         NumberAnimation { to: 0.2; duration: 750; easing.type: Easing.InOutSine }
                         NumberAnimation { to: 1.0; duration: 750; easing.type: Easing.InOutSine }
                     }
                 }
 
                 Text {
-                    text: "REC"
+                    text: recRoot.fmtElapsed(Recorder.elapsed)
                     color: Colours.palette.m3error
                     font.pixelSize: 10
                     font.family: "JetBrainsMono Nerd Font"
                     font.weight: Font.Bold
-                    font.letterSpacing: 1.8
+                    font.letterSpacing: 1
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Row {
                     spacing: 2
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !recRoot.paused
                     Repeater {
                         model: recRoot.waveH.length
                         Rectangle {
@@ -260,6 +288,25 @@ Item {
                     }
                 }
 
+                // Pause/resume
+                Rectangle {
+                    width: 22; height: 22; radius: 5
+                    color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.12)
+                    anchors.verticalCenter: parent.verticalCenter
+                    Text {
+                        anchors.centerIn: parent
+                        text: recRoot.paused ? "▶" : "⏸"
+                        color: Colours.palette.m3error
+                        font.pixelSize: 9
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Recorder.togglePause()
+                    }
+                }
+
+                // Stop
                 Rectangle {
                     width: 22; height: 22; radius: 5
                     color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.12)
@@ -268,7 +315,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: stopRecProc.running = true
+                        onClicked: Recorder.stop()
                     }
                 }
             }

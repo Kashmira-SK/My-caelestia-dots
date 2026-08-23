@@ -140,6 +140,7 @@ Variants {
                 property bool session
                 property bool launcher
                 property bool dashboard
+                property bool islandHidden
                 property bool utilities
                 property bool sidebar
 
