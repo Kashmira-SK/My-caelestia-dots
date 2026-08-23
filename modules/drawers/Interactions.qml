@@ -70,9 +70,6 @@ CustomMouseArea {
                 root.panels.osd.hovered = false;
             }
 
-            if (!dashboardShortcutActive)
-                visibilities.dashboard = false;
-
             if (!utilitiesShortcutActive)
                 visibilities.utilities = false;
 
@@ -175,25 +172,6 @@ CustomMouseArea {
             else if (dragY > Config.launcher.dragThreshold)
                 visibilities.launcher = false;
         } */
-
-        // Show dashboard on hover
-        const showDashboard = Config.dashboard.showOnHover && inTopPanel(panels.dashboard, x, y);
-
-        // Always update visibility based on hover if not in shortcut mode
-        if (!dashboardShortcutActive) {
-            visibilities.dashboard = showDashboard;
-        } else if (showDashboard) {
-            // If hovering over dashboard area while in shortcut mode, transition to hover control
-            dashboardShortcutActive = false;
-        }
-
-        // Show/hide dashboard on drag (for touchscreen devices)
-        if (pressed && inTopPanel(panels.dashboard, dragStart.x, dragStart.y) && withinPanelWidth(panels.dashboard, x, y)) {
-            if (dragY > Config.dashboard.dragThreshold)
-                visibilities.dashboard = true;
-            else if (dragY < -Config.dashboard.dragThreshold)
-                visibilities.dashboard = false;
-        }
 
         // Show utilities on hover
         const showUtilities = inBottomPanel(panels.utilities, x, y);
