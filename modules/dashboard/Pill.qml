@@ -1,40 +1,22 @@
 pragma ComponentBehavior: Bound
 
-import qs.components.containers
 import qs.services
-import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 
-StyledWindow {
+Item {
     id: root
 
-    name: "dynamicisland"
+    required property PersistentProperties visibilities
 
-    required property ShellScreen modelData
-    screen: modelData
-
-    // ── Theme — pulled from the live Material3 scheme ──────────────────────
-    readonly property color clAccent:  Colours.palette.m3primary
-    readonly property color clBg:      Colours.palette.m3surface
-    readonly property color clMuted:   Colours.palette.m3surfaceVariant
-    readonly property color clText:    Colours.palette.m3onSurface
-    readonly property color clSubtext: Colours.palette.m3secondary
-    readonly property color clRed:     Colours.palette.m3error
-
-    // ── Sizes ─────────────────────────────────────────────────────────────
     readonly property int pillH:       38
     readonly property int pillIdleW:   168
     readonly property int pillMusicW:  240
     readonly property int pillRecordW: 285
 
-    // ── State ─────────────────────────────────────────────────────────────
-    property bool   dashOpen:     false
-    property string pillMode:     "idle"
-    property var    activeModes:  ["idle"]
-    property int    modeOffset:   0
+    property string pillMode:    "idle"
+    property var    activeModes: ["idle"]
+    property int    modeOffset:  0
     property bool   musicPlaying: false
     property bool   isRecording:  false
 
@@ -47,25 +29,6 @@ StyledWindow {
         pillMode = modes[((modeOffset % modes.length) + modes.length) % modes.length]
     }
 
-    function toggleDashboard() {
-        dashOpen = !dashOpen
-        const v = Visibilities.screens.get(Hypr.monitorFor(root.modelData))
-        if (v) v.dashboard = dashOpen
-    }
-
-    property var _v: null
-    Component.onCompleted: {
-        _v = Visibilities.screens.get(Hypr.monitorFor(root.modelData))
-        if (_v) dashOpen = _v.dashboard
-    }
-    Connections {
-        target: root._v
-        function onDashboardChanged() {
-            root.dashOpen = root._v?.dashboard ?? false
-        }
-    }
-
-    // ── Pill width animates per mode ──────────────────────────────────────
     implicitWidth: {
         switch (pillMode) {
             case "music":     return pillMusicW
@@ -75,17 +38,7 @@ StyledWindow {
     }
     implicitHeight: pillH
 
-    Behavior on implicitWidth { NumberAnimation { duration: 320; easing.type: Easing.InOutExpo } }
-
-    // ── Layer shell — following AreaPicker.qml's pattern ────────────────────
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    exclusiveZone: 0
-    anchors.top: true
-    margins.top: 10
-
-    // ── Music via playerctl follow mode ───────────────────────────────────
+    // ── Music via playerctl follow mode ────────────────────────────────────
     Process {
         id: playerctlWatch
         command: ["playerctl", "-F", "status"]
@@ -104,7 +57,7 @@ StyledWindow {
     }
     Timer { id: retryTimer; interval: 5000; repeat: false; onTriggered: playerctlWatch.running = true }
 
-    // ── Recording via pgrep poll ──────────────────────────────────────────
+    // ── Recording via pgrep poll ────────────────────────────────────────────
     Timer { interval: 3000; running: true; repeat: true; triggeredOnStart: true; onTriggered: recordPoll.running = true }
     Process {
         id: recordPoll
@@ -113,76 +66,54 @@ StyledWindow {
         onExited: (code, _) => { root.isRecording = code === 0; root.syncModes() }
     }
 
-    // ── Pill shape ────────────────────────────────────────────────────────
-    Rectangle {
-        id: pill
+    // ── Scroll dots ───────────────────────────────────────────────────────
+    Row {
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: 3
+        spacing: 5
+        visible: root.activeModes.length > 1
+
+        Repeater {
+            model: root.activeModes.length
+            Rectangle {
+                required property int index
+                width: 4; height: 4; radius: 2
+                color: {
+                    const cur = ((root.modeOffset % root.activeModes.length) + root.activeModes.length) % root.activeModes.length
+                    return index === cur ? Colours.palette.m3primary : Colours.palette.m3surfaceVariant
+                }
+                Behavior on color { ColorAnimation { duration: 200 } }
+            }
+        }
+    }
+
+    // ── Mode content ──────────────────────────────────────────────────────
+    Loader {
         anchors.fill: parent
-        color: root.clBg
-        radius: height / 2
-        clip: true
-
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            color: "transparent"
-            border.width: 1
-            border.color: root.dashOpen
-                ? Qt.rgba(root.clAccent.r, root.clAccent.g, root.clAccent.b, 0.5)
-                : Qt.rgba(root.clAccent.r, root.clAccent.g, root.clAccent.b, 0.15)
-            z: 10
-            Behavior on border.color { ColorAnimation { duration: 300 } }
-        }
-
-        Loader {
-            anchors.fill: parent
-            anchors.margins: 4
-            sourceComponent: {
-                switch (root.pillMode) {
-                    case "music":     return vizComp
-                    case "recording": return recComp
-                    default:          return clockComp
-                }
+        anchors.margins: 4
+        sourceComponent: {
+            switch (root.pillMode) {
+                case "music":     return vizComp
+                case "recording": return recComp
+                default:          return clockComp
             }
         }
+    }
 
-        Row {
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottomMargin: 3
-            spacing: 5
-            visible: root.activeModes.length > 1
-
-            Repeater {
-                model: root.activeModes.length
-                Rectangle {
-                    required property int index
-                    width: 4; height: 4; radius: 2
-                    color: {
-                        const cur = ((root.modeOffset % root.activeModes.length) + root.activeModes.length) % root.activeModes.length
-                        return index === cur ? root.clAccent : root.clMuted
-                    }
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.toggleDashboard()
-            onWheel: wheel => {
-                if (root.activeModes.length > 1) {
-                    root.modeOffset += wheel.angleDelta.y > 0 ? -1 : 1
-                    root.syncModes()
-                }
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.visibilities.dashboard = !root.visibilities.dashboard
+        onWheel: wheel => {
+            if (root.activeModes.length > 1) {
+                root.modeOffset += wheel.angleDelta.y > 0 ? -1 : 1
+                root.syncModes()
             }
         }
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // State components
-    // ─────────────────────────────────────────────────────────────────────
-
     Component {
         id: clockComp
         Item {
@@ -196,7 +127,7 @@ StyledWindow {
 
                 Text {
                     text: Qt.formatTime(clockRoot.now, "hh:mm")
-                    color: root.clText
+                    color: Colours.palette.m3onSurface
                     font.pixelSize: 14
                     font.family: "JetBrainsMono Nerd Font"
                     font.weight: Font.Medium
@@ -204,7 +135,7 @@ StyledWindow {
                 }
                 Text {
                     text: Qt.formatTime(clockRoot.now, "ss")
-                    color: root.clSubtext
+                    color: Colours.palette.m3secondary
                     font.pixelSize: 10
                     font.family: "JetBrainsMono Nerd Font"
                     anchors.verticalCenter: parent.verticalCenter
@@ -249,7 +180,7 @@ StyledWindow {
                             width: 3
                             height: vizRoot.barH[index] * 22
                             radius: 2
-                            color: root.clAccent
+                            color: Colours.palette.m3primary
                             anchors.verticalCenter: parent.verticalCenter
                             Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.InOutSine } }
                         }
@@ -258,7 +189,7 @@ StyledWindow {
 
                 Text {
                     text: vizRoot.title
-                    color: root.clText
+                    color: Colours.palette.m3onSurface
                     font.pixelSize: 11
                     font.family: "JetBrainsMono Nerd Font"
                     elide: Text.ElideRight
@@ -292,7 +223,7 @@ StyledWindow {
 
                 Rectangle {
                     width: 10; height: 10; radius: 5
-                    color: root.clRed
+                    color: Colours.palette.m3error
                     anchors.verticalCenter: parent.verticalCenter
                     SequentialAnimation on opacity {
                         running: true; loops: Animation.Infinite
@@ -303,7 +234,7 @@ StyledWindow {
 
                 Text {
                     text: "REC"
-                    color: root.clRed
+                    color: Colours.palette.m3error
                     font.pixelSize: 10
                     font.family: "JetBrainsMono Nerd Font"
                     font.weight: Font.Bold
@@ -321,7 +252,7 @@ StyledWindow {
                             width: 2
                             height: recRoot.waveH[index] * 18
                             radius: 1
-                            color: Qt.rgba(root.clRed.r, root.clRed.g, root.clRed.b, 0.6)
+                            color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.6)
                             anchors.verticalCenter: parent.verticalCenter
                             Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.InOutSine } }
                         }
@@ -330,9 +261,9 @@ StyledWindow {
 
                 Rectangle {
                     width: 22; height: 22; radius: 5
-                    color: Qt.rgba(root.clRed.r, root.clRed.g, root.clRed.b, 0.12)
+                    color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.12)
                     anchors.verticalCenter: parent.verticalCenter
-                    Text { anchors.centerIn: parent; text: "■"; color: root.clRed; font.pixelSize: 9 }
+                    Text { anchors.centerIn: parent; text: "■"; color: Colours.palette.m3error; font.pixelSize: 9 }
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
