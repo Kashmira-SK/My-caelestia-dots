@@ -12,8 +12,10 @@ Item {
 
     readonly property int pillH:       38
     readonly property int pillIdleW:   168
-    readonly property int pillMusicW:  290
-    readonly property int pillRecordW: 285
+    readonly property int pillMusicW:  320
+    readonly property int pillRecordW: 250
+
+    readonly property var modeOrder: ["idle", "music", "recording"]
 
     // ── Mode selection ───────────────────────────────────────────────────
     // manualIndex: -1 means "auto" (always shows highest-priority live mode).
@@ -78,38 +80,8 @@ Item {
     }
     implicitHeight: pillH
 
-    // ── Scroll dots ───────────────────────────────────────────────────────
-    Row {
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 3
-        spacing: 5
-        visible: root.availableModes.length > 1
-
-        Repeater {
-            model: root.availableModes.length
-            Rectangle {
-                required property int index
-                width: 4; height: 4; radius: 2
-                color: root.availableModes[index] === root.pillMode
-                    ? Colours.palette.m3primary
-                    : Colours.palette.m3surfaceVariant
-                Behavior on color { ColorAnimation { duration: 200 } }
-            }
-        }
-    }
-
-    // ── Mode content ──────────────────────────────────────────────────────
-    Loader {
-        anchors.fill: parent
-        anchors.margins: 4
-        sourceComponent: {
-            switch (root.pillMode) {
-                case "music":     return vizComp
-                case "recording": return recComp
-                default:          return clockComp
-            }
-        }
+    Behavior on implicitWidth {
+        NumberAnimation { duration: 320; easing.type: Easing.InOutExpo }
     }
 
     MouseArea {
@@ -117,6 +89,30 @@ Item {
         cursorShape: Qt.PointingHandCursor
         onClicked: root.visibilities.dashboard = !root.visibilities.dashboard
         onWheel: wheel => root.cycle(wheel.angleDelta.y > 0 ? -1 : 1)
+    }
+
+    // ── Vertical carousel viewport ──────────────────────────────────────────
+    // All three views exist at fixed stacked positions; the track slides
+    // vertically to bring the active one into frame instead of hot-swapping.
+    Item {
+        id: viewport
+        anchors.fill: parent
+        anchors.margins: 8
+        clip: true
+
+        Column {
+            id: track
+            width: viewport.width
+            y: -root.modeOrder.indexOf(root.pillMode) * viewport.height
+
+            Behavior on y {
+                NumberAnimation { duration: 320; easing.type: Easing.InOutExpo }
+            }
+
+            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: clockComp } }
+            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: vizComp } }
+            Item { width: track.width; height: viewport.height; Loader { anchors.fill: parent; sourceComponent: recComp } }
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -155,6 +151,7 @@ Item {
         id: vizComp
         Item {
             id: vizRoot
+            anchors.fill: parent
             property var barH: [0.35, 0.6, 0.4, 0.8, 0.5, 0.9, 0.45, 0.7, 0.55]
 
             Timer {
@@ -167,53 +164,51 @@ Item {
             }
 
             Row {
-                anchors.fill: parent
-                spacing: 8
-
-                // Fuller visualizer cluster
-                Row {
-                    spacing: 3
-                    anchors.verticalCenter: parent.verticalCenter
-                    Repeater {
-                        model: vizRoot.barH.length
-                        Rectangle {
-                            required property int index
-                            width: 3
-                            height: vizRoot.barH[index] * 24
-                            radius: 2
-                            color: Colours.palette.m3primary
-                            opacity: 0.55 + vizRoot.barH[index] * 0.45
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.InOutSine } }
-                            Behavior on opacity { NumberAnimation { duration: 100 } }
-                        }
+                id: barsRow
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 3
+                Repeater {
+                    model: vizRoot.barH.length
+                    Rectangle {
+                        required property int index
+                        width: 3
+                        height: vizRoot.barH[index] * 24
+                        radius: 2
+                        color: Colours.palette.m3primary
+                        opacity: 0.55 + vizRoot.barH[index] * 0.45
+                        anchors.verticalCenter: parent.verticalCenter
+                        Behavior on height { NumberAnimation { duration: 100; easing.type: Easing.InOutSine } }
+                        Behavior on opacity { NumberAnimation { duration: 100 } }
                     }
                 }
+            }
 
-                // Title / artist stacked
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 148
-                    spacing: 1
+            // Fills all remaining horizontal space — no more dead zone
+            Column {
+                anchors.left: barsRow.right
+                anchors.leftMargin: 12
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
 
-                    Text {
-                        text: (Players.active?.trackTitle ?? "") || qsTr("Nothing playing")
-                        color: Colours.palette.m3onSurface
-                        font.pixelSize: 11
-                        font.weight: Font.Medium
-                        font.family: "JetBrainsMono Nerd Font"
-                        elide: Text.ElideRight
-                        width: parent.width
-                    }
-                    Text {
-                        text: Players.active?.trackArtist ?? ""
-                        color: Colours.palette.m3secondary
-                        font.pixelSize: 9
-                        font.family: "JetBrainsMono Nerd Font"
-                        elide: Text.ElideRight
-                        width: parent.width
-                        visible: text.length > 0
-                    }
+                Text {
+                    width: parent.width
+                    text: (Players.active?.trackTitle ?? "") || qsTr("Nothing playing")
+                    color: Colours.palette.m3onSurface
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                    font.family: "JetBrainsMono Nerd Font"
+                    elide: Text.ElideRight
+                }
+                Text {
+                    width: parent.width
+                    text: Players.active?.trackArtist ?? ""
+                    color: Colours.palette.m3secondary
+                    font.pixelSize: 9
+                    font.family: "JetBrainsMono Nerd Font"
+                    elide: Text.ElideRight
+                    visible: text.length > 0
                 }
             }
         }
@@ -223,8 +218,7 @@ Item {
         id: recComp
         Item {
             id: recRoot
-            property var waveH: [0.3, 0.7, 0.5, 0.9, 0.4, 0.8, 0.35]
-
+            anchors.fill: parent
             readonly property bool paused: Recorder.paused
 
             function fmtElapsed(secs) {
@@ -233,18 +227,9 @@ Item {
                 return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
             }
 
-            Timer {
-                interval: 130; running: !recRoot.paused; repeat: true
-                onTriggered: {
-                    let h = []
-                    for (let i = 0; i < 7; i++) h.push(0.15 + Math.random() * 0.78)
-                    recRoot.waveH = h
-                }
-            }
-
             Row {
                 anchors.centerIn: parent
-                spacing: 9
+                spacing: 14
 
                 Rectangle {
                     width: 10; height: 10; radius: 5
@@ -263,41 +248,22 @@ Item {
                 Text {
                     text: recRoot.fmtElapsed(Recorder.elapsed)
                     color: Colours.palette.m3error
-                    font.pixelSize: 10
+                    font.pixelSize: 12
                     font.family: "JetBrainsMono Nerd Font"
                     font.weight: Font.Bold
                     font.letterSpacing: 1
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                Row {
-                    spacing: 2
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: !recRoot.paused
-                    Repeater {
-                        model: recRoot.waveH.length
-                        Rectangle {
-                            required property int index
-                            width: 2
-                            height: recRoot.waveH[index] * 18
-                            radius: 1
-                            color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.6)
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.InOutSine } }
-                        }
-                    }
-                }
-
-                // Pause/resume
                 Rectangle {
-                    width: 22; height: 22; radius: 5
+                    width: 26; height: 26; radius: 6
                     color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.12)
                     anchors.verticalCenter: parent.verticalCenter
                     Text {
                         anchors.centerIn: parent
                         text: recRoot.paused ? "▶" : "⏸"
                         color: Colours.palette.m3error
-                        font.pixelSize: 9
+                        font.pixelSize: 11
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -306,12 +272,11 @@ Item {
                     }
                 }
 
-                // Stop
                 Rectangle {
-                    width: 22; height: 22; radius: 5
+                    width: 26; height: 26; radius: 6
                     color: Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.12)
                     anchors.verticalCenter: parent.verticalCenter
-                    Text { anchors.centerIn: parent; text: "■"; color: Colours.palette.m3error; font.pixelSize: 9 }
+                    Text { anchors.centerIn: parent; text: "■"; color: Colours.palette.m3error; font.pixelSize: 10 }
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
