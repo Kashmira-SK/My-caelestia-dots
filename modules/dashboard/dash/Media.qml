@@ -5,20 +5,17 @@ import qs.utils
 import Caelestia.Services
 import Quickshell
 import QtQuick
-import QtQuick.Shapes
+import QtQuick.Layouts
 
 Item {
     id: root
+
     required property PersistentProperties state
 
     property real playerProgress: {
         const active = Players.active;
         return active?.length ? active.position / active.length : 0;
     }
-
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    implicitWidth: Config.dashboard.sizes.mediaWidth
 
     Behavior on playerProgress {
         Anim {
@@ -34,227 +31,151 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    ServiceRef {
-        service: Audio.beatTracker
-    }
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Appearance.padding.large
+        spacing: Appearance.spacing.normal
 
-    Shape {
-        preferredRendererType: Shape.CurveRenderer
+        // Album art + info
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
 
-        ShapePath {
-            fillColor: "transparent"
-            strokeColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            strokeWidth: Config.dashboard.sizes.mediaProgressThickness
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
+            StyledClippingRect {
+                id: cover
 
-            PathAngleArc {
-                centerX: cover.x + cover.width / 2
-                centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
-                sweepAngle: Config.dashboard.sizes.mediaProgressSweep
+                Layout.preferredWidth: 72
+                Layout.preferredHeight: 72
+
+                radius: Appearance.rounding.normal
+                color: Colours.tPalette.m3surfaceContainerHigh
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    grade: 200
+                    text: "art_track"
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 24
+                }
+
+                Image {
+                    anchors.fill: parent
+                    source: Players.active?.trackArtUrl ?? ""
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: width
+                    sourceSize.height: height
+                }
             }
 
-            Behavior on strokeColor {
-                CAnim {}
-            }
-        }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.smaller
 
-        ShapePath {
-            fillColor: "transparent"
-            strokeColor: Colours.palette.m3primary
-            strokeWidth: Config.dashboard.sizes.mediaProgressThickness
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
+                StyledText {
+                    Layout.fillWidth: true
+                    animate: true
+                    text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
+                    color: Colours.palette.m3primary
+                    font.pointSize: Appearance.font.size.normal
+                    font.weight: 500
+                    elide: Text.ElideRight
+                }
 
-            PathAngleArc {
-                centerX: cover.x + cover.width / 2
-                centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
-                sweepAngle: Config.dashboard.sizes.mediaProgressSweep * root.playerProgress
-            }
+                StyledText {
+                    Layout.fillWidth: true
+                    animate: true
+                    text: (Players.active?.trackAlbum ?? qsTr("Unknown album"))
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.small
+                    elide: Text.ElideRight
+                }
 
-            Behavior on strokeColor {
-                CAnim {}
-            }
-        }
-    }
-
-    StyledClippingRect {
-        id: cover
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Appearance.padding.large + Config.dashboard.sizes.mediaProgressThickness + Appearance.spacing.small
-
-        implicitHeight: width
-        color: Colours.tPalette.m3surfaceContainerHigh
-        radius: Infinity
-
-        MaterialIcon {
-            anchors.centerIn: parent
-
-            grade: 200
-            text: "art_track"
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: (parent.width * 0.4) || 1
-        }
-
-        Image {
-            id: image
-
-            anchors.fill: parent
-
-            source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
-            asynchronous: true
-            fillMode: Image.PreserveAspectCrop
-            sourceSize.width: width
-            sourceSize.height: height
-        }
-    }
-
-    StyledText {
-        id: title
-
-        anchors.top: cover.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.normal
-
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
-        color: Colours.palette.m3primary
-        font.pointSize: Appearance.font.size.normal
-
-        width: parent.implicitWidth - Appearance.padding.large * 2
-        elide: Text.ElideRight
-    }
-
-    StyledText {
-        id: album
-
-        anchors.top: title.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.small
-
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
-
-        width: parent.implicitWidth - Appearance.padding.large * 2
-        elide: Text.ElideRight
-    }
-
-    StyledText {
-        id: artist
-
-        anchors.top: album.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.small
-
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
-        color: Colours.palette.m3secondary
-
-        width: parent.implicitWidth - Appearance.padding.large * 2
-        elide: Text.ElideRight
-    }
-
-    Row {
-        id: controls
-
-        anchors.top: artist.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.smaller
-
-        spacing: Appearance.spacing.small
-
-        Control {
-            icon: "skip_previous"
-            canUse: Players.active?.canGoPrevious ?? false
-
-            function onClicked(): void {
-                Players.active?.previous();
+                StyledText {
+                    Layout.fillWidth: true
+                    animate: true
+                    text: (Players.active?.trackArtist ?? qsTr("Unknown artist"))
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.small
+                    elide: Text.ElideRight
+                }
             }
         }
 
-        Control {
-            icon: Players.active?.isPlaying ? "pause" : "play_arrow"
-            canUse: Players.active?.canTogglePlaying ?? false
+        // Progress bar
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 4
 
-            function onClicked(): void {
-                Players.active?.togglePlaying();
+            StyledRect {
+                anchors.fill: parent
+                radius: Appearance.rounding.full
+                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+            }
+
+            StyledRect {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width * root.playerProgress
+
+                radius: Appearance.rounding.full
+                color: Colours.palette.m3primary
+
+                Behavior on width {
+                    Anim {
+                        duration: Appearance.anim.durations.large
+                    }
+                }
             }
         }
 
-        Control {
-            icon: "skip_next"
-            canUse: Players.active?.canGoNext ?? false
+        // Controls
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: Appearance.spacing.normal
 
-            function onClicked(): void {
-                Players.active?.next();
+            Control {
+                icon: "skip_previous"
+                canUse: Players.active?.canGoPrevious ?? false
+                function onClicked(): void { Players.active?.previous(); }
+            }
+
+            Control {
+                icon: Players.active?.isPlaying ? "pause" : "play_arrow"
+                canUse: Players.active?.canTogglePlaying ?? false
+                function onClicked(): void { Players.active?.togglePlaying(); }
+            }
+
+            Control {
+                icon: "skip_next"
+                canUse: Players.active?.canGoNext ?? false
+                function onClicked(): void { Players.active?.next(); }
             }
         }
+
+        Item { Layout.fillHeight: true }
     }
 
-    AnimatedImage {
-        id: bongocat
-
-        anchors.top: controls.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: Appearance.spacing.small
-        anchors.bottomMargin: Appearance.padding.large
-        anchors.margins: Appearance.padding.large * 2
-
-        playing: Players.active?.isPlaying ?? false
-        speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment
-        source: [
-            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
-        ][root.state.gifIndex]
-        asynchronous: true
-        fillMode: AnimatedImage.PreserveAspectFit
-    }
-
-    component Control: StyledRect {
+    component Control: Item {
         id: control
 
         required property string icon
         required property bool canUse
-        function onClicked(): void {
-        }
+        function onClicked(): void {}
 
-        implicitWidth: Math.max(icon.implicitHeight, icon.implicitHeight) + Appearance.padding.small
+        implicitWidth: controlIcon.implicitHeight + Appearance.padding.small * 2
         implicitHeight: implicitWidth
 
         StateLayer {
             disabled: !control.canUse
             radius: Appearance.rounding.full
-
-            function onClicked(): void {
-                control.onClicked();
-            }
+            function onClicked(): void { control.onClicked(); }
         }
 
         MaterialIcon {
-            id: icon
-
+            id: controlIcon
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: font.pointSize * 0.05
-
             animate: true
             text: control.icon
             color: control.canUse ? Colours.palette.m3onSurface : Colours.palette.m3outline

@@ -1,41 +1,30 @@
 import qs.components
 import qs.services
 import qs.config
-import qs.utils
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
 
-    anchors.centerIn: parent
-
-    implicitWidth: icon.implicitWidth + info.implicitWidth + info.anchors.leftMargin
-
-    Component.onCompleted: Weather.reload()
-
-    MaterialIcon {
-        id: icon
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-
-        animate: true
-        text: Weather.icon
-        color: Colours.palette.m3secondary
-        font.pointSize: Appearance.font.size.extraLarge * 2
-    }
-
-    Column {
-        id: info
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: icon.right
-        anchors.leftMargin: Appearance.spacing.large
-
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.small
 
+        Item { Layout.fillHeight: true }
+
+        MaterialIcon {
+            Layout.alignment: Qt.AlignHCenter
+
+            animate: true
+            text: Weather.icon
+            color: Colours.palette.m3secondary
+            font.pointSize: Appearance.font.size.extraLarge * 1.5
+        }
+
         StyledText {
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
 
             animate: true
             text: Weather.temp
@@ -45,13 +34,17 @@ Item {
         }
 
         StyledText {
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
 
             animate: true
             text: Weather.description
-
-            elide: Text.ElideRight
-            width: Math.min(implicitWidth, root.parent.width - icon.implicitWidth - info.anchors.leftMargin - Appearance.padding.large * 2)
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            font.capitalization: Font.Capitalize
         }
+
+        Item { Layout.fillHeight: true }
     }
+
+    Component.onCompleted: Weather.reload()
 }
