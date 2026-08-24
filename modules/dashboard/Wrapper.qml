@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import qs.components
 import qs.components.filedialog
 import qs.config
-import qs.services
 import qs.utils
 import Caelestia
 import Quickshell
@@ -32,12 +31,11 @@ Item {
         }
     }
 
-    readonly property real nonAnimHeight: state === "visible" ? (content.item?.nonAnimHeight ?? 0) : pill.implicitHeight
+    readonly property real nonAnimHeight: state === "visible" ? (content.item?.nonAnimHeight ?? 0) : 0
 
-    // Always visible now — the pill IS the collapsed dashboard, not a separate thing
-    visible: !root.visibilities.islandHidden
-    implicitWidth: pill.implicitWidth
-    implicitHeight: pill.implicitHeight
+    visible: height > 0
+    implicitHeight: 0
+    implicitWidth: content.implicitWidth
 
     onStateChanged: {
         if (state === "visible" && timer.running) {
@@ -51,7 +49,6 @@ Item {
         when: root.visibilities.dashboard && Config.dashboard.enabled
 
         PropertyChanges {
-            root.implicitWidth: content.implicitWidth
             root.implicitHeight: content.implicitHeight
         }
     }
@@ -63,12 +60,6 @@ Item {
 
             Anim {
                 target: root
-                property: "implicitWidth"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-            Anim {
-                target: root
                 property: "implicitHeight"
                 duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -78,11 +69,6 @@ Item {
             from: "visible"
             to: ""
 
-            Anim {
-                target: root
-                property: "implicitWidth"
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
             Anim {
                 target: root
                 property: "implicitHeight"
@@ -102,68 +88,14 @@ Item {
         }
     }
 
-    // ── Collapsed pill — clock / visualizer / recording ─────────────────────
-    Pill {
-        id: pill
-
-        visibilities: root.visibilities
-        dashState: root.dashState
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-
-        opacity: root.state === "visible" ? 0 : 1
-        visible: opacity > 0
-
-        Behavior on opacity {
-            Anim { duration: Appearance.anim.durations.expressiveEffects }
-        }
-    }
-
-    // ── Collapse handle — visible only while expanded ────────────────────────
-    Item {
-        id: collapseHandle
-
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: 80
-        height: 18
-        z: 10
-
-        opacity: root.state === "visible" ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-            Anim { duration: Appearance.anim.durations.expressiveEffects }
-        }
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: 44; height: 4; radius: 2
-            color: Colours.palette.m3surfaceVariant
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: root.visibilities.dashboard = false
-        }
-    }
-
-    // ── Expanded dashboard content ────────────────────────────────────────
     Loader {
         id: content
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
 
-        opacity: root.state === "visible" ? 1 : 0
         visible: false
         active: true
-
-        Behavior on opacity {
-            Anim { duration: Appearance.anim.durations.expressiveEffects }
-        }
 
         sourceComponent: Content {
             visibilities: root.visibilities
