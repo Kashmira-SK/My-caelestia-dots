@@ -2,6 +2,16 @@
 
 Newest entries at the top.
 
+## [2026-08-25] - Dashboard redesign
+### Changed
+- `modules/dashboard/Dash.qml`: three-column layout (weather/system/media | clock/quote | calendar/character), fixed implicit-size bug causing layout collapse
+- `modules/dashboard/dash/DateTime.qml`: full analog clock face with botanical center decoration, replaces old digital-only view
+- `modules/dashboard/dash/Quote.qml`: new widget, rotating quotes with decorative dividers
+- `modules/dashboard/dash/Weather.qml`: restyled to match new card aesthetic
+- `modules/dashboard/Tabs.qml`: uppercase letter-spaced labels with underline indicator, replaces default Material tab style
+
+---
+
 ## [2026-08-15] - Migrate Hyprland config to Lua
 
 ### Added
