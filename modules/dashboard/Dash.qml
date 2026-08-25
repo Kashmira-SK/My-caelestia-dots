@@ -4,117 +4,97 @@ import qs.services
 import qs.config
 import "dash"
 import Quickshell
+import QtQuick
 import QtQuick.Layouts
 
-GridLayout {
+RowLayout {
     id: root
 
     required property PersistentProperties visibilities
     required property PersistentProperties state
     required property FileDialog facePicker
 
-    columns: 4
-    rowSpacing: Appearance.spacing.normal
-    columnSpacing: Appearance.spacing.normal
+    spacing: Appearance.spacing.normal
 
-    // Row 0, Col 0: Weather
-    Rect {
-        Layout.row: 0
-        Layout.column: 0
-        Layout.preferredWidth: 160
-        Layout.preferredHeight: 280
-        radius: Appearance.rounding.large
+    // ── Left column: Weather / System / Media ──────────────────────────────
+    ColumnLayout {
+        Layout.preferredWidth: 230
+        Layout.fillHeight: true
+        spacing: Appearance.spacing.normal
 
-        Weather {
-            anchors.fill: parent
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 150
+            Weather { anchors.fill: parent }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 150
+            User { anchors.fill: parent }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Media {
+                id: media
+                anchors.fill: parent
+                state: root.state
+            }
         }
     }
 
-    // Row 0, Col 1-2: Analog clock (spans 2 cols)
-    Rect {
-        Layout.row: 0
-        Layout.column: 1
-        Layout.columnSpan: 2
-        Layout.preferredWidth: 320
-        Layout.preferredHeight: 280
-        radius: Appearance.rounding.large
+    // ── Center column: Clock (big) + Quote (bottom strip) ─────────────────
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        spacing: Appearance.spacing.normal
 
-        DateTime {
-            anchors.fill: parent
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            DateTime { anchors.fill: parent }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 160
+            Quote { anchors.fill: parent }
         }
     }
 
-    // Row 0, Col 3: Calendar
-    Rect {
-        Layout.row: 0
-        Layout.column: 3
-        Layout.preferredWidth: 280
-        Layout.preferredHeight: 280
-        radius: Appearance.rounding.large
+    // ── Right column: Calendar + Character ────────────────────────────────
+    ColumnLayout {
+        Layout.preferredWidth: 290
+        Layout.fillHeight: true
+        spacing: Appearance.spacing.normal
 
-        Calendar {
-            id: calendar
-            anchors.fill: parent
-            state: root.state
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Calendar {
+                id: calendar
+                anchors.fill: parent
+                state: root.state
+            }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 210
+            Character {
+                anchors.fill: parent
+                state: root.state
+            }
         }
     }
 
-    // Row 1, Col 0: System info
-    Rect {
-        Layout.row: 1
-        Layout.column: 0
-        Layout.preferredWidth: 160
-        Layout.preferredHeight: 200
+    component Card: StyledRect {
         radius: Appearance.rounding.large
-
-        User {
-            anchors.fill: parent
-        }
-    }
-
-    // Row 1, Col 1: Media player
-    Rect {
-        Layout.row: 1
-        Layout.column: 1
-        Layout.preferredWidth: 220
-        Layout.preferredHeight: 200
-        radius: Appearance.rounding.large
-
-        Media {
-            id: media
-            anchors.fill: parent
-            state: root.state
-        }
-    }
-
-    // Row 1, Col 2: Quote
-    Rect {
-        Layout.row: 1
-        Layout.column: 2
-        Layout.preferredWidth: 200
-        Layout.preferredHeight: 200
-        radius: Appearance.rounding.large
-
-        Quote {
-            anchors.fill: parent
-        }
-    }
-
-    // Row 1, Col 3: Character gif
-    Rect {
-        Layout.row: 1
-        Layout.column: 3
-        Layout.preferredWidth: 280
-        Layout.preferredHeight: 200
-        radius: Appearance.rounding.large
-
-        Character {
-            anchors.fill: parent
-            state: root.state
-        }
-    }
-
-    component Rect: StyledRect {
-        color: Colours.tPalette.m3surfaceContainer
+        // Dark near-black card — tune alpha if you want more/less transparency
+        color: Qt.rgba(0.12, 0.12, 0.10, 0.92)
+        border.color: Qt.rgba(1, 1, 1, 0.05)
+        border.width: 1
     }
 }

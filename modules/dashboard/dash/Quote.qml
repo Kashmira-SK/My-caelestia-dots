@@ -7,35 +7,67 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    anchors.fill: parent
-
     readonly property var quotes: [
-        { text: "The computer was born to solve problems that did not exist before.", author: "Bill Gates" },
-        { text: "Talk is cheap. Show me the code.", author: "Linus Torvalds" },
-        { text: "Any sufficiently advanced technology is indistinguishable from magic.", author: "Arthur C. Clarke" },
-        { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" },
-        { text: "First, solve the problem. Then, write the code.", author: "John Johnson" },
-        { text: "The best way to predict the future is to invent it.", author: "Alan Kay" },
-        { text: "Programs must be written for people to read.", author: "Hal Abelson" },
-        { text: "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.", author: "Antoine de Saint-Exupéry" }
+        { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" },
+        { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+        { text: "The wound is the place where the light enters you.", author: "Rumi" },
+        { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+        { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
+        { text: "Stars can't shine without darkness.", author: "" },
+        { text: "The quieter you become, the more you are able to hear.", author: "Rumi" },
+        { text: "Bloom where you are planted.", author: "" },
+        { text: "Wherever life plants you, bloom with grace.", author: "" },
+        { text: "Focus is the bridge between goals and accomplishment.", author: "" }
     ]
 
-    readonly property int quoteIndex: Math.floor(Math.random() * quotes.length)
+    readonly property var picked: quotes[Math.floor(Math.random() * quotes.length)]
+
+    // Background image — put a night sky / moon landscape at assets/bg-quote.jpg
+    Image {
+        id: bgImage
+        anchors.fill: parent
+        source: Qt.resolvedUrl("../../../assets/bg-quote.jpg")
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: status === Image.Ready
+    }
+
+    // Overlay
+    Rectangle {
+        anchors.fill: parent
+        radius: Appearance.rounding.large
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: Qt.rgba(0.08, 0.09, 0.07, bgImage.visible ? 0.55 : 0.96) }
+            GradientStop { position: 1.0; color: Qt.rgba(0.06, 0.07, 0.06, bgImage.visible ? 0.20 : 0.92) }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.leftMargin: Appearance.padding.large * 1.5
+        spacing: Appearance.spacing.small
 
         Item { Layout.fillHeight: true }
+
+        // Decorative botanical line
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 6
+
+            Rectangle { width: 30; height: 1; color: Qt.rgba(0.83, 0.66, 0.30, 0.5); anchors.verticalCenter: parent.verticalCenter }
+            StyledText { text: "✦"; color: Qt.rgba(0.83, 0.66, 0.30, 0.7); font.pointSize: 7 }
+            Rectangle { width: 30; height: 1; color: Qt.rgba(0.83, 0.66, 0.30, 0.5); anchors.verticalCenter: parent.verticalCenter }
+        }
 
         StyledText {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
 
-            text: `"${root.quotes[root.quoteIndex].text}"`
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.normal
+            text: `"${root.picked.text}"`
+            color: Qt.rgba(0.88, 0.86, 0.82, 0.90)
+            font.pointSize: Appearance.font.size.smaller
             font.italic: true
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
@@ -43,10 +75,20 @@ Item {
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-
-            text: `— ${root.quotes[root.quoteIndex].author}`
-            color: Colours.palette.m3outline
+            visible: root.picked.author !== ""
+            text: `— ${root.picked.author}`
+            color: Qt.rgba(0.83, 0.66, 0.30, 0.85)   // gold author
             font.pointSize: Appearance.font.size.small
+        }
+
+        // Bottom botanical line
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 6
+
+            Rectangle { width: 30; height: 1; color: Qt.rgba(0.83, 0.66, 0.30, 0.5); anchors.verticalCenter: parent.verticalCenter }
+            StyledText { text: "✦"; color: Qt.rgba(0.83, 0.66, 0.30, 0.7); font.pointSize: 7 }
+            Rectangle { width: 30; height: 1; color: Qt.rgba(0.83, 0.66, 0.30, 0.5); anchors.verticalCenter: parent.verticalCenter }
         }
 
         Item { Layout.fillHeight: true }
