@@ -14,88 +14,103 @@ Item {
     required property PersistentProperties state
     required property FileDialog facePicker
 
+    readonly property int leftW: 220
+    readonly property int rightW: 285
+    readonly property int gap: Appearance.spacing.normal
+    readonly property int centerW: implicitWidth - leftW - rightW - gap * 2
+
     implicitWidth: 840
     implicitHeight: 520
     width: implicitWidth
     height: implicitHeight
 
-    RowLayout {
-        anchors.fill: parent
-        spacing: Appearance.spacing.normal
+    // NOTE: deliberately NOT using an outer RowLayout with a fillWidth center
+    // column here — that combination was silently collapsing the center
+    // column's width to 0 in this Loader/Flickable/Pane context. Explicit
+    // anchored widths below are the reliable fix; each column is still a
+    // normal ColumnLayout internally so Layout.fillWidth/fillHeight on the
+    // Cards inside each column works exactly as expected.
 
-        ColumnLayout {
-            Layout.preferredWidth: 220
-            Layout.fillHeight: true
-            spacing: Appearance.spacing.normal
+    ColumnLayout {
+        id: leftCol
+        x: 0
+        y: 0
+        width: root.leftW
+        height: root.height
+        spacing: root.gap
 
-            Card {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 150
-                Weather { anchors.fill: parent }
-            }
-
-            Card {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 150
-                User { anchors.fill: parent }
-            }
-
-            Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Media {
-                    id: media
-                    anchors.fill: parent
-                    state: root.state
-                }
-            }
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 150
+            Weather { anchors.fill: parent }
         }
 
-        ColumnLayout {
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 150
+            User { anchors.fill: parent }
+        }
+
+        Card {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: Appearance.spacing.normal
-
-            Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                DateTime { anchors.fill: parent }
-            }
-
-            Card {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 155
-                Quote { anchors.fill: parent }
-            }
-        }
-
-        ColumnLayout {
-            Layout.preferredWidth: 285
-            Layout.fillHeight: true
-            spacing: Appearance.spacing.normal
-
-            Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Calendar {
-                    id: calendar
-                    anchors.fill: parent
-                    state: root.state
-                }
-            }
-
-            Card {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 205
-                Character {
-                    anchors.fill: parent
-                    state: root.state
-                }
+            Media {
+                id: media
+                anchors.fill: parent
+                state: root.state
             }
         }
     }
 
-    // Uses the real wallpaper-driven M3 scheme, not hardcoded colors
+    ColumnLayout {
+        id: centerCol
+        x: root.leftW + root.gap
+        y: 0
+        width: root.centerW
+        height: root.height
+        spacing: root.gap
+
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            DateTime { anchors.fill: parent }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 155
+            Quote { anchors.fill: parent }
+        }
+    }
+
+    ColumnLayout {
+        id: rightCol
+        x: root.leftW + root.gap + root.centerW + root.gap
+        y: 0
+        width: root.rightW
+        height: root.height
+        spacing: root.gap
+
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Calendar {
+                id: calendar
+                anchors.fill: parent
+                state: root.state
+            }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 205
+            Character {
+                anchors.fill: parent
+                state: root.state
+            }
+        }
+    }
+
     component Card: StyledRect {
         radius: Appearance.rounding.large
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
