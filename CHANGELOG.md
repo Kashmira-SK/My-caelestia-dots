@@ -4,6 +4,17 @@ Newest entries at the top.
 
 ## [2026-08-25] - Dashboard redesign
 ### Changed
+- `modules/dashboard/Dash.qml`: replaced Material-You card grid with 3-column layout (weather/system/media | clock/quote | calendar/character); columns use explicit anchored widths instead of RowLayout fillWidth, which was silently collapsing the center column to 0 width
+- `modules/dashboard/dash/DateTime.qml`: full analog clock face with botanical center decoration, tick marks, gold second hand
+- `modules/dashboard/dash/Weather.qml`: restyled to match new card aesthetic
+- `modules/dashboard/Tabs.qml`: uppercase letter-spaced tab labels with underline indicator, replaces default Material tab style
+### Added
+- `modules/dashboard/dash/Quote.qml`: new widget, rotating quotes with decorative dividers
+
+---
+
+## [2026-08-25] - Dashboard redesign
+### Changed
 - `modules/dashboard/Dash.qml`: three-column layout (weather/system/media | clock/quote | calendar/character), fixed implicit-size bug causing layout collapse
 - `modules/dashboard/dash/DateTime.qml`: full analog clock face with botanical center decoration, replaces old digital-only view
 - `modules/dashboard/dash/Quote.qml`: new widget, rotating quotes with decorative dividers
