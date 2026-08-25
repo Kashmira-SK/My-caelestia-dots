@@ -7,7 +7,6 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-// Fixed implicit size so Content.qml's Flickable can measure us correctly
 Item {
     id: root
 
@@ -17,12 +16,13 @@ Item {
 
     implicitWidth: 840
     implicitHeight: 520
+    width: implicitWidth
+    height: implicitHeight
 
     RowLayout {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        // ── Left: Weather / System / Media ──────────────────────────────
         ColumnLayout {
             Layout.preferredWidth: 220
             Layout.fillHeight: true
@@ -51,7 +51,6 @@ Item {
             }
         }
 
-        // ── Center: Clock + Quote ────────────────────────────────────────
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -70,7 +69,6 @@ Item {
             }
         }
 
-        // ── Right: Calendar + Character ──────────────────────────────────
         ColumnLayout {
             Layout.preferredWidth: 285
             Layout.fillHeight: true
@@ -97,10 +95,11 @@ Item {
         }
     }
 
+    // Uses the real wallpaper-driven M3 scheme, not hardcoded colors
     component Card: StyledRect {
         radius: Appearance.rounding.large
-        color: Qt.rgba(0.12, 0.12, 0.10, 0.92)
-        border.color: Qt.rgba(1, 1, 1, 0.05)
+        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+        border.color: Colours.palette.m3outlineVariant
         border.width: 1
     }
 }

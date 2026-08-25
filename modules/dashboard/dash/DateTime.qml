@@ -14,7 +14,6 @@ Item {
     readonly property int minutes: Time.minute
     readonly property int seconds: Time.second
 
-    // ── Clock face ────────────────────────────────────────────────────────
     Item {
         id: clockFace
 
@@ -25,16 +24,14 @@ Item {
         width: root.clockSize
         height: root.clockSize
 
-        // Dark face
         StyledRect {
             anchors.fill: parent
             radius: width / 2
-            color: Qt.rgba(0.09, 0.09, 0.08, 0.95)
-            border.color: Qt.rgba(1, 1, 1, 0.06)
+            color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+            border.color: Colours.palette.m3outlineVariant
             border.width: 1
         }
 
-        // Hour tick marks (12 + 60 minute dots style)
         Repeater {
             model: 60
 
@@ -54,50 +51,47 @@ Item {
                     implicitHeight: index % 5 === 0 ? (index % 15 === 0 ? 14 : 10) : 4
                     radius: 1
                     color: index % 15 === 0
-                        ? Qt.rgba(0.83, 0.66, 0.30, 0.9)   // gold for 12/3/6/9
+                        ? Colours.palette.m3primary
                         : index % 5 === 0
-                            ? Qt.rgba(0.85, 0.85, 0.80, 0.45)  // white-ish for other hours
-                            : Qt.rgba(0.85, 0.85, 0.80, 0.15)  // very faint minutes
+                            ? Colours.palette.m3onSurfaceVariant
+                            : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.3)
                 }
             }
         }
 
-        // Botanical leaf canvas at center
         Canvas {
             id: leafCanvas
             anchors.centerIn: parent
             width: root.clockSize * 0.28
             height: root.clockSize * 0.28
 
+            property color leafColour: Qt.alpha(Colours.palette.m3tertiary, 0.5)
+            onLeafColourChanged: requestPaint()
+
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.clearRect(0, 0, width, height);
                 var cx = width / 2;
                 var cy = height / 2;
-                var leafColor = Qt.rgba(0.28, 0.42, 0.22, 0.55);
 
-                ctx.strokeStyle = leafColor;
-                ctx.fillStyle = leafColor;
+                ctx.strokeStyle = leafColour;
+                ctx.fillStyle = leafColour;
                 ctx.lineWidth = 0.8;
 
-                // Draw 4 leaves rotated around center
                 for (var i = 0; i < 4; i++) {
                     ctx.save();
                     ctx.translate(cx, cy);
                     ctx.rotate((Math.PI / 2) * i);
 
-                    // Stem
                     ctx.beginPath();
                     ctx.moveTo(0, 0);
                     ctx.lineTo(0, -height * 0.38);
                     ctx.stroke();
 
-                    // Leaf blob
                     ctx.beginPath();
                     ctx.ellipse(-width * 0.09, -height * 0.38, width * 0.18, height * 0.20);
                     ctx.fill();
 
-                    // Side mini leaves
                     ctx.beginPath();
                     ctx.ellipse(-width * 0.12, -height * 0.22, width * 0.10, height * 0.11);
                     ctx.fill();
@@ -112,7 +106,6 @@ Item {
             Component.onCompleted: requestPaint()
         }
 
-        // Hour hand — off-white, thick
         Item {
             anchors.centerIn: parent
             width: 6
@@ -127,7 +120,7 @@ Item {
                 implicitWidth: 4
                 implicitHeight: root.clockSize * 0.24
                 radius: 2
-                color: Qt.rgba(0.92, 0.90, 0.86, 0.95)
+                color: Colours.palette.m3onSurface
             }
 
             Behavior on rotation {
@@ -138,7 +131,6 @@ Item {
             }
         }
 
-        // Minute hand — off-white, thinner
         Item {
             anchors.centerIn: parent
             width: 4
@@ -153,7 +145,7 @@ Item {
                 implicitWidth: 2.5
                 implicitHeight: root.clockSize * 0.34
                 radius: 2
-                color: Qt.rgba(0.88, 0.86, 0.82, 0.85)
+                color: Colours.palette.m3onSurfaceVariant
             }
 
             Behavior on rotation {
@@ -164,7 +156,6 @@ Item {
             }
         }
 
-        // Second hand — gold
         Item {
             anchors.centerIn: parent
             width: 2
@@ -179,7 +170,7 @@ Item {
                 implicitWidth: 1.5
                 implicitHeight: root.clockSize * 0.38
                 radius: 1
-                color: Qt.rgba(0.83, 0.66, 0.30, 1.0)   // gold
+                color: Colours.palette.m3primary
             }
 
             Behavior on rotation {
@@ -187,17 +178,15 @@ Item {
             }
         }
 
-        // Center cap
         StyledRect {
             anchors.centerIn: parent
             implicitWidth: 10
             implicitHeight: 10
             radius: width / 2
-            color: Qt.rgba(0.83, 0.66, 0.30, 1.0)   // gold dot
+            color: Colours.palette.m3primary
         }
     }
 
-    // ── Date label ────────────────────────────────────────────────────────
     Row {
         id: dateRow
 
@@ -211,7 +200,7 @@ Item {
                 const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
                 return days[new Date().getDay()] + ",";
             }
-            color: Qt.rgba(0.75, 0.73, 0.68, 0.85)
+            color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.smaller
         }
 
@@ -220,7 +209,7 @@ Item {
                 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
                 return months[new Date().getMonth()];
             }
-            color: Qt.rgba(0.83, 0.66, 0.30, 1.0)   // gold highlight on month
+            color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.smaller
             font.weight: 500
         }
@@ -230,7 +219,7 @@ Item {
                 const d = new Date();
                 return d.getDate() + ", " + d.getFullYear();
             }
-            color: Qt.rgba(0.75, 0.73, 0.68, 0.85)
+            color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.smaller
         }
     }

@@ -32,38 +32,33 @@ Item {
 
         Tab {
             iconName: "dashboard"
-            text: qsTr("Dashboard")
+            text: qsTr("DASHBOARD")
         }
 
         Tab {
             iconName: "queue_music"
-            text: qsTr("Media")
+            text: qsTr("MEDIA")
         }
 
         Tab {
             iconName: "speed"
-            text: qsTr("Performance")
+            text: qsTr("PERFORMANCE")
         }
 
         Tab {
             iconName: "cloud"
-            text: qsTr("Weather")
+            text: qsTr("WEATHER")
         }
-
-        // Tab {
-        //     iconName: "workspaces"
-        //     text: qsTr("Workspaces")
-        // }
     }
 
     Item {
         id: indicator
 
         anchors.top: bar.bottom
-        anchors.topMargin: 5
+        anchors.topMargin: 8
 
         implicitWidth: bar.currentItem.implicitWidth
-        implicitHeight: 3
+        implicitHeight: 2
 
         x: {
             const tab = bar.currentItem;
@@ -77,10 +72,10 @@ Item {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            implicitHeight: parent.implicitHeight * 2
+            implicitHeight: parent.implicitHeight
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
+            radius: 0
         }
 
         Behavior on x {
@@ -96,6 +91,7 @@ Item {
         id: separator
 
         anchors.top: indicator.bottom
+        anchors.topMargin: 6
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -115,7 +111,7 @@ Item {
             id: mouse
 
             implicitWidth: Math.max(icon.width, label.width)
-            implicitHeight: icon.height + label.height
+            implicitHeight: icon.height + label.height + 6
 
             cursorShape: Qt.PointingHandCursor
 
@@ -159,7 +155,7 @@ Item {
                 PropertyAction {
                     target: ripple
                     property: "opacity"
-                    value: 0.08
+                    value: 0.06
                 }
                 Anim {
                     target: ripple
@@ -196,7 +192,7 @@ Item {
                     anchors.fill: parent
 
                     color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: mouse.pressed ? 0.1 : tab.hovered ? 0.08 : 0
+                    opacity: mouse.pressed ? 0.08 : tab.hovered ? 0.05 : 0
 
                     Behavior on opacity {
                         Anim {}
@@ -222,11 +218,12 @@ Item {
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: label.top
+                anchors.bottomMargin: 4
 
                 text: tab.iconName
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 fill: tab.current ? 1 : 0
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Appearance.font.size.normal
 
                 Behavior on fill {
                     Anim {}
@@ -241,6 +238,9 @@ Item {
 
                 text: tab.text
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                font.letterSpacing: 1.5
+                font.pointSize: Appearance.font.size.small
+                font.weight: tab.current ? 600 : 400
             }
         }
     }
