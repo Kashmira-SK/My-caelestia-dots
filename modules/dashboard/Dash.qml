@@ -48,8 +48,15 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
-            Weather { anchors.fill: parent }
+            // Bound to Weather's own content height instead of a guessed
+            // fixed number — same fix as Calendar's overflow issue.
+            Layout.preferredHeight: weatherWidget.implicitHeight
+            Weather {
+                id: weatherWidget
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+            }
         }
 
         Card {

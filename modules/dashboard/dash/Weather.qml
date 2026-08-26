@@ -7,12 +7,19 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.small
+    // Same lesson as Calendar: hug the actual content height instead of
+    // guessing a fixed card height and hoping content fits inside it.
+    // The old fillHeight-spacer version was designed to center content
+    // inside whatever box it was given, but the box (150px) was smaller
+    // than the content actually needed, so the description text ("Drizzle")
+    // clipped past the bottom edge.
+    implicitHeight: content.implicitHeight + Appearance.padding.large * 2
 
-        Item { Layout.fillHeight: true }
+    ColumnLayout {
+        id: content
+
+        anchors.centerIn: parent
+        spacing: Appearance.spacing.small
 
         MaterialIcon {
             Layout.alignment: Qt.AlignHCenter
@@ -39,8 +46,6 @@ Item {
             font.pointSize: Appearance.font.size.small
             font.capitalization: Font.Capitalize
         }
-
-        Item { Layout.fillHeight: true }
     }
 
     Component.onCompleted: Weather.reload()

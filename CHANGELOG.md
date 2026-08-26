@@ -2,6 +2,13 @@
 
 Newest entries at the top.
 
+## [2026-08-26] - Dashboard alignment fix
+### Fixed
+- `modules/dashboard/Dash.qml`: Character card was fixed-height while Calendar was content-driven, causing overflow/misalignment depending on calendar content size; Character is now fillHeight like Media and Quote's siblings, so all three columns bottom out flush regardless of calendar's actual size
+- `modules/dashboard/dash/DateTime.qml`: reverted clock to simple top-anchored sizing (cap/centering was compensating for the Dash.qml height bug, not needed once fixed at the source)
+
+---
+
 ## [2026-08-25] - Dashboard redesign
 ### Changed
 - `modules/dashboard/Dash.qml`: replaced Material-You card grid with 3-column layout (weather/system/media | clock/quote | calendar/character); columns use explicit anchored widths instead of RowLayout fillWidth, which was silently collapsing the center column to 0 width
