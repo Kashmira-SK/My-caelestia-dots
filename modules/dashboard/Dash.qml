@@ -93,10 +93,16 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            // Height matches Calendar's own computed content height exactly —
+            // don't force-fit Calendar to a fixed card height, since that's
+            // what was pushing the last calendar row past the card's edge.
+            Layout.preferredHeight: calendar.implicitHeight
+
             Calendar {
                 id: calendar
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
                 state: root.state
             }
         }
@@ -108,6 +114,14 @@ Item {
                 anchors.fill: parent
                 state: root.state
             }
+        }
+
+        // Absorbs whatever vertical space is left over so the column
+        // doesn't try to force Calendar/Character to stretch beyond
+        // their natural sizes.
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
     }
 
