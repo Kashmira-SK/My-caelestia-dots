@@ -35,44 +35,31 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Media
     Item {
         anchors.fill: parent
         anchors.margins: 14
 
-        // Track header
-        Row {
+        // Header
+        Item {
             id: header
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
 
-            height: 78
-            spacing: 12
+            height: 82
 
             StyledClippingRect {
                 id: cover
 
+                anchors.left: parent.left
+                anchors.top: parent.top
+
                 width: 76
                 height: 76
 
-                anchors.verticalCenter: parent.verticalCenter
-
-                radius: 16
+                radius: 15
                 color: Colours.palette.m3surfaceContainerHigh
-
-                Image {
-                    anchors.fill: parent
-
-                    source: Players.active?.trackArtUrl ?? ""
-
-                    asynchronous: true
-                    fillMode: Image.PreserveAspectCrop
-
-                    sourceSize.width: 152
-                    sourceSize.height: 152
-                }
 
                 MaterialIcon {
                     anchors.centerIn: parent
@@ -83,12 +70,42 @@ Item {
                     font.pointSize: 22
                     color: Colours.palette.m3outline
                 }
+
+                Image {
+                    anchors.fill: parent
+
+                    source: Players.active?.trackArtUrl ?? ""
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+
+                    sourceSize.width: 152
+                    sourceSize.height: 152
+                }
             }
 
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
+            // Waveform accent
+            WaveMark {
+                id: wave
 
-                width: parent.width - cover.width - parent.spacing
+                anchors.right: parent.right
+                anchors.top: parent.top
+
+                width: 25
+                height: 28
+            }
+
+            // Track information
+            Column {
+                id: info
+
+                anchors.left: cover.right
+                anchors.right: wave.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                anchors.leftMargin: 12
+                anchors.rightMargin: 10
+
                 spacing: 3
 
                 StyledText {
@@ -107,7 +124,7 @@ Item {
                 }
 
                 StyledText {
-                    width: parent.width - 22
+                    width: parent.width
 
                     text: Players.active?.trackArtist
                         || qsTr("No media")
@@ -121,16 +138,6 @@ Item {
                     elide: Text.ElideRight
                 }
             }
-
-            // Tiny waveform accent
-            WaveMark {
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 5
-
-                width: 24
-                height: 24
-            }
         }
 
         // Progress
@@ -141,7 +148,7 @@ Item {
             anchors.right: parent.right
             anchors.top: header.bottom
 
-            anchors.topMargin: 10
+            anchors.topMargin: 8
 
             height: 12
 
@@ -204,38 +211,48 @@ Item {
         }
 
         // Controls
-        Row {
+        Item {
             id: controls
 
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: progress.bottom
             anchors.bottom: parent.bottom
 
-            anchors.bottomMargin: 8
+            Row {
+                anchors.centerIn: parent
 
-            spacing: 22
+                spacing: 30
 
-            PreviousButton {
-                canUse: Players.active?.canGoPrevious ?? false
+                PreviousButton {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                function onClicked(): void {
-                    Players.active?.previous();
+                    canUse: Players.active?.canGoPrevious ?? false
+
+                    function onClicked(): void {
+                        Players.active?.previous();
+                    }
                 }
-            }
 
-            PlayButton {
-                canUse: Players.active?.canTogglePlaying ?? false
-                playing: Players.active?.isPlaying ?? false
+                PlayButton {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                function onClicked(): void {
-                    Players.active?.togglePlaying();
+                    canUse: Players.active?.canTogglePlaying ?? false
+                    playing: Players.active?.isPlaying ?? false
+
+                    function onClicked(): void {
+                        Players.active?.togglePlaying();
+                    }
                 }
-            }
 
-            NextButton {
-                canUse: Players.active?.canGoNext ?? false
+                NextButton {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                function onClicked(): void {
-                    Players.active?.next();
+                    canUse: Players.active?.canGoNext ?? false
+
+                    function onClicked(): void {
+                        Players.active?.next();
+                    }
                 }
             }
         }
@@ -244,39 +261,38 @@ Item {
     component WaveMark: Canvas {
         id: wave
 
-        property color accent: Colours.palette.m3primary
-
         onPaint: {
             const ctx = getContext("2d");
 
             ctx.clearRect(0, 0, width, height);
 
-            ctx.fillStyle = wave.accent;
+            const accent = Colours.palette.m3primary;
 
-            const bars = [
-                0.30,
-                0.55,
-                0.85,
-                1.0,
-                0.65
-            ];
+            ctx.fillStyle = accent;
+
+            const heights = [0.35, 0.6, 0.82, 1.0, 0.62];
 
             const barWidth = 3;
-            const gap = 3;
+            const gap = 2;
+            const totalWidth =
+                heights.length * barWidth +
+                (heights.length - 1) * gap;
 
-            for (let i = 0; i < bars.length; i++) {
-                const h = height * bars[i];
-                const x = i * (barWidth + gap);
-                const y = (height - h) / 2;
+            const startX = (width - totalWidth) / 2;
+
+            for (let i = 0; i < heights.length; ++i) {
+                const barHeight = height * heights[i];
+                const x = startX + i * (barWidth + gap);
+                const y = (height - barHeight) / 2;
 
                 ctx.beginPath();
                 ctx.roundedRect(
                     x,
                     y,
                     barWidth,
-                    h,
-                    barWidth / 2,
-                    barWidth / 2
+                    barHeight,
+                    1.5,
+                    1.5
                 );
                 ctx.fill();
             }
@@ -288,39 +304,36 @@ Item {
 
         required property bool canUse
 
-        width: 34
-        height: 34
+        width: 40
+        height: 40
+
+        opacity: canUse ? 1 : 0.35
 
         Canvas {
             anchors.fill: parent
-
-            opacity: button.canUse ? 1.0 : 0.35
 
             onPaint: {
                 const ctx = getContext("2d");
 
                 ctx.clearRect(0, 0, width, height);
 
-                const c = Colours.palette.m3onSurface;
+                ctx.fillStyle = Colours.palette.m3onSurface;
 
-                ctx.fillStyle = c;
+                // Previous marker
+                ctx.fillRect(8, 11, 2, 18);
 
-                // vertical stop
-                ctx.fillRect(9, 9, 2, 16);
-
-                // first triangle
+                // Double triangle
                 ctx.beginPath();
-                ctx.moveTo(14, 17);
-                ctx.lineTo(20, 11);
-                ctx.lineTo(20, 23);
+                ctx.moveTo(13, 20);
+                ctx.lineTo(21, 13);
+                ctx.lineTo(21, 27);
                 ctx.closePath();
                 ctx.fill();
 
-                // second triangle
                 ctx.beginPath();
-                ctx.moveTo(20, 17);
-                ctx.lineTo(27, 11);
-                ctx.lineTo(27, 23);
+                ctx.moveTo(21, 20);
+                ctx.lineTo(30, 13);
+                ctx.lineTo(30, 27);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -328,8 +341,8 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            enabled: button.canUse
 
+            enabled: button.canUse
             cursorShape: Qt.PointingHandCursor
 
             onClicked: button.onClicked()
@@ -343,48 +356,45 @@ Item {
 
         required property bool canUse
 
-        width: 34
-        height: 34
+        width: 40
+        height: 40
+
+        opacity: canUse ? 1 : 0.35
 
         Canvas {
             anchors.fill: parent
-
-            opacity: button.canUse ? 1.0 : 0.35
 
             onPaint: {
                 const ctx = getContext("2d");
 
                 ctx.clearRect(0, 0, width, height);
 
-                const c = Colours.palette.m3onSurface;
+                ctx.fillStyle = Colours.palette.m3onSurface;
 
-                ctx.fillStyle = c;
-
-                // first triangle
+                // Double triangle
                 ctx.beginPath();
-                ctx.moveTo(7, 11);
-                ctx.lineTo(14, 17);
-                ctx.lineTo(7, 23);
+                ctx.moveTo(9, 13);
+                ctx.lineTo(18, 20);
+                ctx.lineTo(9, 27);
                 ctx.closePath();
                 ctx.fill();
 
-                // second triangle
                 ctx.beginPath();
-                ctx.moveTo(14, 11);
-                ctx.lineTo(21, 17);
-                ctx.lineTo(14, 23);
+                ctx.moveTo(18, 13);
+                ctx.lineTo(27, 20);
+                ctx.lineTo(18, 27);
                 ctx.closePath();
                 ctx.fill();
 
-                // vertical stop
-                ctx.fillRect(24, 9, 2, 16);
+                // Next marker
+                ctx.fillRect(30, 11, 2, 18);
             }
         }
 
         MouseArea {
             anchors.fill: parent
-            enabled: button.canUse
 
+            enabled: button.canUse
             cursorShape: Qt.PointingHandCursor
 
             onClicked: button.onClicked()
@@ -399,13 +409,13 @@ Item {
         required property bool canUse
         required property bool playing
 
-        width: 48
-        height: 48
+        width: 50
+        height: 50
+
+        opacity: canUse ? 1 : 0.35
 
         Canvas {
             anchors.fill: parent
-
-            opacity: button.canUse ? 1.0 : 0.35
 
             onPaint: {
                 const ctx = getContext("2d");
@@ -433,8 +443,8 @@ Item {
                     ctx.beginPath();
                     ctx.roundedRect(
                         18,
-                        14,
-                        4,
+                        15,
+                        5,
                         20,
                         2,
                         2
@@ -443,9 +453,9 @@ Item {
 
                     ctx.beginPath();
                     ctx.roundedRect(
-                        26,
-                        14,
-                        4,
+                        27,
+                        15,
+                        5,
                         20,
                         2,
                         2
@@ -454,8 +464,8 @@ Item {
                 } else {
                     ctx.beginPath();
                     ctx.moveTo(20, 14);
-                    ctx.lineTo(20, 34);
-                    ctx.lineTo(34, 24);
+                    ctx.lineTo(20, 36);
+                    ctx.lineTo(35, 25);
                     ctx.closePath();
                     ctx.fill();
                 }
@@ -464,8 +474,8 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            enabled: button.canUse
 
+            enabled: button.canUse
             cursorShape: Qt.PointingHandCursor
 
             onClicked: button.onClicked()
