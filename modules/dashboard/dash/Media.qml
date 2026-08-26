@@ -5,7 +5,6 @@ import qs.utils
 import Caelestia.Services
 import Quickshell
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 
 Item {
@@ -34,41 +33,8 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Full-bleed blurred album art as the card's own background — this
-    // is the "Now Playing" treatment instead of an icon+text info row.
-    // Falls back to a plain surface tint when there's no art (no track,
-    // or art hasn't loaded yet).
-    Image {
-        id: bgArt
-        anchors.fill: parent
-        source: Players.active?.trackArtUrl ?? ""
-        asynchronous: true
-        fillMode: Image.PreserveAspectCrop
-        visible: false
-    }
-
-    MultiEffect {
-        anchors.fill: parent
-        source: bgArt
-        visible: bgArt.status === Image.Ready
-        blurEnabled: true
-        blur: 1.0
-        blurMax: 48
-        brightness: -0.35
-        saturation: -0.1
-    }
-
-    // Dark scrim so text stays readable regardless of the art underneath
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.alpha(Colours.palette.m3surfaceContainerLowest, bgArt.status === Image.Ready ? 0.35 : 0.95) }
-            GradientStop { position: 0.55; color: Qt.alpha(Colours.palette.m3surfaceContainerLowest, bgArt.status === Image.Ready ? 0.55 : 0.95) }
-            GradientStop { position: 1.0; color: Qt.alpha(Colours.palette.m3surfaceContainerLowest, bgArt.status === Image.Ready ? 0.85 : 0.95) }
-        }
-    }
-
+    // Flat, clean background matching the rest of the dashboard — the
+    // blurred-art treatment didn't land, back to plain surface color.
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
