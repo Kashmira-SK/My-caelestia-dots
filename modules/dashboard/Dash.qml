@@ -48,38 +48,40 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            // Bound to Weather's own content height instead of a guessed
-            // fixed number — same fix as Calendar's overflow issue.
-            Layout.preferredHeight: weatherWidget.implicitHeight
-            Weather {
-                id: weatherWidget
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-            }
-        }
-
-        Card {
-            Layout.fillWidth: true
-            // Same fix as Weather above — bound to real content height
-            // instead of a fixed number that left dead space at the bottom.
+            // Weather card removed per request — System now absorbs that
+            // space and gets its profile picture back.
             Layout.preferredHeight: systemWidget.implicitHeight
             User {
                 id: systemWidget
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
+                visibilities: root.visibilities
+                state: root.state
+                facePicker: root.facePicker
             }
         }
 
         Card {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            // Media reports its own content height now — same pattern as
+            // System/Weather — instead of being force-stretched to fill
+            // whatever's left in the column.
+            Layout.preferredHeight: media.implicitHeight
             Media {
                 id: media
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
                 state: root.state
             }
+        }
+
+        // Absorbs whatever's left over in the column now that Media
+        // hugs its own content instead of stretching into this space.
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
     }
 

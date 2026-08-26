@@ -12,7 +12,13 @@ Item {
 
     required property PersistentProperties state
 
-    anchors.fill: parent
+    // Was anchors.fill: parent, which meant this widget had no way to
+    // report its own natural size — it just took whatever the Card gave
+    // it and tried to make the content look okay inside that (centering
+    // was a band-aid on that). Now it reports its real content height,
+    // same as System/Weather, so the Card sizes to it instead of the
+    // other way around.
+    implicitHeight: content.implicitHeight + Appearance.padding.large * 2
 
     property real playerProgress: {
         const active = Players.active;
@@ -33,15 +39,17 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Flat, clean background matching the rest of the dashboard — the
-    // blurred-art treatment didn't land, back to plain surface color.
+    // Flat, clean background matching the rest of the dashboard.
     ColumnLayout {
-        anchors.fill: parent
+        id: content
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.small
 
-        // Small square art thumbnail up top-left, kept modest since the
-        // blurred version already fills the whole card behind everything
+        // Small square art thumbnail up top-left
         RowLayout {
             Layout.fillWidth: true
             spacing: Appearance.spacing.small
@@ -87,9 +95,7 @@ Item {
             }
         }
 
-        Item { Layout.fillHeight: true }
-
-        // Track info sits over the blurred art, bottom-anchored
+        // Track info
         StyledText {
             Layout.fillWidth: true
             text: Players.active?.trackTitle || qsTr("Nothing playing")
