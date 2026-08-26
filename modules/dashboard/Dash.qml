@@ -20,7 +20,14 @@ Item {
     readonly property int centerW: implicitWidth - leftW - rightW - gap * 2
 
     implicitWidth: 840
-    implicitHeight: 520
+    // Fixed, reasonable baseline. Calendar takes exactly the height its
+    // content needs (see Layout.preferredHeight: calendar.implicitHeight
+    // below); Character/Media/DateTime are all fillHeight, so whatever's
+    // left over below Calendar/System+Weather/Quote gets absorbed there
+    // automatically. No guessing required, and every column's bottom
+    // card now always ends flush with the others because they're all
+    // the fillHeight element in their column.
+    implicitHeight: 500
     width: implicitWidth
     height: implicitHeight
 
@@ -109,19 +116,15 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            Layout.preferredHeight: 205
+            // Fixed sibling above (Calendar card) takes exactly what its
+            // content needs; this one absorbs whatever's left over in the
+            // column — same pattern as Media in the left column and it's
+            // what keeps every column's bottom edge flush with the others.
+            Layout.fillHeight: true
             Character {
                 anchors.fill: parent
                 state: root.state
             }
-        }
-
-        // Absorbs whatever vertical space is left over so the column
-        // doesn't try to force Calendar/Character to stretch beyond
-        // their natural sizes.
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
         }
     }
 

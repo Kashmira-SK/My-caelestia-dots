@@ -222,5 +222,5 @@ Item {
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.smaller
         }
-    }
+    } // dateRow
 }
