@@ -10,9 +10,9 @@ Item {
     id: root
 
     readonly property real clockSize: Math.min(width, height - dateRow.implicitHeight - Appearance.spacing.normal - Appearance.padding.large * 2) - Appearance.padding.large * 2
-    readonly property int hours: Time.hour
-    readonly property int minutes: Time.minute
-    readonly property int seconds: Time.second
+    readonly property int hours: Time.hours
+    readonly property int minutes: Time.minutes
+    readonly property int seconds: Time.seconds
 
     Item {
         id: clockFace
