@@ -35,250 +35,294 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Media
-    Item {
+    Rectangle {
         anchors.fill: parent
-        anchors.margins: 12
+        color: "transparent"
 
-        StyledClippingRect {
-            id: cover
-
-            anchors.left: parent.left
-            anchors.top: parent.top
-
-            width: 58
-            height: 58
-
-            radius: 14
-
-            color: Colours.palette.m3surfaceContainerHigh
-
-            MaterialIcon {
-                anchors.centerIn: parent
-
-                text: "music_note"
-                font.pointSize: 18
-
-                color: Colours.palette.m3outline
-            }
-
-            Image {
-                anchors.fill: parent
-
-                source: Players.active?.trackArtUrl ?? ""
-                asynchronous: true
-
-                fillMode: Image.PreserveAspectCrop
-
-                sourceSize.width: 116
-                sourceSize.height: 116
-            }
-        }
-
-        Column {
-            anchors.left: cover.right
-            anchors.right: parent.right
-            anchors.top: cover.top
-
-            anchors.leftMargin: 10
-
-            spacing: 2
-
-            StyledText {
-                width: parent.width
-
-                text: Players.active?.trackTitle
-                    || qsTr("Nothing playing")
-
-                color: Colours.palette.m3onSurface
-
-                font.pointSize: Appearance.font.size.small
-                font.weight: 650
-
-                maximumLineCount: 1
-                elide: Text.ElideRight
-            }
-
-            StyledText {
-                width: parent.width
-
-                text: Players.active?.trackArtist
-                    || qsTr("No media")
-
-                color: Colours.palette.m3secondary
-
-                font.pointSize: Appearance.font.size.smaller
-
-                maximumLineCount: 2
-                wrapMode: Text.WordWrap
-                elide: Text.ElideRight
-            }
-        }
-
-        // Progress
-        Item {
-            anchors.left: cover.right
-            anchors.right: parent.right
-            anchors.top: cover.bottom
-
-            anchors.leftMargin: 10
-            anchors.topMargin: 8
-
-            height: 7
-
-            StyledRect {
-                anchors.verticalCenter: parent.verticalCenter
-
-                width: parent.width
-                height: 2
-
-                radius: Appearance.rounding.full
-
-                color: Colours.palette.m3surfaceContainerHighest
-            }
-
-            StyledRect {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-
-                width: parent.width * root.playerProgress
-                height: 2
-
-                radius: Appearance.rounding.full
-
-                color: Colours.palette.m3primary
-            }
-
-            StyledRect {
-                anchors.verticalCenter: parent.verticalCenter
-
-                x: Math.max(
-                    0,
-                    Math.min(
-                        parent.width - width,
-                        (parent.width - width) * root.playerProgress
-                    )
-                )
-
-                width: 5
-                height: 5
-
-                radius: width / 2
-
-                color: Colours.palette.m3primary
-            }
-        }
-
-        // Controls
-        Row {
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-
+        // Media card
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
             spacing: 10
 
-            TinyControl {
-                icon: "arrow_back_ios"
-                canUse: Players.active?.canGoPrevious ?? false
+            // Track header
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 72
+                spacing: 12
 
-                function onClicked(): void {
-                    Players.active?.previous();
+                StyledClippingRect {
+                    id: cover
+
+                    Layout.preferredWidth: 72
+                    Layout.preferredHeight: 72
+                    Layout.alignment: Qt.AlignVCenter
+
+                    radius: 16
+                    color: Colours.palette.m3surfaceContainerHigh
+
+                    MaterialIcon {
+                        anchors.centerIn: parent
+
+                        text: "album"
+                        font.pointSize: 22
+
+                        color: Colours.palette.m3outline
+                    }
+
+                    Image {
+                        anchors.fill: parent
+
+                        source: Players.active?.trackArtUrl ?? ""
+
+                        asynchronous: true
+                        fillMode: Image.PreserveAspectCrop
+
+                        sourceSize.width: 144
+                        sourceSize.height: 144
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+
+                    spacing: 3
+
+                    StyledText {
+                        Layout.fillWidth: true
+
+                        text: Players.active?.trackTitle
+                            || qsTr("Nothing playing")
+
+                        color: Colours.palette.m3onSurface
+
+                        font.pointSize: Appearance.font.size.normal + 1
+                        font.weight: 650
+
+                        maximumLineCount: 2
+                        wrapMode: Text.WordWrap
+                        elide: Text.ElideRight
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+
+                        text: Players.active?.trackArtist
+                            || qsTr("No media")
+
+                        color: Colours.palette.m3secondary
+
+                        font.pointSize: Appearance.font.size.small
+
+                        maximumLineCount: 2
+                        wrapMode: Text.WordWrap
+                        elide: Text.ElideRight
+                    }
                 }
             }
 
-            TinyPlay {
-                icon: Players.active?.isPlaying
-                    ? "pause"
-                    : "play_arrow"
+            // Progress
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 12
 
-                canUse: Players.active?.canTogglePlaying ?? false
+                StyledRect {
+                    anchors.verticalCenter: parent.verticalCenter
 
-                function onClicked(): void {
-                    Players.active?.togglePlaying();
+                    width: parent.width
+                    height: 4
+
+                    radius: Appearance.rounding.full
+
+                    color: Colours.layer(
+                        Colours.palette.m3surfaceContainerHigh,
+                        2
+                    )
+                }
+
+                StyledRect {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    width: parent.width * root.playerProgress
+                    height: 4
+
+                    radius: Appearance.rounding.full
+
+                    color: Colours.palette.m3primary
+
+                    Behavior on width {
+                        Anim {
+                            duration: Appearance.anim.durations.large
+                        }
+                    }
+                }
+
+                StyledRect {
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    x: Math.max(
+                        0,
+                        Math.min(
+                            parent.width - width,
+                            (parent.width - width) * root.playerProgress
+                        )
+                    )
+
+                    width: 8
+                    height: 8
+
+                    radius: width / 2
+
+                    color: Colours.palette.m3primary
+
+                    Behavior on x {
+                        Anim {
+                            duration: Appearance.anim.durations.large
+                        }
+                    }
                 }
             }
 
-            TinyControl {
-                icon: "arrow_forward_ios"
-                canUse: Players.active?.canGoNext ?? false
+            // Transport
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-                function onClicked(): void {
-                    Players.active?.next();
+                Row {
+                    anchors.centerIn: parent
+
+                    spacing: 20
+
+                    TransportButton {
+                        icon: "replay_10"
+                        canUse: Players.active?.canGoPrevious ?? false
+                        iconSize: 17
+
+                        function onClicked(): void {
+                            Players.active?.previous();
+                        }
+                    }
+
+                    PlayButton {
+                        icon: Players.active?.isPlaying
+                            ? "pause"
+                            : "play_arrow"
+
+                        canUse: Players.active?.canTogglePlaying ?? false
+                    }
+
+                    TransportButton {
+                        icon: "forward_10"
+                        canUse: Players.active?.canGoNext ?? false
+                        iconSize: 17
+
+                        function onClicked(): void {
+                            Players.active?.next();
+                        }
+                    }
                 }
             }
         }
     }
 
-    component TinyControl: Item {
-        id: control
+    component TransportButton: Item {
+        id: button
 
         required property string icon
         required property bool canUse
+        required property real iconSize
 
-        width: 24
-        height: 24
-
-        MaterialIcon {
-            anchors.centerIn: parent
-
-            text: control.icon
-            fill: 0
-
-            font.pointSize: 11
-
-            color: control.canUse
-                ? Colours.palette.m3onSurfaceVariant
-                : Colours.palette.m3outline
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: control.canUse
-
-            onClicked: control.onClicked()
-        }
-
-        function onClicked(): void {}
-    }
-
-    component TinyPlay: Item {
-        id: control
-
-        required property string icon
-        required property bool canUse
-
-        width: 28
-        height: 28
+        width: 34
+        height: 34
 
         StyledRect {
             anchors.fill: parent
 
             radius: width / 2
 
-            color: control.canUse
-                ? Colours.palette.m3primary
+            color: "transparent"
+
+            border.width: 1
+
+            border.color: button.canUse
+                ? Colours.palette.m3outlineVariant
                 : Colours.palette.m3surfaceContainerHigh
         }
 
         MaterialIcon {
             anchors.centerIn: parent
 
-            text: control.icon
-            fill: 1
+            text: button.icon
+            fill: 0
 
-            font.pointSize: 13
+            font.pointSize: button.iconSize
 
-            color: control.canUse
-                ? Colours.palette.m3onPrimary
+            color: button.canUse
+                ? Colours.palette.m3onSurface
                 : Colours.palette.m3outline
         }
 
         MouseArea {
             anchors.fill: parent
-            enabled: control.canUse
+            enabled: button.canUse
 
-            onClicked: control.onClicked()
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: button.onClicked()
         }
 
         function onClicked(): void {}
+    }
+
+    component PlayButton: Item {
+        id: button
+
+        required property string icon
+        required property bool canUse
+
+        width: 46
+        height: 46
+
+        StyledRect {
+            anchors.fill: parent
+
+            radius: width / 2
+
+            color: "transparent"
+
+            border.width: 2
+
+            border.color: button.canUse
+                ? Colours.palette.m3primary
+                : Colours.palette.m3outline
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+
+            text: button.icon
+            fill: 1
+
+            font.pointSize: 19
+
+            color: button.canUse
+                ? Colours.palette.m3primary
+                : Colours.palette.m3outline
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: button.canUse
+
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: button.onClicked()
+        }
+
+        function onClicked(): void {
+            Players.active?.togglePlaying();
+        }
     }
 }
