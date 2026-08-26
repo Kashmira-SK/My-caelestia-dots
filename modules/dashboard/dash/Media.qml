@@ -46,6 +46,7 @@ Item {
 
                 Layout.preferredWidth: 72
                 Layout.preferredHeight: 72
+                Layout.alignment: Qt.AlignTop
 
                 radius: Appearance.rounding.normal
                 color: Colours.tPalette.m3surfaceContainerHigh
@@ -97,6 +98,11 @@ Item {
                     text: (Players.active?.trackArtist ?? qsTr("Unknown artist"))
                     color: Colours.palette.m3secondary
                     font.pointSize: Appearance.font.size.small
+                    // Was single-line elide, which chopped longer artist
+                    // credits (e.g. "Alan Walker Ft Ava Max"). Two lines
+                    // gives it room to actually show instead of cutting off.
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
                     elide: Text.ElideRight
                 }
             }

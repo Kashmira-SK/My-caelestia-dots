@@ -61,8 +61,15 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
-            User { anchors.fill: parent }
+            // Same fix as Weather above — bound to real content height
+            // instead of a fixed number that left dead space at the bottom.
+            Layout.preferredHeight: systemWidget.implicitHeight
+            User {
+                id: systemWidget
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+            }
         }
 
         Card {

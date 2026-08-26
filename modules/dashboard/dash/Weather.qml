@@ -7,13 +7,10 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    // Same lesson as Calendar: hug the actual content height instead of
-    // guessing a fixed card height and hoping content fits inside it.
-    // The old fillHeight-spacer version was designed to center content
-    // inside whatever box it was given, but the box (150px) was smaller
-    // than the content actually needed, so the description text ("Drizzle")
-    // clipped past the bottom edge.
-    implicitHeight: content.implicitHeight + Appearance.padding.large * 2
+    // Compact box now — this used to be the tallest card on the left,
+    // crowding out Media below it. Smaller icon/temp fonts and tighter
+    // margins/spacing bring it down to a proper "small info box" size.
+    implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
 
     ColumnLayout {
         id: content
@@ -26,7 +23,7 @@ Item {
             animate: true
             text: Weather.icon
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.extraLarge * 1.4
+            font.pointSize: Appearance.font.size.large
         }
 
         StyledText {
@@ -34,8 +31,8 @@ Item {
             animate: true
             text: Weather.temp
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.extraLarge
-            font.weight: 500
+            font.pointSize: Appearance.font.size.large
+            font.weight: 600
         }
 
         StyledText {

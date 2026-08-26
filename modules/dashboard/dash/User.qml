@@ -10,8 +10,18 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    // Same fix as Weather: hug the actual content height instead of
+    // stretching to fill a fixed card size. The old fillHeight spacer
+    // left a chunk of dead space below "up X minutes" whenever the
+    // card was taller than the content actually needed.
+    implicitHeight: content.implicitHeight + Appearance.padding.large * 2
+
     ColumnLayout {
-        anchors.fill: parent
+        id: content
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.normal
 
@@ -44,8 +54,6 @@ Item {
             label: qsTr("up %1").arg(SysInfo.uptime)
             colour: Colours.palette.m3tertiary
         }
-
-        Item { Layout.fillHeight: true }
     }
 
     component InfoLine: RowLayout {
