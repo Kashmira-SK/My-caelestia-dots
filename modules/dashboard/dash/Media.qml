@@ -36,29 +36,28 @@ Item {
     }
 
     // Media
-    Column {
-        anchors.centerIn: parent
-
-        width: parent.width - 24
-        spacing: 8
+    Item {
+        anchors.fill: parent
+        anchors.margins: 12
 
         StyledClippingRect {
             id: cover
 
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.top: parent.top
 
-            width: 88
-            height: 88
+            width: 58
+            height: 58
 
-            radius: 20
+            radius: 14
 
             color: Colours.palette.m3surfaceContainerHigh
 
             MaterialIcon {
                 anchors.centerIn: parent
 
-                text: "library_music"
-                font.pointSize: 28
+                text: "music_note"
+                font.pointSize: 18
 
                 color: Colours.palette.m3outline
             }
@@ -67,67 +66,75 @@ Item {
                 anchors.fill: parent
 
                 source: Players.active?.trackArtUrl ?? ""
-
                 asynchronous: true
+
                 fillMode: Image.PreserveAspectCrop
 
-                sourceSize.width: 176
-                sourceSize.height: 176
+                sourceSize.width: 116
+                sourceSize.height: 116
             }
         }
 
-        StyledText {
-            width: parent.width
+        Column {
+            anchors.left: cover.right
+            anchors.right: parent.right
+            anchors.top: cover.top
 
-            text: Players.active?.trackTitle
-                || qsTr("Nothing playing")
+            anchors.leftMargin: 10
 
-            horizontalAlignment: Text.AlignHCenter
+            spacing: 2
 
-            color: Colours.palette.m3onSurface
+            StyledText {
+                width: parent.width
 
-            font.pointSize: Appearance.font.size.normal
-            font.weight: 650
+                text: Players.active?.trackTitle
+                    || qsTr("Nothing playing")
 
-            maximumLineCount: 1
-            elide: Text.ElideRight
+                color: Colours.palette.m3onSurface
+
+                font.pointSize: Appearance.font.size.small
+                font.weight: 650
+
+                maximumLineCount: 1
+                elide: Text.ElideRight
+            }
+
+            StyledText {
+                width: parent.width
+
+                text: Players.active?.trackArtist
+                    || qsTr("No media")
+
+                color: Colours.palette.m3secondary
+
+                font.pointSize: Appearance.font.size.smaller
+
+                maximumLineCount: 2
+                wrapMode: Text.WordWrap
+                elide: Text.ElideRight
+            }
         }
 
-        StyledText {
-            width: parent.width - 16
-
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            text: Players.active?.trackArtist
-                || qsTr("No media")
-
-            horizontalAlignment: Text.AlignHCenter
-
-            color: Colours.palette.m3secondary
-
-            font.pointSize: Appearance.font.size.smaller
-
-            maximumLineCount: 2
-            wrapMode: Text.WordWrap
-            elide: Text.ElideRight
-        }
-
+        // Progress
         Item {
-            width: parent.width
-            height: 8
+            anchors.left: cover.right
+            anchors.right: parent.right
+            anchors.top: cover.bottom
+
+            anchors.leftMargin: 10
+            anchors.topMargin: 8
+
+            height: 7
 
             StyledRect {
                 anchors.verticalCenter: parent.verticalCenter
 
                 width: parent.width
-                height: 3
+                height: 2
 
                 radius: Appearance.rounding.full
 
-                color: Colours.layer(
-                    Colours.palette.m3surfaceContainerHigh,
-                    2
-                )
+                color: Colours.palette.m3surfaceContainerHighest
             }
 
             StyledRect {
@@ -135,17 +142,11 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 width: parent.width * root.playerProgress
-                height: 3
+                height: 2
 
                 radius: Appearance.rounding.full
 
                 color: Colours.palette.m3primary
-
-                Behavior on width {
-                    Anim {
-                        duration: Appearance.anim.durations.large
-                    }
-                }
             }
 
             StyledRect {
@@ -159,108 +160,123 @@ Item {
                     )
                 )
 
-                width: 7
-                height: 7
+                width: 5
+                height: 5
 
                 radius: width / 2
 
                 color: Colours.palette.m3primary
-
-                Behavior on x {
-                    Anim {
-                        duration: Appearance.anim.durations.large
-                    }
-                }
             }
         }
 
         // Controls
-        Item {
-            width: parent.width
-            height: 38
+        Row {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
-            StyledRect {
-                anchors.centerIn: parent
+            spacing: 10
 
-                width: 138
-                height: 38
+            TinyControl {
+                icon: "arrow_back_ios"
+                canUse: Players.active?.canGoPrevious ?? false
 
-                radius: 19
-
-                color: Colours.palette.m3surfaceContainerHigh
+                function onClicked(): void {
+                    Players.active?.previous();
+                }
             }
 
-            Row {
-                anchors.centerIn: parent
+            TinyPlay {
+                icon: Players.active?.isPlaying
+                    ? "pause"
+                    : "play_arrow"
 
-                spacing: 4
+                canUse: Players.active?.canTogglePlaying ?? false
 
-                MediaTextButton {
-                    text: "PREV"
-                    canUse: Players.active?.canGoPrevious ?? false
-
-                    function onClicked(): void {
-                        Players.active?.previous();
-                    }
+                function onClicked(): void {
+                    Players.active?.togglePlaying();
                 }
+            }
 
-                MediaTextButton {
-                    text: Players.active?.isPlaying ? "PAUSE" : "PLAY"
-                    accent: true
-                    canUse: Players.active?.canTogglePlaying ?? false
+            TinyControl {
+                icon: "arrow_forward_ios"
+                canUse: Players.active?.canGoNext ?? false
 
-                    function onClicked(): void {
-                        Players.active?.togglePlaying();
-                    }
-                }
-
-                MediaTextButton {
-                    text: "NEXT"
-                    canUse: Players.active?.canGoNext ?? false
-
-                    function onClicked(): void {
-                        Players.active?.next();
-                    }
+                function onClicked(): void {
+                    Players.active?.next();
                 }
             }
         }
     }
 
-    component MediaTextButton: Item {
-        id: button
+    component TinyControl: Item {
+        id: control
 
-        required property string text
+        required property string icon
         required property bool canUse
-        property bool accent: false
 
-        width: accent ? 48 : 38
-        height: 28
+        width: 24
+        height: 24
 
-        StyledText {
+        MaterialIcon {
             anchors.centerIn: parent
 
-            text: button.text
+            text: control.icon
+            fill: 0
 
-            color: !button.canUse
-                ? Colours.palette.m3outline
-                : button.accent
-                    ? Colours.palette.m3primary
-                    : Colours.palette.m3onSurfaceVariant
+            font.pointSize: 11
 
-            font.pointSize: Appearance.font.size.smaller
-            font.weight: accent ? 700 : 600
-
-            opacity: button.canUse ? 1 : 0.45
+            color: control.canUse
+                ? Colours.palette.m3onSurfaceVariant
+                : Colours.palette.m3outline
         }
 
         MouseArea {
             anchors.fill: parent
+            enabled: control.canUse
 
-            enabled: button.canUse
+            onClicked: control.onClicked()
+        }
 
-            cursorShape: Qt.PointingHandCursor
+        function onClicked(): void {}
+    }
 
-            onClicked: button.onClicked()
+    component TinyPlay: Item {
+        id: control
+
+        required property string icon
+        required property bool canUse
+
+        width: 28
+        height: 28
+
+        StyledRect {
+            anchors.fill: parent
+
+            radius: width / 2
+
+            color: control.canUse
+                ? Colours.palette.m3primary
+                : Colours.palette.m3surfaceContainerHigh
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+
+            text: control.icon
+            fill: 1
+
+            font.pointSize: 13
+
+            color: control.canUse
+                ? Colours.palette.m3onPrimary
+                : Colours.palette.m3outline
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: control.canUse
+
+            onClicked: control.onClicked()
         }
 
         function onClicked(): void {}
