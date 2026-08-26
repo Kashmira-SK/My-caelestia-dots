@@ -35,233 +35,350 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    Rectangle {
+    // Media
+    Item {
         anchors.fill: parent
-        color: "transparent"
+        anchors.margins: 14
 
-        // Media card
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
+        // Track header
+        Row {
+            id: header
 
-            // Track header
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 72
-                spacing: 12
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
 
-                StyledClippingRect {
-                    id: cover
+            height: 78
+            spacing: 12
 
-                    Layout.preferredWidth: 72
-                    Layout.preferredHeight: 72
-                    Layout.alignment: Qt.AlignVCenter
+            StyledClippingRect {
+                id: cover
 
-                    radius: 16
-                    color: Colours.palette.m3surfaceContainerHigh
+                width: 76
+                height: 76
 
-                    MaterialIcon {
-                        anchors.centerIn: parent
+                anchors.verticalCenter: parent.verticalCenter
 
-                        text: "album"
-                        font.pointSize: 22
+                radius: 16
+                color: Colours.palette.m3surfaceContainerHigh
 
-                        color: Colours.palette.m3outline
-                    }
+                Image {
+                    anchors.fill: parent
 
-                    Image {
-                        anchors.fill: parent
+                    source: Players.active?.trackArtUrl ?? ""
 
-                        source: Players.active?.trackArtUrl ?? ""
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
 
-                        asynchronous: true
-                        fillMode: Image.PreserveAspectCrop
-
-                        sourceSize.width: 144
-                        sourceSize.height: 144
-                    }
+                    sourceSize.width: 152
+                    sourceSize.height: 152
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignVCenter
-
-                    spacing: 3
-
-                    StyledText {
-                        Layout.fillWidth: true
-
-                        text: Players.active?.trackTitle
-                            || qsTr("Nothing playing")
-
-                        color: Colours.palette.m3onSurface
-
-                        font.pointSize: Appearance.font.size.normal + 1
-                        font.weight: 650
-
-                        maximumLineCount: 2
-                        wrapMode: Text.WordWrap
-                        elide: Text.ElideRight
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-
-                        text: Players.active?.trackArtist
-                            || qsTr("No media")
-
-                        color: Colours.palette.m3secondary
-
-                        font.pointSize: Appearance.font.size.small
-
-                        maximumLineCount: 2
-                        wrapMode: Text.WordWrap
-                        elide: Text.ElideRight
-                    }
-                }
-            }
-
-            // Progress
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 12
-
-                StyledRect {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    width: parent.width
-                    height: 4
-
-                    radius: Appearance.rounding.full
-
-                    color: Colours.layer(
-                        Colours.palette.m3surfaceContainerHigh,
-                        2
-                    )
-                }
-
-                StyledRect {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    width: parent.width * root.playerProgress
-                    height: 4
-
-                    radius: Appearance.rounding.full
-
-                    color: Colours.palette.m3primary
-
-                    Behavior on width {
-                        Anim {
-                            duration: Appearance.anim.durations.large
-                        }
-                    }
-                }
-
-                StyledRect {
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    x: Math.max(
-                        0,
-                        Math.min(
-                            parent.width - width,
-                            (parent.width - width) * root.playerProgress
-                        )
-                    )
-
-                    width: 8
-                    height: 8
-
-                    radius: width / 2
-
-                    color: Colours.palette.m3primary
-
-                    Behavior on x {
-                        Anim {
-                            duration: Appearance.anim.durations.large
-                        }
-                    }
-                }
-            }
-
-            // Transport
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                Row {
+                MaterialIcon {
                     anchors.centerIn: parent
 
-                    spacing: 20
+                    visible: !Players.active?.trackArtUrl
 
-                    TransportButton {
-                        icon: "replay_10"
-                        canUse: Players.active?.canGoPrevious ?? false
-                        iconSize: 17
+                    text: "album"
+                    font.pointSize: 22
+                    color: Colours.palette.m3outline
+                }
+            }
 
-                        function onClicked(): void {
-                            Players.active?.previous();
-                        }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+
+                width: parent.width - cover.width - parent.spacing
+                spacing: 3
+
+                StyledText {
+                    width: parent.width
+
+                    text: Players.active?.trackTitle
+                        || qsTr("Nothing playing")
+
+                    color: Colours.palette.m3onSurface
+
+                    font.pointSize: Appearance.font.size.normal + 1
+                    font.weight: 600
+
+                    maximumLineCount: 1
+                    elide: Text.ElideRight
+                }
+
+                StyledText {
+                    width: parent.width - 22
+
+                    text: Players.active?.trackArtist
+                        || qsTr("No media")
+
+                    color: Colours.palette.m3secondary
+
+                    font.pointSize: Appearance.font.size.small
+
+                    maximumLineCount: 2
+                    wrapMode: Text.WordWrap
+                    elide: Text.ElideRight
+                }
+            }
+
+            // Tiny waveform accent
+            WaveMark {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 5
+
+                width: 24
+                height: 24
+            }
+        }
+
+        // Progress
+        Item {
+            id: progress
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: header.bottom
+
+            anchors.topMargin: 10
+
+            height: 12
+
+            StyledRect {
+                anchors.verticalCenter: parent.verticalCenter
+
+                width: parent.width
+                height: 3
+
+                radius: Appearance.rounding.full
+
+                color: Colours.layer(
+                    Colours.palette.m3surfaceContainerHigh,
+                    2
+                )
+            }
+
+            StyledRect {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+
+                width: parent.width * root.playerProgress
+                height: 3
+
+                radius: Appearance.rounding.full
+
+                color: Colours.palette.m3primary
+
+                Behavior on width {
+                    Anim {
+                        duration: Appearance.anim.durations.large
                     }
+                }
+            }
 
-                    PlayButton {
-                        icon: Players.active?.isPlaying
-                            ? "pause"
-                            : "play_arrow"
+            StyledRect {
+                anchors.verticalCenter: parent.verticalCenter
 
-                        canUse: Players.active?.canTogglePlaying ?? false
+                x: Math.max(
+                    0,
+                    Math.min(
+                        parent.width - width,
+                        (parent.width - width) * root.playerProgress
+                    )
+                )
+
+                width: 8
+                height: 8
+
+                radius: width / 2
+
+                color: Colours.palette.m3primary
+
+                Behavior on x {
+                    Anim {
+                        duration: Appearance.anim.durations.large
                     }
+                }
+            }
+        }
 
-                    TransportButton {
-                        icon: "forward_10"
-                        canUse: Players.active?.canGoNext ?? false
-                        iconSize: 17
+        // Controls
+        Row {
+            id: controls
 
-                        function onClicked(): void {
-                            Players.active?.next();
-                        }
-                    }
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+
+            anchors.bottomMargin: 8
+
+            spacing: 22
+
+            PreviousButton {
+                canUse: Players.active?.canGoPrevious ?? false
+
+                function onClicked(): void {
+                    Players.active?.previous();
+                }
+            }
+
+            PlayButton {
+                canUse: Players.active?.canTogglePlaying ?? false
+                playing: Players.active?.isPlaying ?? false
+
+                function onClicked(): void {
+                    Players.active?.togglePlaying();
+                }
+            }
+
+            NextButton {
+                canUse: Players.active?.canGoNext ?? false
+
+                function onClicked(): void {
+                    Players.active?.next();
                 }
             }
         }
     }
 
-    component TransportButton: Item {
+    component WaveMark: Canvas {
+        id: wave
+
+        property color accent: Colours.palette.m3primary
+
+        onPaint: {
+            const ctx = getContext("2d");
+
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.fillStyle = wave.accent;
+
+            const bars = [
+                0.30,
+                0.55,
+                0.85,
+                1.0,
+                0.65
+            ];
+
+            const barWidth = 3;
+            const gap = 3;
+
+            for (let i = 0; i < bars.length; i++) {
+                const h = height * bars[i];
+                const x = i * (barWidth + gap);
+                const y = (height - h) / 2;
+
+                ctx.beginPath();
+                ctx.roundedRect(
+                    x,
+                    y,
+                    barWidth,
+                    h,
+                    barWidth / 2,
+                    barWidth / 2
+                );
+                ctx.fill();
+            }
+        }
+    }
+
+    component PreviousButton: Item {
         id: button
 
-        required property string icon
         required property bool canUse
-        required property real iconSize
 
         width: 34
         height: 34
 
-        StyledRect {
+        Canvas {
             anchors.fill: parent
 
-            radius: width / 2
+            opacity: button.canUse ? 1.0 : 0.35
 
-            color: "transparent"
+            onPaint: {
+                const ctx = getContext("2d");
 
-            border.width: 1
+                ctx.clearRect(0, 0, width, height);
 
-            border.color: button.canUse
-                ? Colours.palette.m3outlineVariant
-                : Colours.palette.m3surfaceContainerHigh
+                const c = Colours.palette.m3onSurface;
+
+                ctx.fillStyle = c;
+
+                // vertical stop
+                ctx.fillRect(9, 9, 2, 16);
+
+                // first triangle
+                ctx.beginPath();
+                ctx.moveTo(14, 17);
+                ctx.lineTo(20, 11);
+                ctx.lineTo(20, 23);
+                ctx.closePath();
+                ctx.fill();
+
+                // second triangle
+                ctx.beginPath();
+                ctx.moveTo(20, 17);
+                ctx.lineTo(27, 11);
+                ctx.lineTo(27, 23);
+                ctx.closePath();
+                ctx.fill();
+            }
         }
 
-        MaterialIcon {
-            anchors.centerIn: parent
+        MouseArea {
+            anchors.fill: parent
+            enabled: button.canUse
 
-            text: button.icon
-            fill: 0
+            cursorShape: Qt.PointingHandCursor
 
-            font.pointSize: button.iconSize
+            onClicked: button.onClicked()
+        }
 
-            color: button.canUse
-                ? Colours.palette.m3onSurface
-                : Colours.palette.m3outline
+        function onClicked(): void {}
+    }
+
+    component NextButton: Item {
+        id: button
+
+        required property bool canUse
+
+        width: 34
+        height: 34
+
+        Canvas {
+            anchors.fill: parent
+
+            opacity: button.canUse ? 1.0 : 0.35
+
+            onPaint: {
+                const ctx = getContext("2d");
+
+                ctx.clearRect(0, 0, width, height);
+
+                const c = Colours.palette.m3onSurface;
+
+                ctx.fillStyle = c;
+
+                // first triangle
+                ctx.beginPath();
+                ctx.moveTo(7, 11);
+                ctx.lineTo(14, 17);
+                ctx.lineTo(7, 23);
+                ctx.closePath();
+                ctx.fill();
+
+                // second triangle
+                ctx.beginPath();
+                ctx.moveTo(14, 11);
+                ctx.lineTo(21, 17);
+                ctx.lineTo(14, 23);
+                ctx.closePath();
+                ctx.fill();
+
+                // vertical stop
+                ctx.fillRect(24, 9, 2, 16);
+            }
         }
 
         MouseArea {
@@ -279,37 +396,70 @@ Item {
     component PlayButton: Item {
         id: button
 
-        required property string icon
         required property bool canUse
+        required property bool playing
 
-        width: 46
-        height: 46
+        width: 48
+        height: 48
 
-        StyledRect {
+        Canvas {
             anchors.fill: parent
 
-            radius: width / 2
+            opacity: button.canUse ? 1.0 : 0.35
 
-            color: "transparent"
+            onPaint: {
+                const ctx = getContext("2d");
 
-            border.width: 2
+                ctx.clearRect(0, 0, width, height);
 
-            border.color: button.canUse
-                ? Colours.palette.m3primary
-                : Colours.palette.m3outline
-        }
+                const accent = Colours.palette.m3primary;
 
-        MaterialIcon {
-            anchors.centerIn: parent
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = 2;
 
-            text: button.icon
-            fill: 1
+                ctx.beginPath();
+                ctx.arc(
+                    width / 2,
+                    height / 2,
+                    21,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.stroke();
 
-            font.pointSize: 19
+                ctx.fillStyle = accent;
 
-            color: button.canUse
-                ? Colours.palette.m3primary
-                : Colours.palette.m3outline
+                if (button.playing) {
+                    ctx.beginPath();
+                    ctx.roundedRect(
+                        18,
+                        14,
+                        4,
+                        20,
+                        2,
+                        2
+                    );
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.roundedRect(
+                        26,
+                        14,
+                        4,
+                        20,
+                        2,
+                        2
+                    );
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(20, 14);
+                    ctx.lineTo(20, 34);
+                    ctx.lineTo(34, 24);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
         }
 
         MouseArea {
@@ -321,8 +471,6 @@ Item {
             onClicked: button.onClicked()
         }
 
-        function onClicked(): void {
-            Players.active?.togglePlaying();
-        }
+        function onClicked(): void {}
     }
 }
