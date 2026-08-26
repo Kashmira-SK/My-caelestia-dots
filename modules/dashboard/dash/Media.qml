@@ -35,11 +35,11 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
+    // Media
     Item {
         anchors.fill: parent
         anchors.margins: 14
 
-        // Header
         Item {
             id: header
 
@@ -55,11 +55,23 @@ Item {
                 anchors.left: parent.left
                 anchors.top: parent.top
 
-                width: 76
-                height: 76
+                width: 72
+                height: 72
 
                 radius: 15
                 color: Colours.palette.m3surfaceContainerHigh
+
+                Image {
+                    anchors.fill: parent
+
+                    source: Players.active?.trackArtUrl ?? ""
+
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+
+                    sourceSize.width: 144
+                    sourceSize.height: 144
+                }
 
                 MaterialIcon {
                     anchors.centerIn: parent
@@ -67,46 +79,29 @@ Item {
                     visible: !Players.active?.trackArtUrl
 
                     text: "album"
-                    font.pointSize: 22
+                    font.pointSize: 20
                     color: Colours.palette.m3outline
-                }
-
-                Image {
-                    anchors.fill: parent
-
-                    source: Players.active?.trackArtUrl ?? ""
-                    asynchronous: true
-                    fillMode: Image.PreserveAspectCrop
-
-                    sourceSize.width: 152
-                    sourceSize.height: 152
                 }
             }
 
-            // Waveform accent
+            // Waveform
             WaveMark {
-                id: wave
-
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                width: 25
-                height: 28
+                width: 22
+                height: 25
             }
 
-            // Track information
+            // Track info
             Column {
-                id: info
-
                 anchors.left: cover.right
-                anchors.right: wave.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
+                anchors.top: cover.top
 
-                anchors.leftMargin: 12
-                anchors.rightMargin: 10
+                anchors.leftMargin: 11
 
-                spacing: 3
+                width: parent.width - cover.width - 11
+                spacing: 2
 
                 StyledText {
                     width: parent.width
@@ -116,7 +111,7 @@ Item {
 
                     color: Colours.palette.m3onSurface
 
-                    font.pointSize: Appearance.font.size.normal + 1
+                    font.pointSize: Appearance.font.size.normal
                     font.weight: 600
 
                     maximumLineCount: 1
@@ -124,18 +119,20 @@ Item {
                 }
 
                 StyledText {
-                    width: parent.width
+                    width: parent.width - 4
 
                     text: Players.active?.trackArtist
                         || qsTr("No media")
 
                     color: Colours.palette.m3secondary
 
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Appearance.font.size.smaller
 
                     maximumLineCount: 2
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
+
+                    lineHeight: 1.05
                 }
             }
         }
@@ -148,7 +145,7 @@ Item {
             anchors.right: parent.right
             anchors.top: header.bottom
 
-            anchors.topMargin: 8
+            anchors.topMargin: 4
 
             height: 12
 
@@ -195,8 +192,8 @@ Item {
                     )
                 )
 
-                width: 8
-                height: 8
+                width: 7
+                height: 7
 
                 radius: width / 2
 
@@ -212,17 +209,16 @@ Item {
 
         // Controls
         Item {
-            id: controls
-
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: progress.bottom
             anchors.bottom: parent.bottom
 
             Row {
-                anchors.centerIn: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
 
-                spacing: 30
+                spacing: 26
 
                 PreviousButton {
                     anchors.verticalCenter: parent.verticalCenter
@@ -259,8 +255,6 @@ Item {
     }
 
     component WaveMark: Canvas {
-        id: wave
-
         onPaint: {
             const ctx = getContext("2d");
 
@@ -270,29 +264,30 @@ Item {
 
             ctx.fillStyle = accent;
 
-            const heights = [0.35, 0.6, 0.82, 1.0, 0.62];
+            const bars = [0.35, 0.62, 0.88, 1.0, 0.68];
 
-            const barWidth = 3;
-            const gap = 2;
+            const barWidth = 2.5;
+            const gap = 2.5;
+
             const totalWidth =
-                heights.length * barWidth +
-                (heights.length - 1) * gap;
+                bars.length * barWidth +
+                (bars.length - 1) * gap;
 
             const startX = (width - totalWidth) / 2;
 
-            for (let i = 0; i < heights.length; ++i) {
-                const barHeight = height * heights[i];
+            for (let i = 0; i < bars.length; ++i) {
+                const h = height * bars[i];
                 const x = startX + i * (barWidth + gap);
-                const y = (height - barHeight) / 2;
+                const y = (height - h) / 2;
 
                 ctx.beginPath();
                 ctx.roundedRect(
                     x,
                     y,
                     barWidth,
-                    barHeight,
-                    1.5,
-                    1.5
+                    h,
+                    1.25,
+                    1.25
                 );
                 ctx.fill();
             }
@@ -317,25 +312,34 @@ Item {
 
                 ctx.clearRect(0, 0, width, height);
 
-                ctx.fillStyle = Colours.palette.m3onSurface;
+                const accent = Colours.palette.m3onSurface;
 
-                // Previous marker
-                ctx.fillRect(8, 11, 2, 18);
+                ctx.fillStyle = accent;
 
-                // Double triangle
-                ctx.beginPath();
-                ctx.moveTo(13, 20);
-                ctx.lineTo(21, 13);
-                ctx.lineTo(21, 27);
-                ctx.closePath();
-                ctx.fill();
+                // Vertical stop
+                ctx.fillRect(8, 10, 2, 20);
 
-                ctx.beginPath();
-                ctx.moveTo(21, 20);
-                ctx.lineTo(30, 13);
-                ctx.lineTo(30, 27);
-                ctx.closePath();
-                ctx.fill();
+                // Dot triangle pointing left
+                const dots = [
+                    [15, 20],
+                    [19, 16],
+                    [19, 24],
+                    [23, 12],
+                    [23, 20],
+                    [23, 28]
+                ];
+
+                for (const point of dots) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        point[0],
+                        point[1],
+                        2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
             }
         }
 
@@ -369,25 +373,34 @@ Item {
 
                 ctx.clearRect(0, 0, width, height);
 
-                ctx.fillStyle = Colours.palette.m3onSurface;
+                const accent = Colours.palette.m3onSurface;
 
-                // Double triangle
-                ctx.beginPath();
-                ctx.moveTo(9, 13);
-                ctx.lineTo(18, 20);
-                ctx.lineTo(9, 27);
-                ctx.closePath();
-                ctx.fill();
+                ctx.fillStyle = accent;
 
-                ctx.beginPath();
-                ctx.moveTo(18, 13);
-                ctx.lineTo(27, 20);
-                ctx.lineTo(18, 27);
-                ctx.closePath();
-                ctx.fill();
+                // Dot triangle pointing right
+                const dots = [
+                    [25, 20],
+                    [21, 16],
+                    [21, 24],
+                    [17, 12],
+                    [17, 20],
+                    [17, 28]
+                ];
 
-                // Next marker
-                ctx.fillRect(30, 11, 2, 18);
+                for (const point of dots) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        point[0],
+                        point[1],
+                        2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                // Vertical stop
+                ctx.fillRect(30, 10, 2, 20);
             }
         }
 
