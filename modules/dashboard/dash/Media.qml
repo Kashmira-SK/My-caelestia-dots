@@ -22,9 +22,7 @@ Item {
     }
 
     Behavior on playerProgress {
-        Anim {
-            duration: Appearance.anim.durations.large
-        }
+        Anim { duration: Appearance.anim.durations.large }
     }
 
     Timer {
@@ -35,91 +33,101 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Media
     Item {
         anchors.fill: parent
         anchors.margins: 14
 
-        // Track
-        Row {
-            id: track
+        // Header
+        Item {
+            id: header
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-
-            height: 92
-            spacing: 11
+            height: 76
 
             StyledClippingRect {
                 id: cover
 
-                width: 78
-                height: 78
-
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-
-                radius: 16
+                width: 68
+                height: 68
+                radius: Appearance.rounding.normal
                 color: Colours.palette.m3surfaceContainerHigh
 
                 Image {
                     anchors.fill: parent
-
                     source: Players.active?.trackArtUrl ?? ""
                     asynchronous: true
                     fillMode: Image.PreserveAspectCrop
-
-                    sourceSize.width: 156
-                    sourceSize.height: 156
+                    sourceSize.width: 136
+                    sourceSize.height: 136
                 }
 
                 MaterialIcon {
                     anchors.centerIn: parent
-
                     visible: !Players.active?.trackArtUrl
-
                     text: "album"
-                    font.pointSize: 19
-
+                    font.pointSize: Appearance.font.size.large
                     color: Colours.palette.m3outline
                 }
             }
 
+            // Track information — no more visualizer column eating width,
+            // just a small pulsing dot in front of the title. That alone
+            // reclaims ~26px, which is why titles were eliding after only
+            // a few characters before.
             Column {
-                anchors.verticalCenter: parent.verticalCenter
+                id: info
 
-                width: parent.width - cover.width - 11
+                anchors.left: cover.right
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: Appearance.spacing.small
                 spacing: 3
 
-                StyledText {
+                Row {
                     width: parent.width
+                    spacing: 5
 
-                    text: Players.active?.trackTitle
-                        || qsTr("Nothing playing")
+                    StyledRect {
+                        id: playingDot
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: Players.active?.isPlaying ?? false
+                        implicitWidth: 6
+                        implicitHeight: 6
+                        radius: 3
+                        color: Colours.palette.m3primary
 
-                    color: Colours.palette.m3onSurface
+                        SequentialAnimation on opacity {
+                            running: playingDot.visible
+                            loops: Animation.Infinite
+                            NumberAnimation { to: 0.3; duration: 700; easing.type: Easing.InOutQuad }
+                            NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+                        }
+                    }
 
-                    font.pointSize: Appearance.font.size.small
-                    font.weight: 600
-
-                    maximumLineCount: 2
-                    wrapMode: Text.WordWrap
-                    elide: Text.ElideRight
+                    StyledText {
+                        width: parent.width - (playingDot.visible ? 11 : 0)
+                        text: Players.active?.trackTitle || qsTr("Nothing playing")
+                        color: Colours.palette.m3onSurface
+                        font.pointSize: Appearance.font.size.normal
+                        font.weight: 650
+                        maximumLineCount: 1
+                        elide: Text.ElideRight
+                    }
                 }
 
                 StyledText {
                     width: parent.width
-
-                    text: Players.active?.trackArtist
-                        || qsTr("No media")
-
+                    text: Players.active?.trackArtist || qsTr("No media")
                     color: Colours.palette.m3secondary
-
                     font.pointSize: Appearance.font.size.smaller
-
                     maximumLineCount: 2
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
+                    lineHeight: 1.0
                 }
             }
         }
@@ -130,224 +138,137 @@ Item {
 
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: track.bottom
-
-            height: 9
+            anchors.top: header.bottom
+            anchors.topMargin: 5
+            height: 10
 
             StyledRect {
                 anchors.verticalCenter: parent.verticalCenter
-
                 width: parent.width
                 height: 3
-
                 radius: Appearance.rounding.full
-
-                color: Colours.layer(
-                    Colours.palette.m3surfaceContainerHigh,
-                    2
-                )
+                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             }
 
             StyledRect {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-
                 width: parent.width * root.playerProgress
                 height: 3
-
                 radius: Appearance.rounding.full
                 color: Colours.palette.m3primary
+
+                Behavior on width {
+                    Anim { duration: Appearance.anim.durations.large }
+                }
             }
 
             StyledRect {
                 anchors.verticalCenter: parent.verticalCenter
-
-                x: Math.max(
-                    0,
-                    Math.min(
-                        parent.width - width,
-                        (parent.width - width) * root.playerProgress
-                    )
-                )
-
-                width: 6
-                height: 6
-
+                x: Math.max(0, Math.min(parent.width - width, (parent.width - width) * root.playerProgress))
+                width: 7
+                height: 7
                 radius: width / 2
                 color: Colours.palette.m3primary
+
+                Behavior on x {
+                    Anim { duration: Appearance.anim.durations.large }
+                }
             }
         }
 
-        // Controls
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
+        // Controls — clean MaterialIcon-based, matching the rest of the
+        // dashboard (weather icon, tab icons, calendar arrows) instead
+        // of the hand-drawn dot-matrix icons.
+        Item {
+            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.top: progress.bottom
+            anchors.bottom: parent.bottom
 
-            anchors.topMargin: 8
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Appearance.spacing.larger
 
-            spacing: 20
-
-            Transport {
-                type: 0
-                canUse: Players.active?.canGoPrevious ?? false
-
-                function onClicked(): void {
-                    Players.active?.previous();
+                TransportButton {
+                    icon: "skip_previous"
+                    canUse: Players.active?.canGoPrevious ?? false
+                    function onClicked(): void { Players.active?.previous(); }
                 }
-            }
 
-            Play {
-                canUse: Players.active?.canTogglePlaying ?? false
-                playing: Players.active?.isPlaying ?? false
-
-                function onClicked(): void {
-                    Players.active?.togglePlaying();
+                PlayButton {
+                    canUse: Players.active?.canTogglePlaying ?? false
+                    playing: Players.active?.isPlaying ?? false
+                    function onClicked(): void { Players.active?.togglePlaying(); }
                 }
-            }
 
-            Transport {
-                type: 1
-                canUse: Players.active?.canGoNext ?? false
-
-                function onClicked(): void {
-                    Players.active?.next();
+                TransportButton {
+                    icon: "skip_next"
+                    canUse: Players.active?.canGoNext ?? false
+                    function onClicked(): void { Players.active?.next(); }
                 }
             }
         }
     }
 
-    component Transport: Item {
+    component TransportButton: Item {
         id: button
 
-        required property int type
+        required property string icon
         required property bool canUse
-
-        width: 20
-        height: 24
-
-        Canvas {
-            anchors.centerIn: parent
-
-            width: 18
-            height: 18
-
-            opacity: button.canUse ? 1 : 0.3
-
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-
-                ctx.fillStyle = Colours.palette.m3onSurface;
-
-                const points = button.type === 0
-                    ? [
-                        [13, 9],
-                        [10, 6],
-                        [10, 12],
-                        [7, 4],
-                        [7, 9],
-                        [7, 14]
-                    ]
-                    : [
-                        [5, 9],
-                        [8, 6],
-                        [8, 12],
-                        [11, 4],
-                        [11, 9],
-                        [11, 14]
-                    ];
-
-                for (const p of points) {
-                    ctx.beginPath();
-                    ctx.arc(
-                        p[0],
-                        p[1],
-                        1.35,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                }
-
-                ctx.fillRect(
-                    button.type === 0 ? 15 : 2,
-                    5,
-                    1.5,
-                    8
-                );
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            enabled: button.canUse
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: button.onClicked()
-        }
-
         function onClicked(): void {}
+
+        implicitWidth: 34
+        implicitHeight: 34
+
+        StateLayer {
+            disabled: !button.canUse
+            radius: Appearance.rounding.full
+            function onClicked(): void { button.onClicked(); }
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            animate: true
+            fill: 1
+            text: button.icon
+            color: button.canUse ? Colours.palette.m3onSurface : Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.large
+        }
     }
 
-    component Play: Item {
+    component PlayButton: Item {
         id: button
 
         required property bool canUse
         required property bool playing
-
-        width: 34
-        height: 34
-
-        opacity: canUse ? 1 : 0.35
-
-        Canvas {
-            anchors.fill: parent
-
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-
-                const accent = Colours.palette.m3primary;
-
-                ctx.strokeStyle = accent;
-                ctx.lineWidth = 1.5;
-
-                ctx.beginPath();
-                ctx.arc(
-                    width / 2,
-                    height / 2,
-                    15,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.stroke();
-
-                ctx.fillStyle = accent;
-
-                if (button.playing) {
-                    ctx.fillRect(12, 10, 3, 14);
-                    ctx.fillRect(19, 10, 3, 14);
-                } else {
-                    ctx.beginPath();
-                    ctx.moveTo(13, 9);
-                    ctx.lineTo(13, 25);
-                    ctx.lineTo(24, 17);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            enabled: button.canUse
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: button.onClicked()
-        }
-
         function onClicked(): void {}
+
+        implicitWidth: 48
+        implicitHeight: 48
+
+        StyledRect {
+            anchors.fill: parent
+            radius: width / 2
+            color: "transparent"
+            border.color: button.canUse ? Colours.palette.m3primary : Colours.palette.m3outline
+            border.width: 2
+        }
+
+        StateLayer {
+            disabled: !button.canUse
+            radius: Appearance.rounding.full
+            function onClicked(): void { button.onClicked(); }
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            animate: true
+            fill: 1
+            text: button.playing ? "pause" : "play_arrow"
+            color: button.canUse ? Colours.palette.m3primary : Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.large
+        }
     }
 }
