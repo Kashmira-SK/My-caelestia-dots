@@ -40,37 +40,37 @@ Item {
         anchors.fill: parent
         anchors.margins: 14
 
-        Item {
-            id: header
+        // Track
+        Row {
+            id: track
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
 
-            height: 82
+            height: 92
+            spacing: 11
 
             StyledClippingRect {
                 id: cover
 
-                anchors.left: parent.left
-                anchors.top: parent.top
+                width: 78
+                height: 78
 
-                width: 72
-                height: 72
+                anchors.verticalCenter: parent.verticalCenter
 
-                radius: 15
+                radius: 16
                 color: Colours.palette.m3surfaceContainerHigh
 
                 Image {
                     anchors.fill: parent
 
                     source: Players.active?.trackArtUrl ?? ""
-
                     asynchronous: true
                     fillMode: Image.PreserveAspectCrop
 
-                    sourceSize.width: 144
-                    sourceSize.height: 144
+                    sourceSize.width: 156
+                    sourceSize.height: 156
                 }
 
                 MaterialIcon {
@@ -79,29 +79,17 @@ Item {
                     visible: !Players.active?.trackArtUrl
 
                     text: "album"
-                    font.pointSize: 20
+                    font.pointSize: 19
+
                     color: Colours.palette.m3outline
                 }
             }
 
-            // Waveform
-            WaveMark {
-                anchors.right: parent.right
-                anchors.top: parent.top
-
-                width: 22
-                height: 25
-            }
-
-            // Track info
             Column {
-                anchors.left: cover.right
-                anchors.top: cover.top
-
-                anchors.leftMargin: 11
+                anchors.verticalCenter: parent.verticalCenter
 
                 width: parent.width - cover.width - 11
-                spacing: 2
+                spacing: 3
 
                 StyledText {
                     width: parent.width
@@ -111,15 +99,16 @@ Item {
 
                     color: Colours.palette.m3onSurface
 
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Appearance.font.size.small
                     font.weight: 600
 
-                    maximumLineCount: 1
+                    maximumLineCount: 2
+                    wrapMode: Text.WordWrap
                     elide: Text.ElideRight
                 }
 
                 StyledText {
-                    width: parent.width - 4
+                    width: parent.width
 
                     text: Players.active?.trackArtist
                         || qsTr("No media")
@@ -131,8 +120,6 @@ Item {
                     maximumLineCount: 2
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
-
-                    lineHeight: 1.05
                 }
             }
         }
@@ -143,11 +130,9 @@ Item {
 
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: header.bottom
+            anchors.top: track.bottom
 
-            anchors.topMargin: 4
-
-            height: 12
+            height: 9
 
             StyledRect {
                 anchors.verticalCenter: parent.verticalCenter
@@ -171,14 +156,7 @@ Item {
                 height: 3
 
                 radius: Appearance.rounding.full
-
                 color: Colours.palette.m3primary
-
-                Behavior on width {
-                    Anim {
-                        duration: Appearance.anim.durations.large
-                    }
-                }
             }
 
             StyledRect {
@@ -192,154 +170,111 @@ Item {
                     )
                 )
 
-                width: 7
-                height: 7
+                width: 6
+                height: 6
 
                 radius: width / 2
-
                 color: Colours.palette.m3primary
-
-                Behavior on x {
-                    Anim {
-                        duration: Appearance.anim.durations.large
-                    }
-                }
             }
         }
 
         // Controls
-        Item {
-            anchors.left: parent.left
-            anchors.right: parent.right
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: progress.bottom
-            anchors.bottom: parent.bottom
 
-            Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
+            anchors.topMargin: 8
 
-                spacing: 26
+            spacing: 20
 
-                PreviousButton {
-                    anchors.verticalCenter: parent.verticalCenter
+            Transport {
+                type: 0
+                canUse: Players.active?.canGoPrevious ?? false
 
-                    canUse: Players.active?.canGoPrevious ?? false
-
-                    function onClicked(): void {
-                        Players.active?.previous();
-                    }
+                function onClicked(): void {
+                    Players.active?.previous();
                 }
+            }
 
-                PlayButton {
-                    anchors.verticalCenter: parent.verticalCenter
+            Play {
+                canUse: Players.active?.canTogglePlaying ?? false
+                playing: Players.active?.isPlaying ?? false
 
-                    canUse: Players.active?.canTogglePlaying ?? false
-                    playing: Players.active?.isPlaying ?? false
-
-                    function onClicked(): void {
-                        Players.active?.togglePlaying();
-                    }
+                function onClicked(): void {
+                    Players.active?.togglePlaying();
                 }
+            }
 
-                NextButton {
-                    anchors.verticalCenter: parent.verticalCenter
+            Transport {
+                type: 1
+                canUse: Players.active?.canGoNext ?? false
 
-                    canUse: Players.active?.canGoNext ?? false
-
-                    function onClicked(): void {
-                        Players.active?.next();
-                    }
+                function onClicked(): void {
+                    Players.active?.next();
                 }
             }
         }
     }
 
-    component WaveMark: Canvas {
-        onPaint: {
-            const ctx = getContext("2d");
+    component Transport: Item {
+        id: button
 
-            ctx.clearRect(0, 0, width, height);
+        required property int type
+        required property bool canUse
 
-            const accent = Colours.palette.m3primary;
+        width: 20
+        height: 24
 
-            ctx.fillStyle = accent;
+        Canvas {
+            anchors.centerIn: parent
 
-            const bars = [0.35, 0.62, 0.88, 1.0, 0.68];
+            width: 18
+            height: 18
 
-            const barWidth = 2.5;
-            const gap = 2.5;
+            opacity: button.canUse ? 1 : 0.3
 
-            const totalWidth =
-                bars.length * barWidth +
-                (bars.length - 1) * gap;
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
 
-            const startX = (width - totalWidth) / 2;
+                ctx.fillStyle = Colours.palette.m3onSurface;
 
-            for (let i = 0; i < bars.length; ++i) {
-                const h = height * bars[i];
-                const x = startX + i * (barWidth + gap);
-                const y = (height - h) / 2;
+                const points = button.type === 0
+                    ? [
+                        [13, 9],
+                        [10, 6],
+                        [10, 12],
+                        [7, 4],
+                        [7, 9],
+                        [7, 14]
+                    ]
+                    : [
+                        [5, 9],
+                        [8, 6],
+                        [8, 12],
+                        [11, 4],
+                        [11, 9],
+                        [11, 14]
+                    ];
 
-                ctx.beginPath();
-                ctx.roundedRect(
-                    x,
-                    y,
-                    barWidth,
-                    h,
-                    1.25,
-                    1.25
+                for (const p of points) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        p[0],
+                        p[1],
+                        1.35,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+                ctx.fillRect(
+                    button.type === 0 ? 15 : 2,
+                    5,
+                    1.5,
+                    8
                 );
-                ctx.fill();
-            }
-        }
-    }
-
-    component PreviousButton: Item {
-        id: button
-
-        required property bool canUse
-
-        width: 40
-        height: 40
-
-        opacity: canUse ? 1 : 0.35
-
-        Canvas {
-            anchors.fill: parent
-
-            onPaint: {
-                const ctx = getContext("2d");
-
-                ctx.clearRect(0, 0, width, height);
-
-                const accent = Colours.palette.m3onSurface;
-
-                ctx.fillStyle = accent;
-
-                // Vertical stop
-                ctx.fillRect(8, 10, 2, 20);
-
-                // Dot triangle pointing left
-                const dots = [
-                    [15, 20],
-                    [19, 16],
-                    [19, 24],
-                    [23, 12],
-                    [23, 20],
-                    [23, 28]
-                ];
-
-                for (const point of dots) {
-                    ctx.beginPath();
-                    ctx.arc(
-                        point[0],
-                        point[1],
-                        2,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                }
             }
         }
 
@@ -355,75 +290,14 @@ Item {
         function onClicked(): void {}
     }
 
-    component NextButton: Item {
-        id: button
-
-        required property bool canUse
-
-        width: 40
-        height: 40
-
-        opacity: canUse ? 1 : 0.35
-
-        Canvas {
-            anchors.fill: parent
-
-            onPaint: {
-                const ctx = getContext("2d");
-
-                ctx.clearRect(0, 0, width, height);
-
-                const accent = Colours.palette.m3onSurface;
-
-                ctx.fillStyle = accent;
-
-                // Dot triangle pointing right
-                const dots = [
-                    [25, 20],
-                    [21, 16],
-                    [21, 24],
-                    [17, 12],
-                    [17, 20],
-                    [17, 28]
-                ];
-
-                for (const point of dots) {
-                    ctx.beginPath();
-                    ctx.arc(
-                        point[0],
-                        point[1],
-                        2,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                }
-
-                // Vertical stop
-                ctx.fillRect(30, 10, 2, 20);
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            enabled: button.canUse
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: button.onClicked()
-        }
-
-        function onClicked(): void {}
-    }
-
-    component PlayButton: Item {
+    component Play: Item {
         id: button
 
         required property bool canUse
         required property bool playing
 
-        width: 50
-        height: 50
+        width: 34
+        height: 34
 
         opacity: canUse ? 1 : 0.35
 
@@ -432,19 +306,18 @@ Item {
 
             onPaint: {
                 const ctx = getContext("2d");
-
                 ctx.clearRect(0, 0, width, height);
 
                 const accent = Colours.palette.m3primary;
 
                 ctx.strokeStyle = accent;
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1.5;
 
                 ctx.beginPath();
                 ctx.arc(
                     width / 2,
                     height / 2,
-                    21,
+                    15,
                     0,
                     Math.PI * 2
                 );
@@ -453,32 +326,13 @@ Item {
                 ctx.fillStyle = accent;
 
                 if (button.playing) {
-                    ctx.beginPath();
-                    ctx.roundedRect(
-                        18,
-                        15,
-                        5,
-                        20,
-                        2,
-                        2
-                    );
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.roundedRect(
-                        27,
-                        15,
-                        5,
-                        20,
-                        2,
-                        2
-                    );
-                    ctx.fill();
+                    ctx.fillRect(12, 10, 3, 14);
+                    ctx.fillRect(19, 10, 3, 14);
                 } else {
                     ctx.beginPath();
-                    ctx.moveTo(20, 14);
-                    ctx.lineTo(20, 36);
-                    ctx.lineTo(35, 25);
+                    ctx.moveTo(13, 9);
+                    ctx.lineTo(13, 25);
+                    ctx.lineTo(24, 17);
                     ctx.closePath();
                     ctx.fill();
                 }
