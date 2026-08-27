@@ -24,7 +24,6 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    // Left: System (fieldset border label) + Quote (fills rest)
     ColumnLayout {
         id: leftCol
         x: 0
@@ -33,68 +32,68 @@ Item {
         height: root.height
         spacing: root.gap
 
-        // Wrapper so we can position the "SYSTEM" label ON the card's
-        // left border line rather than inside the card content.
-        Item {
-            id: systemCardWrapper
+        Card {
+            id: systemCard
             Layout.fillWidth: true
             Layout.preferredHeight: systemWidget.implicitHeight + Appearance.padding.large * 2
 
-            // Card inset left by half the label item width so the card's
-            // left border sits exactly at the label's centre.
-            Card {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+            User {
+                id: systemWidget
                 anchors.left: parent.left
-                anchors.leftMargin: Math.ceil(sysLabelItem.width / 2)
-
-                User {
-                    id: systemWidget
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    visibilities: root.visibilities
-                    state: root.state
-                    facePicker: root.facePicker
-                }
+                anchors.right: parent.right
+                anchors.top: parent.top
+                visibilities: root.visibilities
+                state: root.state
+                facePicker: root.facePicker
             }
 
-            // "SYSTEM" ON the left border — fieldset/legend style.
-            // The Rectangle behind the text matches the card background
-            // and masks the border line, so the line appears to break
-            // at S, read SYSTEM, then resume at M.
             Item {
                 id: sysLabelItem
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                x: 0
+                width: sysLabel.implicitHeight + 6
+                height: sysLabel.implicitWidth + 14
                 z: 10
-                // Rotated -90°: visual width on screen = text line height,
-                // visual height on screen = text string length.
-                width: sysLabel.implicitHeight + 8
-                height: sysLabel.implicitWidth + 16
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    anchors.leftMargin: -2
+                    color: systemCard.color
                 }
 
                 StyledText {
                     id: sysLabel
                     anchors.centerIn: parent
-                    text: "SYSTEM"
-                    color: Colours.palette.m3outline
+                    text: qsTr("SYSTEM")
+                    color: Colours.palette.m3primary
                     font.pointSize: Appearance.font.size.small
-                    font.weight: 600
+                    font.weight: 700
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 3
                     rotation: -90
                     transformOrigin: Item.Center
                 }
             }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.topMargin: Appearance.rounding.large
+                anchors.bottom: sysLabelItem.top
+                width: 2
+                color: Colours.palette.m3primary
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Appearance.rounding.large
+                anchors.top: sysLabelItem.bottom
+                width: 2
+                color: Colours.palette.m3primary
+            }
         }
 
-        // Quote takes whatever's left in the left column
         Card {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -102,8 +101,6 @@ Item {
         }
     }
 
-    // Center: clock only, full height — wider and taller now that
-    // Quote moved to the left column.
     ColumnLayout {
         id: centerCol
         x: root.leftW + root.gap
@@ -114,13 +111,17 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: 340
             DateTime { anchors.fill: parent }
+        }
+
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            DayProgress { anchors.fill: parent }
         }
     }
 
-    // Right: Character gif (fillHeight) on top, Media player anchored
-    // to the bottom. Calendar is gone — it gets its own tab.
     ColumnLayout {
         id: rightCol
         x: root.leftW + root.gap + root.centerW + root.gap
@@ -132,21 +133,29 @@ Item {
         Card {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Character {
-                anchors.fill: parent
-                state: root.state
-            }
-        }
 
-        Card {
-            Layout.fillWidth: true
-            Layout.preferredHeight: mediaWidget.implicitHeight
-            Media {
-                id: mediaWidget
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                state: root.state
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large
+                spacing: Appearance.spacing.normal
+
+                Character {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 190
+                    state: root.state
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
+                }
+
+                Media {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    state: root.state
+                }
             }
         }
     }

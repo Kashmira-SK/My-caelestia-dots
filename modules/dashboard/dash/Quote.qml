@@ -7,19 +7,6 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    // Decorative watermark — faint oversized open-quote behind the text.
-    // Makes the card feel like a designed feature rather than leftover space.
-    Text {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: -10
-        anchors.rightMargin: Appearance.padding.normal
-        text: "\u201C"
-        color: Qt.alpha(Colours.palette.m3tertiary, 0.07)
-        font.pointSize: 88
-        font.weight: Font.Bold
-    }
-
     readonly property var quotes: [
         { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" },
         { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
@@ -33,29 +20,40 @@ Item {
 
     readonly property var picked: quotes[Math.floor(Math.random() * quotes.length)]
 
+    // Big faint watermark quotation mark so the card doesn't read as
+    // mostly empty space around a small centered block.
+    StyledText {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: -Appearance.padding.large
+        anchors.leftMargin: Appearance.padding.normal
+        text: "\u201C"
+        color: Qt.alpha(Colours.palette.m3tertiary, 0.10)
+        font.pointSize: 96
+        font.weight: 700
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.small
+        spacing: Appearance.spacing.normal
 
         Item { Layout.fillHeight: true }
 
         Row {
             Layout.alignment: Qt.AlignHCenter
             spacing: 6
-
             Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
-            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 7 }
+            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 8 }
             Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
         }
 
         StyledText {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
-
             text: `"${root.picked.text}"`
             color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.smaller
+            font.pointSize: Appearance.font.size.normal
             font.italic: true
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
@@ -66,15 +64,15 @@ Item {
             visible: root.picked.author !== ""
             text: `— ${root.picked.author}`
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: Appearance.font.size.normal
+            font.weight: 600
         }
 
         Row {
             Layout.alignment: Qt.AlignHCenter
             spacing: 6
-
             Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
-            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 7 }
+            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 8 }
             Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
         }
 

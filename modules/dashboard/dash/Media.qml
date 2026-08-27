@@ -12,12 +12,6 @@ Item {
 
     required property PersistentProperties state
 
-    // Was anchors.fill: parent, which meant this widget had no way to
-    // report its own natural size — it just took whatever the Card gave
-    // it and tried to make the content look okay inside that (centering
-    // was a band-aid on that). Now it reports its real content height,
-    // same as System/Weather, so the Card sizes to it instead of the
-    // other way around.
     implicitHeight: content.implicitHeight + Appearance.padding.large * 2
 
     property real playerProgress: {
@@ -39,25 +33,21 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Flat, clean background matching the rest of the dashboard.
     ColumnLayout {
         id: content
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.small
+        anchors.centerIn: parent
+        width: parent.width - Appearance.padding.large * 2
+        spacing: Appearance.spacing.normal
 
-        // Small square art thumbnail up top-left
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.small
+            spacing: Appearance.spacing.normal
 
             StyledClippingRect {
-                Layout.preferredWidth: 40
-                Layout.preferredHeight: 40
-                radius: Appearance.rounding.small
+                Layout.preferredWidth: 64
+                Layout.preferredHeight: 64
+                radius: Appearance.rounding.normal
                 color: Colours.palette.m3surfaceContainerHigh
 
                 Image {
@@ -65,67 +55,74 @@ Item {
                     source: Players.active?.trackArtUrl ?? ""
                     asynchronous: true
                     fillMode: Image.PreserveAspectCrop
-                    sourceSize.width: 80
-                    sourceSize.height: 80
+                    sourceSize.width: 128
+                    sourceSize.height: 128
                 }
 
                 MaterialIcon {
                     anchors.centerIn: parent
                     visible: !Players.active?.trackArtUrl
                     text: "album"
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Appearance.font.size.large
                     color: Colours.palette.m3outline
                 }
             }
 
-            StyledRect {
-                Layout.alignment: Qt.AlignVCenter
-                visible: Players.active?.isPlaying ?? false
-                implicitWidth: 6
-                implicitHeight: 6
-                radius: 3
-                color: Colours.palette.m3primary
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
 
-                SequentialAnimation on opacity {
-                    running: Players.active?.isPlaying ?? false
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.3; duration: 700; easing.type: Easing.InOutQuad }
-                    NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.small
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: Players.active?.trackTitle || qsTr("Nothing playing")
+                        color: Colours.palette.m3onSurface
+                        font.pointSize: Appearance.font.size.normal
+                        font.weight: 700
+                        maximumLineCount: 1
+                        elide: Text.ElideRight
+                    }
+
+                    StyledRect {
+                        visible: Players.active?.isPlaying ?? false
+                        implicitWidth: 6
+                        implicitHeight: 6
+                        radius: 3
+                        color: Colours.palette.m3primary
+
+                        SequentialAnimation on opacity {
+                            running: Players.active?.isPlaying ?? false
+                            loops: Animation.Infinite
+                            NumberAnimation { to: 0.3; duration: 700; easing.type: Easing.InOutQuad }
+                            NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+                        }
+                    }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Players.active?.trackArtist || qsTr("No media")
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.small
+                    maximumLineCount: 1
+                    elide: Text.ElideRight
                 }
             }
         }
 
-        // Track info
-        StyledText {
-            Layout.fillWidth: true
-            text: Players.active?.trackTitle || qsTr("Nothing playing")
-            color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.normal
-            font.weight: 650
-            maximumLineCount: 1
-            elide: Text.ElideRight
-        }
-
-        StyledText {
-            Layout.fillWidth: true
-            text: Players.active?.trackArtist || qsTr("No media")
-            color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.smaller
-            maximumLineCount: 1
-            elide: Text.ElideRight
-        }
-
-        // Progress
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 8
+            Layout.preferredHeight: 10
             Layout.topMargin: 2
 
             StyledRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: 3
+                implicitHeight: 4
                 radius: Appearance.rounding.full
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.2)
             }
@@ -133,7 +130,7 @@ Item {
             StyledRect {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: 3
+                implicitHeight: 4
                 width: parent.width * root.playerProgress
                 radius: Appearance.rounding.full
                 color: Colours.palette.m3primary
@@ -142,17 +139,15 @@ Item {
             }
         }
 
-        // Compact floating control pill — one slim bar instead of a
-        // whole dedicated section, so controls stop eating most of
-        // the card's height.
         RowLayout {
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.small
+            Layout.topMargin: Appearance.spacing.normal
             Layout.alignment: Qt.AlignHCenter
             spacing: Appearance.spacing.large
 
             TransportButton {
                 icon: "skip_previous"
+                size: 32
                 canUse: Players.active?.canGoPrevious ?? false
                 function onClicked(): void { Players.active?.previous(); }
             }
@@ -165,6 +160,7 @@ Item {
 
             TransportButton {
                 icon: "skip_next"
+                size: 32
                 canUse: Players.active?.canGoNext ?? false
                 function onClicked(): void { Players.active?.next(); }
             }
@@ -176,10 +172,11 @@ Item {
 
         required property string icon
         required property bool canUse
+        property int size: 28
         function onClicked(): void {}
 
-        implicitWidth: 28
-        implicitHeight: 28
+        implicitWidth: size
+        implicitHeight: size
 
         StateLayer {
             disabled: !button.canUse
@@ -193,7 +190,7 @@ Item {
             fill: 1
             text: button.icon
             color: button.canUse ? Colours.palette.m3onSurface : Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Appearance.font.size.large
         }
     }
 
@@ -204,8 +201,8 @@ Item {
         required property bool playing
         function onClicked(): void {}
 
-        implicitWidth: 34
-        implicitHeight: 34
+        implicitWidth: 44
+        implicitHeight: 44
 
         StyledRect {
             anchors.fill: parent
@@ -225,7 +222,7 @@ Item {
             fill: 1
             text: button.playing ? "pause" : "play_arrow"
             color: Colours.palette.m3onPrimary
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Appearance.font.size.large
         }
     }
 }
