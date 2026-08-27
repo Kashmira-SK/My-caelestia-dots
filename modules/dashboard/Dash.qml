@@ -14,30 +14,17 @@ Item {
     required property PersistentProperties state
     required property FileDialog facePicker
 
-    readonly property int leftW: 220
-    readonly property int rightW: 285
+    readonly property int leftW: 215
+    readonly property int rightW: 270
     readonly property int gap: Appearance.spacing.normal
     readonly property int centerW: implicitWidth - leftW - rightW - gap * 2
 
     implicitWidth: 840
-    // Fixed, reasonable baseline. Calendar takes exactly the height its
-    // content needs (see Layout.preferredHeight: calendar.implicitHeight
-    // below); Character/Media/DateTime are all fillHeight, so whatever's
-    // left over below Calendar/System+Weather/Quote gets absorbed there
-    // automatically. No guessing required, and every column's bottom
-    // card now always ends flush with the others because they're all
-    // the fillHeight element in their column.
-    implicitHeight: 500
+    implicitHeight: 520
     width: implicitWidth
     height: implicitHeight
 
-    // NOTE: deliberately NOT using an outer RowLayout with a fillWidth center
-    // column here — that combination was silently collapsing the center
-    // column's width to 0 in this Loader/Flickable/Pane context. Explicit
-    // anchored widths below are the reliable fix; each column is still a
-    // normal ColumnLayout internally so Layout.fillWidth/fillHeight on the
-    // Cards inside each column works exactly as expected.
-
+    // Left: System (fieldset border label) + Quote (fills rest)
     ColumnLayout {
         id: leftCol
         x: 0
@@ -46,45 +33,77 @@ Item {
         height: root.height
         spacing: root.gap
 
-        Card {
-            Layout.fillWidth: true
-            // Weather card removed per request — System now absorbs that
-            // space and gets its profile picture back.
-            Layout.preferredHeight: systemWidget.implicitHeight
-            User {
-                id: systemWidget
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                visibilities: root.visibilities
-                state: root.state
-                facePicker: root.facePicker
-            }
-        }
-
-        Card {
-            Layout.fillWidth: true
-            // Media reports its own content height now — same pattern as
-            // System/Weather — instead of being force-stretched to fill
-            // whatever's left in the column.
-            Layout.preferredHeight: media.implicitHeight
-            Media {
-                id: media
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                state: root.state
-            }
-        }
-
-        // Absorbs whatever's left over in the column now that Media
-        // hugs its own content instead of stretching into this space.
+        // Wrapper so we can position the "SYSTEM" label ON the card's
+        // left border line rather than inside the card content.
         Item {
+            id: systemCardWrapper
+            Layout.fillWidth: true
+            Layout.preferredHeight: systemWidget.implicitHeight + Appearance.padding.large * 2
+
+            // Card inset left by half the label item width so the card's
+            // left border sits exactly at the label's centre.
+            Card {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.leftMargin: Math.ceil(sysLabelItem.width / 2)
+
+                User {
+                    id: systemWidget
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    visibilities: root.visibilities
+                    state: root.state
+                    facePicker: root.facePicker
+                }
+            }
+
+            // "SYSTEM" ON the left border — fieldset/legend style.
+            // The Rectangle behind the text matches the card background
+            // and masks the border line, so the line appears to break
+            // at S, read SYSTEM, then resume at M.
+            Item {
+                id: sysLabelItem
+                anchors.verticalCenter: parent.verticalCenter
+                x: 0
+                z: 10
+                // Rotated -90°: visual width on screen = text line height,
+                // visual height on screen = text string length.
+                width: sysLabel.implicitHeight + 8
+                height: sysLabel.implicitWidth + 16
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                }
+
+                StyledText {
+                    id: sysLabel
+                    anchors.centerIn: parent
+                    text: "SYSTEM"
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.small
+                    font.weight: 600
+                    font.capitalization: Font.AllUppercase
+                    font.letterSpacing: 3
+                    rotation: -90
+                    transformOrigin: Item.Center
+                }
+            }
+        }
+
+        // Quote takes whatever's left in the left column
+        Card {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Quote { anchors.fill: parent }
         }
     }
 
+    // Center: clock only, full height — wider and taller now that
+    // Quote moved to the left column.
     ColumnLayout {
         id: centerCol
         x: root.leftW + root.gap
@@ -98,14 +117,10 @@ Item {
             Layout.fillHeight: true
             DateTime { anchors.fill: parent }
         }
-
-        Card {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 155
-            Quote { anchors.fill: parent }
-        }
     }
 
+    // Right: Character gif (fillHeight) on top, Media player anchored
+    // to the bottom. Calendar is gone — it gets its own tab.
     ColumnLayout {
         id: rightCol
         x: root.leftW + root.gap + root.centerW + root.gap
@@ -116,29 +131,21 @@ Item {
 
         Card {
             Layout.fillWidth: true
-            // Height matches Calendar's own computed content height exactly —
-            // don't force-fit Calendar to a fixed card height, since that's
-            // what was pushing the last calendar row past the card's edge.
-            Layout.preferredHeight: calendar.implicitHeight
-
-            Calendar {
-                id: calendar
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+            Layout.fillHeight: true
+            Character {
+                anchors.fill: parent
                 state: root.state
             }
         }
 
         Card {
             Layout.fillWidth: true
-            // Fixed sibling above (Calendar card) takes exactly what its
-            // content needs; this one absorbs whatever's left over in the
-            // column — same pattern as Media in the left column and it's
-            // what keeps every column's bottom edge flush with the others.
-            Layout.fillHeight: true
-            Character {
-                anchors.fill: parent
+            Layout.preferredHeight: mediaWidget.implicitHeight
+            Media {
+                id: mediaWidget
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
                 state: root.state
             }
         }

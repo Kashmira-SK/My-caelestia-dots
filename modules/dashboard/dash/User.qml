@@ -134,20 +134,6 @@ Item {
                     }
                 }
             }
-
-            // Vertical "SYSTEM" label — reads top-to-bottom beside the
-            // avatar instead of sitting in its own horizontal row above.
-            StyledText {
-                Layout.alignment: Qt.AlignVCenter
-                text: qsTr("SYSTEM")
-                color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
-                font.weight: 600
-                font.capitalization: Font.AllUppercase
-                font.letterSpacing: 3
-                rotation: -90
-                transformOrigin: Item.Center
-            }
         }
 
         ColumnLayout {

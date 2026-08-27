@@ -7,6 +7,19 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    // Decorative watermark — faint oversized open-quote behind the text.
+    // Makes the card feel like a designed feature rather than leftover space.
+    Text {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.topMargin: -10
+        anchors.rightMargin: Appearance.padding.normal
+        text: "\u201C"
+        color: Qt.alpha(Colours.palette.m3tertiary, 0.07)
+        font.pointSize: 88
+        font.weight: Font.Bold
+    }
+
     readonly property var quotes: [
         { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" },
         { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
