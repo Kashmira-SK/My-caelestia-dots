@@ -56,8 +56,10 @@ Item {
                 z: 10
 
                 Rectangle {
-                    anchors.fill: parent
-                    anchors.leftMargin: -2
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    width: parent.width / 2 + 2
                     color: systemCard.color
                 }
 
