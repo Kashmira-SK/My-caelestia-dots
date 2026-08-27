@@ -20,8 +20,6 @@ Item {
 
     readonly property var picked: quotes[Math.floor(Math.random() * quotes.length)]
 
-    // Big faint watermark quotation mark so the card doesn't read as
-    // mostly empty space around a small centered block.
     StyledText {
         anchors.top: parent.top
         anchors.left: parent.left
@@ -38,14 +36,33 @@ Item {
         anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.normal
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
 
         Row {
             Layout.alignment: Qt.AlignHCenter
             spacing: 6
-            Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
-            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 8 }
-            Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
+
+            Rectangle {
+                width: 30
+                height: 1
+                color: Colours.palette.m3outlineVariant
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            StyledText {
+                text: "✦"
+                color: Colours.palette.m3tertiary
+                font.pointSize: 8
+            }
+
+            Rectangle {
+                width: 30
+                height: 1
+                color: Colours.palette.m3outlineVariant
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
         StyledText {
@@ -71,11 +88,30 @@ Item {
         Row {
             Layout.alignment: Qt.AlignHCenter
             spacing: 6
-            Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
-            StyledText { text: "✦"; color: Colours.palette.m3tertiary; font.pointSize: 8 }
-            Rectangle { width: 30; height: 1; color: Colours.palette.m3outlineVariant; anchors.verticalCenter: parent.verticalCenter }
+
+            Rectangle {
+                width: 30
+                height: 1
+                color: Colours.palette.m3outlineVariant
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            StyledText {
+                text: "✦"
+                color: Colours.palette.m3tertiary
+                font.pointSize: 8
+            }
+
+            Rectangle {
+                width: 30
+                height: 1
+                color: Colours.palette.m3outlineVariant
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }

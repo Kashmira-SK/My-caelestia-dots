@@ -193,14 +193,112 @@ Item {
             Layout.fillHeight: true
 
             Card {
+                id: quoteCard
+
                 anchors.left: parent.left
                 anchors.leftMargin: root.leftGutter
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
+                border.width: 0
+
                 Quote {
                     anchors.fill: parent
+                }
+
+                Canvas {
+                    id: quoteBorder
+                    anchors.fill: parent
+                    z: 5
+                    antialiasing: true
+
+                    onPaint: {
+                        const ctx = getContext("2d")
+
+                        ctx.clearRect(0, 0, width, height)
+
+                        const w = width
+                        const h = height
+                        const r = Math.min(
+                            Appearance.rounding.large,
+                            Math.min(w, h) / 2
+                        )
+
+                        const padding = 7
+                        const gapLeft = quoteLabelItem.x - padding
+                        const gapRight = quoteLabelItem.x
+                            + quoteLabelItem.width
+                            + padding
+
+                        ctx.strokeStyle = Colours.palette.m3outlineVariant
+                        ctx.lineWidth = 1
+                        ctx.lineJoin = "round"
+                        ctx.lineCap = "butt"
+
+                        ctx.beginPath()
+
+                        // Top border before QUOTE
+                        ctx.moveTo(r, 0)
+                        ctx.lineTo(gapLeft, 0)
+
+                        // Top border after QUOTE
+                        ctx.moveTo(gapRight, 0)
+                        ctx.lineTo(w - r, 0)
+
+                        // Top-right corner
+                        ctx.quadraticCurveTo(w, 0, w, r)
+
+                        // Right edge
+                        ctx.lineTo(w, h - r)
+
+                        // Bottom-right corner
+                        ctx.quadraticCurveTo(w, h, w - r, h)
+
+                        // Bottom edge
+                        ctx.lineTo(r, h)
+
+                        // Bottom-left corner
+                        ctx.quadraticCurveTo(0, h, 0, h - r)
+
+                        // Left edge
+                        ctx.lineTo(0, r)
+
+                        // Top-left corner
+                        ctx.quadraticCurveTo(0, 0, r, 0)
+
+                        ctx.stroke()
+                    }
+
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+                }
+
+                Item {
+                    id: quoteLabelItem
+
+                    x: Appearance.padding.large
+                    y: -height / 2
+
+                    width: quoteLabel.implicitWidth
+                    height: quoteLabel.implicitHeight
+
+                    z: 10
+
+                    StyledText {
+                        id: quoteLabel
+                        anchors.centerIn: parent
+
+                        text: qsTr("QUOTE")
+                        color: Colours.palette.m3outline
+
+                        font.pointSize: Appearance.font.size.smaller
+                        font.weight: 600
+                        font.capitalization: Font.AllUppercase
+                        font.letterSpacing: 2
+
+                        onImplicitWidthChanged: quoteBorder.requestPaint()
+                    }
                 }
             }
         }
