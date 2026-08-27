@@ -206,7 +206,7 @@ Item {
         EdgeLabelCard {
             labelText: qsTr("DAY")
             labelEdge: "top"
-            labelAlignment: Qt.AlignVCenter
+            labelAlignment: Qt.AlignLeft
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -226,10 +226,14 @@ Item {
         height: root.height
         spacing: root.gap
 
-        Card {
+        EdgeLabelCard {
+            labelText: qsTr("MEDIA")
+            labelEdge: "bottom"
+            labelAlignment: Qt.AlignRight
+
             Layout.fillWidth: true
             Layout.fillHeight: true
-            clip: true
+            Layout.bottomMargin: 8
 
             ColumnLayout {
                 anchors.fill: parent
@@ -242,30 +246,10 @@ Item {
                     state: root.state
                 }
 
-                RowLayout {
+                Rectangle {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
-                    }
-
-                    StyledText {
-                        text: qsTr("MEDIA")
-                        color: Colours.palette.m3outline
-                        font.pointSize: Appearance.font.size.smaller
-                        font.weight: 600
-                        font.capitalization: Font.AllUppercase
-                        font.letterSpacing: 2
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
-                    }
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
                 }
 
                 Media {
@@ -301,6 +285,11 @@ Item {
         )
 
         border.width: 0
+
+        onLabelEdgeChanged: borderCanvas.requestPaint()
+        onLabelAlignmentChanged: borderCanvas.requestPaint()
+        onLabelMarginChanged: borderCanvas.requestPaint()
+        onLabelGapPaddingChanged: borderCanvas.requestPaint()
 
         Item {
             id: contentHost
@@ -349,18 +338,22 @@ Item {
                 ctx.beginPath()
 
                 if (edgeCard.labelEdge === "right") {
-                    const gapTop =
+                    const gapTop = Math.max(
+                        top + r + 2,
                         edgeLabelItem.y
-                        - edgeCard.labelGapPadding
+                            - edgeCard.labelGapPadding
+                    )
 
-                    const gapBottom =
+                    const gapBottom = Math.min(
+                        bottom - r - 2,
                         edgeLabelItem.y
-                        + edgeLabelItem.height
-                        + edgeCard.labelGapPadding
+                            + edgeLabelItem.height
+                            + edgeCard.labelGapPadding
+                    )
 
                     ctx.moveTo(left + r, top)
-
                     ctx.lineTo(right - r, top)
+
                     ctx.quadraticCurveTo(
                         right,
                         top,
@@ -373,6 +366,7 @@ Item {
                     ctx.moveTo(right, gapBottom)
 
                     ctx.lineTo(right, bottom - r)
+
                     ctx.quadraticCurveTo(
                         right,
                         bottom,
@@ -381,6 +375,7 @@ Item {
                     )
 
                     ctx.lineTo(left + r, bottom)
+
                     ctx.quadraticCurveTo(
                         left,
                         bottom,
@@ -389,28 +384,36 @@ Item {
                     )
 
                     ctx.lineTo(left, top + r)
+
                     ctx.quadraticCurveTo(
                         left,
                         top,
                         left + r,
                         top
                     )
-                } else {
-                    const gapStart =
+                } else if (edgeCard.labelEdge === "bottom") {
+                    const rawGapStart =
                         edgeLabelItem.x
                         - edgeCard.labelGapPadding
 
-                    const gapEnd =
+                    const rawGapEnd =
                         edgeLabelItem.x
                         + edgeLabelItem.width
                         + edgeCard.labelGapPadding
 
+                    const gapStart = Math.max(
+                        left + r + 2,
+                        rawGapStart
+                    )
+
+                    const gapEnd = Math.min(
+                        right - r - 2,
+                        rawGapEnd
+                    )
+
                     ctx.moveTo(left + r, top)
-                    ctx.lineTo(gapStart, top)
-
-                    ctx.moveTo(gapEnd, top)
-
                     ctx.lineTo(right - r, top)
+
                     ctx.quadraticCurveTo(
                         right,
                         top,
@@ -419,6 +422,7 @@ Item {
                     )
 
                     ctx.lineTo(right, bottom - r)
+
                     ctx.quadraticCurveTo(
                         right,
                         bottom,
@@ -426,7 +430,12 @@ Item {
                         bottom
                     )
 
+                    ctx.lineTo(gapEnd, bottom)
+
+                    ctx.moveTo(gapStart, bottom)
+
                     ctx.lineTo(left + r, bottom)
+
                     ctx.quadraticCurveTo(
                         left,
                         bottom,
@@ -435,6 +444,67 @@ Item {
                     )
 
                     ctx.lineTo(left, top + r)
+
+                    ctx.quadraticCurveTo(
+                        left,
+                        top,
+                        left + r,
+                        top
+                    )
+                } else {
+                    const rawGapStart =
+                        edgeLabelItem.x
+                        - edgeCard.labelGapPadding
+
+                    const rawGapEnd =
+                        edgeLabelItem.x
+                        + edgeLabelItem.width
+                        + edgeCard.labelGapPadding
+
+                    const gapStart = Math.max(
+                        left + r + 2,
+                        rawGapStart
+                    )
+
+                    const gapEnd = Math.min(
+                        right - r - 2,
+                        rawGapEnd
+                    )
+
+                    ctx.moveTo(left + r, top)
+                    ctx.lineTo(gapStart, top)
+
+                    ctx.moveTo(gapEnd, top)
+
+                    ctx.lineTo(right - r, top)
+
+                    ctx.quadraticCurveTo(
+                        right,
+                        top,
+                        right,
+                        top + r
+                    )
+
+                    ctx.lineTo(right, bottom - r)
+
+                    ctx.quadraticCurveTo(
+                        right,
+                        bottom,
+                        right - r,
+                        bottom
+                    )
+
+                    ctx.lineTo(left + r, bottom)
+
+                    ctx.quadraticCurveTo(
+                        left,
+                        bottom,
+                        left,
+                        bottom - r
+                    )
+
+                    ctx.lineTo(left, top + r)
+
                     ctx.quadraticCurveTo(
                         left,
                         top,
@@ -491,6 +561,12 @@ Item {
                     return (
                         edgeCard.height - height
                     ) / 2
+                }
+
+                if (edgeCard.labelEdge === "bottom") {
+                    return edgeCard.height
+                        - height / 2
+                        - edgeCard.labelOpticalOffset
                 }
 
                 return -height / 2
