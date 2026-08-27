@@ -50,8 +50,6 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
-                // We draw this card's border ourselves so that the
-                // left edge can have a real gap behind SYSTEM.
                 border.width: 0
 
                 User {
@@ -71,12 +69,12 @@ Item {
 
                     anchors.fill: parent
                     z: 5
-
                     antialiasing: true
 
-                    function redraw() {
-                        requestPaint()
-                    }
+                    property color borderColour:
+                        Colours.palette.m3outlineVariant
+
+                    onBorderColourChanged: requestPaint()
 
                     onPaint: {
                         const ctx = getContext("2d")
@@ -85,64 +83,39 @@ Item {
 
                         const w = width
                         const h = height
+
                         const r = Math.min(
                             Appearance.rounding.large,
                             Math.min(w, h) / 2
                         )
 
-                        /*
-                         * SYSTEM is rotated -90 degrees, so its
-                         * horizontal painted width becomes the
-                         * vertical space it occupies on screen.
-                         *
-                         * Add a little breathing room on each side
-                         * so the border doesn't visually touch it.
-                         */
                         const gapHeight = sysLabel.paintedWidth + 10
                         const centerY = h / 2
                         const gapTop = centerY - gapHeight / 2
                         const gapBottom = centerY + gapHeight / 2
 
-                        ctx.strokeStyle =
-                            Colours.palette.m3outlineVariant
-
+                        ctx.strokeStyle = borderColour
                         ctx.lineWidth = 1
                         ctx.lineJoin = "round"
                         ctx.lineCap = "butt"
 
                         ctx.beginPath()
 
-                        // Top-left corner
                         ctx.moveTo(r, 0)
-
-                        // Top edge
                         ctx.lineTo(w - r, 0)
-
-                        // Top-right corner
                         ctx.quadraticCurveTo(w, 0, w, r)
 
-                        // Right edge
                         ctx.lineTo(w, h - r)
-
-                        // Bottom-right corner
                         ctx.quadraticCurveTo(w, h, w - r, h)
 
-                        // Bottom edge
                         ctx.lineTo(r, h)
-
-                        // Bottom-left corner
                         ctx.quadraticCurveTo(0, h, 0, h - r)
 
-                        // Left edge — BELOW SYSTEM
                         ctx.lineTo(0, gapBottom)
 
-                        // Leave a real gap behind SYSTEM.
                         ctx.moveTo(0, gapTop)
-
-                        // Left edge — ABOVE SYSTEM
                         ctx.lineTo(0, r)
 
-                        // Top-left corner
                         ctx.quadraticCurveTo(0, 0, r, 0)
 
                         ctx.stroke()
@@ -169,7 +142,6 @@ Item {
                         anchors.centerIn: parent
 
                         text: qsTr("SYSTEM")
-
                         color: Colours.palette.m3outline
 
                         font.pointSize: Appearance.font.size.small
@@ -180,9 +152,8 @@ Item {
                         rotation: -90
                         transformOrigin: Item.Center
 
-                        onImplicitWidthChanged: systemBorder.requestPaint()
-                        onImplicitHeightChanged: systemBorder.requestPaint()
-                        onPaintedWidthChanged: systemBorder.requestPaint()
+                        onPaintedWidthChanged:
+                            systemBorder.requestPaint()
                     }
                 }
             }
@@ -192,8 +163,10 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            Card {
-                id: quoteCard
+            EdgeLabelCard {
+                labelText: qsTr("QUOTE")
+                labelEdge: "top"
+                labelAlignment: Qt.AlignLeft
 
                 anchors.left: parent.left
                 anchors.leftMargin: root.leftGutter
@@ -201,104 +174,8 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
-                border.width: 0
-
                 Quote {
                     anchors.fill: parent
-                }
-
-                Canvas {
-                    id: quoteBorder
-                    anchors.fill: parent
-                    z: 5
-                    antialiasing: true
-
-                    onPaint: {
-                        const ctx = getContext("2d")
-
-                        ctx.clearRect(0, 0, width, height)
-
-                        const w = width
-                        const h = height
-                        const r = Math.min(
-                            Appearance.rounding.large,
-                            Math.min(w, h) / 2
-                        )
-
-                        const padding = 7
-                        const gapLeft = quoteLabelItem.x - padding
-                        const gapRight = quoteLabelItem.x
-                            + quoteLabelItem.width
-                            + padding
-
-                        ctx.strokeStyle = Colours.palette.m3outlineVariant
-                        ctx.lineWidth = 1
-                        ctx.lineJoin = "round"
-                        ctx.lineCap = "butt"
-
-                        ctx.beginPath()
-
-                        // Top border before QUOTE
-                        ctx.moveTo(r, 0)
-                        ctx.lineTo(gapLeft, 0)
-
-                        // Top border after QUOTE
-                        ctx.moveTo(gapRight, 0)
-                        ctx.lineTo(w - r, 0)
-
-                        // Top-right corner
-                        ctx.quadraticCurveTo(w, 0, w, r)
-
-                        // Right edge
-                        ctx.lineTo(w, h - r)
-
-                        // Bottom-right corner
-                        ctx.quadraticCurveTo(w, h, w - r, h)
-
-                        // Bottom edge
-                        ctx.lineTo(r, h)
-
-                        // Bottom-left corner
-                        ctx.quadraticCurveTo(0, h, 0, h - r)
-
-                        // Left edge
-                        ctx.lineTo(0, r)
-
-                        // Top-left corner
-                        ctx.quadraticCurveTo(0, 0, r, 0)
-
-                        ctx.stroke()
-                    }
-
-                    onWidthChanged: requestPaint()
-                    onHeightChanged: requestPaint()
-                }
-
-                Item {
-                    id: quoteLabelItem
-
-                    x: Appearance.padding.large
-                    y: -height / 2
-
-                    width: quoteLabel.implicitWidth
-                    height: quoteLabel.implicitHeight
-
-                    z: 10
-
-                    StyledText {
-                        id: quoteLabel
-                        anchors.centerIn: parent
-
-                        text: qsTr("QUOTE")
-                        color: Colours.palette.m3outline
-
-                        font.pointSize: Appearance.font.size.smaller
-                        font.weight: 600
-                        font.capitalization: Font.AllUppercase
-                        font.letterSpacing: 2
-
-                        onImplicitWidthChanged: quoteBorder.requestPaint()
-                    }
                 }
             }
         }
@@ -313,7 +190,11 @@ Item {
         height: root.height
         spacing: root.gap
 
-        Card {
+        EdgeLabelCard {
+            labelText: qsTr("TIME")
+            labelEdge: "right"
+            labelAlignment: Qt.AlignVCenter
+
             Layout.fillWidth: true
             Layout.preferredHeight: 340
 
@@ -322,7 +203,11 @@ Item {
             }
         }
 
-        Card {
+        EdgeLabelCard {
+            labelText: qsTr("DAY")
+            labelEdge: "top"
+            labelAlignment: Qt.AlignVCenter
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -357,10 +242,30 @@ Item {
                     state: root.state
                 }
 
-                Rectangle {
+                RowLayout {
                     Layout.fillWidth: true
-                    implicitHeight: 1
-                    color: Colours.palette.m3outlineVariant
+                    spacing: Appearance.spacing.small
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Colours.palette.m3outlineVariant
+                    }
+
+                    StyledText {
+                        text: qsTr("MEDIA")
+                        color: Colours.palette.m3outline
+                        font.pointSize: Appearance.font.size.smaller
+                        font.weight: 600
+                        font.capitalization: Font.AllUppercase
+                        font.letterSpacing: 2
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Colours.palette.m3outlineVariant
+                    }
                 }
 
                 Media {
@@ -368,6 +273,260 @@ Item {
                     Layout.fillHeight: true
                     state: root.state
                 }
+            }
+        }
+    }
+
+    component EdgeLabelCard: StyledRect {
+        id: edgeCard
+
+        property string labelText: ""
+        property string labelEdge: "top"
+        property int labelAlignment: Qt.AlignLeft
+
+        property real labelMargin:
+            Appearance.rounding.large
+            + Appearance.spacing.small
+
+        property real labelGapPadding: 7
+        property real labelOpticalOffset: 1
+
+        default property alias contentData: contentHost.data
+
+        radius: Appearance.rounding.large
+
+        color: Colours.layer(
+            Colours.palette.m3surfaceContainer,
+            2
+        )
+
+        border.width: 0
+
+        Item {
+            id: contentHost
+            anchors.fill: parent
+        }
+
+        Canvas {
+            id: borderCanvas
+
+            anchors.fill: parent
+            z: 5
+            antialiasing: true
+
+            property color borderColour:
+                Colours.palette.m3outlineVariant
+
+            onBorderColourChanged: requestPaint()
+
+            onPaint: {
+                const ctx = getContext("2d")
+
+                ctx.clearRect(0, 0, width, height)
+
+                const w = width
+                const h = height
+                const inset = 0.5
+
+                const left = inset
+                const top = inset
+                const right = w - inset
+                const bottom = h - inset
+
+                const r = Math.max(
+                    0,
+                    Math.min(
+                        Appearance.rounding.large - inset,
+                        Math.min(w, h) / 2 - inset
+                    )
+                )
+
+                ctx.strokeStyle = borderColour
+                ctx.lineWidth = 1
+                ctx.lineJoin = "round"
+                ctx.lineCap = "butt"
+
+                ctx.beginPath()
+
+                if (edgeCard.labelEdge === "right") {
+                    const gapTop =
+                        edgeLabelItem.y
+                        - edgeCard.labelGapPadding
+
+                    const gapBottom =
+                        edgeLabelItem.y
+                        + edgeLabelItem.height
+                        + edgeCard.labelGapPadding
+
+                    ctx.moveTo(left + r, top)
+
+                    ctx.lineTo(right - r, top)
+                    ctx.quadraticCurveTo(
+                        right,
+                        top,
+                        right,
+                        top + r
+                    )
+
+                    ctx.lineTo(right, gapTop)
+
+                    ctx.moveTo(right, gapBottom)
+
+                    ctx.lineTo(right, bottom - r)
+                    ctx.quadraticCurveTo(
+                        right,
+                        bottom,
+                        right - r,
+                        bottom
+                    )
+
+                    ctx.lineTo(left + r, bottom)
+                    ctx.quadraticCurveTo(
+                        left,
+                        bottom,
+                        left,
+                        bottom - r
+                    )
+
+                    ctx.lineTo(left, top + r)
+                    ctx.quadraticCurveTo(
+                        left,
+                        top,
+                        left + r,
+                        top
+                    )
+                } else {
+                    const gapStart =
+                        edgeLabelItem.x
+                        - edgeCard.labelGapPadding
+
+                    const gapEnd =
+                        edgeLabelItem.x
+                        + edgeLabelItem.width
+                        + edgeCard.labelGapPadding
+
+                    ctx.moveTo(left + r, top)
+                    ctx.lineTo(gapStart, top)
+
+                    ctx.moveTo(gapEnd, top)
+
+                    ctx.lineTo(right - r, top)
+                    ctx.quadraticCurveTo(
+                        right,
+                        top,
+                        right,
+                        top + r
+                    )
+
+                    ctx.lineTo(right, bottom - r)
+                    ctx.quadraticCurveTo(
+                        right,
+                        bottom,
+                        right - r,
+                        bottom
+                    )
+
+                    ctx.lineTo(left + r, bottom)
+                    ctx.quadraticCurveTo(
+                        left,
+                        bottom,
+                        left,
+                        bottom - r
+                    )
+
+                    ctx.lineTo(left, top + r)
+                    ctx.quadraticCurveTo(
+                        left,
+                        top,
+                        left + r,
+                        top
+                    )
+                }
+
+                ctx.stroke()
+            }
+
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+        }
+
+        Item {
+            id: edgeLabelItem
+
+            width: edgeCard.labelEdge === "right"
+                ? edgeLabel.implicitHeight + 4
+                : edgeLabel.implicitWidth
+
+            height: edgeCard.labelEdge === "right"
+                ? edgeLabel.implicitWidth + 8
+                : edgeLabel.implicitHeight
+
+            x: {
+                if (edgeCard.labelEdge === "right") {
+                    return edgeCard.width
+                        - width / 2
+                        - edgeCard.labelOpticalOffset
+                }
+
+                if (edgeCard.labelAlignment === Qt.AlignRight) {
+                    return edgeCard.width
+                        - edgeCard.labelMargin
+                        - width
+                }
+
+                if (
+                    edgeCard.labelAlignment
+                    === Qt.AlignHCenter
+                ) {
+                    return (
+                        edgeCard.width - width
+                    ) / 2
+                }
+
+                return edgeCard.labelMargin
+            }
+
+            y: {
+                if (edgeCard.labelEdge === "right") {
+                    return (
+                        edgeCard.height - height
+                    ) / 2
+                }
+
+                return -height / 2
+                    + edgeCard.labelOpticalOffset
+            }
+
+            z: 10
+
+            onXChanged: borderCanvas.requestPaint()
+            onYChanged: borderCanvas.requestPaint()
+            onWidthChanged: borderCanvas.requestPaint()
+            onHeightChanged: borderCanvas.requestPaint()
+
+            StyledText {
+                id: edgeLabel
+
+                anchors.centerIn: parent
+
+                text: edgeCard.labelText
+                color: Colours.palette.m3outline
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight: 600
+                font.capitalization:
+                    Font.AllUppercase
+
+                font.letterSpacing: 2
+
+                rotation:
+                    edgeCard.labelEdge === "right"
+                    ? 90
+                    : 0
+
+                transformOrigin: Item.Center
             }
         }
     }
@@ -380,7 +539,9 @@ Item {
             2
         )
 
-        border.color: Colours.palette.m3outlineVariant
+        border.color:
+            Colours.palette.m3outlineVariant
+
         border.width: 1
     }
 }
