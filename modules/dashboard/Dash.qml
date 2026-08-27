@@ -49,8 +49,8 @@ Item {
 
             Item {
                 id: sysLabelItem
-                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
+                x: -width / 2
                 width: sysLabel.implicitHeight + 6
                 height: sysLabel.implicitWidth + 14
                 z: 10
