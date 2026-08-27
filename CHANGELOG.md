@@ -2,6 +2,13 @@
 
 Newest entries at the top.
 
+## [2026-08-28] - Dashboard System Border Fix
+### Fixed
+- `modules/dashboard/Dash.qml`: fixed the `SYSTEM` label border so the card's left border cleanly breaks around the rotated label instead of running through the text
+- `modules/dashboard/Dash.qml`: preserved the card's rounded corners while aligning the border gap with the actual rendered `SYSTEM` text
+
+---
+
 ## [2026-08-26] - Dashboard alignment fix
 ### Fixed
 - `modules/dashboard/Dash.qml`: Character card was fixed-height while Calendar was content-driven, causing overflow/misalignment depending on calendar content size; Character is now fillHeight like Media and Quote's siblings, so all three columns bottom out flush regardless of calendar's actual size
