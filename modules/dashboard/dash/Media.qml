@@ -31,23 +31,17 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    // Vertical "hero" layout instead of the old thumbnail+text row —
-    // that row design was built for a ~110px hugging card and only ever
-    // gave the title a narrow sliver next to the art, hence the eliding
-    // even with a huge card around it. Flex spacers top/bottom keep this
-    // centered in whatever height it's given instead of pinned to the
-    // top with dead air below.
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Appearance.padding.normal
         spacing: Appearance.spacing.normal
 
         Item { Layout.fillHeight: true; Layout.minimumHeight: 0 }
 
         StyledClippingRect {
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: 110
-            Layout.preferredHeight: 110
+            Layout.preferredWidth: 84
+            Layout.preferredHeight: 84
             radius: Appearance.rounding.normal
             color: Colours.palette.m3surfaceContainerHigh
 
@@ -56,29 +50,26 @@ Item {
                 source: Players.active?.trackArtUrl ?? ""
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
-                sourceSize.width: 220
-                sourceSize.height: 220
+                sourceSize.width: 168
+                sourceSize.height: 168
             }
 
             MaterialIcon {
                 anchors.centerIn: parent
                 visible: !Players.active?.trackArtUrl
                 text: "album"
-                font.pointSize: Appearance.font.size.extraLarge
+                font.pointSize: Appearance.font.size.large
                 color: Colours.palette.m3outline
             }
 
-            // Playing indicator moved to a corner badge on the art
-            // instead of squeezed inline next to the title — same
-            // pattern as the SYSTEM avatar's status dot.
             StyledRect {
                 visible: Players.active?.isPlaying ?? false
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.margins: 4
-                implicitWidth: 14
-                implicitHeight: 14
-                radius: 7
+                anchors.margins: 3
+                implicitWidth: 12
+                implicitHeight: 12
+                radius: 6
                 color: Colours.palette.m3primary
 
                 SequentialAnimation on opacity {
@@ -92,11 +83,8 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.small
-            spacing: 4
+            spacing: 2
 
-            // Full column width now instead of squeezed beside the art —
-            // wraps to 2 lines before it ever needs to elide.
             StyledText {
                 Layout.fillWidth: true
                 text: Players.active?.trackTitle || qsTr("Nothing playing")
@@ -113,7 +101,7 @@ Item {
                 Layout.fillWidth: true
                 text: Players.active?.trackArtist || qsTr("No media")
                 color: Colours.palette.m3secondary
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Appearance.font.size.smaller
                 horizontalAlignment: Text.AlignHCenter
                 maximumLineCount: 1
                 elide: Text.ElideRight
@@ -122,14 +110,13 @@ Item {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 10
-            Layout.topMargin: Appearance.spacing.small
+            Layout.preferredHeight: 8
 
             StyledRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: 4
+                implicitHeight: 3
                 radius: Appearance.rounding.full
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.2)
             }
@@ -137,7 +124,7 @@ Item {
             StyledRect {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: 4
+                implicitHeight: 3
                 width: parent.width * root.playerProgress
                 radius: Appearance.rounding.full
                 color: Colours.palette.m3primary
@@ -148,12 +135,11 @@ Item {
 
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Appearance.spacing.normal
             spacing: Appearance.spacing.large
 
             TransportButton {
                 icon: "skip_previous"
-                size: 34
+                size: 28
                 canUse: Players.active?.canGoPrevious ?? false
                 function onClicked(): void { Players.active?.previous(); }
             }
@@ -166,7 +152,7 @@ Item {
 
             TransportButton {
                 icon: "skip_next"
-                size: 34
+                size: 28
                 canUse: Players.active?.canGoNext ?? false
                 function onClicked(): void { Players.active?.next(); }
             }
@@ -198,7 +184,7 @@ Item {
             fill: 1
             text: button.icon
             color: button.canUse ? Colours.palette.m3onSurface : Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Appearance.font.size.normal
         }
     }
 
@@ -209,8 +195,8 @@ Item {
         required property bool playing
         function onClicked(): void {}
 
-        implicitWidth: 48
-        implicitHeight: 48
+        implicitWidth: 40
+        implicitHeight: 40
 
         StyledRect {
             anchors.fill: parent
@@ -230,7 +216,7 @@ Item {
             fill: 1
             text: button.playing ? "pause" : "play_arrow"
             color: Colours.palette.m3onPrimary
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Appearance.font.size.normal
         }
     }
 }
