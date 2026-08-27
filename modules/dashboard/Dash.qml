@@ -14,43 +14,38 @@ Item {
     required property PersistentProperties state
     required property FileDialog facePicker
 
-    // Uniform margin on ALL FOUR sides, not just the left — the SYSTEM
-    // label still needs somewhere real (unclipped) to straddle into on
-    // the left, but taking that space from one side only is what made
-    // the left margin visibly bigger than the right last time. This way
-    // it's a small consistent frame around the whole dashboard instead.
-    readonly property int outerMargin: 14
+    readonly property int leftGutter: 14
     readonly property int leftW: 215
     readonly property int rightW: 270
     readonly property int gap: Appearance.spacing.normal
-    readonly property int centerW: content.width - leftW - rightW - gap * 2
+    readonly property int centerW: implicitWidth - leftW - rightW - gap * 2
 
-    implicitWidth: 840 + outerMargin * 2
-    implicitHeight: 520 + outerMargin * 2
+    implicitWidth: 840
+    implicitHeight: 520
     width: implicitWidth
     height: implicitHeight
 
-    Item {
-        id: content
-        anchors.fill: parent
-        anchors.margins: root.outerMargin
+    ColumnLayout {
+        id: leftCol
+        x: 0
+        y: 0
+        width: root.leftW
+        height: root.height
+        spacing: root.gap
 
-        ColumnLayout {
-            id: leftCol
-            x: 0
-            y: 0
-            width: root.leftW
-            height: parent.height
-            spacing: root.gap
+        Item {
+            id: systemWrapper
+            Layout.fillWidth: true
+            Layout.preferredHeight: systemWidget.implicitHeight + Appearance.padding.large * 2
 
             Card {
                 id: systemCard
-                Layout.fillWidth: true
-                Layout.preferredHeight: systemWidget.implicitHeight + Appearance.padding.large * 2
-                // Built-in border turned off for THIS card only — every
-                // edge below is drawn manually so there's no continuous
-                // line anywhere for the label to sit "on top of" and
-                // partially hide. The gap is real, not painted over.
+                anchors.left: parent.left
+                anchors.leftMargin: root.leftGutter
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                radius: 0
                 border.width: 0
 
                 User {
@@ -85,124 +80,117 @@ Item {
                     }
                 }
 
-                // Top edge (straight section only, clear of the rounded
-                // corner arcs).
                 Rectangle {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.leftMargin: Appearance.rounding.large
-                    anchors.rightMargin: Appearance.rounding.large
                     height: 1
                     color: Colours.palette.m3outlineVariant
                 }
 
-                // Bottom edge.
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.leftMargin: Appearance.rounding.large
-                    anchors.rightMargin: Appearance.rounding.large
                     height: 1
                     color: Colours.palette.m3outlineVariant
                 }
 
-                // Right edge.
                 Rectangle {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    anchors.topMargin: Appearance.rounding.large
-                    anchors.bottomMargin: Appearance.rounding.large
                     width: 1
                     color: Colours.palette.m3outlineVariant
                 }
 
-                // Left edge, upper segment — stops at the label, no
-                // further.
                 Rectangle {
                     anchors.left: parent.left
                     anchors.top: parent.top
-                    anchors.topMargin: Appearance.rounding.large
                     anchors.bottom: sysLabelItem.top
                     width: 1
                     color: Colours.palette.m3outlineVariant
                 }
 
-                // Left edge, lower segment — starts after the label.
                 Rectangle {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: Appearance.rounding.large
                     anchors.top: sysLabelItem.bottom
                     width: 1
                     color: Colours.palette.m3outlineVariant
                 }
             }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
             Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                anchors.left: parent.left
+                anchors.leftMargin: root.leftGutter
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 Quote { anchors.fill: parent }
             }
         }
+    }
 
-        ColumnLayout {
-            id: centerCol
-            x: root.leftW + root.gap
-            y: 0
-            width: root.centerW
-            height: parent.height
-            spacing: root.gap
+    ColumnLayout {
+        id: centerCol
+        x: root.leftW + root.gap
+        y: 0
+        width: root.centerW
+        height: root.height
+        spacing: root.gap
 
-            Card {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 340
-                DateTime { anchors.fill: parent }
-            }
-
-            Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                DayProgress { anchors.fill: parent }
-            }
+        Card {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 340
+            DateTime { anchors.fill: parent }
         }
 
-        ColumnLayout {
-            id: rightCol
-            x: root.leftW + root.gap + root.centerW + root.gap
-            y: 0
-            width: root.rightW
-            height: parent.height
-            spacing: root.gap
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            DayProgress { anchors.fill: parent }
+        }
+    }
 
-            Card {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+    ColumnLayout {
+        id: rightCol
+        x: root.leftW + root.gap + root.centerW + root.gap
+        y: 0
+        width: root.rightW
+        height: root.height
+        spacing: root.gap
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Appearance.padding.large
-                    spacing: Appearance.spacing.normal
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-                    Character {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 190
-                        state: root.state
-                    }
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large
+                spacing: Appearance.spacing.normal
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
-                    }
+                Character {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 190
+                    state: root.state
+                }
 
-                    Media {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        state: root.state
-                    }
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
+                }
+
+                Media {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    state: root.state
                 }
             }
         }
