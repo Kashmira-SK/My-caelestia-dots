@@ -35,8 +35,11 @@ Item {
 
         Item {
             id: systemWrapper
+
             Layout.fillWidth: true
-            Layout.preferredHeight: systemWidget.implicitHeight + Appearance.padding.large * 2
+            Layout.preferredHeight:
+                systemWidget.implicitHeight
+                + Appearance.padding.large * 2
 
             Card {
                 id: systemCard
@@ -47,13 +50,13 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
-                // Disable the built-in border for this card.
-                // We draw it manually so the left side can have
-                // a real gap where SYSTEM crosses it.
+                // We draw this card's border ourselves so that the
+                // left edge can have a real gap behind SYSTEM.
                 border.width: 0
 
                 User {
                     id: systemWidget
+
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
@@ -63,60 +66,90 @@ Item {
                     facePicker: root.facePicker
                 }
 
-                // Top border
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 1
-                    color: Colours.palette.m3outlineVariant
-                }
+                Canvas {
+                    id: systemBorder
 
-                // Bottom border
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: 1
-                    color: Colours.palette.m3outlineVariant
-                }
+                    anchors.fill: parent
+                    z: 5
 
-                // Right border
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    width: 1
-                    color: Colours.palette.m3outlineVariant
-                }
+                    antialiasing: true
 
-                // Left border ABOVE SYSTEM
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    width: 1
+                    function redraw() {
+                        requestPaint()
+                    }
 
-                    height: Math.max(
-                        0,
-                        sysLabelItem.y - sysLabelItem.height / 2
-                    )
+                    onPaint: {
+                        const ctx = getContext("2d")
 
-                    color: Colours.palette.m3outlineVariant
-                }
+                        ctx.clearRect(0, 0, width, height)
 
-                // Left border BELOW SYSTEM
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    width: 1
+                        const w = width
+                        const h = height
+                        const r = Math.min(
+                            Appearance.rounding.large,
+                            Math.min(w, h) / 2
+                        )
 
-                    height: Math.max(
-                        0,
-                        parent.height
-                            - (sysLabelItem.y + sysLabelItem.height / 2)
-                    )
+                        /*
+                         * SYSTEM is rotated -90 degrees, so its
+                         * horizontal painted width becomes the
+                         * vertical space it occupies on screen.
+                         *
+                         * Add a little breathing room on each side
+                         * so the border doesn't visually touch it.
+                         */
+                        const gapHeight = sysLabel.paintedWidth + 10
+                        const centerY = h / 2
+                        const gapTop = centerY - gapHeight / 2
+                        const gapBottom = centerY + gapHeight / 2
 
-                    color: Colours.palette.m3outlineVariant
+                        ctx.strokeStyle =
+                            Colours.palette.m3outlineVariant
+
+                        ctx.lineWidth = 1
+                        ctx.lineJoin = "round"
+                        ctx.lineCap = "butt"
+
+                        ctx.beginPath()
+
+                        // Top-left corner
+                        ctx.moveTo(r, 0)
+
+                        // Top edge
+                        ctx.lineTo(w - r, 0)
+
+                        // Top-right corner
+                        ctx.quadraticCurveTo(w, 0, w, r)
+
+                        // Right edge
+                        ctx.lineTo(w, h - r)
+
+                        // Bottom-right corner
+                        ctx.quadraticCurveTo(w, h, w - r, h)
+
+                        // Bottom edge
+                        ctx.lineTo(r, h)
+
+                        // Bottom-left corner
+                        ctx.quadraticCurveTo(0, h, 0, h - r)
+
+                        // Left edge — BELOW SYSTEM
+                        ctx.lineTo(0, gapBottom)
+
+                        // Leave a real gap behind SYSTEM.
+                        ctx.moveTo(0, gapTop)
+
+                        // Left edge — ABOVE SYSTEM
+                        ctx.lineTo(0, r)
+
+                        // Top-left corner
+                        ctx.quadraticCurveTo(0, 0, r, 0)
+
+                        ctx.stroke()
+                    }
+
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
                 }
 
                 Item {
@@ -136,6 +169,7 @@ Item {
                         anchors.centerIn: parent
 
                         text: qsTr("SYSTEM")
+
                         color: Colours.palette.m3outline
 
                         font.pointSize: Appearance.font.size.small
@@ -145,6 +179,10 @@ Item {
 
                         rotation: -90
                         transformOrigin: Item.Center
+
+                        onImplicitWidthChanged: systemBorder.requestPaint()
+                        onImplicitHeightChanged: systemBorder.requestPaint()
+                        onPaintedWidthChanged: systemBorder.requestPaint()
                     }
                 }
             }
@@ -238,6 +276,7 @@ Item {
 
     component Card: StyledRect {
         radius: Appearance.rounding.large
+
         color: Colours.layer(
             Colours.palette.m3surfaceContainer,
             2
