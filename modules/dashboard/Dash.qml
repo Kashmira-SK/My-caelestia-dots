@@ -14,19 +14,20 @@ Item {
     required property PersistentProperties state
     required property FileDialog facePicker
 
+    readonly property int leftInset: 16
     readonly property int leftW: 215
     readonly property int rightW: 270
     readonly property int gap: Appearance.spacing.normal
-    readonly property int centerW: implicitWidth - leftW - rightW - gap * 2
+    readonly property int centerW: implicitWidth - leftInset - leftW - rightW - gap * 2
 
-    implicitWidth: 840
+    implicitWidth: 856
     implicitHeight: 520
     width: implicitWidth
     height: implicitHeight
 
     ColumnLayout {
         id: leftCol
-        x: 0
+        x: root.leftInset
         y: 0
         width: root.leftW
         height: root.height
@@ -67,9 +68,9 @@ Item {
                     id: sysLabel
                     anchors.centerIn: parent
                     text: qsTr("SYSTEM")
-                    color: Colours.palette.m3primary
+                    color: Colours.palette.m3outline
                     font.pointSize: Appearance.font.size.small
-                    font.weight: 700
+                    font.weight: 600
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 3
                     rotation: -90
@@ -82,8 +83,8 @@ Item {
                 anchors.top: parent.top
                 anchors.topMargin: Appearance.rounding.large
                 anchors.bottom: sysLabelItem.top
-                width: 2
-                color: Colours.palette.m3primary
+                width: 1
+                color: Colours.palette.m3outlineVariant
             }
 
             Rectangle {
@@ -91,8 +92,8 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: Appearance.rounding.large
                 anchors.top: sysLabelItem.bottom
-                width: 2
-                color: Colours.palette.m3primary
+                width: 1
+                color: Colours.palette.m3outlineVariant
             }
         }
 
@@ -105,7 +106,7 @@ Item {
 
     ColumnLayout {
         id: centerCol
-        x: root.leftW + root.gap
+        x: root.leftInset + root.leftW + root.gap
         y: 0
         width: root.centerW
         height: root.height
@@ -126,7 +127,7 @@ Item {
 
     ColumnLayout {
         id: rightCol
-        x: root.leftW + root.gap + root.centerW + root.gap
+        x: root.leftInset + root.leftW + root.gap + root.centerW + root.gap
         y: 0
         width: root.rightW
         height: root.height
