@@ -14,7 +14,7 @@ Item {
     required property PersistentProperties state
     required property FileDialog facePicker
 
-    readonly property int leftGutter: 24
+    readonly property int leftGutter: 4
     readonly property int leftW: 215
     readonly property int rightW: 270
     readonly property int gap: Appearance.spacing.normal
