@@ -7,51 +7,17 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    required property date selectedDate
-
     property int clockTick: 0
 
     readonly property var visibleTodos: {
         root.clockTick
 
-        const key =
-            Calendar.dateKey(
-                root.selectedDate
-            )
-
         return Calendar.todos
-            .filter(todo => {
-                if (todo.completed)
-                    return false
-
-                if (
-                    Calendar.todoIsOverdue(
-                        todo
-                    )
-                )
-                    return true
-
-                if (!todo.dueDate)
-                    return true
-
-                return todo.dueDate === key
-            })
+            .filter(todo =>
+                !todo.completed
+            )
             .slice()
             .sort((a, b) => {
-                const overdueA =
-                    Calendar.todoIsOverdue(a)
-
-                const overdueB =
-                    Calendar.todoIsOverdue(b)
-
-                if (
-                    overdueA
-                    !== overdueB
-                )
-                    return overdueA
-                        ? -1
-                        : 1
-
                 const priorityA =
                     root.priorityRank(
                         Calendar.effectiveTodoPriority(
@@ -73,12 +39,29 @@ Item {
                     return priorityB
                         - priorityA
 
+                const deadlineA =
+                    Calendar.todoDeadline(a)
+
+                const deadlineB =
+                    Calendar.todoDeadline(b)
+
+                if (
+                    deadlineA
+                    && deadlineB
+                )
+                    return deadlineA.getTime()
+                        - deadlineB.getTime()
+
+                if (deadlineA)
+                    return -1
+
+                if (deadlineB)
+                    return 1
+
                 return (
-                    a.dueTime
-                    || "23:59"
+                    a.createdAt || ""
                 ).localeCompare(
-                    b.dueTime
-                    || "23:59"
+                    b.createdAt || ""
                 )
             })
     }

@@ -619,10 +619,7 @@ Item {
     Component {
         id: todoList
 
-        TodoView {
-            selectedDate:
-                root.selectedDate
-        }
+        TodoView {}
     }
 
     component ModeButton: Item {
