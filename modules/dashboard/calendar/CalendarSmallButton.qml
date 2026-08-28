@@ -20,7 +20,10 @@ Item {
         color:
             mouse.containsMouse
             ? Colours.palette.m3primary
-            : Colours.palette.m3outline
+            : Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.78
+            )
 
         font.pointSize:
             Appearance.font.size.smaller

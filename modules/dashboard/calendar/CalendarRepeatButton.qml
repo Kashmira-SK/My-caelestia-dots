@@ -31,7 +31,10 @@ Item {
         color:
             root.active
             ? Colours.palette.m3primary
-            : Colours.palette.m3outline
+            : Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.72
+            )
 
         font.pointSize:
             Appearance.font.size.smaller

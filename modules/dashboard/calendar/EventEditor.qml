@@ -129,7 +129,7 @@ Item {
                         .toUpperCase()
 
                 color:
-                    Colours.palette.m3outline
+                    Colours.palette.m3onSurface
 
                 font.pointSize:
                     Appearance.font.size.smaller
