@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 
 import qs.config
+import qs.utils
 import Caelestia
 import Quickshell
 import Quickshell.Io
@@ -143,6 +144,11 @@ Singleton {
         interval: 1000
 
         onTriggered: {
+            console.log(
+                "Saving calendar to:",
+                storage.path
+            )
+
             storage.setText(JSON.stringify({
                 events: root.events,
                 todos: root.todos
@@ -175,6 +181,13 @@ Singleton {
         }
 
         onLoadFailed: err => {
+            console.log(
+                "Calendar load failed:",
+                FileViewError.toString(err),
+                "path:",
+                path
+            )
+
             if (err === FileViewError.FileNotFound) {
                 root.events = []
                 root.todos = []
@@ -186,6 +199,15 @@ Singleton {
                 }, null, 2))
             }
         }
+
+        onSaveFailed: err => {
+            console.log(
+                "Calendar save failed:",
+                FileViewError.toString(err),
+                "path:",
+                path
+            )
+        }
     }
-    
+
 }
