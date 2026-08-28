@@ -13,35 +13,37 @@ Item {
     property int displayYear
     property int displayMonth
 
-    readonly property date selectedDate: state.currentDate
+    readonly property date selectedDate:
+        state.currentDate
 
     readonly property var monthNames: [
-        "JANUARY",
-        "FEBRUARY",
-        "MARCH",
-        "APRIL",
-        "MAY",
-        "JUNE",
-        "JULY",
-        "AUGUST",
-        "SEPTEMBER",
-        "OCTOBER",
-        "NOVEMBER",
-        "DECEMBER"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
     ]
 
     readonly property var dayNames: [
-        "MON",
-        "TUE",
-        "WED",
-        "THU",
-        "FRI",
-        "SAT",
-        "SUN"
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
     ]
 
     function dateKey(date) {
         const year = date.getFullYear()
+
         const month = String(
             date.getMonth() + 1
         ).padStart(2, "0")
@@ -96,47 +98,87 @@ Item {
     function goToday() {
         const today = new Date()
 
-        displayYear = today.getFullYear()
-        displayMonth = today.getMonth()
-        state.currentDate = today
+        displayYear =
+            today.getFullYear()
+
+        displayMonth =
+            today.getMonth()
+
+        state.currentDate =
+            today
     }
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
+
+        spacing:
+            Appearance.spacing.normal
 
         RowLayout {
             Layout.fillWidth: true
 
-            ColumnLayout {
-                spacing: 1
+            Item {
+                implicitWidth:
+                    monthHeader.implicitWidth
 
-                StyledText {
-                    text:
-                        root.monthNames[
-                            root.displayMonth
-                        ]
+                implicitHeight:
+                    monthHeader.implicitHeight
 
-                    color:
-                        Colours.palette.m3onSurface
+                ColumnLayout {
+                    id: monthHeader
 
-                    font.pointSize:
-                        Appearance.font.size.extraLarge
+                    spacing: 0
 
-                    font.weight: 600
-                    font.letterSpacing: 2
+                    StyledText {
+                        text:
+                            root.monthNames[
+                                root.displayMonth
+                            ]
+
+                        color:
+                            monthMouse.containsMouse
+                            ? Colours.palette.m3primary
+                            : Colours.palette.m3secondary
+
+                        font.pointSize:
+                            Appearance.font.size.extraLarge
+
+                        font.weight: 500
+                        font.letterSpacing: 0.5
+                    }
+
+                    StyledText {
+                        text:
+                            root.displayYear
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            monthMouse.containsMouse
+                            ? 0.7
+                            : 0.45
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.small
+
+                        font.weight: 400
+                        font.letterSpacing: 1
+                    }
                 }
 
-                StyledText {
-                    text: root.displayYear
+                MouseArea {
+                    id: monthMouse
 
-                    color:
-                        Colours.palette.m3outline
+                    anchors.fill: parent
+                    anchors.margins: -7
 
-                    font.pointSize:
-                        Appearance.font.size.small
+                    hoverEnabled: true
 
-                    font.letterSpacing: 2
+                    cursorShape:
+                        Qt.PointingHandCursor
+
+                    onClicked:
+                        root.goToday()
                 }
             }
 
@@ -146,12 +188,14 @@ Item {
 
             NavButton {
                 text: "‹"
+
                 onClicked:
                     root.previousMonth()
             }
 
             NavButton {
                 text: "›"
+
                 onClicked:
                     root.nextMonth()
             }
@@ -162,23 +206,26 @@ Item {
             spacing: 0
 
             Repeater {
-                model: root.dayNames
+                model:
+                    root.dayNames
 
                 StyledText {
                     required property var modelData
 
                     Layout.fillWidth: true
 
-                    text: modelData
+                    text:
+                        modelData
 
-                    color:
-                        Colours.palette.m3outline
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.45
+                    )
 
                     font.pointSize:
                         Appearance.font.size.smaller
 
-                    font.weight: 600
-                    font.letterSpacing: 1.5
+                    font.weight: 400
 
                     horizontalAlignment:
                         Text.AlignHCenter
@@ -249,15 +296,25 @@ Item {
                             dayCell.selected
                             ? Qt.alpha(
                                 Colours.palette.m3primary,
-                                0.12
+                                0.1
                             )
-                            : "transparent"
+                            : dayMouse.containsMouse
+                                ? Qt.alpha(
+                                    Colours.palette.m3secondary,
+                                    0.045
+                                )
+                                : "transparent"
 
                         border.width:
-                            dayCell.selected ? 1 : 0
+                            dayCell.selected
+                            ? 1
+                            : 0
 
                         border.color:
-                            Colours.palette.m3primary
+                            Qt.alpha(
+                                Colours.palette.m3primary,
+                                0.7
+                            )
                     }
 
                     StyledText {
@@ -272,20 +329,23 @@ Item {
 
                             if (!dayCell.inMonth)
                                 return Qt.alpha(
-                                    Colours.palette.m3outline,
-                                    0.35
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.22
                                 )
 
-                            return Colours.palette.m3onSurfaceVariant
+                            return Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.78
+                            )
                         }
 
                         font.pointSize:
                             Appearance.font.size.normal
 
                         font.weight:
-                            dayCell.today
-                            || dayCell.selected
-                            ? 600
+                            dayCell.selected
+                            || dayCell.today
+                            ? 500
                             : 400
                     }
 
@@ -302,11 +362,11 @@ Item {
 
                         anchors.bottomMargin: 5
 
-                        width: 12
+                        width: 11
                         height: 1
 
                         color:
-                            Colours.palette.m3primary
+                            Colours.palette.m3secondary
                     }
 
                     Rectangle {
@@ -332,7 +392,11 @@ Item {
                     }
 
                     MouseArea {
+                        id: dayMouse
+
                         anchors.fill: parent
+
+                        hoverEnabled: true
 
                         cursorShape:
                             Qt.PointingHandCursor
@@ -355,59 +419,13 @@ Item {
                 }
             }
         }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            StyledText {
-                text: qsTr("TODAY")
-
-                color:
-                    Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight: 600
-                font.letterSpacing: 1.5
-
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.margins: -8
-
-                    cursorShape:
-                        Qt.PointingHandCursor
-
-                    onClicked:
-                        root.goToday()
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
-
-            StyledText {
-                text:
-                    Calendar.loaded
-                    ? qsTr("READY")
-                    : qsTr("LOADING")
-
-                color:
-                    Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.letterSpacing: 1.5
-            }
-        }
     }
 
     component NavButton: Item {
         id: button
 
         property string text
+
         signal clicked
 
         implicitWidth: 30
@@ -416,21 +434,28 @@ Item {
         StyledText {
             anchors.centerIn: parent
 
-            text: button.text
+            text:
+                button.text
 
             color:
                 navMouse.containsMouse
-                ? Colours.palette.m3primary
-                : Colours.palette.m3onSurfaceVariant
+                ? Colours.palette.m3secondary
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.5
+                )
 
             font.pointSize:
                 Appearance.font.size.large
+
+            font.weight: 400
         }
 
         MouseArea {
             id: navMouse
 
             anchors.fill: parent
+
             hoverEnabled: true
 
             cursorShape:

@@ -43,6 +43,22 @@ Item {
         return next % 60
     }
 
+    function repeatUnit() {
+        if (recurrenceFrequency === "daily")
+            return recurrenceInterval === 1 ? "day" : "days"
+
+        if (recurrenceFrequency === "weekly")
+            return recurrenceInterval === 1 ? "week" : "weeks"
+
+        if (recurrenceFrequency === "monthly")
+            return recurrenceInterval === 1 ? "month" : "months"
+
+        if (recurrenceFrequency === "yearly")
+            return recurrenceInterval === 1 ? "year" : "years"
+
+        return ""
+    }
+
     function saveEvent() {
         const title = titleField.text.trim()
 
@@ -62,8 +78,14 @@ Item {
         Calendar.addEvent(
             title,
             root.selectedDate,
-            root.timeString(root.startHour, root.startMinute),
-            root.timeString(root.endHour, root.endMinute),
+            root.timeString(
+                root.startHour,
+                root.startMinute
+            ),
+            root.timeString(
+                root.endHour,
+                root.endMinute
+            ),
             notesField.text.trim(),
             recurrence
         )
@@ -80,8 +102,12 @@ Item {
         contentHeight: form.implicitHeight
 
         clip: true
-        boundsBehavior: Flickable.StopAtBounds
-        flickableDirection: Flickable.VerticalFlick
+
+        boundsBehavior:
+            Flickable.StopAtBounds
+
+        flickableDirection:
+            Flickable.VerticalFlick
 
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
@@ -89,26 +115,28 @@ Item {
 
         ColumnLayout {
             id: form
+
             width: flick.width
-            spacing: Appearance.spacing.small
+
+            spacing:
+                Appearance.spacing.normal
 
             RowLayout {
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    spacing: 0
+                    spacing: 1
 
                     StyledText {
-                        text: qsTr("EVENT")
+                        text: qsTr("New event")
 
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.48
-                        )
+                        color:
+                            Colours.palette.m3primary
 
-                        font.pointSize: Appearance.font.size.smaller
-                        font.weight: 600
-                        font.letterSpacing: 1.3
+                        font.pointSize:
+                            Appearance.font.size.large
+
+                        font.weight: 500
                     }
 
                     StyledText {
@@ -116,13 +144,18 @@ Item {
                             root.selectedDate
                                 .toLocaleDateString(
                                     Qt.locale(),
-                                    "ddd · d MMM"
+                                    "ddd, d MMMM"
                                 )
-                                .toUpperCase()
 
-                        color: Colours.palette.m3primary
-                        font.pointSize: Appearance.font.size.normal
-                        font.weight: 600
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.55
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+
+                        font.weight: 400
                     }
                 }
 
@@ -130,423 +163,667 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                CalendarActionButton {
-                    text: qsTr("CANCEL")
-                    onClicked: root.cancelled()
+                StyledText {
+                    id: cancelText
+
+                    text: qsTr("Cancel")
+
+                    color:
+                        cancelMouse.containsMouse
+                        ? Colours.palette.m3primary
+                        : Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.5
+                        )
+
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.weight: 400
+
+                    MouseArea {
+                        id: cancelMouse
+
+                        anchors.fill: parent
+                        anchors.margins: -7
+
+                        hoverEnabled: true
+
+                        cursorShape:
+                            Qt.PointingHandCursor
+
+                        onClicked:
+                            root.cancelled()
+                    }
                 }
             }
 
-            CalendarThinLine {}
-
-            StyledRect {
+            Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: titleColumn.implicitHeight + 18
-
-                radius: Appearance.rounding.small
+                implicitHeight: 1
 
                 color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.04
+                    Colours.palette.m3outlineVariant,
+                    0.4
                 )
+            }
 
-                border.width: 1
-                border.color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.13
-                )
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 3
 
-                ColumnLayout {
-                    id: titleColumn
+                StyledText {
+                    text: qsTr("Title")
 
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.5
+                    )
 
-                    spacing: 3
+                    font.pointSize:
+                        Appearance.font.size.smaller
 
-                    CalendarFieldLabel {
-                        text: qsTr("TITLE")
+                    font.weight: 400
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 32
+
+                    TextInput {
+                        id: titleField
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: titleLine.top
+
+                        verticalAlignment:
+                            TextInput.AlignVCenter
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.88
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.normal
+
+                        font.weight:
+                            Font.Normal
+
+                        clip: true
+
+                        Component.onCompleted:
+                            forceActiveFocus()
+
+                        MouseArea {
+                            anchors.fill: parent
+
+                            cursorShape:
+                                Qt.IBeamCursor
+
+                            onPressed: mouse => {
+                                titleField.forceActiveFocus()
+                                mouse.accepted = false
+                            }
+                        }
                     }
 
-                    Item {
+                    StyledText {
+                        visible:
+                            titleField.text.length === 0
+                            && !titleField.activeFocus
+
+                        anchors.left: parent.left
+                        anchors.verticalCenter:
+                            titleField.verticalCenter
+
+                        text:
+                            qsTr("What are you doing?")
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.28
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.normal
+
+                        font.weight: 400
+                    }
+
+                    Rectangle {
+                        id: titleLine
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+
+                        height: 1
+
+                        color:
+                            titleField.activeFocus
+                            ? Qt.alpha(
+                                Colours.palette.m3primary,
+                                0.7
+                            )
+                            : Qt.alpha(
+                                Colours.palette.m3outlineVariant,
+                                0.5
+                            )
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 5
+
+                StyledText {
+                    text: qsTr("Time")
+
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.5
+                    )
+
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.weight: 400
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    spacing:
+                        Appearance.spacing.large
+
+                    CalendarTimePicker {
                         Layout.fillWidth: true
-                        implicitHeight: 27
 
-                        TextInput {
-                            id: titleField
+                        label: qsTr("Starts")
 
-                            anchors.fill: parent
-                            verticalAlignment: TextInput.AlignVCenter
+                        hour:
+                            root.startHour
+
+                        minute:
+                            root.startMinute
+
+                        onDecreaseHour:
+                            root.startHour =
+                                root.changeHour(
+                                    root.startHour,
+                                    -1
+                                )
+
+                        onIncreaseHour:
+                            root.startHour =
+                                root.changeHour(
+                                    root.startHour,
+                                    1
+                                )
+
+                        onDecreaseMinute:
+                            root.startMinute =
+                                root.changeMinute(
+                                    root.startMinute,
+                                    -15
+                                )
+
+                        onIncreaseMinute:
+                            root.startMinute =
+                                root.changeMinute(
+                                    root.startMinute,
+                                    15
+                                )
+                    }
+
+                    Rectangle {
+                        Layout.preferredWidth: 1
+                        Layout.preferredHeight: 56
+
+                        color: Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.35
+                        )
+                    }
+
+                    CalendarTimePicker {
+                        Layout.fillWidth: true
+
+                        label: qsTr("Ends")
+
+                        hour:
+                            root.endHour
+
+                        minute:
+                            root.endMinute
+
+                        onDecreaseHour:
+                            root.endHour =
+                                root.changeHour(
+                                    root.endHour,
+                                    -1
+                                )
+
+                        onIncreaseHour:
+                            root.endHour =
+                                root.changeHour(
+                                    root.endHour,
+                                    1
+                                )
+
+                        onDecreaseMinute:
+                            root.endMinute =
+                                root.changeMinute(
+                                    root.endMinute,
+                                    -15
+                                )
+
+                        onIncreaseMinute:
+                            root.endMinute =
+                                root.changeMinute(
+                                    root.endMinute,
+                                    15
+                                )
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+
+                color: Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    0.32
+                )
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+
+                spacing:
+                    Appearance.spacing.small
+
+                StyledText {
+                    text: qsTr("Repeats")
+
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.5
+                    )
+
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.weight: 400
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+
+                    spacing:
+                        Appearance.spacing.normal
+
+                    CalendarRepeatButton {
+                        text: qsTr("Never")
+                        value: "none"
+
+                        currentValue:
+                            root.recurrenceFrequency
+
+                        onClicked: value =>
+                            root.recurrenceFrequency =
+                                value
+                    }
+
+                    CalendarRepeatButton {
+                        text: qsTr("Daily")
+                        value: "daily"
+
+                        currentValue:
+                            root.recurrenceFrequency
+
+                        onClicked: value =>
+                            root.recurrenceFrequency =
+                                value
+                    }
+
+                    CalendarRepeatButton {
+                        text: qsTr("Weekly")
+                        value: "weekly"
+
+                        currentValue:
+                            root.recurrenceFrequency
+
+                        onClicked: value =>
+                            root.recurrenceFrequency =
+                                value
+                    }
+
+                    CalendarRepeatButton {
+                        text: qsTr("Monthly")
+                        value: "monthly"
+
+                        currentValue:
+                            root.recurrenceFrequency
+
+                        onClicked: value =>
+                            root.recurrenceFrequency =
+                                value
+                    }
+
+                    CalendarRepeatButton {
+                        text: qsTr("Yearly")
+                        value: "yearly"
+
+                        currentValue:
+                            root.recurrenceFrequency
+
+                        onClicked: value =>
+                            root.recurrenceFrequency =
+                                value
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+
+                    visible:
+                        root.recurrenceFrequency
+                        !== "none"
+
+                    spacing:
+                        Appearance.spacing.small
+
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        StyledText {
+                            text:
+                                qsTr("Every")
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.92
+                                0.45
                             )
 
-                            font.pointSize: Appearance.font.size.normal
-                            clip: true
+                            font.pointSize:
+                                Appearance.font.size.smaller
 
-                            Component.onCompleted:
-                                forceActiveFocus()
+                            font.weight: 400
+                        }
 
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.IBeamCursor
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
-                                onPressed: mouse => {
-                                    titleField.forceActiveFocus()
-                                    mouse.accepted = false
-                                }
-                            }
+                        CalendarStepper {
+                            label: ""
+
+                            value:
+                                root.recurrenceInterval
+
+                            onValueChanged:
+                                root.recurrenceInterval =
+                                    value
                         }
 
                         StyledText {
-                            visible:
-                                titleField.text.length === 0
-                                && !titleField.activeFocus
+                            Layout.preferredWidth: 52
 
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            text: qsTr("What is it?")
+                            text:
+                                root.repeatUnit()
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.36
+                                0.65
                             )
 
-                            font.pointSize: Appearance.font.size.normal
-                        }
-                    }
-                }
-            }
+                            font.pointSize:
+                                Appearance.font.size.smaller
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.small
-
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: startTime.implicitHeight + 16
-
-                    radius: Appearance.rounding.small
-
-                    color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.035
-                    )
-
-                    border.width: 1
-                    border.color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.11
-                    )
-
-                    CalendarTimePicker {
-                        id: startTime
-
-                        anchors.fill: parent
-                        anchors.margins: 8
-
-                        label: qsTr("START")
-                        hour: root.startHour
-                        minute: root.startMinute
-
-                        onDecreaseHour:
-                            root.startHour =
-                                root.changeHour(root.startHour, -1)
-
-                        onIncreaseHour:
-                            root.startHour =
-                                root.changeHour(root.startHour, 1)
-
-                        onDecreaseMinute:
-                            root.startMinute =
-                                root.changeMinute(root.startMinute, -15)
-
-                        onIncreaseMinute:
-                            root.startMinute =
-                                root.changeMinute(root.startMinute, 15)
-                    }
-                }
-
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: endTime.implicitHeight + 16
-
-                    radius: Appearance.rounding.small
-
-                    color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.035
-                    )
-
-                    border.width: 1
-                    border.color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.11
-                    )
-
-                    CalendarTimePicker {
-                        id: endTime
-
-                        anchors.fill: parent
-                        anchors.margins: 8
-
-                        label: qsTr("END")
-                        hour: root.endHour
-                        minute: root.endMinute
-
-                        onDecreaseHour:
-                            root.endHour =
-                                root.changeHour(root.endHour, -1)
-
-                        onIncreaseHour:
-                            root.endHour =
-                                root.changeHour(root.endHour, 1)
-
-                        onDecreaseMinute:
-                            root.endMinute =
-                                root.changeMinute(root.endMinute, -15)
-
-                        onIncreaseMinute:
-                            root.endMinute =
-                                root.changeMinute(root.endMinute, 15)
-                    }
-                }
-            }
-
-            StyledRect {
-                Layout.fillWidth: true
-                implicitHeight: repeatColumn.implicitHeight + 16
-
-                radius: Appearance.rounding.small
-
-                color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.03
-                )
-
-                border.width: 1
-                border.color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.1
-                )
-
-                ColumnLayout {
-                    id: repeatColumn
-
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-
-                    spacing: Appearance.spacing.small
-
-                    CalendarFieldLabel {
-                        text: qsTr("REPEAT")
-                    }
-
-                    Flow {
-                        Layout.fillWidth: true
-                        spacing: Appearance.spacing.small
-
-                        CalendarRepeatButton {
-                            text: qsTr("NONE")
-                            value: "none"
-                            currentValue: root.recurrenceFrequency
-
-                            onClicked: value =>
-                                root.recurrenceFrequency = value
-                        }
-
-                        CalendarRepeatButton {
-                            text: qsTr("DAILY")
-                            value: "daily"
-                            currentValue: root.recurrenceFrequency
-
-                            onClicked: value =>
-                                root.recurrenceFrequency = value
-                        }
-
-                        CalendarRepeatButton {
-                            text: qsTr("WEEKLY")
-                            value: "weekly"
-                            currentValue: root.recurrenceFrequency
-
-                            onClicked: value =>
-                                root.recurrenceFrequency = value
-                        }
-
-                        CalendarRepeatButton {
-                            text: qsTr("MONTHLY")
-                            value: "monthly"
-                            currentValue: root.recurrenceFrequency
-
-                            onClicked: value =>
-                                root.recurrenceFrequency = value
-                        }
-
-                        CalendarRepeatButton {
-                            text: qsTr("YEARLY")
-                            value: "yearly"
-                            currentValue: root.recurrenceFrequency
-
-                            onClicked: value =>
-                                root.recurrenceFrequency = value
+                            font.weight: 400
                         }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
 
-                        visible:
-                            root.recurrenceFrequency !== "none"
+                        StyledText {
+                            text:
+                                qsTr("Stop after")
 
-                        spacing: Appearance.spacing.normal
+                            color: Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.45
+                            )
 
-                        CalendarStepper {
+                            font.pointSize:
+                                Appearance.font.size.smaller
+
+                            font.weight: 400
+                        }
+
+                        Item {
                             Layout.fillWidth: true
-
-                            label: qsTr("EVERY")
-                            value: root.recurrenceInterval
-
-                            onValueChanged:
-                                root.recurrenceInterval = value
                         }
 
                         CalendarStepper {
-                            Layout.fillWidth: true
+                            label: ""
 
-                            label: qsTr("COUNT")
-                            value: root.recurrenceCount
+                            value:
+                                root.recurrenceCount
 
                             onValueChanged:
-                                root.recurrenceCount = value
+                                root.recurrenceCount =
+                                    value
+                        }
+
+                        StyledText {
+                            Layout.preferredWidth: 52
+
+                            text:
+                                root.recurrenceCount === 1
+                                ? qsTr("event")
+                                : qsTr("events")
+
+                            color: Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.65
+                            )
+
+                            font.pointSize:
+                                Appearance.font.size.smaller
+
+                            font.weight: 400
                         }
                     }
                 }
             }
 
-            StyledRect {
+            Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: 58
-
-                radius: Appearance.rounding.small
+                implicitHeight: 1
 
                 color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.025
+                    Colours.palette.m3outlineVariant,
+                    0.32
                 )
+            }
 
-                border.width: 1
-                border.color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.09
-                )
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 3
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 9
-                    spacing: 2
+                StyledText {
+                    text: qsTr("Notes")
 
-                    CalendarFieldLabel {
-                        text: qsTr("NOTES")
-                    }
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.5
+                    )
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    font.pointSize:
+                        Appearance.font.size.smaller
 
-                        TextInput {
-                            id: notesField
+                    font.weight: 400
+                }
 
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 34
+
+                    TextInput {
+                        id: notesField
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: notesLine.top
+
+                        verticalAlignment:
+                            TextInput.AlignVCenter
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.72
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+
+                        font.weight:
+                            Font.Normal
+
+                        clip: true
+
+                        MouseArea {
                             anchors.fill: parent
-                            verticalAlignment: TextInput.AlignVCenter
 
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.78
-                            )
+                            cursorShape:
+                                Qt.IBeamCursor
 
-                            font.pointSize: Appearance.font.size.smaller
-                            clip: true
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.IBeamCursor
-
-                                onPressed: mouse => {
-                                    notesField.forceActiveFocus()
-                                    mouse.accepted = false
-                                }
+                            onPressed: mouse => {
+                                notesField.forceActiveFocus()
+                                mouse.accepted = false
                             }
                         }
+                    }
 
-                        StyledText {
-                            visible:
-                                notesField.text.length === 0
-                                && !notesField.activeFocus
+                    StyledText {
+                        visible:
+                            notesField.text.length === 0
+                            && !notesField.activeFocus
 
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.verticalCenter:
+                            notesField.verticalCenter
 
-                            text: qsTr("Optional detail")
+                        text:
+                            qsTr("Add a note if you need one")
 
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.32
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.25
+                        )
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+
+                        font.weight: 400
+                    }
+
+                    Rectangle {
+                        id: notesLine
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+
+                        height: 1
+
+                        color:
+                            notesField.activeFocus
+                            ? Qt.alpha(
+                                Colours.palette.m3primary,
+                                0.65
                             )
-
-                            font.pointSize: Appearance.font.size.smaller
-                        }
+                            : Qt.alpha(
+                                Colours.palette.m3outlineVariant,
+                                0.45
+                            )
                     }
                 }
             }
 
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 36
+                implicitHeight: 32
 
-                StyledRect {
+                StyledText {
+                    id: saveText
+
                     anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter:
+                        parent.verticalCenter
 
-                    width: saveText.implicitWidth + 24
-                    height: 28
-                    radius: 14
+                    text:
+                        qsTr("Save")
 
-                    color: saveMouse.containsMouse
-                        ? Qt.alpha(Colours.palette.m3primary, 0.16)
-                        : Qt.alpha(Colours.palette.m3primary, 0.09)
+                    color:
+                        saveMouse.containsMouse
+                        ? Colours.palette.m3primary
+                        : Qt.alpha(
+                            Colours.palette.m3primary,
+                            0.75
+                        )
 
-                    border.width: 1
-                    border.color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.45
-                    )
+                    font.pointSize:
+                        Appearance.font.size.normal
 
-                    StyledText {
-                        id: saveText
-                        anchors.centerIn: parent
+                    font.weight: 500
+                }
 
-                        text: qsTr("SAVE EVENT")
-                        color: Colours.palette.m3primary
-                        font.pointSize: Appearance.font.size.smaller
-                        font.weight: 600
-                        font.letterSpacing: 1
-                    }
+                Rectangle {
+                    visible:
+                        saveMouse.containsMouse
 
-                    MouseArea {
-                        id: saveMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.saveEvent()
-                    }
+                    anchors.left:
+                        saveText.left
+
+                    anchors.right:
+                        saveText.right
+
+                    anchors.top:
+                        saveText.bottom
+
+                    anchors.topMargin: 2
+
+                    height: 1
+
+                    color:
+                        Colours.palette.m3primary
+                }
+
+                MouseArea {
+                    id: saveMouse
+
+                    anchors.fill:
+                        saveText
+
+                    anchors.margins: -8
+
+                    hoverEnabled: true
+
+                    cursorShape:
+                        Qt.PointingHandCursor
+
+                    onClicked:
+                        root.saveEvent()
                 }
             }
 
