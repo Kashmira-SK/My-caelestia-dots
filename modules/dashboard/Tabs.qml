@@ -57,7 +57,7 @@ Item {
 
         Tab {
             indexText: "04"
-            text: qsTr("WEATHER")
+            text: qsTr("CALENDAR")
         }
     }
 

@@ -110,7 +110,10 @@ Item {
 
                 Pane {
                     index: 3
-                    sourceComponent: Weather {}
+
+                    sourceComponent: CalendarPage {
+                        state: root.state
+                    }
                 }
             }
 
