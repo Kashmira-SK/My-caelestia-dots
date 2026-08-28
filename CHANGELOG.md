@@ -2,11 +2,16 @@
 
 Newest entries at the top.
 
-## [2026-08-28] - Dashboard System Border Fix
-### Fixed
-- `modules/dashboard/Dash.qml`: fixed the `SYSTEM` label border so the card's left border cleanly breaks around the rotated label instead of running through the text
-- `modules/dashboard/Dash.qml`: preserved the card's rounded corners while aligning the border gap with the actual rendered `SYSTEM` text
+## [2026-08-28] - Dashboard Card Labels
+### Changed
+- `modules/dashboard/Dash.qml`: added integrated border labels to the dashboard cards, including vertical `SYSTEM` and `TIME` labels, top-border `QUOTE` and `DAY` labels, and a bottom-border `MEDIA` label
+- `modules/dashboard/Dash.qml`: replaced affected card borders with custom Canvas-drawn rounded borders so labels create real gaps in the outline instead of sitting on separate background blocks
+- `modules/dashboard/Dash.qml`: restored the Character/Media section divider while keeping `MEDIA` as the label for the shared right-side card
+- `modules/dashboard/Dash.qml`: adjusted card spacing and the left gutter so the dashboard edges align more evenly on both sides
 
+### Fixed
+- `modules/dashboard/Dash.qml`: fixed border gaps crossing through label text and corrected label alignment around rounded corners
+- `modules/dashboard/Dash.qml`: fixed `TIME`, `DAY`, and `MEDIA` labels being clipped when positioned on outer card edges
 ---
 
 ## [2026-08-26] - Dashboard alignment fix
