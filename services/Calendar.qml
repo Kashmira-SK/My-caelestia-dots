@@ -27,6 +27,9 @@ Singleton {
     }
 
     function parseDate(key) {
+        if (!key)
+            return new Date()
+
         const parts = key.split("-")
 
         return new Date(
@@ -67,14 +70,14 @@ Singleton {
         )
     }
 
+    // events
+
     function recurrenceIndex(event, date) {
         if (!event.recurrence)
             return -1
 
         const start = parseDate(event.date)
-
-        const frequency =
-            event.recurrence.frequency
+        const frequency = event.recurrence.frequency
 
         const interval = Math.max(
             1,
@@ -209,27 +212,6 @@ Singleton {
             })
     }
 
-    function todosForDate(date) {
-        const key = dateKey(date)
-
-        return root.todos.filter(todo =>
-            todo.dueDate === key
-        )
-    }
-
-    function hasItemsForDate(date) {
-        const key = dateKey(date)
-
-        return root.events.some(event =>
-            eventOccursOnDate(
-                event,
-                date
-            )
-        ) || root.todos.some(todo =>
-            todo.dueDate === key
-        )
-    }
-
     function addEvent(
         title,
         date,
@@ -281,14 +263,230 @@ Singleton {
         save()
     }
 
-    function addTodo(title, dueDate) {
+    // todos
+
+    function todoDeadline(todo) {
+        if (!todo.dueDate)
+            return null
+
+        const date = parseDate(todo.dueDate)
+
+        if (todo.dueTime) {
+            const parts = todo.dueTime.split(":")
+
+            date.setHours(
+                Number(parts[0]) || 0,
+                Number(parts[1]) || 0,
+                0,
+                0
+            )
+        } else {
+            // Date-only deadlines last until the end of the day.
+            date.setHours(
+                23,
+                59,
+                59,
+                999
+            )
+        }
+
+        return date
+    }
+
+    function todoIsOverdue(todo, now) {
+        if (
+            todo.completed
+            || !todo.dueDate
+        )
+            return false
+
+        const deadline =
+            todoDeadline(todo)
+
+        if (!deadline)
+            return false
+
+        return deadline.getTime()
+            < (now || new Date()).getTime()
+    }
+
+    function priorityRank(priority) {
+        if (priority === "hard")
+            return 2
+
+        if (priority === "medium")
+            return 1
+
+        return 0
+    }
+
+    function effectiveTodoPriority(todo, now) {
+        if (todo.completed)
+            return todo.priority || "small"
+
+        if (!todo.dueDate)
+            return todo.priority || "small"
+
+        const current =
+            now || new Date()
+
+        if (todoIsOverdue(todo, current))
+            return "overdue"
+
+        const deadline =
+            todoDeadline(todo)
+
+        const hours =
+            (
+                deadline.getTime()
+                - current.getTime()
+            ) / 3600000
+
+        const base =
+            todo.priority || "small"
+
+        if (hours <= 24)
+            return "hard"
+
+        if (
+            hours <= 72
+            && priorityRank(base)
+                < priorityRank("medium")
+        )
+            return "medium"
+
+        return base
+    }
+
+    function todoOccursOnDate(todo, date) {
+        if (
+            todo.completed
+            || !todo.dueDate
+        )
+            return false
+
+        return todo.dueDate
+            === dateKey(date)
+    }
+
+    function todosForDate(date) {
+        return root.todos
+            .filter(todo =>
+                todoOccursOnDate(
+                    todo,
+                    date
+                )
+            )
+            .slice()
+            .sort((a, b) => {
+                const timeA =
+                    a.dueTime || "23:59"
+
+                const timeB =
+                    b.dueTime || "23:59"
+
+                return timeA.localeCompare(
+                    timeB
+                )
+            })
+    }
+
+    function undatedTodos() {
+        return root.todos.filter(todo =>
+            !todo.completed
+            && !todo.dueDate
+        )
+    }
+
+    function overdueTodos() {
+        const now = new Date()
+
+        return root.todos
+            .filter(todo =>
+                todoIsOverdue(
+                    todo,
+                    now
+                )
+            )
+            .slice()
+            .sort((a, b) => {
+                const aDate =
+                    todoDeadline(a)
+
+                const bDate =
+                    todoDeadline(b)
+
+                return aDate.getTime()
+                    - bDate.getTime()
+            })
+    }
+
+    function activeTodos() {
+        return root.todos.filter(todo =>
+            !todo.completed
+        )
+    }
+
+    function completedTodos() {
+        return root.todos.filter(todo =>
+            todo.completed
+        )
+    }
+
+    function hasItemsForDate(date) {
+        return root.events.some(event =>
+            eventOccursOnDate(
+                event,
+                date
+            )
+        ) || root.todos.some(todo =>
+            todoOccursOnDate(
+                todo,
+                date
+            )
+        )
+    }
+
+    function hasEventsForDate(date) {
+        return root.events.some(event =>
+            eventOccursOnDate(
+                event,
+                date
+            )
+        )
+    }
+
+    function hasTodosForDate(date) {
+        return root.todos.some(todo =>
+            todoOccursOnDate(
+                todo,
+                date
+            )
+        )
+    }
+
+    function addTodo(
+        title,
+        priority,
+        notes,
+        dueDate,
+        dueTime,
+        recurrence
+    ) {
         const todo = {
             id: makeId("todo"),
             title: title,
+            priority: priority || "small",
+            notes: notes || "",
             dueDate: dueDate
                 ? dateKey(dueDate)
                 : "",
-            completed: false
+            dueTime: dueTime || "",
+            recurrence: recurrence || null,
+            completed: false,
+            completedAt: "",
+            createdAt:
+                new Date().toISOString()
         }
 
         root.todos = [
@@ -316,17 +514,218 @@ Singleton {
         save()
     }
 
-    function toggleTodo(id) {
+    function addTodoRecurrenceStep(
+        date,
+        recurrence
+    ) {
+        const interval = Math.max(
+            1,
+            recurrence.interval || 1
+        )
+
+        const result =
+            new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+            )
+
+        if (
+            recurrence.frequency
+            === "daily"
+        ) {
+            result.setDate(
+                result.getDate()
+                + interval
+            )
+
+            return result
+        }
+
+        if (
+            recurrence.frequency
+            === "weekly"
+        ) {
+            result.setDate(
+                result.getDate()
+                + 7 * interval
+            )
+
+            return result
+        }
+
+        if (
+            recurrence.frequency
+            === "monthly"
+        ) {
+            const originalDay =
+                result.getDate()
+
+            const target =
+                new Date(
+                    result.getFullYear(),
+                    result.getMonth()
+                        + interval,
+                    1
+                )
+
+            const lastDay =
+                new Date(
+                    target.getFullYear(),
+                    target.getMonth() + 1,
+                    0
+                ).getDate()
+
+            target.setDate(
+                Math.min(
+                    originalDay,
+                    lastDay
+                )
+            )
+
+            return target
+        }
+
+        if (
+            recurrence.frequency
+            === "yearly"
+        ) {
+            const month =
+                result.getMonth()
+
+            const day =
+                result.getDate()
+
+            const target =
+                new Date(
+                    result.getFullYear()
+                        + interval,
+                    month,
+                    1
+                )
+
+            const lastDay =
+                new Date(
+                    target.getFullYear(),
+                    month + 1,
+                    0
+                ).getDate()
+
+            target.setDate(
+                Math.min(
+                    day,
+                    lastDay
+                )
+            )
+
+            return target
+        }
+
+        return result
+    }
+
+    function nextTodoDueDate(todo) {
+        if (
+            !todo.recurrence
+            || !todo.dueDate
+        )
+            return ""
+
+        let candidate =
+            addTodoRecurrenceStep(
+                parseDate(todo.dueDate),
+                todo.recurrence
+            )
+
+        const today =
+            new Date()
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        )
+
+        // If several occurrences were missed,
+        // move to the next future occurrence.
+        let guard = 0
+
+        while (
+            candidate < today
+            && guard < 10000
+        ) {
+            candidate =
+                addTodoRecurrenceStep(
+                    candidate,
+                    todo.recurrence
+                )
+
+            guard++
+        }
+
+        return dateKey(candidate)
+    }
+
+    function finishTodo(id) {
+        let changed = false
+
         root.todos = root.todos.map(todo => {
             if (todo.id !== id)
                 return todo
+
+            changed = true
+
+            if (
+                todo.recurrence
+                && todo.dueDate
+            ) {
+                return Object.assign(
+                    {},
+                    todo,
+                    {
+                        dueDate:
+                            nextTodoDueDate(
+                                todo
+                            ),
+                        completed: false,
+                        completedAt: ""
+                    }
+                )
+            }
 
             return Object.assign(
                 {},
                 todo,
                 {
-                    completed:
-                        !todo.completed
+                    completed: true,
+                    completedAt:
+                        new Date().toISOString()
+                }
+            )
+        })
+
+        if (changed)
+            save()
+    }
+
+    function toggleTodo(id) {
+        root.todos = root.todos.map(todo => {
+            if (todo.id !== id)
+                return todo
+
+            const completed =
+                !todo.completed
+
+            return Object.assign(
+                {},
+                todo,
+                {
+                    completed: completed,
+                    completedAt:
+                        completed
+                        ? new Date().toISOString()
+                        : ""
                 }
             )
         })
@@ -351,8 +750,10 @@ Singleton {
             storage.setText(
                 JSON.stringify(
                     {
-                        events: root.events,
-                        todos: root.todos
+                        events:
+                            root.events,
+                        todos:
+                            root.todos
                     },
                     null,
                     2
@@ -373,13 +774,37 @@ Singleton {
                     JSON.parse(text())
 
                 root.events =
-                    Array.isArray(data.events)
+                    Array.isArray(
+                        data.events
+                    )
                     ? data.events
                     : []
 
                 root.todos =
-                    Array.isArray(data.todos)
-                    ? data.todos
+                    Array.isArray(
+                        data.todos
+                    )
+                    ? data.todos.map(todo =>
+                        Object.assign(
+                            {
+                                title: "",
+                                priority:
+                                    "small",
+                                notes: "",
+                                dueDate: "",
+                                dueTime: "",
+                                recurrence:
+                                    null,
+                                completed:
+                                    false,
+                                completedAt:
+                                    "",
+                                createdAt:
+                                    ""
+                            },
+                            todo
+                        )
+                    )
                     : []
             } catch (e) {
                 root.events = []

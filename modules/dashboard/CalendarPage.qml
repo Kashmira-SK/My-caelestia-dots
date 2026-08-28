@@ -19,6 +19,7 @@ Item {
 
     property int sideMode: 0
     property bool eventEditorOpen: false
+    property bool todoEditorOpen: false
 
     readonly property date selectedDate: state.currentDate
 
@@ -68,10 +69,13 @@ Item {
                 Loader {
                     anchors.fill: parent
 
-                    sourceComponent: root.eventEditorOpen
+                    sourceComponent:
+                        root.eventEditorOpen
                         ? eventEditorComponent
-                        : agendaComponent
-                }
+                        : root.todoEditorOpen
+                            ? todoEditorComponent
+                            : agendaComponent
+                                    }
             }
         }
     }
@@ -88,6 +92,9 @@ Item {
 
             onAddEvent:
                 root.eventEditorOpen = true
+
+            onAddTodo:
+                root.todoEditorOpen = true
         }
     }
 
@@ -102,6 +109,21 @@ Item {
 
             onSaved:
                 root.eventEditorOpen = false
+        }
+    }
+
+    Component {
+        id: todoEditorComponent
+
+        TodoEditor {
+            selectedDate:
+                root.selectedDate
+
+            onCancelled:
+                root.todoEditorOpen = false
+
+            onSaved:
+                root.todoEditorOpen = false
         }
     }
 }

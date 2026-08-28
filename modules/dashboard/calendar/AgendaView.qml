@@ -12,6 +12,7 @@ Item {
     property int mode: 0
 
     signal addEvent
+    signal addTodo
 
     readonly property var selectedEvents:
         Calendar.eventsForDate(selectedDate)
@@ -158,7 +159,7 @@ Item {
                 sourceComponent:
                     root.mode === 0
                     ? agendaList
-                    : todoPlaceholder
+                    : todoList
             }
         }
 
@@ -189,7 +190,9 @@ Item {
                     parent.verticalCenter
 
                 text:
-                    qsTr("+ Add event")
+                    root.mode === 0
+                    ? qsTr("+ Add event")
+                    : qsTr("+ Add todo")
 
                 color:
                     addMouse.containsMouse
@@ -239,8 +242,12 @@ Item {
                 cursorShape:
                     Qt.PointingHandCursor
 
-                onClicked:
-                    root.addEvent()
+                onClicked: {
+                    if (root.mode === 0)
+                        root.addEvent()
+                    else
+                        root.addTodo()
+                }
             }
         }
     }
@@ -613,47 +620,11 @@ Item {
     }
 
     Component {
-        id: todoPlaceholder
+        id: todoList
 
-        Item {
-            Column {
-                anchors.centerIn: parent
-
-                spacing:
-                    Appearance.spacing.small
-
-                StyledText {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
-
-                    text:
-                        "( ._. )"
-
-                    color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.52
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.large
-                }
-
-                StyledText {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
-
-                    text:
-                        qsTr("No todos here yet.")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.38
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-                }
-            }
+        TodoView {
+            selectedDate:
+                root.selectedDate
         }
     }
 
