@@ -172,8 +172,20 @@ Item {
                         StyledText {
                             Layout.preferredWidth: 46
 
-                            text:
-                                modelData.time || "—"
+                            text: {
+                                const start =
+                                    modelData.startTime
+                                    || modelData.time
+                                    || "—"
+
+                                const end =
+                                    modelData.endTime
+                                    || ""
+
+                                return end !== ""
+                                    ? `${start}\n${end}`
+                                    : start
+                            }
 
                             color:
                                 Colours.palette.m3primary

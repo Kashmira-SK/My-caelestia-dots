@@ -1,4 +1,5 @@
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import QtQuick
@@ -13,18 +14,65 @@ Item {
     signal cancelled
     signal saved
 
-    function saveEvent() {
-        const cleanTitle =
-            titleField.text.trim()
+    property int startHour: 9
+    property int startMinute: 0
+    property int endHour: 10
+    property int endMinute: 0
 
-        if (cleanTitle === "")
+    property string recurrenceFrequency: "none"
+    property int recurrenceInterval: 1
+    property int recurrenceCount: 1
+
+    function pad(value) {
+        return String(value).padStart(2, "0")
+    }
+
+    function timeString(hour, minute) {
+        return `${pad(hour)}:${pad(minute)}`
+    }
+
+    function changeHour(current, amount) {
+        return (current + amount + 24) % 24
+    }
+
+    function changeMinute(current, amount) {
+        let value = current + amount
+
+        while (value < 0)
+            value += 60
+
+        return value % 60
+    }
+
+    function saveEvent() {
+        const title = titleField.text.trim()
+
+        if (title === "")
             return
 
+        let recurrence = null
+
+        if (root.recurrenceFrequency !== "none") {
+            recurrence = {
+                frequency: root.recurrenceFrequency,
+                interval: root.recurrenceInterval,
+                count: root.recurrenceCount
+            }
+        }
+
         Calendar.addEvent(
-            cleanTitle,
-            selectedDate,
-            timeField.text.trim(),
-            notesField.text.trim()
+            title,
+            root.selectedDate,
+            root.timeString(
+                root.startHour,
+                root.startMinute
+            ),
+            root.timeString(
+                root.endHour,
+                root.endMinute
+            ),
+            notesField.text.trim(),
+            recurrence
         )
 
         root.saved()
@@ -34,109 +82,208 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        StyledText {
-            text: qsTr("NEW EVENT")
+        RowLayout {
+            Layout.fillWidth: true
 
-            color:
-                Colours.palette.m3onSurface
+            ColumnLayout {
+                spacing: 2
 
-            font.pointSize:
-                Appearance.font.size.extraLarge
+                StyledText {
+                    text: qsTr("NEW EVENT")
 
-            font.weight: 600
-            font.letterSpacing: 2
-        }
+                    color:
+                        Colours.palette.m3onSurface
 
-        StyledText {
-            text:
-                root.selectedDate
-                    .toLocaleDateString(
-                        Qt.locale(),
-                        "dddd · d MMMM"
-                    )
-                    .toUpperCase()
+                    font.pointSize:
+                        Appearance.font.size.extraLarge
 
-            color:
-                Colours.palette.m3outline
+                    font.weight: 600
+                    font.letterSpacing: 2
+                }
 
-            font.pointSize:
-                Appearance.font.size.smaller
+                StyledText {
+                    text:
+                        root.selectedDate
+                            .toLocaleDateString(
+                                Qt.locale(),
+                                "dddd · d MMMM"
+                            )
+                            .toUpperCase()
 
-            font.letterSpacing: 1.5
+                    color:
+                        Colours.palette.m3outline
+
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.letterSpacing: 1.5
+                }
+            }
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: 1
-
-            color:
-                Colours.palette.m3outlineVariant
+            color: Colours.palette.m3outlineVariant
         }
 
-        FieldGroup {
+        ColumnLayout {
             Layout.fillWidth: true
+            spacing: Appearance.spacing.small
 
-            label: qsTr("TITLE")
+            FieldLabel {
+                text: qsTr("TITLE")
+            }
 
-            TextField {
+            StyledTextField {
                 id: titleField
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                Layout.fillWidth: true
 
                 placeholderText:
                     qsTr("Event title")
 
-                background: null
-
-                color:
-                    Colours.palette.m3onSurface
-
-                placeholderTextColor:
-                    Colours.palette.m3outline
+                Component.onCompleted:
+                    forceActiveFocus()
             }
         }
 
-        FieldGroup {
+        RowLayout {
             Layout.fillWidth: true
+            spacing: Appearance.spacing.large
 
-            label: qsTr("TIME")
+            TimePicker {
+                Layout.fillWidth: true
 
-            TextField {
-                id: timeField
+                label: qsTr("START")
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                hour: root.startHour
+                minute: root.startMinute
 
-                placeholderText:
-                    qsTr("13:30")
+                onHourChanged:
+                    root.startHour = hour
 
-                background: null
+                onMinuteChanged:
+                    root.startMinute = minute
+            }
 
-                color:
-                    Colours.palette.m3onSurface
+            TimePicker {
+                Layout.fillWidth: true
 
-                placeholderTextColor:
-                    Colours.palette.m3outline
+                label: qsTr("END")
+
+                hour: root.endHour
+                minute: root.endMinute
+
+                onHourChanged:
+                    root.endHour = hour
+
+                onMinuteChanged:
+                    root.endMinute = minute
             }
         }
 
-        FieldGroup {
+        ColumnLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 90
+            spacing: Appearance.spacing.small
 
-            label: qsTr("NOTES")
+            FieldLabel {
+                text: qsTr("REPEAT")
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                RepeatButton {
+                    text: qsTr("NONE")
+                    value: "none"
+                }
+
+                RepeatButton {
+                    text: qsTr("DAILY")
+                    value: "daily"
+                }
+
+                RepeatButton {
+                    text: qsTr("WEEKLY")
+                    value: "weekly"
+                }
+
+                RepeatButton {
+                    text: qsTr("MONTHLY")
+                    value: "monthly"
+                }
+
+                RepeatButton {
+                    text: qsTr("YEARLY")
+                    value: "yearly"
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            visible:
+                root.recurrenceFrequency !== "none"
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                FieldLabel {
+                    text: qsTr("EVERY")
+                }
+
+                NumberStepper {
+                    value:
+                        root.recurrenceInterval
+
+                    minimum: 1
+
+                    onValueChanged:
+                        root.recurrenceInterval = value
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                FieldLabel {
+                    text: qsTr("OCCURRENCES")
+                }
+
+                NumberStepper {
+                    value:
+                        root.recurrenceCount
+
+                    minimum: 1
+
+                    onValueChanged:
+                        root.recurrenceCount = value
+                }
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 92
+
+            spacing: Appearance.spacing.small
+
+            FieldLabel {
+                text: qsTr("NOTES")
+            }
 
             TextArea {
                 id: notesField
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 24
-                anchors.bottom: parent.bottom
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                padding: 0
 
                 placeholderText:
                     qsTr("Optional notes")
@@ -151,6 +298,14 @@ Item {
 
                 wrapMode:
                     TextEdit.Wrap
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+
+                color:
+                    Colours.palette.m3outlineVariant
             }
         }
 
@@ -175,7 +330,6 @@ Item {
 
             ActionButton {
                 text: qsTr("CANCEL")
-                primary: false
 
                 onClicked:
                     root.cancelled()
@@ -191,52 +345,325 @@ Item {
         }
     }
 
-    component FieldGroup: Item {
-        id: field
+    component FieldLabel: StyledText {
+        color:
+            Colours.palette.m3outline
 
-        property string label
+        font.pointSize:
+            Appearance.font.size.smaller
 
-        default property alias content:
-            fieldContent.data
+        font.weight: 600
+        font.letterSpacing: 1.5
+    }
 
-        implicitHeight: 58
+    component TimePicker: ColumnLayout {
+        id: picker
+
+        required property string label
+
+        property int hour
+        property int minute
+
+        spacing: Appearance.spacing.small
+
+        FieldLabel {
+            text: picker.label
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.small
+
+            StepButton {
+                text: "−"
+
+                onClicked:
+                    picker.hour =
+                        root.changeHour(
+                            picker.hour,
+                            -1
+                        )
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    root.pad(picker.hour)
+
+                horizontalAlignment:
+                    Text.AlignHCenter
+
+                color:
+                    Colours.palette.m3onSurface
+
+                font.pointSize:
+                    Appearance.font.size.large
+
+                font.weight: 600
+            }
+
+            StyledText {
+                text: ":"
+
+                color:
+                    Colours.palette.m3outline
+
+                font.pointSize:
+                    Appearance.font.size.large
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    root.pad(picker.minute)
+
+                horizontalAlignment:
+                    Text.AlignHCenter
+
+                color:
+                    Colours.palette.m3onSurface
+
+                font.pointSize:
+                    Appearance.font.size.large
+
+                font.weight: 600
+            }
+
+            StepButton {
+                text: "+"
+
+                onClicked:
+                    picker.minute =
+                        root.changeMinute(
+                            picker.minute,
+                            15
+                        )
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text: qsTr("HOUR")
+
+                horizontalAlignment:
+                    Text.AlignHCenter
+
+                color:
+                    Colours.palette.m3outline
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text: qsTr("MIN")
+
+                horizontalAlignment:
+                    Text.AlignHCenter
+
+                color:
+                    Colours.palette.m3outline
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            StepButton {
+                text: "+1H"
+
+                onClicked:
+                    picker.hour =
+                        root.changeHour(
+                            picker.hour,
+                            1
+                        )
+            }
+
+            StepButton {
+                text: "−15"
+
+                onClicked:
+                    picker.minute =
+                        root.changeMinute(
+                            picker.minute,
+                            -15
+                        )
+            }
+
+            StepButton {
+                text: "+15"
+
+                onClicked:
+                    picker.minute =
+                        root.changeMinute(
+                            picker.minute,
+                            15
+                        )
+            }
+        }
+    }
+
+    component NumberStepper: RowLayout {
+        id: stepper
+
+        property int value: 1
+        property int minimum: 1
+
+        spacing: Appearance.spacing.small
+
+        StepButton {
+            text: "−"
+
+            onClicked:
+                stepper.value =
+                    Math.max(
+                        stepper.minimum,
+                        stepper.value - 1
+                    )
+        }
 
         StyledText {
-            anchors.top: parent.top
-            anchors.left: parent.left
+            Layout.preferredWidth: 26
 
-            text: field.label
+            text:
+                stepper.value
+
+            horizontalAlignment:
+                Text.AlignHCenter
 
             color:
-                Colours.palette.m3outline
+                Colours.palette.m3onSurface
+
+            font.pointSize:
+                Appearance.font.size.normal
+
+            font.weight: 600
+        }
+
+        StepButton {
+            text: "+"
+
+            onClicked:
+                stepper.value++
+        }
+    }
+
+    component RepeatButton: Item {
+        id: button
+
+        required property string text
+        required property string value
+
+        readonly property bool active:
+            root.recurrenceFrequency
+            === button.value
+
+        implicitWidth:
+            label.implicitWidth + 10
+
+        implicitHeight:
+            label.implicitHeight + 8
+
+        StyledText {
+            id: label
+
+            anchors.centerIn: parent
+
+            text: button.text
+
+            color:
+                button.active
+                ? Colours.palette.m3primary
+                : Colours.palette.m3outline
 
             font.pointSize:
                 Appearance.font.size.smaller
 
             font.weight: 600
-            font.letterSpacing: 1.5
-        }
-
-        Item {
-            id: fieldContent
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: fieldLine.top
+            font.letterSpacing: 1
         }
 
         Rectangle {
-            id: fieldLine
+            visible:
+                button.active
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            anchors.left:
+                parent.left
+
+            anchors.right:
+                parent.right
+
+            anchors.bottom:
+                parent.bottom
 
             height: 1
 
             color:
-                Colours.palette.m3outlineVariant
+                Colours.palette.m3primary
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            cursorShape:
+                Qt.PointingHandCursor
+
+            onClicked:
+                root.recurrenceFrequency =
+                    button.value
+        }
+    }
+
+    component StepButton: Item {
+        id: button
+
+        required property string text
+
+        signal clicked
+
+        implicitWidth: 34
+        implicitHeight: 28
+
+        StyledText {
+            anchors.centerIn: parent
+
+            text:
+                button.text
+
+            color:
+                mouse.containsMouse
+                ? Colours.palette.m3primary
+                : Colours.palette.m3outline
+
+            font.pointSize:
+                Appearance.font.size.small
+
+            font.weight: 600
+        }
+
+        MouseArea {
+            id: mouse
+
+            anchors.fill: parent
+            hoverEnabled: true
+
+            cursorShape:
+                Qt.PointingHandCursor
+
+            onClicked:
+                button.clicked()
         }
     }
 
@@ -259,7 +686,8 @@ Item {
 
             anchors.centerIn: parent
 
-            text: button.text
+            text:
+                button.text
 
             color:
                 button.primary
