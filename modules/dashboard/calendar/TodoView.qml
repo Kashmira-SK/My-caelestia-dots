@@ -151,6 +151,8 @@ Item {
             { subtasks: next }
         )
 
+        root.expandedTodoId = todo.id
+        root.refreshTick++
         input.text = ""
     }
 
@@ -171,6 +173,9 @@ Item {
             todo.id,
             { subtasks: next }
         )
+
+        root.expandedTodoId = todo.id
+        root.refreshTick++
     }
 
     function removeSubtask(todo, subtaskId) {
@@ -181,6 +186,9 @@ Item {
             todo.id,
             { subtasks: next }
         )
+
+        root.expandedTodoId = todo.id
+        root.refreshTick++
     }
 
     Timer {
@@ -219,8 +227,18 @@ Item {
                     readonly property bool expanded:
                         root.expandedTodoId === modelData.id
 
+                    readonly property var liveTodo: {
+                        root.refreshTick
+
+                        const match = Calendar.todos.find(
+                            todo => todo.id === modelData.id
+                        )
+
+                        return match || modelData
+                    }
+
                     readonly property var subtasks:
-                        root.subtaskList(modelData)
+                        root.subtaskList(liveTodo)
 
                     readonly property int completedSubtasks:
                         subtasks.filter(
@@ -655,7 +673,7 @@ Item {
 
                                                         onClicked:
                                                             root.toggleSubtask(
-                                                                todoItem.modelData,
+                                                                todoItem.liveTodo,
                                                                 subtaskItem.modelData.id
                                                             )
                                                     }
@@ -710,7 +728,7 @@ Item {
 
                                                         onClicked:
                                                             root.removeSubtask(
-                                                                todoItem.modelData,
+                                                                todoItem.liveTodo,
                                                                 subtaskItem.modelData.id
                                                             )
                                                     }
@@ -787,7 +805,7 @@ Item {
 
                                                 onClicked:
                                                     root.addSubtask(
-                                                        todoItem.modelData,
+                                                        todoItem.liveTodo,
                                                         subtaskInput
                                                     )
                                             }
@@ -820,7 +838,7 @@ Item {
 
                                             onClicked:
                                                 root.editTodo(
-                                                    todoItem.modelData
+                                                    todoItem.liveTodo
                                                 )
                                         }
 

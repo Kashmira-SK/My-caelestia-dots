@@ -59,68 +59,45 @@ Item {
 
             Item {
                 Layout.fillHeight: true
-                Layout.preferredWidth: root.width * 0.55
+                Layout.preferredWidth: root.width * 0.50
 
-                ColumnLayout {
+                MonthView {
                     anchors.fill: parent
-                    spacing: 4
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 24
+                    state: root.state
 
-                        RowLayout {
-                            anchors.fill: parent
+                    displayYear: root.displayYear
+                    displayMonth: root.displayMonth
 
-                            Item {
-                                Layout.fillWidth: true
-                            }
+                    onDisplayYearChanged:
+                        root.displayYear = displayYear
 
-                            StyledText {
-                                text:
-                                    Qt.formatTime(
-                                        root.currentTime,
-                                        "HH:mm"
-                                    )
+                    onDisplayMonthChanged:
+                        root.displayMonth = displayMonth
+                }
 
-                                color: Qt.alpha(
-                                    Colours.palette.m3onSurfaceVariant,
-                                    0.62
-                                )
+                StyledText {
+                    anchors.top: parent.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.topMargin: 5
 
-                                font.pointSize:
-                                    Appearance.font.size.normal
+                    z: 10
 
-                                font.weight: 500
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-
-                        color: Qt.alpha(
-                            Colours.palette.m3outlineVariant,
-                            0.24
+                    text:
+                        Qt.formatTime(
+                            root.currentTime,
+                            "HH:mm"
                         )
-                    }
 
-                    MonthView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.48
+                    )
 
-                        state: root.state
+                    font.pointSize:
+                        Appearance.font.size.smaller
 
-                        displayYear: root.displayYear
-                        displayMonth: root.displayMonth
-
-                        onDisplayYearChanged:
-                            root.displayYear = displayYear
-
-                        onDisplayMonthChanged:
-                            root.displayMonth = displayMonth
-                    }
+                    font.weight: 400
                 }
             }
 
