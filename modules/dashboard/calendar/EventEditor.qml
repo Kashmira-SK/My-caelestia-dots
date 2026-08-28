@@ -18,9 +18,28 @@ Item {
     property int endHour: 10
     property int endMinute: 0
 
-    property string recurrenceFrequency: "none"
+    property int recurrenceIndex: 0
     property int recurrenceInterval: 1
     property int recurrenceCount: 1
+
+    readonly property var recurrenceValues: [
+        "none",
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+    ]
+
+    readonly property var recurrenceLabels: [
+        "Never",
+        "Daily",
+        "Weekly",
+        "Monthly",
+        "Yearly"
+    ]
+
+    readonly property string recurrenceFrequency:
+        recurrenceValues[recurrenceIndex]
 
     function pad(value) {
         return String(value).padStart(2, "0")
@@ -43,49 +62,86 @@ Item {
         return next % 60
     }
 
+    function changeRepeat(amount) {
+        let next =
+            root.recurrenceIndex + amount
+
+        if (next < 0)
+            next =
+                root.recurrenceValues.length - 1
+
+        if (
+            next
+            >= root.recurrenceValues.length
+        )
+            next = 0
+
+        root.recurrenceIndex = next
+    }
+
     function repeatUnit() {
         if (recurrenceFrequency === "daily")
-            return recurrenceInterval === 1 ? "day" : "days"
+            return recurrenceInterval === 1
+                ? "day"
+                : "days"
 
         if (recurrenceFrequency === "weekly")
-            return recurrenceInterval === 1 ? "week" : "weeks"
+            return recurrenceInterval === 1
+                ? "week"
+                : "weeks"
 
         if (recurrenceFrequency === "monthly")
-            return recurrenceInterval === 1 ? "month" : "months"
+            return recurrenceInterval === 1
+                ? "month"
+                : "months"
 
         if (recurrenceFrequency === "yearly")
-            return recurrenceInterval === 1 ? "year" : "years"
+            return recurrenceInterval === 1
+                ? "year"
+                : "years"
 
         return ""
     }
 
     function saveEvent() {
-        const title = titleField.text.trim()
+        const title =
+            titleField.text.trim()
 
         if (title === "")
             return
 
         let recurrence = null
 
-        if (root.recurrenceFrequency !== "none") {
+        if (
+            root.recurrenceFrequency
+            !== "none"
+        ) {
             recurrence = {
-                frequency: root.recurrenceFrequency,
-                interval: root.recurrenceInterval,
-                count: root.recurrenceCount
+                frequency:
+                    root.recurrenceFrequency,
+
+                interval:
+                    root.recurrenceInterval,
+
+                count:
+                    root.recurrenceCount
             }
         }
 
         Calendar.addEvent(
             title,
             root.selectedDate,
+
             root.timeString(
                 root.startHour,
                 root.startMinute
             ),
+
             root.timeString(
                 root.endHour,
                 root.endMinute
             ),
+
             notesField.text.trim(),
             recurrence
         )
@@ -110,7 +166,7 @@ Item {
             Flickable.VerticalFlick
 
         ScrollBar.vertical: ScrollBar {
-            policy: ScrollBar.AsNeeded
+            policy: ScrollBar.AlwaysOff
         }
 
         ColumnLayout {
@@ -128,7 +184,8 @@ Item {
                     spacing: 1
 
                     StyledText {
-                        text: qsTr("New event")
+                        text:
+                            qsTr("New event")
 
                         color:
                             Colours.palette.m3primary
@@ -166,7 +223,8 @@ Item {
                 StyledText {
                     id: cancelText
 
-                    text: qsTr("Cancel")
+                    text:
+                        qsTr("Cancel")
 
                     color:
                         cancelMouse.containsMouse
@@ -198,32 +256,15 @@ Item {
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 1
-
-                color: Qt.alpha(
-                    Colours.palette.m3outlineVariant,
-                    0.4
-                )
-            }
+            Divider {}
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 3
 
-                StyledText {
-                    text: qsTr("Title")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.5
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
+                FieldName {
+                    text:
+                        qsTr("Title")
                 }
 
                 Item {
@@ -233,10 +274,17 @@ Item {
                     TextInput {
                         id: titleField
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: titleLine.top
+                        anchors.left:
+                            parent.left
+
+                        anchors.right:
+                            parent.right
+
+                        anchors.top:
+                            parent.top
+
+                        anchors.bottom:
+                            titleLine.top
 
                         verticalAlignment:
                             TextInput.AlignVCenter
@@ -275,7 +323,9 @@ Item {
                             titleField.text.length === 0
                             && !titleField.activeFocus
 
-                        anchors.left: parent.left
+                        anchors.left:
+                            parent.left
+
                         anchors.verticalCenter:
                             titleField.verticalCenter
 
@@ -284,7 +334,7 @@ Item {
 
                         color: Qt.alpha(
                             Colours.palette.m3onSurfaceVariant,
-                            0.28
+                            0.27
                         )
 
                         font.pointSize:
@@ -296,9 +346,14 @@ Item {
                     Rectangle {
                         id: titleLine
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
+                        anchors.left:
+                            parent.left
+
+                        anchors.right:
+                            parent.right
+
+                        anchors.bottom:
+                            parent.bottom
 
                         height: 1
 
@@ -310,7 +365,7 @@ Item {
                             )
                             : Qt.alpha(
                                 Colours.palette.m3outlineVariant,
-                                0.5
+                                0.45
                             )
                     }
                 }
@@ -320,18 +375,9 @@ Item {
                 Layout.fillWidth: true
                 spacing: 5
 
-                StyledText {
-                    text: qsTr("Time")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.5
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
+                FieldName {
+                    text:
+                        qsTr("Time")
                 }
 
                 RowLayout {
@@ -343,7 +389,8 @@ Item {
                     CalendarTimePicker {
                         Layout.fillWidth: true
 
-                        label: qsTr("Starts")
+                        label:
+                            qsTr("Starts")
 
                         hour:
                             root.startHour
@@ -386,14 +433,15 @@ Item {
 
                         color: Qt.alpha(
                             Colours.palette.m3outlineVariant,
-                            0.35
+                            0.3
                         )
                     }
 
                     CalendarTimePicker {
                         Layout.fillWidth: true
 
-                        label: qsTr("Ends")
+                        label:
+                            qsTr("Ends")
 
                         hour:
                             root.endHour
@@ -432,15 +480,7 @@ Item {
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 1
-
-                color: Qt.alpha(
-                    Colours.palette.m3outlineVariant,
-                    0.32
-                )
-            }
+            Divider {}
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -448,84 +488,65 @@ Item {
                 spacing:
                     Appearance.spacing.small
 
-                StyledText {
-                    text: qsTr("Repeats")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.5
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
-                }
-
-                Flow {
+                RowLayout {
                     Layout.fillWidth: true
 
-                    spacing:
-                        Appearance.spacing.normal
+                    StyledText {
+                        text:
+                            qsTr("Repeats")
 
-                    CalendarRepeatButton {
-                        text: qsTr("Never")
-                        value: "none"
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.5
+                        )
 
-                        currentValue:
-                            root.recurrenceFrequency
+                        font.pointSize:
+                            Appearance.font.size.smaller
 
-                        onClicked: value =>
-                            root.recurrenceFrequency =
-                                value
+                        font.weight: 400
                     }
 
-                    CalendarRepeatButton {
-                        text: qsTr("Daily")
-                        value: "daily"
-
-                        currentValue:
-                            root.recurrenceFrequency
-
-                        onClicked: value =>
-                            root.recurrenceFrequency =
-                                value
+                    Item {
+                        Layout.fillWidth: true
                     }
 
-                    CalendarRepeatButton {
-                        text: qsTr("Weekly")
-                        value: "weekly"
+                    SmallArrow {
+                        text: "‹"
 
-                        currentValue:
-                            root.recurrenceFrequency
-
-                        onClicked: value =>
-                            root.recurrenceFrequency =
-                                value
+                        onClicked:
+                            root.changeRepeat(-1)
                     }
 
-                    CalendarRepeatButton {
-                        text: qsTr("Monthly")
-                        value: "monthly"
+                    StyledText {
+                        Layout.preferredWidth: 64
 
-                        currentValue:
-                            root.recurrenceFrequency
+                        text:
+                            root.recurrenceLabels[
+                                root.recurrenceIndex
+                            ]
 
-                        onClicked: value =>
-                            root.recurrenceFrequency =
-                                value
+                        horizontalAlignment:
+                            Text.AlignHCenter
+
+                        color:
+                            root.recurrenceIndex === 0
+                            ? Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.55
+                            )
+                            : Colours.palette.m3primary
+
+                        font.pointSize:
+                            Appearance.font.size.small
+
+                        font.weight: 500
                     }
 
-                    CalendarRepeatButton {
-                        text: qsTr("Yearly")
-                        value: "yearly"
+                    SmallArrow {
+                        text: "›"
 
-                        currentValue:
-                            root.recurrenceFrequency
-
-                        onClicked: value =>
-                            root.recurrenceFrequency =
-                                value
+                        onClicked:
+                            root.changeRepeat(1)
                     }
                 }
 
@@ -548,22 +569,18 @@ Item {
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.45
+                                0.42
                             )
 
                             font.pointSize:
                                 Appearance.font.size.smaller
-
-                            font.weight: 400
                         }
 
                         Item {
                             Layout.fillWidth: true
                         }
 
-                        CalendarStepper {
-                            label: ""
-
+                        MiniStepper {
                             value:
                                 root.recurrenceInterval
 
@@ -573,20 +590,18 @@ Item {
                         }
 
                         StyledText {
-                            Layout.preferredWidth: 52
+                            Layout.preferredWidth: 48
 
                             text:
                                 root.repeatUnit()
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.65
+                                0.62
                             )
 
                             font.pointSize:
                                 Appearance.font.size.smaller
-
-                            font.weight: 400
                         }
                     }
 
@@ -599,22 +614,18 @@ Item {
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.45
+                                0.42
                             )
 
                             font.pointSize:
                                 Appearance.font.size.smaller
-
-                            font.weight: 400
                         }
 
                         Item {
                             Layout.fillWidth: true
                         }
 
-                        CalendarStepper {
-                            label: ""
-
+                        MiniStepper {
                             value:
                                 root.recurrenceCount
 
@@ -624,7 +635,7 @@ Item {
                         }
 
                         StyledText {
-                            Layout.preferredWidth: 52
+                            Layout.preferredWidth: 48
 
                             text:
                                 root.recurrenceCount === 1
@@ -633,44 +644,25 @@ Item {
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.65
+                                0.62
                             )
 
                             font.pointSize:
                                 Appearance.font.size.smaller
-
-                            font.weight: 400
                         }
                     }
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 1
-
-                color: Qt.alpha(
-                    Colours.palette.m3outlineVariant,
-                    0.32
-                )
-            }
+            Divider {}
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 3
 
-                StyledText {
-                    text: qsTr("Notes")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.5
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
+                FieldName {
+                    text:
+                        qsTr("Notes")
                 }
 
                 Item {
@@ -680,10 +672,17 @@ Item {
                     TextInput {
                         id: notesField
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: notesLine.top
+                        anchors.left:
+                            parent.left
+
+                        anchors.right:
+                            parent.right
+
+                        anchors.top:
+                            parent.top
+
+                        anchors.bottom:
+                            notesLine.top
 
                         verticalAlignment:
                             TextInput.AlignVCenter
@@ -719,30 +718,35 @@ Item {
                             notesField.text.length === 0
                             && !notesField.activeFocus
 
-                        anchors.left: parent.left
+                        anchors.left:
+                            parent.left
+
                         anchors.verticalCenter:
                             notesField.verticalCenter
 
                         text:
-                            qsTr("Add a note if you need one")
+                            qsTr("Anything worth remembering?")
 
                         color: Qt.alpha(
                             Colours.palette.m3onSurfaceVariant,
-                            0.25
+                            0.24
                         )
 
                         font.pointSize:
                             Appearance.font.size.smaller
-
-                        font.weight: 400
                     }
 
                     Rectangle {
                         id: notesLine
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
+                        anchors.left:
+                            parent.left
+
+                        anchors.right:
+                            parent.right
+
+                        anchors.bottom:
+                            parent.bottom
 
                         height: 1
 
@@ -754,7 +758,7 @@ Item {
                             )
                             : Qt.alpha(
                                 Colours.palette.m3outlineVariant,
-                                0.45
+                                0.4
                             )
                     }
                 }
@@ -767,7 +771,9 @@ Item {
                 StyledText {
                     id: saveText
 
-                    anchors.right: parent.right
+                    anchors.right:
+                        parent.right
+
                     anchors.verticalCenter:
                         parent.verticalCenter
 
@@ -779,7 +785,7 @@ Item {
                         ? Colours.palette.m3primary
                         : Qt.alpha(
                             Colours.palette.m3primary,
-                            0.75
+                            0.72
                         )
 
                     font.pointSize:
@@ -831,6 +837,116 @@ Item {
                 Layout.preferredHeight:
                     Appearance.padding.normal
             }
+        }
+    }
+
+    component FieldName: StyledText {
+        color: Qt.alpha(
+            Colours.palette.m3onSurfaceVariant,
+            0.5
+        )
+
+        font.pointSize:
+            Appearance.font.size.smaller
+
+        font.weight: 400
+    }
+
+    component Divider: Rectangle {
+        Layout.fillWidth: true
+
+        implicitHeight: 1
+
+        color: Qt.alpha(
+            Colours.palette.m3outlineVariant,
+            0.3
+        )
+    }
+
+    component SmallArrow: Item {
+        id: arrow
+
+        required property string text
+
+        signal clicked
+
+        implicitWidth: 22
+        implicitHeight: 22
+
+        StyledText {
+            anchors.centerIn: parent
+
+            text:
+                arrow.text
+
+            color:
+                arrowMouse.containsMouse
+                ? Colours.palette.m3primary
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.48
+                )
+
+            font.pointSize:
+                Appearance.font.size.normal
+        }
+
+        MouseArea {
+            id: arrowMouse
+
+            anchors.fill: parent
+
+            hoverEnabled: true
+
+            cursorShape:
+                Qt.PointingHandCursor
+
+            onClicked:
+                arrow.clicked()
+        }
+    }
+
+    component MiniStepper: RowLayout {
+        id: stepper
+
+        property int value: 1
+
+        spacing: 5
+
+        SmallArrow {
+            text: "−"
+
+            onClicked:
+                stepper.value =
+                    Math.max(
+                        1,
+                        stepper.value - 1
+                    )
+        }
+
+        StyledText {
+            Layout.preferredWidth: 20
+
+            text:
+                stepper.value
+
+            horizontalAlignment:
+                Text.AlignHCenter
+
+            color:
+                Colours.palette.m3primary
+
+            font.pointSize:
+                Appearance.font.size.small
+
+            font.weight: 500
+        }
+
+        SmallArrow {
+            text: "+"
+
+            onClicked:
+                stepper.value++
         }
     }
 }

@@ -8,15 +8,61 @@ Item {
     id: root
 
     required property date selectedDate
+
     property int mode: 0
+
     signal addEvent
 
     readonly property var selectedEvents:
         Calendar.eventsForDate(selectedDate)
 
+    readonly property var freeMessages: [
+        {
+            face: "(˶ᵔ ᵕ ᵔ˶)",
+            text: "Looks like you're free."
+        },
+        {
+            face: "╰(*´︶`*)╯",
+            text: "Nothing planned. Go enjoy yourself."
+        },
+        {
+            face: "( •̀ᴗ•́ )و",
+            text: "Open day. Maybe get something done?"
+        },
+        {
+            face: "z z z",
+            text: "No plans here. Rest counts too."
+        },
+        {
+            face: "┐(￣ヮ￣)┌",
+            text: "Your calendar has nothing to say."
+        },
+        {
+            face: "(っ˘ω˘ς )",
+            text: "A quiet day. Keep it that way?"
+        }
+    ]
+
+    function emptyMessageIndex() {
+        const date = root.selectedDate
+
+        const seed =
+            date.getFullYear()
+            + date.getMonth() * 31
+            + date.getDate() * 17
+
+        return Math.abs(seed)
+            % root.freeMessages.length
+    }
+
+    readonly property var emptyMessage:
+        freeMessages[emptyMessageIndex()]
+
     ColumnLayout {
         anchors.fill: parent
-        spacing: Appearance.spacing.small
+
+        spacing:
+            Appearance.spacing.small
 
         RowLayout {
             Layout.fillWidth: true
@@ -25,29 +71,39 @@ Item {
                 spacing: 0
 
                 StyledText {
-                    text: root.selectedDate
-                        .toLocaleDateString(Qt.locale(), "ddd")
-                        .toUpperCase()
+                    text:
+                        root.selectedDate
+                            .toLocaleDateString(
+                                Qt.locale(),
+                                "ddd"
+                            )
 
                     color: Qt.alpha(
                         Colours.palette.m3onSurfaceVariant,
-                        0.58
+                        0.48
                     )
 
-                    font.pointSize: Appearance.font.size.smaller
-                    font.weight: 600
-                    font.letterSpacing: 1.4
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.weight: 400
                 }
 
                 StyledText {
-                    text: root.selectedDate
-                        .toLocaleDateString(Qt.locale(), "d MMMM")
-                        .toUpperCase()
+                    text:
+                        root.selectedDate
+                            .toLocaleDateString(
+                                Qt.locale(),
+                                "d MMMM"
+                            )
 
-                    color: Colours.palette.m3primary
-                    font.pointSize: Appearance.font.size.large
-                    font.weight: 600
-                    font.letterSpacing: 0.8
+                    color:
+                        Colours.palette.m3primary
+
+                    font.pointSize:
+                        Appearance.font.size.large
+
+                    font.weight: 500
                 }
             }
 
@@ -59,15 +115,25 @@ Item {
                 spacing: 14
 
                 ModeButton {
-                    text: qsTr("AGENDA")
-                    active: root.mode === 0
-                    onClicked: root.mode = 0
+                    text:
+                        qsTr("Agenda")
+
+                    active:
+                        root.mode === 0
+
+                    onClicked:
+                        root.mode = 0
                 }
 
                 ModeButton {
-                    text: qsTr("TODOS")
-                    active: root.mode === 1
-                    onClicked: root.mode = 1
+                    text:
+                        qsTr("Todos")
+
+                    active:
+                        root.mode === 1
+
+                    onClicked:
+                        root.mode = 1
                 }
             }
         }
@@ -78,7 +144,7 @@ Item {
 
             color: Qt.alpha(
                 Colours.palette.m3outlineVariant,
-                0.45
+                0.38
             )
         }
 
@@ -88,6 +154,7 @@ Item {
 
             Loader {
                 anchors.fill: parent
+
                 sourceComponent:
                     root.mode === 0
                     ? agendaList
@@ -101,51 +168,79 @@ Item {
 
             color: Qt.alpha(
                 Colours.palette.m3outlineVariant,
-                0.45
+                0.38
             )
         }
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 34
-            visible: root.mode === 0
+            Layout.preferredHeight: 30
+
+            visible:
+                root.mode === 0
+
+            StyledText {
+                id: addText
+
+                anchors.right:
+                    parent.right
+
+                anchors.verticalCenter:
+                    parent.verticalCenter
+
+                text:
+                    qsTr("+ Add event")
+
+                color:
+                    addMouse.containsMouse
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.52
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight: 400
+            }
 
             Rectangle {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
+                visible:
+                    addMouse.containsMouse
 
-                width: addText.implicitWidth + 18
-                height: 26
-                radius: 13
+                anchors.left:
+                    addText.left
 
-                color: addMouse.containsMouse
-                    ? Qt.alpha(Colours.palette.m3primary, 0.12)
-                    : Qt.alpha(Colours.palette.m3primary, 0.06)
+                anchors.right:
+                    addText.right
 
-                border.width: 1
-                border.color: Qt.alpha(
-                    Colours.palette.m3primary,
-                    0.34
-                )
+                anchors.top:
+                    addText.bottom
 
-                StyledText {
-                    id: addText
-                    anchors.centerIn: parent
+                anchors.topMargin: 2
 
-                    text: qsTr("ADD EVENT")
-                    color: Colours.palette.m3primary
-                    font.pointSize: Appearance.font.size.smaller
-                    font.weight: 600
-                    font.letterSpacing: 1
-                }
+                height: 1
 
-                MouseArea {
-                    id: addMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.addEvent()
-                }
+                color:
+                    Colours.palette.m3primary
+            }
+
+            MouseArea {
+                id: addMouse
+
+                anchors.fill:
+                    addText
+
+                anchors.margins: -7
+
+                hoverEnabled: true
+
+                cursorShape:
+                    Qt.PointingHandCursor
+
+                onClicked:
+                    root.addEvent()
             }
         }
     }
@@ -158,63 +253,100 @@ Item {
                 anchors.fill: parent
 
                 contentWidth: width
-                contentHeight: eventColumn.implicitHeight
+
+                contentHeight:
+                    eventColumn.implicitHeight
 
                 clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                flickableDirection: Flickable.VerticalFlick
+
+                boundsBehavior:
+                    Flickable.StopAtBounds
+
+                flickableDirection:
+                    Flickable.VerticalFlick
 
                 ColumnLayout {
                     id: eventColumn
+
                     width: parent.width
-                    spacing: Appearance.spacing.small
+
+                    spacing:
+                        Appearance.spacing.small
 
                     Repeater {
-                        model: root.selectedEvents
+                        model:
+                            root.selectedEvents
 
                         Item {
                             id: eventItem
+
                             required property var modelData
 
+                            property bool expanded:
+                                false
+
+                            readonly property bool hasNotes:
+                                (modelData.notes || "")
+                                !== ""
+
                             Layout.fillWidth: true
-                            implicitHeight: eventCard.implicitHeight
+
+                            implicitHeight:
+                                eventCard.implicitHeight
 
                             StyledRect {
                                 id: eventCard
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
+                                anchors.left:
+                                    parent.left
+
+                                anchors.right:
+                                    parent.right
 
                                 implicitHeight:
-                                    eventContent.implicitHeight + 16
+                                    eventContent.implicitHeight
+                                    + 17
 
-                                radius: Appearance.rounding.small
+                                radius:
+                                    Appearance.rounding.small
 
                                 color: Qt.alpha(
                                     Colours.palette.m3primary,
-                                    eventMouse.containsMouse ? 0.09 : 0.045
+                                    eventHover.containsMouse
+                                    ? 0.065
+                                    : 0.028
                                 )
 
                                 border.width: 1
+
                                 border.color: Qt.alpha(
                                     Colours.palette.m3primary,
-                                    0.15
+                                    eventItem.expanded
+                                    ? 0.25
+                                    : 0.1
                                 )
 
                                 RowLayout {
                                     id: eventContent
 
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.leftMargin: 12
-                                    anchors.rightMargin: 9
+                                    anchors.left:
+                                        parent.left
 
-                                    spacing: 10
+                                    anchors.right:
+                                        parent.right
+
+                                    anchors.verticalCenter:
+                                        parent.verticalCenter
+
+                                    anchors.leftMargin: 11
+                                    anchors.rightMargin: 8
+
+                                    spacing: 9
 
                                     ColumnLayout {
-                                        Layout.preferredWidth: 52
-                                        spacing: 1
+                                        Layout.preferredWidth: 48
+
+                                        spacing: 0
 
                                         StyledText {
                                             text:
@@ -222,82 +354,151 @@ Item {
                                                 || eventItem.modelData.time
                                                 || "—"
 
-                                            color: Colours.palette.m3primary
-                                            font.pointSize: Appearance.font.size.smaller
-                                            font.weight: 600
+                                            color:
+                                                Colours.palette.m3primary
+
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
+
+                                            font.weight: 500
                                         }
 
                                         StyledText {
                                             visible:
-                                                (eventItem.modelData.endTime || "") !== ""
+                                                (
+                                                    eventItem.modelData.endTime
+                                                    || ""
+                                                ) !== ""
 
                                             text:
-                                                eventItem.modelData.endTime || ""
+                                                eventItem.modelData.endTime
+                                                || ""
 
                                             color: Qt.alpha(
                                                 Colours.palette.m3onSurfaceVariant,
-                                                0.55
+                                                0.42
                                             )
 
-                                            font.pointSize: Appearance.font.size.smaller
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
+
+                                            font.weight: 400
                                         }
                                     }
 
                                     Rectangle {
                                         Layout.preferredWidth: 2
+
                                         Layout.preferredHeight:
-                                            Math.max(30, eventText.implicitHeight)
+                                            Math.max(
+                                                27,
+                                                details.implicitHeight
+                                            )
 
                                         radius: 1
 
                                         color: Qt.alpha(
                                             Colours.palette.m3primary,
-                                            0.55
+                                            0.44
                                         )
                                     }
 
                                     ColumnLayout {
-                                        id: eventText
+                                        id: details
+
                                         Layout.fillWidth: true
-                                        spacing: 2
+
+                                        spacing:
+                                            eventItem.expanded
+                                            ? 5
+                                            : 1
 
                                         StyledText {
                                             Layout.fillWidth: true
-                                            text: eventItem.modelData.title
+
+                                            text:
+                                                eventItem.modelData.title
 
                                             color: Qt.alpha(
                                                 Colours.palette.m3onSurfaceVariant,
-                                                0.9
+                                                0.84
                                             )
 
-                                            font.pointSize: Appearance.font.size.normal
-                                            font.weight: 600
-                                            elide: Text.ElideRight
+                                            font.pointSize:
+                                                Appearance.font.size.normal
+
+                                            font.weight: 500
+
+                                            elide:
+                                                Text.ElideRight
                                         }
 
                                         StyledText {
                                             Layout.fillWidth: true
-                                            visible:
-                                                (eventItem.modelData.notes || "") !== ""
 
-                                            text: eventItem.modelData.notes || ""
+                                            visible:
+                                                eventItem.hasNotes
+
+                                            text:
+                                                eventItem.modelData.notes
 
                                             color: Qt.alpha(
                                                 Colours.palette.m3onSurfaceVariant,
-                                                0.52
+                                                eventItem.expanded
+                                                ? 0.62
+                                                : 0.38
                                             )
 
-                                            font.pointSize: Appearance.font.size.smaller
-                                            elide: Text.ElideRight
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
+
+                                            font.weight: 400
+
+                                            wrapMode:
+                                                eventItem.expanded
+                                                ? Text.Wrap
+                                                : Text.NoWrap
+
+                                            elide:
+                                                eventItem.expanded
+                                                ? Text.ElideNone
+                                                : Text.ElideRight
+
+                                            maximumLineCount:
+                                                eventItem.expanded
+                                                ? 20
+                                                : 1
+                                        }
+
+                                        StyledText {
+                                            visible:
+                                                eventItem.hasNotes
+
+                                            text:
+                                                eventItem.expanded
+                                                ? "⌃"
+                                                : "⌄"
+
+                                            color: Qt.alpha(
+                                                Colours.palette.m3primary,
+                                                0.5
+                                            )
+
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
                                         }
                                     }
 
                                     Item {
-                                        Layout.preferredWidth: 24
-                                        Layout.preferredHeight: 24
+                                        Layout.preferredWidth: 23
+                                        Layout.preferredHeight: 23
+
+                                        z: 2
 
                                         StyledText {
-                                            anchors.centerIn: parent
+                                            anchors.centerIn:
+                                                parent
+
                                             text: "×"
 
                                             color:
@@ -305,18 +506,25 @@ Item {
                                                 ? Colours.palette.m3primary
                                                 : Qt.alpha(
                                                     Colours.palette.m3onSurfaceVariant,
-                                                    0.46
+                                                    0.34
                                                 )
 
-                                            font.pointSize: Appearance.font.size.normal
-                                            font.weight: 600
+                                            font.pointSize:
+                                                Appearance.font.size.normal
+
+                                            font.weight: 400
                                         }
 
                                         MouseArea {
                                             id: deleteMouse
-                                            anchors.fill: parent
+
+                                            anchors.fill:
+                                                parent
+
                                             hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
+
+                                            cursorShape:
+                                                Qt.PointingHandCursor
 
                                             onClicked:
                                                 Calendar.removeEvent(
@@ -327,44 +535,76 @@ Item {
                                 }
 
                                 MouseArea {
-                                    id: eventMouse
-                                    anchors.fill: parent
+                                    id: eventHover
+
+                                    anchors.fill:
+                                        parent
+
                                     hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
+
+                                    cursorShape:
+                                        eventItem.hasNotes
+                                        ? Qt.PointingHandCursor
+                                        : Qt.ArrowCursor
+
+                                    onClicked: {
+                                        if (
+                                            eventItem.hasNotes
+                                        ) {
+                                            eventItem.expanded =
+                                                !eventItem.expanded
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
 
                     Column {
-                        Layout.alignment: Qt.AlignCenter
-                        visible: root.selectedEvents.length === 0
-                        spacing: Appearance.spacing.small
+                        Layout.alignment:
+                            Qt.AlignCenter
+
+                        visible:
+                            root.selectedEvents.length
+                            === 0
+
+                        spacing:
+                            Appearance.spacing.normal
 
                         StyledText {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: qsTr("EMPTY DAY")
+                            anchors.horizontalCenter:
+                                parent.horizontalCenter
+
+                            text:
+                                root.emptyMessage.face
 
                             color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.48
+                                Colours.palette.m3primary,
+                                0.58
                             )
 
-                            font.pointSize: Appearance.font.size.smaller
-                            font.weight: 600
-                            font.letterSpacing: 1.3
+                            font.pointSize:
+                                Appearance.font.size.large
+
+                            font.weight: 400
                         }
 
                         StyledText {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: qsTr("No events scheduled.")
+                            anchors.horizontalCenter:
+                                parent.horizontalCenter
+
+                            text:
+                                root.emptyMessage.text
 
                             color: Qt.alpha(
                                 Colours.palette.m3onSurfaceVariant,
-                                0.38
+                                0.43
                             )
 
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize:
+                                Appearance.font.size.smaller
+
+                            font.weight: 400
                         }
                     }
                 }
@@ -378,32 +618,40 @@ Item {
         Item {
             Column {
                 anchors.centerIn: parent
-                spacing: Appearance.spacing.small
+
+                spacing:
+                    Appearance.spacing.small
 
                 StyledText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("TODOS")
+                    anchors.horizontalCenter:
+                        parent.horizontalCenter
+
+                    text:
+                        "( ._. )"
 
                     color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.5
+                        Colours.palette.m3primary,
+                        0.52
                     )
 
-                    font.pointSize: Appearance.font.size.smaller
-                    font.weight: 600
-                    font.letterSpacing: 1.2
+                    font.pointSize:
+                        Appearance.font.size.large
                 }
 
                 StyledText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Todo list coming next.")
+                    anchors.horizontalCenter:
+                        parent.horizontalCenter
+
+                    text:
+                        qsTr("No todos here yet.")
 
                     color: Qt.alpha(
                         Colours.palette.m3onSurfaceVariant,
                         0.38
                     )
 
-                    font.pointSize: Appearance.font.size.smaller
+                    font.pointSize:
+                        Appearance.font.size.smaller
                 }
             }
         }
@@ -414,46 +662,69 @@ Item {
 
         required property string text
         required property bool active
+
         signal clicked
 
-        implicitWidth: label.implicitWidth
-        implicitHeight: label.implicitHeight + 7
+        implicitWidth:
+            label.implicitWidth
+
+        implicitHeight:
+            label.implicitHeight + 7
 
         StyledText {
             id: label
 
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top:
+                parent.top
 
-            text: button.text
+            anchors.horizontalCenter:
+                parent.horizontalCenter
+
+            text:
+                button.text
 
             color:
                 button.active
                 ? Colours.palette.m3primary
                 : Qt.alpha(
                     Colours.palette.m3onSurfaceVariant,
-                    0.48
+                    0.4
                 )
 
-            font.pointSize: Appearance.font.size.smaller
-            font.weight: 600
-            font.letterSpacing: 1
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 400
         }
 
         Rectangle {
-            visible: button.active
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            visible:
+                button.active
+
+            anchors.left:
+                parent.left
+
+            anchors.right:
+                parent.right
+
+            anchors.bottom:
+                parent.bottom
 
             height: 1
-            color: Colours.palette.m3primary
+
+            color:
+                Colours.palette.m3primary
         }
 
         MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: button.clicked()
+            anchors.fill:
+                parent
+
+            cursorShape:
+                Qt.PointingHandCursor
+
+            onClicked:
+                button.clicked()
         }
     }
 }
