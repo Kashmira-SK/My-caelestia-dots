@@ -72,21 +72,6 @@ Item {
                         RowLayout {
                             anchors.fill: parent
 
-                            StyledText {
-                                text:
-                                    qsTr("Local time")
-
-                                color: Qt.alpha(
-                                    Colours.palette.m3onSurfaceVariant,
-                                    0.34
-                                )
-
-                                font.pointSize:
-                                    Appearance.font.size.smaller
-
-                                font.weight: 400
-                            }
-
                             Item {
                                 Layout.fillWidth: true
                             }

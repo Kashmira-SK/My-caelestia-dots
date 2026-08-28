@@ -10,6 +10,7 @@ Item {
     signal editTodo(var todo)
 
     property int refreshTick: 0
+    property string expandedTodoId: ""
 
     readonly property var visibleTodos: {
         root.refreshTick
@@ -215,7 +216,8 @@ Item {
 
                     required property var modelData
 
-                    property bool expanded: false
+                    readonly property bool expanded:
+                        root.expandedTodoId === modelData.id
 
                     readonly property var subtasks:
                         root.subtaskList(modelData)
@@ -491,8 +493,11 @@ Item {
                                             cursorShape: Qt.PointingHandCursor
 
                                             onClicked:
-                                                todoItem.expanded =
-                                                    !todoItem.expanded
+                                                root.expandedTodoId =
+                                                    root.expandedTodoId
+                                                        === todoItem.modelData.id
+                                                    ? ""
+                                                    : todoItem.modelData.id
                                         }
                                     }
                                 }
