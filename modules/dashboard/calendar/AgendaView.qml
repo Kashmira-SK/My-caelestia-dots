@@ -177,9 +177,6 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 30
 
-            visible:
-                root.mode === 0
-
             StyledText {
                 id: addText
 
