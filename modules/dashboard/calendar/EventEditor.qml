@@ -137,9 +137,9 @@ Item {
                 font.letterSpacing: 1.2
             }
 
-            ThinLine {}
+            CalendarThinLine {}
 
-            FieldLabel {
+            CalendarFieldLabel {
                 text: qsTr("TITLE")
             }
 
@@ -166,7 +166,7 @@ Item {
                 }
             }
 
-            FieldLabel {
+            CalendarFieldLabel {
                 text: qsTr("TIME")
             }
 
@@ -174,38 +174,48 @@ Item {
                 Layout.fillWidth: true
                 spacing: Appearance.spacing.normal
 
-                CompactTime {
+                CalendarTimePicker {
                     Layout.fillWidth: true
 
                     label: qsTr("START")
-
                     hour: root.startHour
                     minute: root.startMinute
 
-                    onHourChanged:
-                        root.startHour = hour
+                    onDecreaseHour:
+                        root.startHour = root.changeHour(root.startHour, -1)
 
-                    onMinuteChanged:
-                        root.startMinute = minute
+                    onIncreaseHour:
+                        root.startHour = root.changeHour(root.startHour, 1)
+
+                    onDecreaseMinute:
+                        root.startMinute = root.changeMinute(root.startMinute, -15)
+
+                    onIncreaseMinute:
+                        root.startMinute = root.changeMinute(root.startMinute, 15)
                 }
 
-                CompactTime {
+                CalendarTimePicker {
                     Layout.fillWidth: true
 
                     label: qsTr("END")
-
                     hour: root.endHour
                     minute: root.endMinute
 
-                    onHourChanged:
-                        root.endHour = hour
+                    onDecreaseHour:
+                        root.endHour = root.changeHour(root.endHour, -1)
 
-                    onMinuteChanged:
-                        root.endMinute = minute
+                    onIncreaseHour:
+                        root.endHour = root.changeHour(root.endHour, 1)
+
+                    onDecreaseMinute:
+                        root.endMinute = root.changeMinute(root.endMinute, -15)
+
+                    onIncreaseMinute:
+                        root.endMinute = root.changeMinute(root.endMinute, 15)
                 }
             }
 
-            FieldLabel {
+            CalendarFieldLabel {
                 text: qsTr("REPEAT")
             }
 
@@ -215,29 +225,49 @@ Item {
                 spacing:
                     Appearance.spacing.small
 
-                RepeatButton {
+                CalendarRepeatButton {
                     text: qsTr("NONE")
                     value: "none"
+                    currentValue: root.recurrenceFrequency
+
+                    onClicked: value =>
+                        root.recurrenceFrequency = value
                 }
 
-                RepeatButton {
+                CalendarRepeatButton {
                     text: qsTr("DAILY")
                     value: "daily"
+                    currentValue: root.recurrenceFrequency
+
+                    onClicked: value =>
+                        root.recurrenceFrequency = value
                 }
 
-                RepeatButton {
+                CalendarRepeatButton {
                     text: qsTr("WEEKLY")
                     value: "weekly"
+                    currentValue: root.recurrenceFrequency
+
+                    onClicked: value =>
+                        root.recurrenceFrequency = value
                 }
 
-                RepeatButton {
+                CalendarRepeatButton {
                     text: qsTr("MONTHLY")
                     value: "monthly"
+                    currentValue: root.recurrenceFrequency
+
+                    onClicked: value =>
+                        root.recurrenceFrequency = value
                 }
 
-                RepeatButton {
+                CalendarRepeatButton {
                     text: qsTr("YEARLY")
                     value: "yearly"
+                    currentValue: root.recurrenceFrequency
+
+                    onClicked: value =>
+                        root.recurrenceFrequency = value
                 }
             }
 
@@ -250,7 +280,7 @@ Item {
                 spacing:
                     Appearance.spacing.normal
 
-                CompactStepper {
+                CalendarStepper {
                     Layout.fillWidth: true
 
                     label: qsTr("EVERY")
@@ -260,7 +290,7 @@ Item {
                         root.recurrenceInterval = value
                 }
 
-                CompactStepper {
+                CalendarStepper {
                     Layout.fillWidth: true
 
                     label: qsTr("COUNT")
@@ -271,7 +301,7 @@ Item {
                 }
             }
 
-            FieldLabel {
+            CalendarFieldLabel {
                 text: qsTr("NOTES")
             }
 
@@ -287,7 +317,7 @@ Item {
                     Appearance.font.size.normal
             }
 
-            ThinLine {}
+            CalendarThinLine {}
 
             RowLayout {
                 Layout.fillWidth: true
@@ -296,14 +326,14 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                ActionButton {
+                CalendarActionButton {
                     text: qsTr("CANCEL")
 
                     onClicked:
                         root.cancelled()
                 }
 
-                ActionButton {
+                CalendarActionButton {
                     text: qsTr("SAVE")
                     primary: true
 
@@ -316,319 +346,6 @@ Item {
                 Layout.preferredHeight:
                     Appearance.padding.normal
             }
-        }
-    }
-
-    component FieldLabel: StyledText {
-        color:
-            Colours.palette.m3outline
-
-        font.pointSize:
-            Appearance.font.size.smaller
-
-        font.weight: 600
-        font.letterSpacing: 1.2
-    }
-
-    component ThinLine: Rectangle {
-        Layout.fillWidth: true
-
-        implicitHeight: 1
-
-        color:
-            Colours.palette.m3outlineVariant
-    }
-
-    component CompactTime: ColumnLayout {
-        id: picker
-
-        required property string label
-
-        property int hour
-        property int minute
-
-        spacing:
-            Appearance.spacing.small / 2
-
-        FieldLabel {
-            text: picker.label
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 3
-
-            SmallButton {
-                text: "−"
-
-                onClicked:
-                    picker.hour =
-                        root.changeHour(
-                            picker.hour,
-                            -1
-                        )
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text:
-                    `${root.pad(picker.hour)}:${root.pad(picker.minute)}`
-
-                horizontalAlignment:
-                    Text.AlignHCenter
-
-                color:
-                    Colours.palette.m3onSurface
-
-                font.pointSize:
-                    Appearance.font.size.normal
-
-                font.weight: 600
-            }
-
-            SmallButton {
-                text: "+"
-
-                onClicked:
-                    picker.hour =
-                        root.changeHour(
-                            picker.hour,
-                            1
-                        )
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 3
-
-            SmallButton {
-                Layout.fillWidth: true
-
-                text: "−15"
-
-                onClicked:
-                    picker.minute =
-                        root.changeMinute(
-                            picker.minute,
-                            -15
-                        )
-            }
-
-            SmallButton {
-                Layout.fillWidth: true
-
-                text: "+15"
-
-                onClicked:
-                    picker.minute =
-                        root.changeMinute(
-                            picker.minute,
-                            15
-                        )
-            }
-        }
-    }
-
-    component CompactStepper: ColumnLayout {
-        id: stepper
-
-        required property string label
-
-        property int value: 1
-
-        spacing:
-            Appearance.spacing.small / 2
-
-        FieldLabel {
-            text: stepper.label
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 4
-
-            SmallButton {
-                text: "−"
-
-                onClicked:
-                    stepper.value =
-                        Math.max(
-                            1,
-                            stepper.value - 1
-                        )
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text:
-                    stepper.value
-
-                horizontalAlignment:
-                    Text.AlignHCenter
-
-                color:
-                    Colours.palette.m3onSurface
-
-                font.pointSize:
-                    Appearance.font.size.normal
-
-                font.weight: 600
-            }
-
-            SmallButton {
-                text: "+"
-
-                onClicked:
-                    stepper.value++
-            }
-        }
-    }
-
-    component RepeatButton: Item {
-        id: button
-
-        required property string text
-        required property string value
-
-        readonly property bool active:
-            root.recurrenceFrequency
-            === button.value
-
-        implicitWidth:
-            label.implicitWidth + 12
-
-        implicitHeight:
-            label.implicitHeight + 7
-
-        StyledText {
-            id: label
-
-            anchors.centerIn: parent
-
-            text: button.text
-
-            color:
-                button.active
-                ? Colours.palette.m3primary
-                : Colours.palette.m3outline
-
-            font.pointSize:
-                Appearance.font.size.smaller
-
-            font.weight: 600
-            font.letterSpacing: 0.8
-        }
-
-        Rectangle {
-            visible: button.active
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-
-            height: 1
-
-            color:
-                Colours.palette.m3primary
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            cursorShape:
-                Qt.PointingHandCursor
-
-            onClicked:
-                root.recurrenceFrequency =
-                    button.value
-        }
-    }
-
-    component SmallButton: Item {
-        id: button
-
-        required property string text
-
-        signal clicked
-
-        implicitWidth: 28
-        implicitHeight: 24
-
-        StyledText {
-            anchors.centerIn: parent
-
-            text: button.text
-
-            color:
-                mouse.containsMouse
-                ? Colours.palette.m3primary
-                : Colours.palette.m3outline
-
-            font.pointSize:
-                Appearance.font.size.smaller
-
-            font.weight: 600
-        }
-
-        MouseArea {
-            id: mouse
-
-            anchors.fill: parent
-            hoverEnabled: true
-
-            cursorShape:
-                Qt.PointingHandCursor
-
-            onClicked:
-                button.clicked()
-        }
-    }
-
-    component ActionButton: Item {
-        id: button
-
-        required property string text
-
-        property bool primary: false
-
-        signal clicked
-
-        implicitWidth:
-            label.implicitWidth + 10
-
-        implicitHeight:
-            label.implicitHeight + 8
-
-        StyledText {
-            id: label
-
-            anchors.centerIn: parent
-
-            text: button.text
-
-            color:
-                button.primary
-                ? Colours.palette.m3primary
-                : Colours.palette.m3outline
-
-            font.pointSize:
-                Appearance.font.size.smaller
-
-            font.weight: 600
-            font.letterSpacing: 1
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            cursorShape:
-                Qt.PointingHandCursor
-
-            onClicked:
-                button.clicked()
         }
     }
 }
