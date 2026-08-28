@@ -21,6 +21,9 @@ Item {
     property bool eventEditorOpen: false
     property bool todoEditorOpen: false
 
+    property var editingEvent: null
+    property var editingTodo: null
+
     readonly property date selectedDate: state.currentDate
 
     StyledRect {
@@ -75,7 +78,7 @@ Item {
                         : root.todoEditorOpen
                             ? todoEditorComponent
                             : agendaComponent
-                                    }
+                }
             }
         }
     }
@@ -90,11 +93,25 @@ Item {
             onModeChanged:
                 root.sideMode = mode
 
-            onAddEvent:
+            onAddEvent: {
+                root.editingEvent = null
                 root.eventEditorOpen = true
+            }
 
-            onAddTodo:
+            onAddTodo: {
+                root.editingTodo = null
                 root.todoEditorOpen = true
+            }
+
+            onEditEvent: event => {
+                root.editingEvent = event
+                root.eventEditorOpen = true
+            }
+
+            onEditTodo: todo => {
+                root.editingTodo = todo
+                root.todoEditorOpen = true
+            }
         }
     }
 
@@ -103,12 +120,17 @@ Item {
 
         EventEditor {
             selectedDate: root.selectedDate
+            eventData: root.editingEvent
 
-            onCancelled:
+            onCancelled: {
                 root.eventEditorOpen = false
+                root.editingEvent = null
+            }
 
-            onSaved:
+            onSaved: {
                 root.eventEditorOpen = false
+                root.editingEvent = null
+            }
         }
     }
 
@@ -116,14 +138,18 @@ Item {
         id: todoEditorComponent
 
         TodoEditor {
-            selectedDate:
-                root.selectedDate
+            selectedDate: root.selectedDate
+            todoData: root.editingTodo
 
-            onCancelled:
+            onCancelled: {
                 root.todoEditorOpen = false
+                root.editingTodo = null
+            }
 
-            onSaved:
+            onSaved: {
                 root.todoEditorOpen = false
+                root.editingTodo = null
+            }
         }
     }
 }

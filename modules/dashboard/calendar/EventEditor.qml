@@ -109,18 +109,18 @@ Item {
     }
 
     function timeParts(value) {
-    if (!value)
-        return [0, 0]
+        if (!value)
+            return [0, 0]
 
-    const parts = value.split(":")
+        const parts = value.split(":")
 
-    return [
-        Number(parts[0]) || 0,
-        Number(parts[1]) || 0
-    ]
-}
+        return [
+            Number(parts[0]) || 0,
+            Number(parts[1]) || 0
+        ]
+    }
 
-function loadEvent() {
+    function loadEvent() {
         if (!root.eventData)
             return
 
@@ -145,7 +145,6 @@ function loadEvent() {
 
         root.startHour = start[0]
         root.startMinute = start[1]
-
         root.endHour = end[0]
         root.endMinute = end[1]
 
@@ -176,6 +175,9 @@ function loadEvent() {
                 )
         }
     }
+
+    Component.onCompleted:
+        root.loadEvent()
 
     function saveEvent() {
         const title =
@@ -280,8 +282,8 @@ function loadEvent() {
                     StyledText {
                         text:
                             root.editing
-                                ? qsTr("Edit event")
-                                : qsTr("New event")
+                            ? qsTr("Edit event")
+                            : qsTr("New event")
 
                         color:
                             Colours.palette.m3primary
