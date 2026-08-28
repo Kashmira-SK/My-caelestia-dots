@@ -24,18 +24,32 @@ Item {
     property var editingEvent: null
     property var editingTodo: null
 
+    property date currentTime: new Date()
+
     readonly property date selectedDate: state.currentDate
+
+    Timer {
+        interval: 60 * 1000
+        running: true
+        repeat: true
+
+        onTriggered:
+            root.currentTime = new Date()
+    }
 
     StyledRect {
         anchors.fill: parent
 
         radius: Appearance.rounding.large
+
         color: Colours.layer(
             Colours.palette.m3surfaceContainer,
             2
         )
 
-        border.color: Colours.palette.m3outlineVariant
+        border.color:
+            Colours.palette.m3outlineVariant
+
         border.width: 1
 
         RowLayout {
@@ -43,26 +57,94 @@ Item {
             anchors.margins: Appearance.padding.large
             spacing: Appearance.padding.large
 
-            MonthView {
+            Item {
                 Layout.fillHeight: true
                 Layout.preferredWidth: root.width * 0.55
 
-                state: root.state
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 4
 
-                displayYear: root.displayYear
-                displayMonth: root.displayMonth
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
 
-                onDisplayYearChanged:
-                    root.displayYear = displayYear
+                        RowLayout {
+                            anchors.fill: parent
 
-                onDisplayMonthChanged:
-                    root.displayMonth = displayMonth
+                            StyledText {
+                                text:
+                                    qsTr("Local time")
+
+                                color: Qt.alpha(
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.34
+                                )
+
+                                font.pointSize:
+                                    Appearance.font.size.smaller
+
+                                font.weight: 400
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            StyledText {
+                                text:
+                                    Qt.formatTime(
+                                        root.currentTime,
+                                        "HH:mm"
+                                    )
+
+                                color: Qt.alpha(
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.62
+                                )
+
+                                font.pointSize:
+                                    Appearance.font.size.normal
+
+                                font.weight: 500
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+
+                        color: Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.24
+                        )
+                    }
+
+                    MonthView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        state: root.state
+
+                        displayYear: root.displayYear
+                        displayMonth: root.displayMonth
+
+                        onDisplayYearChanged:
+                            root.displayYear = displayYear
+
+                        onDisplayMonthChanged:
+                            root.displayMonth = displayMonth
+                    }
+                }
             }
 
             Rectangle {
                 Layout.fillHeight: true
                 implicitWidth: 1
-                color: Colours.palette.m3outlineVariant
+
+                color:
+                    Colours.palette.m3outlineVariant
             }
 
             Item {

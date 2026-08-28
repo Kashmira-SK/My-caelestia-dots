@@ -17,8 +17,6 @@ Item {
     readonly property bool editing:
         todoData !== null
 
-    property var subtasks: []
-
     property string priority: "small"
 
     property bool deadlineEnabled: false
@@ -140,64 +138,6 @@ Item {
                     || 1
                 )
         }
-
-        root.subtasks =
-            Array.isArray(
-                root.todoData.subtasks
-            )
-            ? root.todoData.subtasks.slice()
-            : []
-    }
-
-    function addSubtask() {
-        const title =
-            subtaskInput.text.trim()
-
-        if (title === "")
-            return
-
-        root.subtasks = [
-            ...root.subtasks,
-            {
-                id:
-                    Calendar.makeId(
-                        "subtask"
-                    ),
-                title: title,
-                completed: false
-            }
-        ]
-
-        subtaskInput.text = ""
-    }
-
-    function removeSubtask(id) {
-        root.subtasks =
-            root.subtasks.filter(
-                subtask =>
-                    subtask.id !== id
-            )
-    }
-
-    function toggleSubtask(id) {
-        root.subtasks =
-            root.subtasks.map(
-                subtask => {
-                    if (
-                        subtask.id !== id
-                    )
-                        return subtask
-
-                    return Object.assign(
-                        {},
-                        subtask,
-                        {
-                            completed:
-                                !subtask.completed
-                        }
-                    )
-                }
-            )
     }
 
     Component.onCompleted:
@@ -226,30 +166,22 @@ Item {
         const changes = {
             title:
                 cleanTitle,
-
             priority:
                 root.priority,
-
             notes:
                 notesInput.text.trim(),
-
             dueDate:
                 root.deadlineEnabled
                 ? Calendar.dateKey(
                     root.deadlineDate
                 )
                 : "",
-
             dueTime:
                 root.deadlineEnabled
                 ? root.deadlineTime
                 : "",
-
             recurrence:
-                recurrence,
-
-            subtasks:
-                root.subtasks.slice()
+                recurrence
         }
 
         if (root.editing) {
@@ -258,24 +190,15 @@ Item {
                 changes
             )
         } else {
-            const id =
-                Calendar.addTodo(
-                    cleanTitle,
-                    root.priority,
-                    changes.notes,
-                    root.deadlineEnabled
-                        ? root.deadlineDate
-                        : null,
-                    changes.dueTime,
-                    recurrence
-                )
-
-            Calendar.updateTodo(
-                id,
-                {
-                    subtasks:
-                        root.subtasks.slice()
-                }
+            Calendar.addTodo(
+                cleanTitle,
+                root.priority,
+                changes.notes,
+                root.deadlineEnabled
+                    ? root.deadlineDate
+                    : null,
+                changes.dueTime,
+                recurrence
             )
         }
 
@@ -820,236 +743,6 @@ Item {
 
             Item {
                 Layout.fillWidth: true
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-
-            implicitHeight: 1
-
-            color: Qt.alpha(
-                Colours.palette.m3outlineVariant,
-                0.26
-            )
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-
-            spacing: 6
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                StyledText {
-                    text:
-                        qsTr("Subtasks")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.48
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    visible:
-                        root.subtasks.length > 0
-
-                    text:
-                        qsTr("%1 tasks")
-                            .arg(
-                                root.subtasks.length
-                            )
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.32
-                    )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-                }
-            }
-
-            Repeater {
-                model:
-                    root.subtasks
-
-                delegate: RowLayout {
-                    required property var modelData
-
-                    Layout.fillWidth: true
-
-                    spacing: 7
-
-                    StyledText {
-                        text:
-                            modelData.completed
-                            ? "●"
-                            : "○"
-
-                        color:
-                            modelData.completed
-                            ? Colours.palette.m3primary
-                            : Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.42
-                            )
-
-                        font.pointSize:
-                            Appearance.font.size.smaller
-
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -5
-
-                            cursorShape:
-                                Qt.PointingHandCursor
-
-                            onClicked:
-                                root.toggleSubtask(
-                                    modelData.id
-                                )
-                        }
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-
-                        text:
-                            modelData.title
-
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            modelData.completed
-                            ? 0.38
-                            : 0.76
-                        )
-
-                        font.pointSize:
-                            Appearance.font.size.smaller
-
-                        font.weight: 400
-
-                        elide:
-                            Text.ElideRight
-                    }
-
-                    StyledText {
-                        text: "×"
-
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.3
-                        )
-
-                        font.pointSize:
-                            Appearance.font.size.smaller
-
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -6
-
-                            cursorShape:
-                                Qt.PointingHandCursor
-
-                            onClicked:
-                                root.removeSubtask(
-                                    modelData.id
-                                )
-                        }
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                spacing: 7
-
-                StyledText {
-                    text: "+"
-
-                    color: Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.72
-                    )
-                }
-
-                TextInput {
-                    id: subtaskInput
-
-                    Layout.fillWidth: true
-
-                    color:
-                        Colours.palette.m3onSurface
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.weight: 400
-
-                    clip: true
-
-                    Keys.onReturnPressed:
-                        root.addSubtask()
-                }
-
-                StyledText {
-                    id: addSubtaskText
-
-                    text:
-                        qsTr("Add")
-
-                    color:
-                        subtaskInput.text.trim() !== ""
-                        ? Colours.palette.m3primary
-                        : Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.26
-                        )
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -6
-
-                        enabled:
-                            subtaskInput.text.trim()
-                            !== ""
-
-                        cursorShape:
-                            Qt.PointingHandCursor
-
-                        onClicked:
-                            root.addSubtask()
-                    }
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-
-                implicitHeight: 1
-
-                color: Qt.alpha(
-                    Colours.palette.m3outlineVariant,
-                    subtaskInput.activeFocus
-                    ? 0.72
-                    : 0.32
-                )
             }
         }
 

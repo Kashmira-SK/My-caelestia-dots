@@ -10,7 +10,6 @@ Item {
     required property date selectedDate
 
     property int mode: 0
-    property date currentTime: new Date()
 
     signal addEvent
     signal addTodo
@@ -21,72 +20,40 @@ Item {
         Calendar.eventsForDate(selectedDate)
 
     readonly property var activeTodos:
-        Calendar.todos.filter(todo =>
-            !todo.completed
-        )
+        Calendar.todos.filter(todo => !todo.completed)
 
     readonly property int overdueTodoCount:
         Calendar.overdueTodos().length
 
     readonly property var freeMessages: [
-        {
-            face: "(˶ᵔ ᵕ ᵔ˶)",
-            text: "Looks like you're free."
-        },
-        {
-            face: "╰(*´︶`*)╯",
-            text: "Nothing planned. Go enjoy yourself."
-        },
-        {
-            face: "( •̀ᴗ•́ )و",
-            text: "Open day. Maybe get something done?"
-        },
-        {
-            face: "z z z",
-            text: "No plans here. Rest counts too."
-        },
-        {
-            face: "┐(￣ヮ￣)┌",
-            text: "Your calendar has nothing to say."
-        },
-        {
-            face: "(っ˘ω˘ς )",
-            text: "A quiet day. Keep it that way?"
-        }
+        { face: "(˶ᵔ ᵕ ᵔ˶)", text: "Looks like you're free." },
+        { face: "╰(*´︶`*)╯", text: "Nothing planned. Go enjoy yourself." },
+        { face: "( •̀ᴗ•́ )و", text: "Open day. Maybe get something done?" },
+        { face: "z z z", text: "No plans here. Rest counts too." },
+        { face: "┐(￣ヮ￣)┌", text: "Your calendar has nothing to say." },
+        { face: "(っ˘ω˘ς )", text: "A quiet day. Keep it that way?" }
     ]
 
     function emptyMessageIndex() {
         const date = root.selectedDate
-
         const seed =
             date.getFullYear()
             + date.getMonth() * 31
             + date.getDate() * 17
 
-        return Math.abs(seed)
-            % root.freeMessages.length
+        return Math.abs(seed) % root.freeMessages.length
     }
 
     readonly property var emptyMessage:
         freeMessages[emptyMessageIndex()]
 
-    Timer {
-        interval: 60 * 1000
-        running: true
-        repeat: true
-
-        onTriggered:
-            root.currentTime = new Date()
-    }
-
     ColumnLayout {
         anchors.fill: parent
-
-        spacing:
-            Appearance.spacing.small
+        spacing: Appearance.spacing.small
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.preferredHeight: 46
 
             ColumnLayout {
                 spacing: 0
@@ -94,11 +61,10 @@ Item {
                 StyledText {
                     text:
                         root.mode === 0
-                        ? root.selectedDate
-                            .toLocaleDateString(
-                                Qt.locale(),
-                                "ddd"
-                            )
+                        ? root.selectedDate.toLocaleDateString(
+                            Qt.locale(),
+                            "ddd"
+                        )
                         : qsTr("Tasks")
 
                     color: Qt.alpha(
@@ -115,31 +81,22 @@ Item {
                 StyledText {
                     text: {
                         if (root.mode === 0) {
-                            return root.selectedDate
-                                .toLocaleDateString(
-                                    Qt.locale(),
-                                    "d MMMM"
-                                )
-                        }
-
-                        const remaining =
-                            root.activeTodos.length
-
-                        if (
-                            root.overdueTodoCount > 0
-                        ) {
-                            return qsTr(
-                                "%1 remaining · %2 overdue"
+                            return root.selectedDate.toLocaleDateString(
+                                Qt.locale(),
+                                "d MMMM"
                             )
-                                .arg(remaining)
-                                .arg(
-                                    root.overdueTodoCount
-                                )
                         }
 
-                        return qsTr(
-                            "%1 remaining"
-                        ).arg(remaining)
+                        const remaining = root.activeTodos.length
+                        const overdue = root.overdueTodoCount
+
+                        if (overdue > 0) {
+                            return qsTr("%1 remaining · %2 overdue")
+                                .arg(remaining)
+                                .arg(overdue)
+                        }
+
+                        return qsTr("%1 remaining").arg(remaining)
                     }
 
                     color:
@@ -158,48 +115,20 @@ Item {
                 Layout.fillWidth: true
             }
 
-            StyledText {
-                text:
-                    Qt.formatTime(
-                        root.currentTime,
-                        "HH:mm"
-                    )
-
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.46
-                )
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight: 400
-            }
-
-            Item {
-                Layout.preferredWidth: 8
-            }
-
-            Row {
+            RowLayout {
                 spacing: 14
 
                 ModeButton {
-                    text:
-                        qsTr("Agenda")
-
-                    active:
-                        root.mode === 0
+                    text: qsTr("Agenda")
+                    active: root.mode === 0
 
                     onClicked:
                         root.mode = 0
                 }
 
                 ModeButton {
-                    text:
-                        qsTr("Todos")
-
-                    active:
-                        root.mode === 1
+                    text: qsTr("Todos")
+                    active: root.mode === 1
 
                     onClicked:
                         root.mode = 1
@@ -248,11 +177,8 @@ Item {
             StyledText {
                 id: addText
 
-                anchors.right:
-                    parent.right
-
-                anchors.verticalCenter:
-                    parent.verticalCenter
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
 
                 text:
                     root.mode === 0
@@ -273,39 +199,12 @@ Item {
                 font.weight: 400
             }
 
-            Rectangle {
-                visible:
-                    addMouse.containsMouse
-
-                anchors.left:
-                    addText.left
-
-                anchors.right:
-                    addText.right
-
-                anchors.top:
-                    addText.bottom
-
-                anchors.topMargin: 2
-
-                height: 1
-
-                color:
-                    Colours.palette.m3primary
-            }
-
             MouseArea {
                 id: addMouse
 
-                anchors.fill:
-                    addText
-
-                anchors.margins: -7
-
+                anchors.fill: parent
                 hoverEnabled: true
-
-                cursorShape:
-                    Qt.PointingHandCursor
+                cursorShape: Qt.PointingHandCursor
 
                 onClicked: {
                     if (root.mode === 0)
@@ -325,356 +224,251 @@ Item {
                 anchors.fill: parent
 
                 contentWidth: width
-
-                contentHeight:
-                    eventColumn.implicitHeight
+                contentHeight: eventColumn.implicitHeight
 
                 clip: true
-
-                boundsBehavior:
-                    Flickable.StopAtBounds
-
-                flickableDirection:
-                    Flickable.VerticalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
 
                 ColumnLayout {
                     id: eventColumn
 
                     width: parent.width
-
-                    spacing:
-                        Appearance.spacing.small
+                    spacing: Appearance.spacing.small
 
                     Repeater {
-                        model:
-                            root.selectedEvents
+                        model: root.selectedEvents
 
-                        Item {
+                        delegate: Item {
                             id: eventItem
 
                             required property var modelData
 
-                            property bool expanded:
-                                false
-
-                            property bool actionsOpen:
-                                false
+                            property bool expanded: false
 
                             readonly property bool hasNotes:
-                                (modelData.notes || "")
-                                !== ""
+                                (modelData.notes || "") !== ""
 
                             Layout.fillWidth: true
-
-                            implicitHeight:
-                                eventCard.implicitHeight
+                            implicitHeight: eventCard.implicitHeight
 
                             StyledRect {
                                 id: eventCard
 
-                                anchors.left:
-                                    parent.left
-
-                                anchors.right:
-                                    parent.right
+                                anchors.left: parent.left
+                                anchors.right: parent.right
 
                                 implicitHeight:
-                                    eventContent.implicitHeight
-                                    + 17
+                                    eventCardColumn.implicitHeight + 2
 
                                 radius:
                                     Appearance.rounding.small
 
                                 color: Qt.alpha(
                                     Colours.palette.m3primary,
-                                    eventHover.containsMouse
-                                    ? 0.065
-                                    : 0.028
+                                    eventItem.expanded ? 0.045 : 0.026
                                 )
 
                                 border.width: 1
 
                                 border.color: Qt.alpha(
                                     Colours.palette.m3primary,
-                                    eventItem.expanded
-                                    ? 0.25
-                                    : 0.1
+                                    eventItem.expanded ? 0.26 : 0.11
                                 )
 
-                                RowLayout {
-                                    id: eventContent
+                                ColumnLayout {
+                                    id: eventCardColumn
 
-                                    anchors.left:
-                                        parent.left
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
 
-                                    anchors.right:
-                                        parent.right
+                                    spacing: 0
 
-                                    anchors.verticalCenter:
-                                        parent.verticalCenter
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 34
 
-                                    anchors.leftMargin: 11
-                                    anchors.rightMargin: 8
+                                        color: Qt.alpha(
+                                            Colours.palette.m3primary,
+                                            0.045
+                                        )
 
-                                    spacing: 9
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 11
+                                            anchors.rightMargin: 7
+                                            spacing: 6
 
-                                    ColumnLayout {
-                                        Layout.preferredWidth: 48
+                                            StyledText {
+                                                text: {
+                                                    const start =
+                                                        eventItem.modelData.startTime
+                                                        || eventItem.modelData.time
+                                                        || "—"
 
-                                        spacing: 0
+                                                    const end =
+                                                        eventItem.modelData.endTime
+                                                        || ""
 
-                                        StyledText {
-                                            text:
-                                                eventItem.modelData.startTime
-                                                || eventItem.modelData.time
-                                                || "—"
+                                                    return end !== ""
+                                                        ? start + " — " + end
+                                                        : start
+                                                }
 
-                                            color:
-                                                Colours.palette.m3primary
+                                                color:
+                                                    Colours.palette.m3primary
 
-                                            font.pointSize:
-                                                Appearance.font.size.smaller
+                                                font.pointSize:
+                                                    Appearance.font.size.smaller
 
-                                            font.weight: 500
-                                        }
+                                                font.weight: 500
+                                            }
 
-                                        StyledText {
-                                            visible:
-                                                (
-                                                    eventItem.modelData.endTime
-                                                    || ""
-                                                ) !== ""
+                                            Item {
+                                                Layout.fillWidth: true
+                                            }
 
-                                            text:
-                                                eventItem.modelData.endTime
-                                                || ""
+                                            EventAction {
+                                                text: qsTr("Edit")
 
-                                            color: Qt.alpha(
-                                                Colours.palette.m3onSurfaceVariant,
-                                                0.42
-                                            )
+                                                onClicked:
+                                                    root.editEvent(
+                                                        eventItem.modelData
+                                                    )
+                                            }
 
-                                            font.pointSize:
-                                                Appearance.font.size.smaller
+                                            EventAction {
+                                                text: qsTr("Delete")
+                                                destructive: true
 
-                                            font.weight: 400
+                                                onClicked:
+                                                    Calendar.removeEvent(
+                                                        eventItem.modelData.id
+                                                    )
+                                            }
                                         }
                                     }
 
                                     Rectangle {
-                                        Layout.preferredWidth: 2
-
-                                        Layout.preferredHeight:
-                                            Math.max(
-                                                27,
-                                                details.implicitHeight
-                                            )
-
-                                        radius: 1
-
-                                        color: Qt.alpha(
-                                            Colours.palette.m3primary,
-                                            0.44
-                                        )
-                                    }
-
-                                    ColumnLayout {
-                                        id: details
-
                                         Layout.fillWidth: true
-
-                                        spacing:
-                                            eventItem.expanded
-                                            ? 5
-                                            : 1
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            text:
-                                                eventItem.modelData.title
-
-                                            color: Qt.alpha(
-                                                Colours.palette.m3onSurfaceVariant,
-                                                0.84
-                                            )
-
-                                            font.pointSize:
-                                                Appearance.font.size.normal
-
-                                            font.weight: 500
-
-                                            elide:
-                                                Text.ElideRight
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            visible:
-                                                eventItem.hasNotes
-
-                                            text:
-                                                eventItem.modelData.notes
-
-                                            color: Qt.alpha(
-                                                Colours.palette.m3onSurfaceVariant,
-                                                eventItem.expanded
-                                                ? 0.62
-                                                : 0.38
-                                            )
-
-                                            font.pointSize:
-                                                Appearance.font.size.smaller
-
-                                            font.weight: 400
-
-                                            wrapMode:
-                                                eventItem.expanded
-                                                ? Text.Wrap
-                                                : Text.NoWrap
-
-                                            elide:
-                                                eventItem.expanded
-                                                ? Text.ElideNone
-                                                : Text.ElideRight
-
-                                            maximumLineCount:
-                                                eventItem.expanded
-                                                ? 20
-                                                : 1
-                                        }
-
-                                        StyledText {
-                                            visible:
-                                                eventItem.hasNotes
-
-                                            text:
-                                                eventItem.expanded
-                                                ? "⌃"
-                                                : "⌄"
-
-                                            color: Qt.alpha(
-                                                Colours.palette.m3primary,
-                                                0.5
-                                            )
-
-                                            font.pointSize:
-                                                Appearance.font.size.smaller
-                                        }
-                                    }
-
-                                    StyledText {
-                                        id: actionToggle
-
-                                        text:
-                                            eventItem.actionsOpen
-                                            ? "›"
-                                            : "‹"
+                                        implicitHeight: 1
 
                                         color: Qt.alpha(
-                                            Colours.palette.m3primary,
-                                            0.5
+                                            Colours.palette.m3outlineVariant,
+                                            0.24
                                         )
-
-                                        font.pointSize:
-                                            Appearance.font.size.normal
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            anchors.margins: -7
-
-                                            cursorShape:
-                                                Qt.PointingHandCursor
-
-                                            onClicked:
-                                                eventItem.actionsOpen =
-                                                    !eventItem.actionsOpen
-                                        }
                                     }
 
-                                    StyledText {
-                                        visible:
-                                            eventItem.actionsOpen
+                                    Item {
+                                        Layout.fillWidth: true
+                                        implicitHeight:
+                                            eventBodyColumn.implicitHeight + 20
 
-                                        text:
-                                            qsTr("Delete")
+                                        ColumnLayout {
+                                            id: eventBodyColumn
 
-                                        color:
-                                            Colours.palette.m3primary
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.leftMargin: 12
+                                            anchors.rightMargin: 12
 
-                                        font.pointSize:
-                                            Appearance.font.size.smaller
+                                            spacing:
+                                                eventItem.expanded ? 7 : 2
 
-                                        font.weight: 400
+                                            StyledText {
+                                                Layout.fillWidth: true
 
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            anchors.margins: -7
+                                                text:
+                                                    eventItem.modelData.title
 
-                                            cursorShape:
-                                                Qt.PointingHandCursor
+                                                color:
+                                                    Colours.palette.m3onSurface
 
-                                            onClicked:
-                                                Calendar.removeEvent(
-                                                    eventItem.modelData.id
+                                                font.pointSize:
+                                                    Appearance.font.size.normal
+
+                                                font.weight: 500
+                                                elide: Text.ElideRight
+                                            }
+
+                                            StyledText {
+                                                Layout.fillWidth: true
+
+                                                visible:
+                                                    eventItem.expanded
+                                                    && eventItem.hasNotes
+
+                                                text:
+                                                    eventItem.modelData.notes
+
+                                                color: Qt.alpha(
+                                                    Colours.palette.m3onSurfaceVariant,
+                                                    0.58
                                                 )
+
+                                                font.pointSize:
+                                                    Appearance.font.size.smaller
+
+                                                font.weight: 400
+                                                wrapMode: Text.Wrap
+                                            }
+
+                                            StyledText {
+                                                visible:
+                                                    eventItem.hasNotes
+
+                                                text:
+                                                    eventItem.expanded
+                                                    ? qsTr("Click title area to collapse")
+                                                    : qsTr("Click to view notes")
+
+                                                color: Qt.alpha(
+                                                    Colours.palette.m3onSurfaceVariant,
+                                                    0.3
+                                                )
+
+                                                font.pointSize:
+                                                    Appearance.font.size.smaller
+
+                                                font.weight: 400
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+
+                                            enabled:
+                                                eventItem.hasNotes
+
+                                            hoverEnabled: true
+
+                                            cursorShape:
+                                                eventItem.hasNotes
+                                                ? Qt.PointingHandCursor
+                                                : Qt.ArrowCursor
+
+                                            onClicked:
+                                                eventItem.expanded =
+                                                    !eventItem.expanded
                                         }
                                     }
-                                }
-
-                                MouseArea {
-                                    id: eventHover
-
-                                    anchors.left:
-                                        parent.left
-
-                                    anchors.right:
-                                        actionToggle.left
-
-                                    anchors.top:
-                                        parent.top
-
-                                    anchors.bottom:
-                                        parent.bottom
-
-                                    hoverEnabled: true
-
-                                    cursorShape:
-                                        Qt.PointingHandCursor
-
-                                    onClicked: {
-                                        if (
-                                            eventItem.hasNotes
-                                        ) {
-                                            eventItem.expanded =
-                                                !eventItem.expanded
-                                        }
-                                    }
-
-                                    onDoubleClicked:
-                                        root.editEvent(
-                                            eventItem.modelData
-                                        )
                                 }
                             }
                         }
                     }
 
                     Column {
-                        Layout.alignment:
-                            Qt.AlignCenter
+                        Layout.alignment: Qt.AlignCenter
 
                         visible:
-                            root.selectedEvents.length
-                            === 0
+                            root.selectedEvents.length === 0
 
                         spacing:
                             Appearance.spacing.normal
 
                         StyledText {
-                            anchors.horizontalCenter:
-                                parent.horizontalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
 
                             text:
                                 root.emptyMessage.face
@@ -691,8 +485,7 @@ Item {
                         }
 
                         StyledText {
-                            anchors.horizontalCenter:
-                                parent.horizontalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
 
                             text:
                                 root.emptyMessage.text
@@ -722,6 +515,54 @@ Item {
         }
     }
 
+    component EventAction: Item {
+        id: action
+
+        required property string text
+        property bool destructive: false
+
+        signal clicked
+
+        implicitWidth:
+            Math.max(46, actionLabel.implicitWidth + 16)
+
+        implicitHeight: 26
+
+        StyledText {
+            id: actionLabel
+
+            anchors.centerIn: parent
+
+            text: action.text
+
+            color:
+                actionMouse.containsMouse
+                ? Colours.palette.m3primary
+                : Qt.alpha(
+                    action.destructive
+                    ? Colours.palette.m3primary
+                    : Colours.palette.m3onSurfaceVariant,
+                    action.destructive ? 0.6 : 0.48
+                )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 400
+        }
+
+        MouseArea {
+            id: actionMouse
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked:
+                action.clicked()
+        }
+    }
+
     component ModeButton: Item {
         id: button
 
@@ -731,22 +572,18 @@ Item {
         signal clicked
 
         implicitWidth:
-            label.implicitWidth
+            Math.max(44, modeLabel.implicitWidth + 8)
 
         implicitHeight:
-            label.implicitHeight + 7
+            modeLabel.implicitHeight + 8
 
         StyledText {
-            id: label
+            id: modeLabel
 
-            anchors.top:
-                parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
 
-            anchors.horizontalCenter:
-                parent.horizontalCenter
-
-            text:
-                button.text
+            text: button.text
 
             color:
                 button.active
@@ -763,17 +600,11 @@ Item {
         }
 
         Rectangle {
-            visible:
-                button.active
+            visible: button.active
 
-            anchors.left:
-                parent.left
-
-            anchors.right:
-                parent.right
-
-            anchors.bottom:
-                parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
             height: 1
 
@@ -782,11 +613,8 @@ Item {
         }
 
         MouseArea {
-            anchors.fill:
-                parent
-
-            cursorShape:
-                Qt.PointingHandCursor
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
 
             onClicked:
                 button.clicked()

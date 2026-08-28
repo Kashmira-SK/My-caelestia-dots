@@ -9,50 +9,31 @@ Item {
 
     signal editTodo(var todo)
 
-    property int clockTick: 0
+    property int refreshTick: 0
 
     readonly property var visibleTodos: {
-        root.clockTick
+        root.refreshTick
 
         return Calendar.todos
-            .filter(todo =>
-                !todo.completed
-            )
+            .filter(todo => !todo.completed)
             .slice()
             .sort((a, b) => {
-                const priorityA =
-                    root.priorityRank(
-                        Calendar.effectiveTodoPriority(
-                            a
-                        )
-                    )
-
-                const priorityB =
-                    root.priorityRank(
-                        Calendar.effectiveTodoPriority(
-                            b
-                        )
-                    )
-
-                if (
-                    priorityA
-                    !== priorityB
+                const priorityA = root.priorityRank(
+                    Calendar.effectiveTodoPriority(a)
                 )
-                    return priorityB
-                        - priorityA
 
-                const deadlineA =
-                    Calendar.todoDeadline(a)
-
-                const deadlineB =
-                    Calendar.todoDeadline(b)
-
-                if (
-                    deadlineA
-                    && deadlineB
+                const priorityB = root.priorityRank(
+                    Calendar.effectiveTodoPriority(b)
                 )
-                    return deadlineA.getTime()
-                        - deadlineB.getTime()
+
+                if (priorityA !== priorityB)
+                    return priorityB - priorityA
+
+                const deadlineA = Calendar.todoDeadline(a)
+                const deadlineB = Calendar.todoDeadline(b)
+
+                if (deadlineA && deadlineB)
+                    return deadlineA.getTime() - deadlineB.getTime()
 
                 if (deadlineA)
                     return -1
@@ -60,9 +41,7 @@ Item {
                 if (deadlineB)
                     return 1
 
-                return (
-                    a.createdAt || ""
-                ).localeCompare(
+                return (a.createdAt || "").localeCompare(
                     b.createdAt || ""
                 )
             })
@@ -82,10 +61,7 @@ Item {
     }
 
     function priorityLabel(todo) {
-        const value =
-            Calendar.effectiveTodoPriority(
-                todo
-            )
+        const value = Calendar.effectiveTodoPriority(todo)
 
         if (value === "overdue")
             return qsTr("Overdue")
@@ -103,618 +79,776 @@ Item {
         if (!todo.recurrence)
             return ""
 
-        const interval =
-            Math.max(
-                1,
-                todo.recurrence.interval
-                || 1
-            )
+        const interval = Math.max(
+            1,
+            todo.recurrence.interval || 1
+        )
 
         let unit = ""
 
-        if (
-            todo.recurrence.frequency
-            === "daily"
-        )
-            unit =
-                interval === 1
-                ? qsTr("day")
-                : qsTr("days")
+        if (todo.recurrence.frequency === "daily")
+            unit = interval === 1 ? qsTr("day") : qsTr("days")
 
-        if (
-            todo.recurrence.frequency
-            === "weekly"
-        )
-            unit =
-                interval === 1
-                ? qsTr("week")
-                : qsTr("weeks")
+        if (todo.recurrence.frequency === "weekly")
+            unit = interval === 1 ? qsTr("week") : qsTr("weeks")
 
-        if (
-            todo.recurrence.frequency
-            === "monthly"
-        )
-            unit =
-                interval === 1
-                ? qsTr("month")
-                : qsTr("months")
+        if (todo.recurrence.frequency === "monthly")
+            unit = interval === 1 ? qsTr("month") : qsTr("months")
 
-        if (
-            todo.recurrence.frequency
-            === "yearly"
-        )
-            unit =
-                interval === 1
-                ? qsTr("year")
-                : qsTr("years")
+        if (todo.recurrence.frequency === "yearly")
+            unit = interval === 1 ? qsTr("year") : qsTr("years")
 
         if (interval === 1)
             return "↻ " + unit
 
         return "↻ "
             + qsTr("Every")
-            + " "
-            + interval
-            + " "
-            + unit
+            + " " + interval
+            + " " + unit
     }
 
     function dueLabel(todo) {
         if (!todo.dueDate)
             return ""
 
-        const date =
-            Calendar.parseDate(
-                todo.dueDate
-            )
+        const date = Calendar.parseDate(todo.dueDate)
 
-        let label =
-            date.toLocaleDateString(
-                Qt.locale(),
-                "d MMM"
-            )
+        let label = date.toLocaleDateString(
+            Qt.locale(),
+            "d MMM"
+        )
 
         if (todo.dueTime)
-            label += " · "
-                + todo.dueTime
+            label += " · " + todo.dueTime
 
         return label
     }
 
-    Timer {
-        interval:
-            60 * 1000
+    function subtaskList(todo) {
+        return Array.isArray(todo.subtasks)
+            ? todo.subtasks
+            : []
+    }
 
+    function addSubtask(todo, input) {
+        const title = input.text.trim()
+
+        if (title === "")
+            return
+
+        const next = [
+            ...root.subtaskList(todo),
+            {
+                id: Calendar.makeId("subtask"),
+                title: title,
+                completed: false
+            }
+        ]
+
+        Calendar.updateTodo(
+            todo.id,
+            { subtasks: next }
+        )
+
+        input.text = ""
+    }
+
+    function toggleSubtask(todo, subtaskId) {
+        const next = root.subtaskList(todo)
+            .map(subtask => {
+                if (subtask.id !== subtaskId)
+                    return subtask
+
+                return Object.assign(
+                    {},
+                    subtask,
+                    { completed: !subtask.completed }
+                )
+            })
+
+        Calendar.updateTodo(
+            todo.id,
+            { subtasks: next }
+        )
+    }
+
+    function removeSubtask(todo, subtaskId) {
+        const next = root.subtaskList(todo)
+            .filter(subtask => subtask.id !== subtaskId)
+
+        Calendar.updateTodo(
+            todo.id,
+            { subtasks: next }
+        )
+    }
+
+    Timer {
+        interval: 60 * 1000
         repeat: true
         running: true
 
         onTriggered:
-            root.clockTick++
+            root.refreshTick++
     }
 
     Flickable {
         anchors.fill: parent
 
         contentWidth: width
-
-        contentHeight:
-            todoColumn.implicitHeight
+        contentHeight: todoColumn.implicitHeight
 
         clip: true
-
-        boundsBehavior:
-            Flickable.StopAtBounds
-
-        flickableDirection:
-            Flickable.VerticalFlick
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.VerticalFlick
 
         ColumnLayout {
             id: todoColumn
 
             width: parent.width
-
-            spacing: 5
+            spacing: Appearance.spacing.small
 
             Repeater {
-                model:
-                    root.visibleTodos
+                model: root.visibleTodos
 
                 delegate: Item {
                     id: todoItem
 
                     required property var modelData
 
-                    property bool expanded:
-                        false
-
-                    readonly property bool hasNotes:
-                        (modelData.notes || "")
-                        !== ""
+                    property bool expanded: false
 
                     readonly property var subtasks:
-                        Array.isArray(
-                            modelData.subtasks
-                        )
-                        ? modelData.subtasks
-                        : []
-
-                    readonly property bool hasSubtasks:
-                        subtasks.length > 0
-
-                    readonly property bool hasDetails:
-                        hasNotes || hasSubtasks
+                        root.subtaskList(modelData)
 
                     readonly property int completedSubtasks:
                         subtasks.filter(
-                            subtask =>
-                                subtask.completed
+                            subtask => subtask.completed
                         ).length
 
                     readonly property string effectivePriority:
-                        Calendar.effectiveTodoPriority(
-                            modelData
-                        )
+                        Calendar.effectiveTodoPriority(modelData)
 
                     Layout.fillWidth: true
+                    implicitHeight: todoCard.implicitHeight
 
-                    implicitHeight:
-                        todoContent.implicitHeight
-                        + 15
+                    StyledRect {
+                        id: todoCard
 
-                    Rectangle {
-                        anchors.left:
-                            parent.left
+                        anchors.left: parent.left
+                        anchors.right: parent.right
 
-                        anchors.top:
-                            parent.top
+                        implicitHeight:
+                            todoCardColumn.implicitHeight + 2
 
-                        anchors.bottom:
-                            parent.bottom
-
-                        width:
-                            todoItem.effectivePriority
-                                === "small"
-                            ? 1
-                            : todoItem.effectivePriority
-                                === "medium"
-                                ? 2
-                                : 3
-
-                        radius: 1
+                        radius:
+                            Appearance.rounding.small
 
                         color: Qt.alpha(
                             Colours.palette.m3primary,
-                            todoItem.effectivePriority
-                                === "overdue"
-                            ? 0.9
-                            : todoItem.effectivePriority
-                                === "hard"
-                                ? 0.7
-                                : todoItem.effectivePriority
-                                    === "medium"
-                                    ? 0.5
-                                    : 0.3
+                            todoItem.expanded ? 0.04 : 0.024
                         )
-                    }
 
-                    RowLayout {
-                        id: todoContent
+                        border.width: 1
 
-                        anchors.left:
-                            parent.left
-
-                        anchors.right:
-                            parent.right
-
-                        anchors.verticalCenter:
-                            parent.verticalCenter
-
-                        anchors.leftMargin: 9
-
-                        spacing: 8
+                        border.color: Qt.alpha(
+                            Colours.palette.m3primary,
+                            todoItem.expanded ? 0.24 : 0.1
+                        )
 
                         ColumnLayout {
-                            Layout.fillWidth: true
+                            id: todoCardColumn
 
-                            spacing:
-                                todoItem.expanded
-                                ? 4
-                                : 1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
 
-                            StyledText {
+                            spacing: 0
+
+                            Item {
                                 Layout.fillWidth: true
+                                implicitHeight:
+                                    todoSummaryRow.implicitHeight + 18
 
-                                text:
-                                    todoItem.modelData.title
+                                RowLayout {
+                                    id: todoSummaryRow
 
-                                color:
-                                    Colours.palette.m3onSurface
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 10
 
-                                font.pointSize:
-                                    Appearance.font.size.normal
+                                    spacing: 9
 
-                                font.weight: 500
+                                    Item {
+                                        Layout.preferredWidth: 28
+                                        Layout.preferredHeight: 28
 
-                                elide:
-                                    Text.ElideRight
-                            }
+                                        Rectangle {
+                                            anchors.centerIn: parent
 
-                            RowLayout {
-                                Layout.fillWidth: true
+                                            width: 17
+                                            height: 17
+                                            radius: 4
 
-                                spacing: 6
+                                            color: Qt.alpha(
+                                                Colours.palette.m3primary,
+                                                finishMouse.containsMouse
+                                                ? 0.08
+                                                : 0.0
+                                            )
 
-                                StyledText {
-                                    text:
-                                        root.priorityLabel(
-                                            todoItem.modelData
-                                        )
+                                            border.width: 1
 
-                                    color:
-                                        todoItem.effectivePriority
-                                            === "overdue"
-                                        ? Colours.palette.m3primary
-                                        : Qt.alpha(
-                                            Colours.palette.m3onSurfaceVariant,
-                                            0.52
-                                        )
+                                            border.color: Qt.alpha(
+                                                Colours.palette.m3primary,
+                                                finishMouse.containsMouse
+                                                ? 0.9
+                                                : 0.48
+                                            )
 
-                                    font.pointSize:
-                                        Appearance.font.size.smaller
+                                            StyledText {
+                                                anchors.centerIn: parent
 
-                                    font.weight:
-                                        todoItem.effectivePriority
-                                            === "overdue"
-                                        ? 500
-                                        : 400
-                                }
+                                                visible:
+                                                    finishMouse.containsMouse
 
-                                StyledText {
-                                    visible:
-                                        todoItem.modelData.dueDate
-                                        !== ""
+                                                text: "✓"
 
-                                    text: "·"
+                                                color:
+                                                    Colours.palette.m3primary
 
-                                    color: Qt.alpha(
-                                        Colours.palette.m3onSurfaceVariant,
-                                        0.28
-                                    )
-                                }
+                                                font.pointSize:
+                                                    Appearance.font.size.smaller
 
-                                StyledText {
-                                    visible:
-                                        todoItem.modelData.dueDate
-                                        !== ""
+                                                font.weight: 500
+                                            }
+                                        }
 
-                                    text:
-                                        root.dueLabel(
-                                            todoItem.modelData
-                                        )
+                                        MouseArea {
+                                            id: finishMouse
 
-                                    color: Qt.alpha(
-                                        Colours.palette.m3onSurfaceVariant,
-                                        0.42
-                                    )
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
 
-                                    font.pointSize:
-                                        Appearance.font.size.smaller
+                                            onClicked:
+                                                Calendar.finishTodo(
+                                                    todoItem.modelData.id
+                                                )
+                                        }
+                                    }
 
-                                    font.weight: 400
-                                }
-
-                                StyledText {
-                                    visible:
-                                        todoItem.modelData.recurrence
-                                        !== null
-
-                                    text: "·"
-
-                                    color: Qt.alpha(
-                                        Colours.palette.m3onSurfaceVariant,
-                                        0.28
-                                    )
-                                }
-
-                                StyledText {
-                                    visible:
-                                        todoItem.modelData.recurrence
-                                        !== null
-
-                                    text:
-                                        root.repeatLabel(
-                                            todoItem.modelData
-                                        )
-
-                                    color: Qt.alpha(
-                                        Colours.palette.m3secondary,
-                                        0.62
-                                    )
-
-                                    font.pointSize:
-                                        Appearance.font.size.smaller
-
-                                    font.weight: 400
-                                }
-
-                                StyledText {
-                                    visible:
-                                        todoItem.hasSubtasks
-
-                                    text: "·"
-
-                                    color: Qt.alpha(
-                                        Colours.palette.m3onSurfaceVariant,
-                                        0.28
-                                    )
-                                }
-
-                                StyledText {
-                                    visible:
-                                        todoItem.hasSubtasks
-
-                                    text:
-                                        todoItem.completedSubtasks
-                                        + "/"
-                                        + todoItem.subtasks.length
-                                        + " "
-                                        + qsTr("done")
-
-                                    color: Qt.alpha(
-                                        Colours.palette.m3secondary,
-                                        0.56
-                                    )
-
-                                    font.pointSize:
-                                        Appearance.font.size.smaller
-
-                                    font.weight: 400
-                                }
-
-                                Item {
-                                    Layout.fillWidth: true
-                                }
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-
-                                visible:
-                                    todoItem.hasNotes
-                                    && todoItem.expanded
-
-                                text:
-                                    todoItem.modelData.notes
-
-                                color: Qt.alpha(
-                                    Colours.palette.m3onSurfaceVariant,
-                                    0.52
-                                )
-
-                                font.pointSize:
-                                    Appearance.font.size.smaller
-
-                                font.weight: 400
-
-                                wrapMode:
-                                    Text.Wrap
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-
-                                visible:
-                                    todoItem.expanded
-                                    && todoItem.hasSubtasks
-
-                                spacing: 3
-
-                                Repeater {
-                                    model:
-                                        todoItem.subtasks
-
-                                    delegate: RowLayout {
-                                        required property var modelData
+                                    Item {
+                                        id: todoBody
 
                                         Layout.fillWidth: true
+                                        implicitHeight:
+                                            todoSummaryColumn.implicitHeight
 
-                                        spacing: 6
+                                        ColumnLayout {
+                                            id: todoSummaryColumn
 
-                                        StyledText {
-                                            text:
-                                                modelData.completed
-                                                ? "●"
-                                                : "○"
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
 
-                                            color:
-                                                modelData.completed
-                                                ? Colours.palette.m3primary
-                                                : Qt.alpha(
-                                                    Colours.palette.m3onSurfaceVariant,
-                                                    0.38
-                                                )
+                                            spacing: 3
 
-                                            font.pointSize:
-                                                Appearance.font.size.smaller
+                                            StyledText {
+                                                Layout.fillWidth: true
 
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                anchors.margins: -5
+                                                text:
+                                                    todoItem.modelData.title
 
-                                                cursorShape:
-                                                    Qt.PointingHandCursor
+                                                color:
+                                                    Colours.palette.m3onSurface
 
-                                                onClicked: {
-                                                    const updated =
-                                                        todoItem.subtasks.map(
-                                                            subtask => {
-                                                                if (
-                                                                    subtask.id
-                                                                    !== modelData.id
-                                                                )
-                                                                    return subtask
+                                                font.pointSize:
+                                                    Appearance.font.size.normal
 
-                                                                return Object.assign(
-                                                                    {},
-                                                                    subtask,
-                                                                    {
-                                                                        completed:
-                                                                            !subtask.completed
-                                                                    }
-                                                                )
-                                                            }
+                                                font.weight: 500
+                                                elide: Text.ElideRight
+                                            }
+
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 5
+
+                                                StyledText {
+                                                    text:
+                                                        root.priorityLabel(
+                                                            todoItem.modelData
                                                         )
 
-                                                    Calendar.updateTodo(
-                                                        todoItem.modelData.id,
-                                                        {
-                                                            subtasks:
-                                                                updated
-                                                        }
+                                                    color:
+                                                        todoItem.effectivePriority === "overdue"
+                                                        ? Colours.palette.m3primary
+                                                        : Qt.alpha(
+                                                            Colours.palette.m3onSurfaceVariant,
+                                                            0.52
+                                                        )
+
+                                                    font.pointSize:
+                                                        Appearance.font.size.smaller
+
+                                                    font.weight:
+                                                        todoItem.effectivePriority === "overdue"
+                                                        ? 500
+                                                        : 400
+                                                }
+
+                                                StyledText {
+                                                    visible:
+                                                        todoItem.modelData.dueDate !== ""
+
+                                                    text: "·"
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        0.28
                                                     )
+                                                }
+
+                                                StyledText {
+                                                    visible:
+                                                        todoItem.modelData.dueDate !== ""
+
+                                                    text:
+                                                        root.dueLabel(
+                                                            todoItem.modelData
+                                                        )
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        0.44
+                                                    )
+
+                                                    font.pointSize:
+                                                        Appearance.font.size.smaller
+
+                                                    font.weight: 400
+                                                }
+
+                                                StyledText {
+                                                    visible:
+                                                        todoItem.modelData.recurrence !== null
+
+                                                    text: "·"
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        0.28
+                                                    )
+                                                }
+
+                                                StyledText {
+                                                    visible:
+                                                        todoItem.modelData.recurrence !== null
+
+                                                    text:
+                                                        root.repeatLabel(
+                                                            todoItem.modelData
+                                                        )
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3secondary,
+                                                        0.62
+                                                    )
+
+                                                    font.pointSize:
+                                                        Appearance.font.size.smaller
+
+                                                    font.weight: 400
+                                                }
+
+                                                StyledText {
+                                                    visible:
+                                                        todoItem.subtasks.length > 0
+
+                                                    text:
+                                                        "· "
+                                                        + todoItem.completedSubtasks
+                                                        + "/"
+                                                        + todoItem.subtasks.length
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        0.4
+                                                    )
+
+                                                    font.pointSize:
+                                                        Appearance.font.size.smaller
+                                                }
+
+                                                Item {
+                                                    Layout.fillWidth: true
                                                 }
                                             }
                                         }
 
-                                        StyledText {
-                                            Layout.fillWidth: true
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
 
+                                            onClicked:
+                                                todoItem.expanded =
+                                                    !todoItem.expanded
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                implicitHeight:
+                                    todoExpandedColumn.implicitHeight + 16
+
+                                visible:
+                                    todoItem.expanded
+
+                                ColumnLayout {
+                                    id: todoExpandedColumn
+
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: 47
+                                    anchors.rightMargin: 10
+
+                                    spacing: 7
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        implicitHeight: 1
+
+                                        color: Qt.alpha(
+                                            Colours.palette.m3outlineVariant,
+                                            0.22
+                                        )
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+
+                                        visible:
+                                            (todoItem.modelData.notes || "") !== ""
+
+                                        text:
+                                            todoItem.modelData.notes
+
+                                        color: Qt.alpha(
+                                            Colours.palette.m3onSurfaceVariant,
+                                            0.56
+                                        )
+
+                                        font.pointSize:
+                                            Appearance.font.size.smaller
+
+                                        font.weight: 400
+                                        wrapMode: Text.Wrap
+                                    }
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+
+                                        StyledText {
                                             text:
-                                                modelData.title
+                                                qsTr("Subtasks")
 
                                             color: Qt.alpha(
                                                 Colours.palette.m3onSurfaceVariant,
-                                                modelData.completed
-                                                ? 0.36
-                                                : 0.68
+                                                0.48
                                             )
 
                                             font.pointSize:
                                                 Appearance.font.size.smaller
 
-                                            font.weight: 400
+                                            font.weight: 500
+                                        }
 
-                                            elide:
-                                                Text.ElideRight
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        StyledText {
+                                            visible:
+                                                todoItem.subtasks.length > 0
+
+                                            text:
+                                                todoItem.completedSubtasks
+                                                + "/"
+                                                + todoItem.subtasks.length
+                                                + " "
+                                                + qsTr("done")
+
+                                            color: Qt.alpha(
+                                                Colours.palette.m3onSurfaceVariant,
+                                                0.36
+                                            )
+
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
+                                        }
+                                    }
+
+                                    Repeater {
+                                        model:
+                                            todoItem.subtasks
+
+                                        delegate: Item {
+                                            id: subtaskItem
+
+                                            required property var modelData
+
+                                            Layout.fillWidth: true
+                                            implicitHeight: 26
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                spacing: 7
+
+                                                Item {
+                                                    Layout.preferredWidth: 24
+                                                    Layout.preferredHeight: 24
+
+                                                    Rectangle {
+                                                        anchors.centerIn: parent
+
+                                                        width: 14
+                                                        height: 14
+                                                        radius: 3
+                                                        color: "transparent"
+
+                                                        border.width: 1
+
+                                                        border.color: Qt.alpha(
+                                                            Colours.palette.m3primary,
+                                                            subtaskItem.modelData.completed
+                                                            ? 0.82
+                                                            : 0.38
+                                                        )
+
+                                                        StyledText {
+                                                            anchors.centerIn: parent
+
+                                                            visible:
+                                                                subtaskItem.modelData.completed
+
+                                                            text: "✓"
+
+                                                            color:
+                                                                Colours.palette.m3primary
+
+                                                            font.pointSize:
+                                                                Appearance.font.size.smaller
+                                                        }
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        cursorShape: Qt.PointingHandCursor
+
+                                                        onClicked:
+                                                            root.toggleSubtask(
+                                                                todoItem.modelData,
+                                                                subtaskItem.modelData.id
+                                                            )
+                                                    }
+                                                }
+
+                                                StyledText {
+                                                    Layout.fillWidth: true
+
+                                                    text:
+                                                        subtaskItem.modelData.title
+
+                                                    color: Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        subtaskItem.modelData.completed
+                                                        ? 0.34
+                                                        : 0.7
+                                                    )
+
+                                                    font.pointSize:
+                                                        Appearance.font.size.smaller
+
+                                                    font.weight: 400
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                Item {
+                                                    Layout.preferredWidth: 28
+                                                    Layout.preferredHeight: 24
+
+                                                    StyledText {
+                                                        anchors.centerIn: parent
+
+                                                        text: "×"
+
+                                                        color: Qt.alpha(
+                                                            Colours.palette.m3onSurfaceVariant,
+                                                            removeSubtaskMouse.containsMouse
+                                                            ? 0.7
+                                                            : 0.3
+                                                        )
+
+                                                        font.pointSize:
+                                                            Appearance.font.size.normal
+                                                    }
+
+                                                    MouseArea {
+                                                        id: removeSubtaskMouse
+
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+
+                                                        onClicked:
+                                                            root.removeSubtask(
+                                                                todoItem.modelData,
+                                                                subtaskItem.modelData.id
+                                                            )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 7
+
+                                        StyledText {
+                                            text: "+"
+
+                                            color: Qt.alpha(
+                                                Colours.palette.m3primary,
+                                                0.68
+                                            )
+                                        }
+
+                                        TextInput {
+                                            id: subtaskInput
+
+                                            Layout.fillWidth: true
+
+                                            color:
+                                                Colours.palette.m3onSurface
+
+                                            font.pointSize:
+                                                Appearance.font.size.smaller
+
+                                            font.weight: 400
+                                            clip: true
+
+                                            Keys.onReturnPressed:
+                                                root.addSubtask(
+                                                    todoItem.modelData,
+                                                    subtaskInput
+                                                )
+                                        }
+
+                                        Item {
+                                            Layout.preferredWidth: 72
+                                            Layout.preferredHeight: 26
+
+                                            StyledText {
+                                                anchors.centerIn: parent
+
+                                                text:
+                                                    qsTr("Add")
+
+                                                color:
+                                                    subtaskInput.text.trim() !== ""
+                                                    ? Colours.palette.m3primary
+                                                    : Qt.alpha(
+                                                        Colours.palette.m3onSurfaceVariant,
+                                                        0.28
+                                                    )
+
+                                                font.pointSize:
+                                                    Appearance.font.size.smaller
+
+                                                font.weight: 500
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+
+                                                enabled:
+                                                    subtaskInput.text.trim() !== ""
+
+                                                cursorShape: Qt.PointingHandCursor
+
+                                                onClicked:
+                                                    root.addSubtask(
+                                                        todoItem.modelData,
+                                                        subtaskInput
+                                                    )
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        implicitHeight: 1
+
+                                        color: Qt.alpha(
+                                            Colours.palette.m3outlineVariant,
+                                            subtaskInput.activeFocus
+                                            ? 0.68
+                                            : 0.28
+                                        )
+                                    }
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 2
+                                        spacing: 8
+
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        TodoAction {
+                                            text: qsTr("Edit")
+
+                                            onClicked:
+                                                root.editTodo(
+                                                    todoItem.modelData
+                                                )
+                                        }
+
+                                        TodoAction {
+                                            text: qsTr("Delete")
+                                            destructive: true
+
+                                            onClicked:
+                                                Calendar.removeTodo(
+                                                    todoItem.modelData.id
+                                                )
                                         }
                                     }
                                 }
                             }
                         }
-
-                        StyledText {
-                            id: detailsToggle
-
-                            visible:
-                                todoItem.hasDetails
-
-                            text:
-                                todoItem.expanded
-                                ? "⌃"
-                                : "⌄"
-
-                            color: Qt.alpha(
-                                Colours.palette.m3primary,
-                                0.48
-                            )
-
-                            font.pointSize:
-                                Appearance.font.size.smaller
-
-                            MouseArea {
-                                anchors.fill: parent
-                                anchors.margins: -6
-
-                                cursorShape:
-                                    Qt.PointingHandCursor
-
-                                onClicked:
-                                    todoItem.expanded =
-                                        !todoItem.expanded
-                            }
-                        }
-
-                        StyledText {
-                            id: finishText
-
-                            text:
-                                qsTr("Finish")
-
-                            color:
-                                finishMouse.containsMouse
-                                ? Colours.palette.m3primary
-                                : Qt.alpha(
-                                    Colours.palette.m3onSurfaceVariant,
-                                    0.42
-                                )
-
-                            font.pointSize:
-                                Appearance.font.size.smaller
-
-                            font.weight: 400
-
-                            MouseArea {
-                                id: finishMouse
-
-                                anchors.fill: parent
-                                anchors.margins: -7
-
-                                hoverEnabled: true
-
-                                cursorShape:
-                                    Qt.PointingHandCursor
-
-                                onClicked:
-                                    Calendar.finishTodo(
-                                        todoItem.modelData.id
-                                    )
-                            }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.left:
-                            parent.left
-
-                        anchors.right:
-                            detailsToggle.left
-
-                        anchors.top:
-                            parent.top
-
-                        anchors.bottom:
-                            parent.bottom
-
-                        hoverEnabled: true
-
-                        cursorShape:
-                            Qt.PointingHandCursor
-
-                        onDoubleClicked:
-                            root.editTodo(
-                                todoItem.modelData
-                            )
                     }
                 }
             }
 
             Column {
-                Layout.alignment:
-                    Qt.AlignCenter
+                Layout.alignment: Qt.AlignCenter
 
                 visible:
-                    root.visibleTodos.length
-                    === 0
+                    root.visibleTodos.length === 0
 
                 spacing:
                     Appearance.spacing.normal
 
                 StyledText {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
 
-                    text:
-                        "(˶ᵔ ᵕ ᵔ˶)"
+                    text: "(˶ᵔ ᵕ ᵔ˶)"
 
                     color: Qt.alpha(
                         Colours.palette.m3primary,
@@ -728,8 +862,7 @@ Item {
                 }
 
                 StyledText {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
 
                     text:
                         qsTr("Nothing needs you right now.")
@@ -745,6 +878,55 @@ Item {
                     font.weight: 400
                 }
             }
+        }
+    }
+
+    component TodoAction: Item {
+        id: action
+
+        required property string text
+        property bool destructive: false
+
+        signal clicked
+
+        implicitWidth:
+            Math.max(48, actionLabel.implicitWidth + 16)
+
+        implicitHeight: 28
+
+        StyledText {
+            id: actionLabel
+
+            anchors.centerIn: parent
+
+            text:
+                action.text
+
+            color:
+                actionMouse.containsMouse
+                ? Colours.palette.m3primary
+                : Qt.alpha(
+                    action.destructive
+                    ? Colours.palette.m3primary
+                    : Colours.palette.m3onSurfaceVariant,
+                    action.destructive ? 0.6 : 0.48
+                )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 400
+        }
+
+        MouseArea {
+            id: actionMouse
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked:
+                action.clicked()
         }
     }
 }
