@@ -14,6 +14,14 @@ Item {
     signal addEvent
     signal addTodo
 
+    readonly property var activeTodos:
+        Calendar.todos.filter(todo =>
+            !todo.completed
+        )
+
+    readonly property int overdueTodoCount:
+        Calendar.overdueTodos().length
+
     readonly property var selectedEvents:
         Calendar.eventsForDate(selectedDate)
 
@@ -73,11 +81,13 @@ Item {
 
                 StyledText {
                     text:
-                        root.selectedDate
+                        root.mode === 0
+                        ? root.selectedDate
                             .toLocaleDateString(
                                 Qt.locale(),
                                 "ddd"
                             )
+                        : qsTr("Tasks")
 
                     color: Qt.alpha(
                         Colours.palette.m3onSurfaceVariant,
@@ -91,18 +101,38 @@ Item {
                 }
 
                 StyledText {
-                    text:
-                        root.selectedDate
-                            .toLocaleDateString(
-                                Qt.locale(),
-                                "d MMMM"
-                            )
+                    text: {
+                        if (root.mode === 0) {
+                            return root.selectedDate
+                                .toLocaleDateString(
+                                    Qt.locale(),
+                                    "d MMMM"
+                                )
+                        }
+
+                        const remaining =
+                            root.activeTodos.length
+
+                        const overdue =
+                            root.overdueTodoCount
+
+                        if (overdue > 0) {
+                            return qsTr("%1 remaining · %2 overdue")
+                                .arg(remaining)
+                                .arg(overdue)
+                        }
+
+                        return qsTr("%1 remaining")
+                            .arg(remaining)
+                    }
 
                     color:
                         Colours.palette.m3primary
 
                     font.pointSize:
-                        Appearance.font.size.large
+                        root.mode === 0
+                        ? Appearance.font.size.large
+                        : Appearance.font.size.normal
 
                     font.weight: 500
                 }
