@@ -31,17 +31,17 @@ Item {
         return `${pad(hour)}:${pad(minute)}`
     }
 
-    function changeHour(current, amount) {
-        return (current + amount + 24) % 24
+    function changeHour(value, amount) {
+        return (value + amount + 24) % 24
     }
 
-    function changeMinute(current, amount) {
-        let value = current + amount
+    function changeMinute(value, amount) {
+        let next = value + amount
 
-        while (value < 0)
-            value += 60
+        while (next < 0)
+            next += 60
 
-        return value % 60
+        return next % 60
     }
 
     function saveEvent() {
@@ -78,58 +78,66 @@ Item {
         root.saved()
     }
 
-    ColumnLayout {
+    Flickable {
+        id: flick
+
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
 
-        RowLayout {
-            Layout.fillWidth: true
+        contentWidth: width
+        contentHeight: form.implicitHeight
 
-            ColumnLayout {
-                spacing: 2
+        clip: true
 
-                StyledText {
-                    text: qsTr("NEW EVENT")
+        boundsBehavior:
+            Flickable.StopAtBounds
 
-                    color:
-                        Colours.palette.m3onSurface
+        flickableDirection:
+            Flickable.VerticalFlick
 
-                    font.pointSize:
-                        Appearance.font.size.extraLarge
-
-                    font.weight: 600
-                    font.letterSpacing: 2
-                }
-
-                StyledText {
-                    text:
-                        root.selectedDate
-                            .toLocaleDateString(
-                                Qt.locale(),
-                                "dddd · d MMMM"
-                            )
-                            .toUpperCase()
-
-                    color:
-                        Colours.palette.m3outline
-
-                    font.pointSize:
-                        Appearance.font.size.smaller
-
-                    font.letterSpacing: 1.5
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Colours.palette.m3outlineVariant
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
         }
 
         ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.small
+            id: form
+
+            width: flick.width
+
+            spacing:
+                Appearance.spacing.small
+
+            StyledText {
+                text: qsTr("NEW EVENT")
+
+                color:
+                    Colours.palette.m3onSurface
+
+                font.pointSize:
+                    Appearance.font.size.large
+
+                font.weight: 600
+                font.letterSpacing: 1.5
+            }
+
+            StyledText {
+                text:
+                    root.selectedDate
+                        .toLocaleDateString(
+                            Qt.locale(),
+                            "ddd · d MMM"
+                        )
+                        .toUpperCase()
+
+                color:
+                    Colours.palette.m3outline
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.letterSpacing: 1.2
+            }
+
+            ThinLine {}
 
             FieldLabel {
                 text: qsTr("TITLE")
@@ -143,57 +151,69 @@ Item {
                 placeholderText:
                     qsTr("Event title")
 
-                Component.onCompleted:
+                font.pointSize:
+                    Appearance.font.size.normal
+
+                Keys.onPressed: event => {
+                    console.log(
+                        "calendar title key:",
+                        event.key
+                    )
+                }
+
+                Component.onCompleted: {
                     forceActiveFocus()
+                }
             }
-        }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.large
+            FieldLabel {
+                text: qsTr("TIME")
+            }
 
-            TimePicker {
+            RowLayout {
                 Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
 
-                label: qsTr("START")
+                CompactTime {
+                    Layout.fillWidth: true
 
-                hour: root.startHour
-                minute: root.startMinute
+                    label: qsTr("START")
 
-                onHourChanged:
-                    root.startHour = hour
+                    hour: root.startHour
+                    minute: root.startMinute
 
-                onMinuteChanged:
-                    root.startMinute = minute
+                    onHourChanged:
+                        root.startHour = hour
+
+                    onMinuteChanged:
+                        root.startMinute = minute
+                }
+
+                CompactTime {
+                    Layout.fillWidth: true
+
+                    label: qsTr("END")
+
+                    hour: root.endHour
+                    minute: root.endMinute
+
+                    onHourChanged:
+                        root.endHour = hour
+
+                    onMinuteChanged:
+                        root.endMinute = minute
+                }
             }
-
-            TimePicker {
-                Layout.fillWidth: true
-
-                label: qsTr("END")
-
-                hour: root.endHour
-                minute: root.endMinute
-
-                onHourChanged:
-                    root.endHour = hour
-
-                onMinuteChanged:
-                    root.endMinute = minute
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.small
 
             FieldLabel {
                 text: qsTr("REPEAT")
             }
 
-            RowLayout {
+            Flow {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.small
+
+                spacing:
+                    Appearance.spacing.small
 
                 RepeatButton {
                     text: qsTr("NONE")
@@ -220,127 +240,81 @@ Item {
                     value: "yearly"
                 }
             }
-        }
 
-        RowLayout {
-            Layout.fillWidth: true
-
-            visible:
-                root.recurrenceFrequency !== "none"
-
-            ColumnLayout {
+            RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.small
 
-                FieldLabel {
-                    text: qsTr("EVERY")
-                }
+                visible:
+                    root.recurrenceFrequency !== "none"
 
-                NumberStepper {
-                    value:
-                        root.recurrenceInterval
+                spacing:
+                    Appearance.spacing.normal
 
-                    minimum: 1
+                CompactStepper {
+                    Layout.fillWidth: true
+
+                    label: qsTr("EVERY")
+                    value: root.recurrenceInterval
 
                     onValueChanged:
                         root.recurrenceInterval = value
                 }
-            }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.small
+                CompactStepper {
+                    Layout.fillWidth: true
 
-                FieldLabel {
-                    text: qsTr("OCCURRENCES")
-                }
-
-                NumberStepper {
-                    value:
-                        root.recurrenceCount
-
-                    minimum: 1
+                    label: qsTr("COUNT")
+                    value: root.recurrenceCount
 
                     onValueChanged:
                         root.recurrenceCount = value
                 }
             }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 92
-
-            spacing: Appearance.spacing.small
 
             FieldLabel {
                 text: qsTr("NOTES")
             }
 
-            TextArea {
+            StyledTextField {
                 id: notesField
 
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                padding: 0
 
                 placeholderText:
                     qsTr("Optional notes")
 
-                background: null
-
-                color:
-                    Colours.palette.m3onSurface
-
-                placeholderTextColor:
-                    Colours.palette.m3outline
-
-                wrapMode:
-                    TextEdit.Wrap
+                font.pointSize:
+                    Appearance.font.size.normal
             }
 
-            Rectangle {
+            ThinLine {}
+
+            RowLayout {
                 Layout.fillWidth: true
-                implicitHeight: 1
 
-                color:
-                    Colours.palette.m3outlineVariant
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                ActionButton {
+                    text: qsTr("CANCEL")
+
+                    onClicked:
+                        root.cancelled()
+                }
+
+                ActionButton {
+                    text: qsTr("SAVE")
+                    primary: true
+
+                    onClicked:
+                        root.saveEvent()
+                }
             }
-        }
-
-        Item {
-            Layout.fillHeight: true
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-
-            color:
-                Colours.palette.m3outlineVariant
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
 
             Item {
-                Layout.fillWidth: true
-            }
-
-            ActionButton {
-                text: qsTr("CANCEL")
-
-                onClicked:
-                    root.cancelled()
-            }
-
-            ActionButton {
-                text: qsTr("SAVE")
-                primary: true
-
-                onClicked:
-                    root.saveEvent()
+                Layout.preferredHeight:
+                    Appearance.padding.normal
             }
         }
     }
@@ -353,10 +327,19 @@ Item {
             Appearance.font.size.smaller
 
         font.weight: 600
-        font.letterSpacing: 1.5
+        font.letterSpacing: 1.2
     }
 
-    component TimePicker: ColumnLayout {
+    component ThinLine: Rectangle {
+        Layout.fillWidth: true
+
+        implicitHeight: 1
+
+        color:
+            Colours.palette.m3outlineVariant
+    }
+
+    component CompactTime: ColumnLayout {
         id: picker
 
         required property string label
@@ -364,7 +347,8 @@ Item {
         property int hour
         property int minute
 
-        spacing: Appearance.spacing.small
+        spacing:
+            Appearance.spacing.small / 2
 
         FieldLabel {
             text: picker.label
@@ -372,9 +356,9 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.small
+            spacing: 3
 
-            StepButton {
+            SmallButton {
                 text: "−"
 
                 onClicked:
@@ -389,7 +373,7 @@ Item {
                 Layout.fillWidth: true
 
                 text:
-                    root.pad(picker.hour)
+                    `${root.pad(picker.hour)}:${root.pad(picker.minute)}`
 
                 horizontalAlignment:
                     Text.AlignHCenter
@@ -398,90 +382,13 @@ Item {
                     Colours.palette.m3onSurface
 
                 font.pointSize:
-                    Appearance.font.size.large
+                    Appearance.font.size.normal
 
                 font.weight: 600
             }
 
-            StyledText {
-                text: ":"
-
-                color:
-                    Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.large
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text:
-                    root.pad(picker.minute)
-
-                horizontalAlignment:
-                    Text.AlignHCenter
-
-                color:
-                    Colours.palette.m3onSurface
-
-                font.pointSize:
-                    Appearance.font.size.large
-
-                font.weight: 600
-            }
-
-            StepButton {
+            SmallButton {
                 text: "+"
-
-                onClicked:
-                    picker.minute =
-                        root.changeMinute(
-                            picker.minute,
-                            15
-                        )
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text: qsTr("HOUR")
-
-                horizontalAlignment:
-                    Text.AlignHCenter
-
-                color:
-                    Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-
-                text: qsTr("MIN")
-
-                horizontalAlignment:
-                    Text.AlignHCenter
-
-                color:
-                    Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            StepButton {
-                text: "+1H"
 
                 onClicked:
                     picker.hour =
@@ -490,8 +397,15 @@ Item {
                             1
                         )
             }
+        }
 
-            StepButton {
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 3
+
+            SmallButton {
+                Layout.fillWidth: true
+
                 text: "−15"
 
                 onClicked:
@@ -502,7 +416,9 @@ Item {
                         )
             }
 
-            StepButton {
+            SmallButton {
+                Layout.fillWidth: true
+
                 text: "+15"
 
                 onClicked:
@@ -515,48 +431,59 @@ Item {
         }
     }
 
-    component NumberStepper: RowLayout {
+    component CompactStepper: ColumnLayout {
         id: stepper
 
+        required property string label
+
         property int value: 1
-        property int minimum: 1
 
-        spacing: Appearance.spacing.small
+        spacing:
+            Appearance.spacing.small / 2
 
-        StepButton {
-            text: "−"
-
-            onClicked:
-                stepper.value =
-                    Math.max(
-                        stepper.minimum,
-                        stepper.value - 1
-                    )
+        FieldLabel {
+            text: stepper.label
         }
 
-        StyledText {
-            Layout.preferredWidth: 26
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 4
 
-            text:
-                stepper.value
+            SmallButton {
+                text: "−"
 
-            horizontalAlignment:
-                Text.AlignHCenter
+                onClicked:
+                    stepper.value =
+                        Math.max(
+                            1,
+                            stepper.value - 1
+                        )
+            }
 
-            color:
-                Colours.palette.m3onSurface
+            StyledText {
+                Layout.fillWidth: true
 
-            font.pointSize:
-                Appearance.font.size.normal
+                text:
+                    stepper.value
 
-            font.weight: 600
-        }
+                horizontalAlignment:
+                    Text.AlignHCenter
 
-        StepButton {
-            text: "+"
+                color:
+                    Colours.palette.m3onSurface
 
-            onClicked:
-                stepper.value++
+                font.pointSize:
+                    Appearance.font.size.normal
+
+                font.weight: 600
+            }
+
+            SmallButton {
+                text: "+"
+
+                onClicked:
+                    stepper.value++
+            }
         }
     }
 
@@ -571,10 +498,10 @@ Item {
             === button.value
 
         implicitWidth:
-            label.implicitWidth + 10
+            label.implicitWidth + 12
 
         implicitHeight:
-            label.implicitHeight + 8
+            label.implicitHeight + 7
 
         StyledText {
             id: label
@@ -592,21 +519,15 @@ Item {
                 Appearance.font.size.smaller
 
             font.weight: 600
-            font.letterSpacing: 1
+            font.letterSpacing: 0.8
         }
 
         Rectangle {
-            visible:
-                button.active
+            visible: button.active
 
-            anchors.left:
-                parent.left
-
-            anchors.right:
-                parent.right
-
-            anchors.bottom:
-                parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
             height: 1
 
@@ -626,21 +547,20 @@ Item {
         }
     }
 
-    component StepButton: Item {
+    component SmallButton: Item {
         id: button
 
         required property string text
 
         signal clicked
 
-        implicitWidth: 34
-        implicitHeight: 28
+        implicitWidth: 28
+        implicitHeight: 24
 
         StyledText {
             anchors.centerIn: parent
 
-            text:
-                button.text
+            text: button.text
 
             color:
                 mouse.containsMouse
@@ -648,7 +568,7 @@ Item {
                 : Colours.palette.m3outline
 
             font.pointSize:
-                Appearance.font.size.small
+                Appearance.font.size.smaller
 
             font.weight: 600
         }
@@ -671,23 +591,23 @@ Item {
         id: button
 
         required property string text
+
         property bool primary: false
 
         signal clicked
 
         implicitWidth:
-            label.implicitWidth + 12
+            label.implicitWidth + 10
 
         implicitHeight:
-            label.implicitHeight + 10
+            label.implicitHeight + 8
 
         StyledText {
             id: label
 
             anchors.centerIn: parent
 
-            text:
-                button.text
+            text: button.text
 
             color:
                 button.primary
@@ -695,10 +615,10 @@ Item {
                 : Colours.palette.m3outline
 
             font.pointSize:
-                Appearance.font.size.small
+                Appearance.font.size.smaller
 
             font.weight: 600
-            font.letterSpacing: 1.5
+            font.letterSpacing: 1
         }
 
         MouseArea {
