@@ -13,6 +13,11 @@ Item {
     signal cancelled
     signal saved
 
+    property var eventData: null
+
+    readonly property bool editing:
+        eventData !== null
+
     property int startHour: 9
     property int startMinute: 0
     property int endHour: 10
@@ -103,6 +108,75 @@ Item {
         return ""
     }
 
+    function timeParts(value) {
+    if (!value)
+        return [0, 0]
+
+    const parts = value.split(":")
+
+    return [
+        Number(parts[0]) || 0,
+        Number(parts[1]) || 0
+    ]
+}
+
+function loadEvent() {
+        if (!root.eventData)
+            return
+
+        titleField.text =
+            root.eventData.title || ""
+
+        notesField.text =
+            root.eventData.notes || ""
+
+        const start =
+            root.timeParts(
+                root.eventData.startTime
+                || root.eventData.time
+                || ""
+            )
+
+        const end =
+            root.timeParts(
+                root.eventData.endTime
+                || ""
+            )
+
+        root.startHour = start[0]
+        root.startMinute = start[1]
+
+        root.endHour = end[0]
+        root.endMinute = end[1]
+
+        if (root.eventData.recurrence) {
+            const frequency =
+                root.eventData.recurrence.frequency
+
+            const index =
+                root.recurrenceValues.indexOf(
+                    frequency
+                )
+
+            root.recurrenceIndex =
+                Math.max(0, index)
+
+            root.recurrenceInterval =
+                Math.max(
+                    1,
+                    root.eventData.recurrence.interval
+                    || 1
+                )
+
+            root.recurrenceCount =
+                Math.max(
+                    1,
+                    root.eventData.recurrence.count
+                    || 1
+                )
+        }
+    }
+
     function saveEvent() {
         const title =
             titleField.text.trim()
@@ -128,23 +202,43 @@ Item {
             }
         }
 
-        Calendar.addEvent(
-            title,
-            root.selectedDate,
+        const changes = {
+            title: title,
 
-            root.timeString(
-                root.startHour,
-                root.startMinute
-            ),
+            startTime:
+                root.timeString(
+                    root.startHour,
+                    root.startMinute
+                ),
 
-            root.timeString(
-                root.endHour,
-                root.endMinute
-            ),
+            endTime:
+                root.timeString(
+                    root.endHour,
+                    root.endMinute
+                ),
 
-            notesField.text.trim(),
-            recurrence
-        )
+            notes:
+                notesField.text.trim(),
+
+            recurrence:
+                recurrence
+        }
+
+        if (root.editing) {
+            Calendar.updateEvent(
+                root.eventData.id,
+                changes
+            )
+        } else {
+            Calendar.addEvent(
+                title,
+                root.selectedDate,
+                changes.startTime,
+                changes.endTime,
+                changes.notes,
+                recurrence
+            )
+        }
 
         root.saved()
     }
@@ -185,7 +279,9 @@ Item {
 
                     StyledText {
                         text:
-                            qsTr("New event")
+                            root.editing
+                                ? qsTr("Edit event")
+                                : qsTr("New event")
 
                         color:
                             Colours.palette.m3primary

@@ -10,9 +10,15 @@ Item {
     required property date selectedDate
 
     property int mode: 0
+    property date currentTime: new Date()
 
     signal addEvent
     signal addTodo
+    signal editEvent(var event)
+    signal editTodo(var todo)
+
+    readonly property var selectedEvents:
+        Calendar.eventsForDate(selectedDate)
 
     readonly property var activeTodos:
         Calendar.todos.filter(todo =>
@@ -21,9 +27,6 @@ Item {
 
     readonly property int overdueTodoCount:
         Calendar.overdueTodos().length
-
-    readonly property var selectedEvents:
-        Calendar.eventsForDate(selectedDate)
 
     readonly property var freeMessages: [
         {
@@ -66,6 +69,15 @@ Item {
 
     readonly property var emptyMessage:
         freeMessages[emptyMessageIndex()]
+
+    Timer {
+        interval: 60 * 1000
+        running: true
+        repeat: true
+
+        onTriggered:
+            root.currentTime = new Date()
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -113,17 +125,21 @@ Item {
                         const remaining =
                             root.activeTodos.length
 
-                        const overdue =
-                            root.overdueTodoCount
-
-                        if (overdue > 0) {
-                            return qsTr("%1 remaining · %2 overdue")
+                        if (
+                            root.overdueTodoCount > 0
+                        ) {
+                            return qsTr(
+                                "%1 remaining · %2 overdue"
+                            )
                                 .arg(remaining)
-                                .arg(overdue)
+                                .arg(
+                                    root.overdueTodoCount
+                                )
                         }
 
-                        return qsTr("%1 remaining")
-                            .arg(remaining)
+                        return qsTr(
+                            "%1 remaining"
+                        ).arg(remaining)
                     }
 
                     color:
@@ -140,6 +156,28 @@ Item {
 
             Item {
                 Layout.fillWidth: true
+            }
+
+            StyledText {
+                text:
+                    Qt.formatTime(
+                        root.currentTime,
+                        "HH:mm"
+                    )
+
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.46
+                )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight: 400
+            }
+
+            Item {
+                Layout.preferredWidth: 8
             }
 
             Row {
@@ -317,6 +355,9 @@ Item {
                             required property var modelData
 
                             property bool expanded:
+                                false
+
+                            property bool actionsOpen:
                                 false
 
                             readonly property bool hasNotes:
@@ -523,39 +564,53 @@ Item {
                                         }
                                     }
 
-                                    Item {
-                                        Layout.preferredWidth: 23
-                                        Layout.preferredHeight: 23
+                                    StyledText {
+                                        id: actionToggle
 
-                                        z: 2
+                                        text:
+                                            eventItem.actionsOpen
+                                            ? "›"
+                                            : "‹"
 
-                                        StyledText {
-                                            anchors.centerIn:
-                                                parent
+                                        color: Qt.alpha(
+                                            Colours.palette.m3primary,
+                                            0.5
+                                        )
 
-                                            text: "×"
-
-                                            color:
-                                                deleteMouse.containsMouse
-                                                ? Colours.palette.m3primary
-                                                : Qt.alpha(
-                                                    Colours.palette.m3onSurfaceVariant,
-                                                    0.34
-                                                )
-
-                                            font.pointSize:
-                                                Appearance.font.size.normal
-
-                                            font.weight: 400
-                                        }
+                                        font.pointSize:
+                                            Appearance.font.size.normal
 
                                         MouseArea {
-                                            id: deleteMouse
+                                            anchors.fill: parent
+                                            anchors.margins: -7
 
-                                            anchors.fill:
-                                                parent
+                                            cursorShape:
+                                                Qt.PointingHandCursor
 
-                                            hoverEnabled: true
+                                            onClicked:
+                                                eventItem.actionsOpen =
+                                                    !eventItem.actionsOpen
+                                        }
+                                    }
+
+                                    StyledText {
+                                        visible:
+                                            eventItem.actionsOpen
+
+                                        text:
+                                            qsTr("Delete")
+
+                                        color:
+                                            Colours.palette.m3primary
+
+                                        font.pointSize:
+                                            Appearance.font.size.smaller
+
+                                        font.weight: 400
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            anchors.margins: -7
 
                                             cursorShape:
                                                 Qt.PointingHandCursor
@@ -571,15 +626,22 @@ Item {
                                 MouseArea {
                                     id: eventHover
 
-                                    anchors.fill:
-                                        parent
+                                    anchors.left:
+                                        parent.left
+
+                                    anchors.right:
+                                        actionToggle.left
+
+                                    anchors.top:
+                                        parent.top
+
+                                    anchors.bottom:
+                                        parent.bottom
 
                                     hoverEnabled: true
 
                                     cursorShape:
-                                        eventItem.hasNotes
-                                        ? Qt.PointingHandCursor
-                                        : Qt.ArrowCursor
+                                        Qt.PointingHandCursor
 
                                     onClicked: {
                                         if (
@@ -589,6 +651,11 @@ Item {
                                                 !eventItem.expanded
                                         }
                                     }
+
+                                    onDoubleClicked:
+                                        root.editEvent(
+                                            eventItem.modelData
+                                        )
                                 }
                             }
                         }
@@ -649,7 +716,10 @@ Item {
     Component {
         id: todoList
 
-        TodoView {}
+        TodoView {
+            onEditTodo: todo =>
+                root.editTodo(todo)
+        }
     }
 
     component ModeButton: Item {
