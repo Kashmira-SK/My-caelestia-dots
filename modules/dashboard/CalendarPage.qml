@@ -77,9 +77,10 @@ Item {
                 }
 
                 StyledText {
+                    anchors.left: parent.left
                     anchors.top: parent.top
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.topMargin: 5
+                    anchors.leftMargin: 84
+                    anchors.topMargin: 54
 
                     z: 10
 
@@ -91,7 +92,7 @@ Item {
 
                     color: Qt.alpha(
                         Colours.palette.m3onSurfaceVariant,
-                        0.48
+                        0.42
                     )
 
                     font.pointSize:

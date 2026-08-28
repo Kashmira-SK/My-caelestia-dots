@@ -288,10 +288,7 @@ Item {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 34
 
-                                        color: Qt.alpha(
-                                            Colours.palette.m3primary,
-                                            0.045
-                                        )
+                                        color: "transparent"
 
                                         RowLayout {
                                             anchors.fill: parent
@@ -413,26 +410,6 @@ Item {
                                                 font.weight: 400
                                                 wrapMode: Text.Wrap
                                             }
-
-                                            StyledText {
-                                                visible:
-                                                    eventItem.hasNotes
-
-                                                text:
-                                                    eventItem.expanded
-                                                    ? qsTr("Click title area to collapse")
-                                                    : qsTr("Click to view notes")
-
-                                                color: Qt.alpha(
-                                                    Colours.palette.m3onSurfaceVariant,
-                                                    0.3
-                                                )
-
-                                                font.pointSize:
-                                                    Appearance.font.size.smaller
-
-                                                font.weight: 400
-                                            }
                                         }
 
                                         MouseArea {
@@ -457,50 +434,50 @@ Item {
                             }
                         }
                     }
+                }
+            }
 
-                    Column {
-                        Layout.alignment: Qt.AlignCenter
+            Column {
+                anchors.centerIn: parent
 
-                        visible:
-                            root.selectedEvents.length === 0
+                visible:
+                    root.selectedEvents.length === 0
 
-                        spacing:
-                            Appearance.spacing.normal
+                spacing:
+                    Appearance.spacing.normal
 
-                        StyledText {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                StyledText {
+                    anchors.horizontalCenter: parent.horizontalCenter
 
-                            text:
-                                root.emptyMessage.face
+                    text:
+                        root.emptyMessage.face
 
-                            color: Qt.alpha(
-                                Colours.palette.m3primary,
-                                0.58
-                            )
+                    color: Qt.alpha(
+                        Colours.palette.m3primary,
+                        0.58
+                    )
 
-                            font.pointSize:
-                                Appearance.font.size.large
+                    font.pointSize:
+                        Appearance.font.size.large
 
-                            font.weight: 400
-                        }
+                    font.weight: 400
+                }
 
-                        StyledText {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                StyledText {
+                    anchors.horizontalCenter: parent.horizontalCenter
 
-                            text:
-                                root.emptyMessage.text
+                    text:
+                        root.emptyMessage.text
 
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.43
-                            )
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.43
+                    )
 
-                            font.pointSize:
-                                Appearance.font.size.smaller
+                    font.pointSize:
+                        Appearance.font.size.smaller
 
-                            font.weight: 400
-                        }
-                    }
+                    font.weight: 400
                 }
             }
         }

@@ -152,8 +152,11 @@ Item {
         )
 
         root.expandedTodoId = todo.id
-        root.refreshTick++
         input.text = ""
+
+        Qt.callLater(() => {
+            root.refreshTick++
+        })
     }
 
     function toggleSubtask(todo, subtaskId) {
@@ -175,7 +178,10 @@ Item {
         )
 
         root.expandedTodoId = todo.id
-        root.refreshTick++
+
+        Qt.callLater(() => {
+            root.refreshTick++
+        })
     }
 
     function removeSubtask(todo, subtaskId) {
@@ -188,7 +194,10 @@ Item {
         )
 
         root.expandedTodoId = todo.id
-        root.refreshTick++
+
+        Qt.callLater(() => {
+            root.refreshTick++
+        })
     }
 
     Timer {
@@ -246,7 +255,7 @@ Item {
                         ).length
 
                     readonly property string effectivePriority:
-                        Calendar.effectiveTodoPriority(modelData)
+                        Calendar.effectiveTodoPriority(liveTodo)
 
                     Layout.fillWidth: true
                     implicitHeight: todoCard.implicitHeight
@@ -374,6 +383,8 @@ Item {
                                             spacing: 3
 
                                             StyledText {
+                                                id: todoTitle
+
                                                 Layout.fillWidth: true
 
                                                 text:
@@ -390,6 +401,8 @@ Item {
                                             }
 
                                             RowLayout {
+                                                id: todoMetaRow
+
                                                 Layout.fillWidth: true
                                                 spacing: 5
 
@@ -503,10 +516,110 @@ Item {
                                                     Layout.fillWidth: true
                                                 }
                                             }
+
+                                            ColumnLayout {
+                                                Layout.fillWidth: true
+
+                                                visible:
+                                                    todoItem.subtasks.length > 0
+
+                                                spacing: 2
+
+                                                Repeater {
+                                                    model:
+                                                        todoItem.subtasks
+
+                                                    delegate: RowLayout {
+                                                        id: compactSubtask
+
+                                                        required property var modelData
+
+                                                        Layout.fillWidth: true
+                                                        spacing: 6
+
+                                                        Item {
+                                                            Layout.preferredWidth: 18
+                                                            Layout.preferredHeight: 18
+
+                                                            Rectangle {
+                                                                anchors.centerIn: parent
+
+                                                                width: 11
+                                                                height: 11
+                                                                radius: 3
+                                                                color: "transparent"
+
+                                                                border.width: 1
+
+                                                                border.color: Qt.alpha(
+                                                                    Colours.palette.m3primary,
+                                                                    compactSubtask.modelData.completed
+                                                                    ? 0.72
+                                                                    : 0.32
+                                                                )
+
+                                                                StyledText {
+                                                                    anchors.centerIn: parent
+
+                                                                    visible:
+                                                                        compactSubtask.modelData.completed
+
+                                                                    text: "✓"
+
+                                                                    color:
+                                                                        Colours.palette.m3primary
+
+                                                                    font.pointSize:
+                                                                        Appearance.font.size.smaller
+                                                                }
+                                                            }
+
+                                                            MouseArea {
+                                                                anchors.fill: parent
+                                                                cursorShape: Qt.PointingHandCursor
+
+                                                                onClicked:
+                                                                    root.toggleSubtask(
+                                                                        todoItem.liveTodo,
+                                                                        compactSubtask.modelData.id
+                                                                    )
+                                                            }
+                                                        }
+
+                                                        StyledText {
+                                                            Layout.fillWidth: true
+
+                                                            text:
+                                                                compactSubtask.modelData.title
+
+                                                            color: Qt.alpha(
+                                                                Colours.palette.m3onSurfaceVariant,
+                                                                compactSubtask.modelData.completed
+                                                                ? 0.34
+                                                                : 0.58
+                                                            )
+
+                                                            font.pointSize:
+                                                                Appearance.font.size.smaller
+
+                                                            font.weight: 400
+                                                            elide: Text.ElideRight
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
 
                                         MouseArea {
-                                            anchors.fill: parent
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+
+                                            height:
+                                                todoTitle.implicitHeight
+                                                + todoMetaRow.implicitHeight
+                                                + 6
+
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
 
@@ -614,129 +727,6 @@ Item {
                                         }
                                     }
 
-                                    Repeater {
-                                        model:
-                                            todoItem.subtasks
-
-                                        delegate: Item {
-                                            id: subtaskItem
-
-                                            required property var modelData
-
-                                            Layout.fillWidth: true
-                                            implicitHeight: 26
-
-                                            RowLayout {
-                                                anchors.fill: parent
-                                                spacing: 7
-
-                                                Item {
-                                                    Layout.preferredWidth: 24
-                                                    Layout.preferredHeight: 24
-
-                                                    Rectangle {
-                                                        anchors.centerIn: parent
-
-                                                        width: 14
-                                                        height: 14
-                                                        radius: 3
-                                                        color: "transparent"
-
-                                                        border.width: 1
-
-                                                        border.color: Qt.alpha(
-                                                            Colours.palette.m3primary,
-                                                            subtaskItem.modelData.completed
-                                                            ? 0.82
-                                                            : 0.38
-                                                        )
-
-                                                        StyledText {
-                                                            anchors.centerIn: parent
-
-                                                            visible:
-                                                                subtaskItem.modelData.completed
-
-                                                            text: "✓"
-
-                                                            color:
-                                                                Colours.palette.m3primary
-
-                                                            font.pointSize:
-                                                                Appearance.font.size.smaller
-                                                        }
-                                                    }
-
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-
-                                                        onClicked:
-                                                            root.toggleSubtask(
-                                                                todoItem.liveTodo,
-                                                                subtaskItem.modelData.id
-                                                            )
-                                                    }
-                                                }
-
-                                                StyledText {
-                                                    Layout.fillWidth: true
-
-                                                    text:
-                                                        subtaskItem.modelData.title
-
-                                                    color: Qt.alpha(
-                                                        Colours.palette.m3onSurfaceVariant,
-                                                        subtaskItem.modelData.completed
-                                                        ? 0.34
-                                                        : 0.7
-                                                    )
-
-                                                    font.pointSize:
-                                                        Appearance.font.size.smaller
-
-                                                    font.weight: 400
-                                                    elide: Text.ElideRight
-                                                }
-
-                                                Item {
-                                                    Layout.preferredWidth: 28
-                                                    Layout.preferredHeight: 24
-
-                                                    StyledText {
-                                                        anchors.centerIn: parent
-
-                                                        text: "×"
-
-                                                        color: Qt.alpha(
-                                                            Colours.palette.m3onSurfaceVariant,
-                                                            removeSubtaskMouse.containsMouse
-                                                            ? 0.7
-                                                            : 0.3
-                                                        )
-
-                                                        font.pointSize:
-                                                            Appearance.font.size.normal
-                                                    }
-
-                                                    MouseArea {
-                                                        id: removeSubtaskMouse
-
-                                                        anchors.fill: parent
-                                                        hoverEnabled: true
-                                                        cursorShape: Qt.PointingHandCursor
-
-                                                        onClicked:
-                                                            root.removeSubtask(
-                                                                todoItem.liveTodo,
-                                                                subtaskItem.modelData.id
-                                                            )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
                                     RowLayout {
                                         Layout.fillWidth: true
                                         spacing: 7
@@ -766,7 +756,7 @@ Item {
 
                                             Keys.onReturnPressed:
                                                 root.addSubtask(
-                                                    todoItem.modelData,
+                                                    todoItem.liveTodo,
                                                     subtaskInput
                                                 )
                                         }
