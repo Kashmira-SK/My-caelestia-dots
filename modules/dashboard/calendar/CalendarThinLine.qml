@@ -1,5 +1,6 @@
 import qs.config
 import QtQuick
+import qs.utils
 import QtQuick.Layouts
 
 Rectangle {
