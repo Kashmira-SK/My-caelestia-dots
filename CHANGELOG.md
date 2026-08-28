@@ -2,7 +2,62 @@
 
 Newest entries at the top.
 
-## [2026-08-28] - Dashboard Card Labels
+## [2026-08-28] - Calendar Dashboard
+
+### Added
+- `modules/dashboard/CalendarPage.qml`: added a new Calendar dashboard tab to replace the previous Weather page
+- `modules/dashboard/calendar/MonthView.qml`: added a full month calendar with day selection, previous/next month navigation, today highlighting, event indicators, and click-to-jump back to the current date from the month heading
+- `modules/dashboard/calendar/AgendaView.qml`: added a selected-day agenda view with event times, notes, expandable event details, delete controls, and rotating empty-day messages
+- `modules/dashboard/calendar/EventEditor.qml`: added a dedicated event editor with title, start/end time controls, notes, recurrence options, and save/cancel actions
+- `services/Calendar.qml`: added persistent calendar storage using `${Paths.state}/calendar.json`
+- `services/Calendar.qml`: added event and todo data handling with JSON persistence
+- `services/Calendar.qml`: added recurring event support for daily, weekly, monthly, and yearly schedules
+- `services/Calendar.qml`: added recurrence intervals and occurrence limits without duplicating recurring events in storage
+- `modules/dashboard/calendar/CalendarFieldLabel.qml`: added reusable calendar field labels
+- `modules/dashboard/calendar/CalendarThinLine.qml`: added reusable themed divider lines
+- `modules/dashboard/calendar/CalendarSmallButton.qml`: added reusable compact calendar controls
+- `modules/dashboard/calendar/CalendarRepeatButton.qml`: added reusable recurrence controls
+- `modules/dashboard/calendar/CalendarActionButton.qml`: added reusable calendar actions
+- `modules/dashboard/calendar/CalendarStepper.qml`: added reusable numeric steppers
+- `modules/dashboard/calendar/CalendarTimePicker.qml`: added compact start/end time controls
+
+### Changed
+- `modules/dashboard/Content.qml`: replaced the Weather page at tab index 3 with the new Calendar page
+- `modules/dashboard/Tabs.qml`: renamed the fourth dashboard tab from `WEATHER` to `CALENDAR`
+- `modules/dashboard/CalendarPage.qml`: split the original single-file calendar implementation into dedicated month, agenda, and event-editor components
+- `modules/dashboard/calendar/AgendaView.qml`: redesigned events into compact themed timeline entries instead of plain text rows
+- `modules/dashboard/calendar/AgendaView.qml`: changed the add-event action from a large pill button to a subtle text action
+- `modules/dashboard/calendar/AgendaView.qml`: added expandable event rows so long notes stay compact until opened
+- `modules/dashboard/calendar/AgendaView.qml`: replaced generic empty-state text with several date-stable messages and small emoticons / ASCII faces
+- `modules/dashboard/calendar/EventEditor.qml`: redesigned the event editor into a lighter, denser sidebar layout
+- `modules/dashboard/calendar/EventEditor.qml`: replaced manually typed event times with start/end time controls
+- `modules/dashboard/calendar/EventEditor.qml`: simplified recurrence selection into a compact cycling control
+- `modules/dashboard/calendar/EventEditor.qml`: replaced the unclear recurrence `COUNT` wording with `Stop after N events`
+- `modules/dashboard/calendar/EventEditor.qml`: removed the visible scrollbar while preserving vertical scrolling
+- `modules/dashboard/calendar/EventEditor.qml`: changed headings, labels, actions, and recurrence text from all-caps to sentence case
+- `modules/dashboard/calendar/EventEditor.qml`: reduced excessive bold text and visual weight throughout the editor
+- `modules/dashboard/calendar/MonthView.qml`: changed month/day labels from all-caps to normal capitalization
+- `modules/dashboard/calendar/MonthView.qml`: changed the month heading to use the dynamic secondary theme color
+- `modules/dashboard/calendar/MonthView.qml`: removed the temporary `READY / LOADING` storage status indicator
+- `modules/dashboard/calendar/MonthView.qml`: made the month/year heading interactive so clicking it returns to today
+- calendar controls now use wallpaper-derived `Colours.palette` values and muted alpha variants instead of hardcoded neutral colors
+
+### Fixed
+- `services/Calendar.qml`: fixed calendar persistence failing because `Paths` was not imported
+- `services/Calendar.qml`: fixed recurring events not appearing on future matching dates
+- `services/Calendar.qml`: maintained compatibility with older events using the original single `time` property
+- `modules/drawers/Drawers.qml`: enabled keyboard focus for the dashboard so calendar text inputs can receive keyboard input
+- `modules/dashboard/calendar/EventEditor.qml`: fixed title and notes fields appearing focused but not accepting typed input
+- `modules/dashboard/calendar/EventEditor.qml`: fixed time and recurrence controls overflowing the right-side editor pane
+- `modules/dashboard/calendar/EventEditor.qml`: fixed editor content being inaccessible below the visible area by adding vertical scrolling
+- `modules/dashboard/calendar/EventEditor.qml`: fixed unsupported `TextInput` selection styling properties
+- calendar helper components: fixed missing `Colours` references by importing the correct services module
+- calendar helper components: split inline helper components into standalone QML files to avoid Quickshell parser/type-loading issues
+- `modules/dashboard/calendar/AgendaView.qml`: added event deletion through `Calendar.removeEvent()`
+
+---
+
+## [2026-08-27] - Dashboard Card Labels
 ### Changed
 - `modules/dashboard/Dash.qml`: added integrated border labels to the dashboard cards, including vertical `SYSTEM` and `TIME` labels, top-border `QUOTE` and `DAY` labels, and a bottom-border `MEDIA` label
 - `modules/dashboard/Dash.qml`: replaced affected card borders with custom Canvas-drawn rounded borders so labels create real gaps in the outline instead of sitting on separate background blocks
