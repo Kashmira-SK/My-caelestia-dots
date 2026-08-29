@@ -70,16 +70,18 @@ def main():
 
     # Hyprland border colors
     active = colours["primary"]
-    subprocess.run(["hyprctl", "keyword", "general:col.active_border", f"rgba({active}ff)"])
-    subprocess.run(["hyprctl", "keyword", "general:col.inactive_border", "rgba(00000000)"])
+    border_lua = (
+        'hl.config({ general = { '
+        f'["col.active_border"] = "rgba({active}ff)", '
+        '["col.inactive_border"] = "rgba(00000000)" '
+        '} })'
+    )
+    subprocess.run(["hyprctl", "eval", border_lua])
     print(f"[apply_theme] Hyprland borders updated.")
 
     # Persist border colors for startup
-    with open("/home/kashmira/.config/hypr/border_colors.conf", "w") as f:
-        f.write(f"general {{\n")
-        f.write(f"    col.active_border = rgba({active}ff)\n")
-        f.write(f"    col.inactive_border = rgba(00000000)\n")
-        f.write(f"}}\n")
+    with open("/home/kashmira/.config/hypr/border_colors.lua", "w") as f:
+        f.write(border_lua + "\n")
     print("[apply_theme] Border colors persisted.")
 
     apply_startpage(colours)

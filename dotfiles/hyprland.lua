@@ -30,8 +30,6 @@ hl.config({
 		gaps_in = 4,
 		gaps_out = 7,
 		border_size = 1,
-		["col.active_border"] = "rgba(a4d1b4ff)",
-		["col.inactive_border"] = "rgba(00000000)",
 		resize_on_border = true,
 		layout = "dwindle",
 	},
@@ -299,3 +297,6 @@ end)
 
 -- Brain_ShellKeybinds
 dofile("/home/kashmira/.config/Brain_Shell/Brain_ShellKeybinds.lua")
+
+-- Dynamic border colors
+pcall(dofile, "/home/kashmira/.config/hypr/border_colors.lua")

@@ -4,6 +4,15 @@ Newest entries at the top.
 
 ## [2026-08-28] - Calendar Dashboard
 
+## [2026-08-29] - Fix dynamic border colors under Lua config
+### Fixed
+- `apply_theme.py`: replaced `hyprctl keyword general:col.active_border/...` with `hyprctl eval` — `keyword` silently no-ops under a Lua config provider
+- `apply_theme.py`: border color persistence now writes `border_colors.lua` (valid `hl.config()` call) instead of hyprlang-syntax `border_colors.conf`
+### Changed
+- `hyprland.lua`: removed hardcoded `col.active_border`/`col.inactive_border` from the `general` block, replaced with `pcall(dofile, ".../border_colors.lua")` so dynamic theming persists across restarts
+
+---
+
 ### Added
 - `modules/dashboard/CalendarPage.qml`: added a new Calendar dashboard tab to replace the previous Weather page
 - `modules/dashboard/calendar/MonthView.qml`: added a full month calendar with day selection, previous/next month navigation, today highlighting, event indicators, and click-to-jump back to the current date from the month heading
