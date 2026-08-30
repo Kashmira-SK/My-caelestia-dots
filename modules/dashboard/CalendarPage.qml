@@ -78,12 +78,12 @@ Item {
         id: panel
 
         anchors.top: parent.top
-        anchors.topMargin: root.monthGutter
+        anchors.topMargin: root.monthGutter - 6
         anchors.right: parent.right
-        anchors.rightMargin: root.yearGutter
+        anchors.rightMargin: root.yearGutter - 7
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: root.yearGutter
+        anchors.leftMargin: root.yearGutter - 7
 
         radius: Appearance.rounding.large
 
@@ -263,7 +263,7 @@ Item {
         id: monthBorderLabel
 
         x: panel.x + Appearance.padding.large + 12
-        y: panel.y - height * root.topLabelOutsideRatio
+        y: panel.y - height * root.topLabelOutsideRatio - 10
 
         width: monthBorderText.paintedWidth + 14
         height: monthBorderText.paintedHeight + 2
@@ -322,7 +322,7 @@ Item {
             - width
             - Appearance.padding.large
             - 12
-        y: panel.y - height * root.topLabelOutsideRatio
+        y: panel.y - height * root.topLabelOutsideRatio - 6
 
         width: timeBorderText.paintedWidth + 12
         height: timeBorderText.paintedHeight + 2
