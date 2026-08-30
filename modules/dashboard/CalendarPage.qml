@@ -43,8 +43,14 @@ Item {
         "December"
     ]
 
+    // only reserve the outside half of the side label
     readonly property real scheduleGutter:
         Math.ceil(scheduleText.paintedHeight / 2) + 1
+
+    // keep most of the month label inside the card; reserve only what sticks out
+    readonly property real monthOutsideRatio: 0.5
+
+    readonly property real monthGutter: 11
 
     function goToday() {
         const today = new Date()
@@ -67,6 +73,7 @@ Item {
         id: panel
 
         anchors.top: parent.top
+        anchors.topMargin: root.monthGutter
         anchors.right: parent.right
         anchors.rightMargin: root.scheduleGutter
         anchors.bottom: parent.bottom
@@ -99,7 +106,6 @@ Item {
                     displayYear: root.displayYear
                     displayMonth: root.displayMonth
                     currentTime: root.currentTime
-                    topInset: 14
 
                     onDisplayYearChanged:
                         root.displayYear = displayYear
@@ -148,6 +154,9 @@ Item {
         onLineColorChanged:
             requestPaint()
 
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
         onPaint: {
             const ctx = getContext("2d")
             const inset = 0.5
@@ -162,21 +171,23 @@ Item {
             const scheduleGapHeight =
                 scheduleText.paintedWidth + 10
 
-            const scheduleCenterY = h / 2
             const scheduleGapTop =
-                scheduleCenterY - scheduleGapHeight / 2
+                h / 2 - scheduleGapHeight / 2
+
             const scheduleGapBottom =
-                scheduleCenterY + scheduleGapHeight / 2
+                h / 2 + scheduleGapHeight / 2
+
+            const monthLeft =
+                monthBorderLabel.x - panel.x
 
             const monthGapLeft = Math.max(
                 r + 3,
-                monthBorderLabel.x - panel.x - 7
+                monthLeft - 7
             )
 
             const monthGapRight = Math.min(
                 w - r - 3,
-                monthBorderLabel.x - panel.x
-                    + monthBorderLabel.width + 7
+                monthLeft + monthBorderLabel.width
             )
 
             ctx.clearRect(0, 0, w, h)
@@ -184,18 +195,7 @@ Item {
             ctx.lineWidth = 1
             ctx.strokeStyle = lineColor.toString()
 
-            // left edge above schedule, corner, top edge before month
-            ctx.moveTo(inset, scheduleGapTop)
-            ctx.lineTo(inset, r)
-            ctx.quadraticCurveTo(
-                inset,
-                inset,
-                r,
-                inset
-            )
-            ctx.lineTo(monthGapLeft, inset)
-
-            // top edge after month, then right/bottom and left below schedule
+            // month gap -> right edge -> bottom -> left edge below schedule
             ctx.moveTo(monthGapRight, inset)
             ctx.lineTo(w - r, inset)
             ctx.quadraticCurveTo(
@@ -220,25 +220,34 @@ Item {
             )
             ctx.lineTo(inset, scheduleGapBottom)
 
+            // left edge above schedule -> top edge before month
+            ctx.moveTo(inset, scheduleGapTop)
+            ctx.lineTo(inset, r)
+            ctx.quadraticCurveTo(
+                inset,
+                inset,
+                r,
+                inset
+            )
+            ctx.lineTo(monthGapLeft, inset)
+
             ctx.stroke()
         }
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
     }
 
     Item {
         id: monthBorderLabel
 
-        anchors.top: panel.top
-        anchors.topMargin: 1
-        anchors.left: panel.left
-        anchors.leftMargin: Appearance.padding.large
+        x: panel.x + Appearance.padding.large + 12
+        y: panel.y - height * root.monthOutsideRatio
 
         width: monthBorderText.paintedWidth + 14
         height: monthBorderText.paintedHeight + 2
 
         z: 20
+
+        onXChanged: panelBorder.requestPaint()
+        onWidthChanged: panelBorder.requestPaint()
 
         StyledText {
             id: monthBorderText
@@ -312,15 +321,12 @@ Item {
             )
 
             font.pointSize:
-                Math.max(7, Appearance.font.size.smaller - 1)
+                Appearance.font.size.smaller
 
             font.weight: 400
-            font.letterSpacing: 0.65
+            font.letterSpacing: 0.8
 
             onPaintedWidthChanged:
-                panelBorder.requestPaint()
-
-            onPaintedHeightChanged:
                 panelBorder.requestPaint()
         }
     }
