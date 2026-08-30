@@ -44,13 +44,18 @@ Item {
     ]
 
     // only reserve the outside half of the side label
-    readonly property real scheduleGutter:
-        Math.ceil(scheduleText.paintedHeight / 2) + 1
+    readonly property real yearGutter:
+        Math.ceil(yearText.paintedHeight / 2) + 1
 
-    // keep most of the month label inside the card; reserve only what sticks out
-    readonly property real monthOutsideRatio: 0.5
+    readonly property real topLabelOutsideRatio: 0.28
 
-    readonly property real monthGutter: 11
+    readonly property real monthGutter:
+        Math.ceil(
+            Math.max(
+                monthBorderText.paintedHeight,
+                timeBorderText.paintedHeight
+            ) * root.topLabelOutsideRatio
+        ) + 1
 
     function goToday() {
         const today = new Date()
@@ -75,10 +80,10 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: root.monthGutter
         anchors.right: parent.right
-        anchors.rightMargin: root.scheduleGutter
+        anchors.rightMargin: root.yearGutter
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: root.scheduleGutter
+        anchors.leftMargin: root.yearGutter
 
         radius: Appearance.rounding.large
 
@@ -107,7 +112,6 @@ Item {
 
                     displayYear: root.displayYear
                     displayMonth: root.displayMonth
-                    currentTime: root.currentTime
 
                     onDisplayYearChanged:
                         root.displayYear = displayYear
@@ -162,6 +166,7 @@ Item {
         onPaint: {
             const ctx = getContext("2d")
             const inset = 0.5
+            const topY = inset
             const w = width
             const h = height
             const r = Math.min(
@@ -170,14 +175,14 @@ Item {
                 h / 2
             )
 
-            const scheduleGapHeight =
-                scheduleText.paintedWidth + 10
+            const yearGapHeight =
+                yearText.paintedWidth + 10
 
-            const scheduleGapTop =
-                h / 2 - scheduleGapHeight / 2
+            const yearGapTop =
+                h / 2 - yearGapHeight / 2
 
-            const scheduleGapBottom =
-                h / 2 + scheduleGapHeight / 2
+            const yearGapBottom =
+                h / 2 + yearGapHeight / 2
 
             const monthLeft =
                 monthBorderLabel.x - panel.x
@@ -192,19 +197,36 @@ Item {
                 monthLeft + monthBorderLabel.width
             )
 
+            const timeLeft =
+                timeBorderLabel.x - panel.x
+
+            const timeGapLeft = Math.max(
+                monthGapRight + 8,
+                timeLeft - 5
+            )
+
+            const timeGapRight = Math.min(
+                w - r - 3,
+                timeLeft + timeBorderLabel.width + 5
+            )
+
             ctx.clearRect(0, 0, w, h)
             ctx.beginPath()
             ctx.lineWidth = 1
             ctx.strokeStyle = lineColor.toString()
 
-            // month gap -> right edge -> bottom -> left edge below schedule
-            ctx.moveTo(monthGapRight, inset)
-            ctx.lineTo(w - r, inset)
+            // top edge between month and time labels
+            ctx.moveTo(monthGapRight, topY)
+            ctx.lineTo(timeGapLeft, topY)
+
+            // top-right edge after time label
+            ctx.moveTo(timeGapRight, topY)
+            ctx.lineTo(w - r, topY)
             ctx.quadraticCurveTo(
                 w - inset,
-                inset,
+                topY,
                 w - inset,
-                r
+                topY + r
             )
             ctx.lineTo(w - inset, h - r)
             ctx.quadraticCurveTo(
@@ -220,18 +242,18 @@ Item {
                 inset,
                 h - r
             )
-            ctx.lineTo(inset, scheduleGapBottom)
+            ctx.lineTo(inset, yearGapBottom)
 
-            // left edge above schedule -> top edge before month
-            ctx.moveTo(inset, scheduleGapTop)
-            ctx.lineTo(inset, r)
+            // left edge above year -> top edge before month
+            ctx.moveTo(inset, yearGapTop)
+            ctx.lineTo(inset, topY + r)
             ctx.quadraticCurveTo(
                 inset,
-                inset,
+                topY,
                 r,
-                inset
+                topY
             )
-            ctx.lineTo(monthGapLeft, inset)
+            ctx.lineTo(monthGapLeft, topY)
 
             ctx.stroke()
         }
@@ -241,7 +263,7 @@ Item {
         id: monthBorderLabel
 
         x: panel.x + Appearance.padding.large + 12
-        y: panel.y - height * root.monthOutsideRatio
+        y: panel.y - height * root.topLabelOutsideRatio
 
         width: monthBorderText.paintedWidth + 14
         height: monthBorderText.paintedHeight + 2
@@ -250,6 +272,8 @@ Item {
 
         onXChanged: panelBorder.requestPaint()
         onWidthChanged: panelBorder.requestPaint()
+
+        onYChanged: panelBorder.requestPaint()
 
         StyledText {
             id: monthBorderText
@@ -292,13 +316,62 @@ Item {
     }
 
     Item {
-        id: scheduleBorderLabel
+        id: timeBorderLabel
+
+        x: panel.x + panel.width
+            - width
+            - Appearance.padding.large
+            - 12
+        y: panel.y - height * root.topLabelOutsideRatio
+
+        width: timeBorderText.paintedWidth + 12
+        height: timeBorderText.paintedHeight + 2
+
+        z: 20
+
+        onXChanged: panelBorder.requestPaint()
+        onWidthChanged: panelBorder.requestPaint()
+
+        onYChanged: panelBorder.requestPaint()
+
+        StyledText {
+            id: timeBorderText
+
+            anchors.centerIn: parent
+
+            text:
+                Qt.formatTime(
+                    root.currentTime,
+                    "HH:mm"
+                )
+
+            color: Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.52
+            )
+
+            font.pointSize:
+                Appearance.font.size.small
+
+            font.weight: 400
+            font.letterSpacing: 0.6
+
+            onPaintedWidthChanged:
+                panelBorder.requestPaint()
+
+            onPaintedHeightChanged:
+                panelBorder.requestPaint()
+        }
+    }
+
+    Item {
+        id: yearBorderLabel
 
         anchors.verticalCenter: panel.verticalCenter
         x: panel.x - width / 2
 
-        width: scheduleText.paintedHeight + 2
-        height: scheduleText.paintedWidth + 12
+        width: yearText.paintedHeight + 2
+        height: yearText.paintedWidth + 12
 
         z: 20
 
@@ -309,7 +382,7 @@ Item {
             panelBorder.requestPaint()
 
         StyledText {
-            id: scheduleText
+            id: yearText
 
             anchors.centerIn: parent
 

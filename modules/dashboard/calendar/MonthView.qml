@@ -12,7 +12,6 @@ Item {
 
     property int displayYear
     property int displayMonth
-    property date currentTime: new Date()
 
     readonly property date selectedDate:
         state.currentDate
@@ -96,6 +95,19 @@ Item {
         }
     }
 
+    function eventsOn(date) {
+        return Calendar.eventsForDate(date)
+    }
+
+    function todosOn(date) {
+        const key = root.dateKey(date)
+
+        return Calendar.todos.filter(todo =>
+            !todo.completed
+            && (todo.dueDate || "") === key
+        )
+    }
+
     function goToday() {
         const today = new Date()
 
@@ -119,33 +131,8 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: 6
 
-            spacing:
-                Appearance.spacing.small
-
             Item {
                 Layout.fillWidth: true
-            }
-
-            StyledText {
-                text:
-                    Qt.formatTime(
-                        root.currentTime,
-                        "HH:mm"
-                    )
-
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.42
-                )
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight: 400
-            }
-
-            Item {
-                Layout.preferredWidth: 8
             }
 
             NavButton {
@@ -235,6 +222,18 @@ Item {
                             new Date()
                         )
 
+                    readonly property var dayEvents:
+                        root.eventsOn(cellDate)
+
+                    readonly property var dayTodos:
+                        root.todosOn(cellDate)
+
+                    readonly property int eventCount:
+                        dayEvents.length
+
+                    readonly property int todoCount:
+                        dayTodos.length
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
@@ -319,10 +318,10 @@ Item {
                         anchors.horizontalCenter:
                             parent.horizontalCenter
 
-                        anchors.bottom:
-                            parent.bottom
+                        anchors.top:
+                            parent.verticalCenter
 
-                        anchors.bottomMargin: 5
+                        anchors.topMargin: 8
 
                         width: 11
                         height: 1
@@ -331,26 +330,59 @@ Item {
                             Colours.palette.m3secondary
                     }
 
-                    Rectangle {
-                        visible:
-                            Calendar.hasItemsForDate(
-                                dayCell.cellDate
-                            )
-
+                    Row {
                         anchors.horizontalCenter:
                             parent.horizontalCenter
 
                         anchors.top:
                             parent.verticalCenter
 
-                        anchors.topMargin: 13
+                        anchors.topMargin: 12
 
-                        width: 3
-                        height: 3
-                        radius: 2
+                        spacing: 3
 
-                        color:
-                            Colours.palette.m3tertiary
+                        visible:
+                            dayCell.inMonth
+                            && (
+                                dayCell.eventCount > 0
+                                || dayCell.todoCount > 0
+                            )
+
+                        // event
+                        Rectangle {
+                            visible:
+                                dayCell.eventCount > 0
+
+                            anchors.verticalCenter:
+                                parent.verticalCenter
+
+                            width: 4
+                            height: 1
+                            radius: 0.5
+
+                            color: Qt.alpha(
+                                Colours.palette.m3secondary,
+                                0.62
+                            )
+                        }
+
+                        // todo
+                        Rectangle {
+                            visible:
+                                dayCell.todoCount > 0
+
+                            anchors.verticalCenter:
+                                parent.verticalCenter
+
+                            width: 2
+                            height: 2
+                            radius: 1
+
+                            color: Qt.alpha(
+                                Colours.palette.m3primary,
+                                0.72
+                            )
+                        }
                     }
 
                     MouseArea {
