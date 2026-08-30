@@ -38,6 +38,8 @@ Item {
     }
 
     StyledRect {
+        id: panel
+
         anchors.fill: parent
 
         radius: Appearance.rounding.large
@@ -51,6 +53,48 @@ Item {
             Colours.palette.m3outlineVariant
 
         border.width: 1
+
+        Item {
+            id: scheduleBorderLabel
+
+            z: 20
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -24
+
+            width: 1
+            height: scheduleText.implicitWidth + 18
+
+            Rectangle {
+                anchors.centerIn: parent
+
+                width: 5
+                height: parent.height
+
+                color: panel.color
+            }
+
+            StyledText {
+                id: scheduleText
+
+                anchors.centerIn: parent
+
+                text: qsTr("SCHEDULE")
+                rotation: -90
+
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.62
+                )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight: 400
+                font.letterSpacing: 0.8
+            }
+        }
 
         RowLayout {
             anchors.fill: parent
