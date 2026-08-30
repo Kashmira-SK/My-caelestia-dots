@@ -13,6 +13,7 @@ Item {
     property int displayYear
     property int displayMonth
     property date currentTime: new Date()
+    property real topInset: 0
 
     readonly property date selectedDate:
         state.currentDate
@@ -117,9 +118,10 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.topMargin: root.topInset
 
             spacing:
-                Appearance.spacing.small
+                Appearance.spacing.normal
 
             StyledText {
                 text:

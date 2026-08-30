@@ -46,9 +46,6 @@ Item {
     readonly property real scheduleGutter:
         Math.ceil(scheduleText.paintedHeight / 2) + 1
 
-    readonly property real monthGutter:
-        Math.ceil(monthBorderText.paintedHeight / 2) + 1
-
     function goToday() {
         const today = new Date()
 
@@ -70,8 +67,8 @@ Item {
         id: panel
 
         anchors.top: parent.top
-        anchors.topMargin: root.monthGutter
         anchors.right: parent.right
+        anchors.rightMargin: root.scheduleGutter
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.leftMargin: root.scheduleGutter
@@ -102,6 +99,7 @@ Item {
                     displayYear: root.displayYear
                     displayMonth: root.displayMonth
                     currentTime: root.currentTime
+                    topInset: 14
 
                     onDisplayYearChanged:
                         root.displayYear = displayYear
@@ -233,7 +231,7 @@ Item {
         id: monthBorderLabel
 
         anchors.top: panel.top
-        anchors.topMargin: -height / 2
+        anchors.topMargin: 1
         anchors.left: panel.left
         anchors.leftMargin: Appearance.padding.large
 
@@ -314,10 +312,10 @@ Item {
             )
 
             font.pointSize:
-                Appearance.font.size.smaller
+                Math.max(7, Appearance.font.size.smaller - 1)
 
             font.weight: 400
-            font.letterSpacing: 0.8
+            font.letterSpacing: 0.65
 
             onPaintedWidthChanged:
                 panelBorder.requestPaint()
