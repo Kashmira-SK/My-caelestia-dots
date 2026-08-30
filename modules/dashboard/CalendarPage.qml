@@ -323,7 +323,7 @@ Item {
             )
 
             font.pointSize:
-                Appearance.font.size.small
+                Appearance.font.size.normal
 
             font.weight: 400
             font.letterSpacing: 1.2
