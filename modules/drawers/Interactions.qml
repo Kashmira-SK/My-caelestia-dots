@@ -3,7 +3,6 @@ import qs.config
 import qs.modules.bar.popouts as BarPopouts
 import Quickshell
 import QtQuick
-import Quickshell.Io
 
 CustomMouseArea {
     id: root
@@ -48,13 +47,6 @@ CustomMouseArea {
     function onWheel(event: WheelEvent): void {
         if (event.x < bar.implicitWidth) {
             bar.handleWheel(event.y, event.angleDelta);
-        }
-    }
-    
-    IpcHandler {
-        target: "cheatsheet"
-        function open(): void {
-            root.popouts.detach("cheatsheet")
         }
     }
 
