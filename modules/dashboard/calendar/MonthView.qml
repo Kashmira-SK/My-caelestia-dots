@@ -13,7 +13,6 @@ Item {
     property int displayYear
     property int displayMonth
     property date currentTime: new Date()
-    property real topInset: 0
 
     readonly property date selectedDate:
         state.currentDate
@@ -118,25 +117,13 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.topMargin: root.topInset
+            Layout.topMargin: 6
 
             spacing:
-                Appearance.spacing.normal
+                Appearance.spacing.small
 
-            StyledText {
-                text:
-                    root.displayYear
-
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.45
-                )
-
-                font.pointSize:
-                    Appearance.font.size.small
-
-                font.weight: 400
-                font.letterSpacing: 1
+            Item {
+                Layout.fillWidth: true
             }
 
             StyledText {
@@ -158,7 +145,7 @@ Item {
             }
 
             Item {
-                Layout.fillWidth: true
+                Layout.preferredWidth: 8
             }
 
             NavButton {

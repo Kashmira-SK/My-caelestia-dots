@@ -99,6 +99,8 @@ Item {
                 Layout.preferredWidth: root.width * 0.50
 
                 MonthView {
+                    id: monthView
+
                     anchors.fill: parent
 
                     state: root.state
@@ -285,7 +287,7 @@ Item {
             cursorShape: Qt.PointingHandCursor
 
             onClicked:
-                root.goToday()
+                monthView.goToday()
         }
     }
 
@@ -311,7 +313,7 @@ Item {
 
             anchors.centerIn: parent
 
-            text: qsTr("SCHEDULE")
+            text: String(root.displayYear)
             rotation: -90
             transformOrigin: Item.Center
 
@@ -321,10 +323,10 @@ Item {
             )
 
             font.pointSize:
-                Appearance.font.size.smaller
+                Appearance.font.size.small
 
             font.weight: 400
-            font.letterSpacing: 0.8
+            font.letterSpacing: 1.2
 
             onPaintedWidthChanged:
                 panelBorder.requestPaint()
