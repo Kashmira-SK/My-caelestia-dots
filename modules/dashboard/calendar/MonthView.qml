@@ -12,6 +12,7 @@ Item {
 
     property int displayYear
     property int displayMonth
+    property date currentTime: new Date()
 
     readonly property date selectedDate:
         state.currentDate
@@ -117,69 +118,41 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            Item {
-                implicitWidth:
-                    monthHeader.implicitWidth
+            spacing:
+                Appearance.spacing.small
 
-                implicitHeight:
-                    monthHeader.implicitHeight
+            StyledText {
+                text:
+                    root.displayYear
 
-                ColumnLayout {
-                    id: monthHeader
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.45
+                )
 
-                    spacing: 0
+                font.pointSize:
+                    Appearance.font.size.small
 
-                    StyledText {
-                        text:
-                            root.monthNames[
-                                root.displayMonth
-                            ]
+                font.weight: 400
+                font.letterSpacing: 1
+            }
 
-                        color:
-                            monthMouse.containsMouse
-                            ? Colours.palette.m3primary
-                            : Colours.palette.m3secondary
+            StyledText {
+                text:
+                    Qt.formatTime(
+                        root.currentTime,
+                        "HH:mm"
+                    )
 
-                        font.pointSize:
-                            Appearance.font.size.extraLarge
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.42
+                )
 
-                        font.weight: 500
-                        font.letterSpacing: 0.5
-                    }
+                font.pointSize:
+                    Appearance.font.size.smaller
 
-                    StyledText {
-                        text:
-                            root.displayYear
-
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            monthMouse.containsMouse
-                            ? 0.7
-                            : 0.45
-                        )
-
-                        font.pointSize:
-                            Appearance.font.size.small
-
-                        font.weight: 400
-                        font.letterSpacing: 1
-                    }
-                }
-
-                MouseArea {
-                    id: monthMouse
-
-                    anchors.fill: parent
-                    anchors.margins: -7
-
-                    hoverEnabled: true
-
-                    cursorShape:
-                        Qt.PointingHandCursor
-
-                    onClicked:
-                        root.goToday()
-                }
+                font.weight: 400
             }
 
             Item {
