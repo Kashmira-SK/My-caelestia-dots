@@ -28,6 +28,9 @@ Item {
 
     readonly property date selectedDate: state.currentDate
 
+    readonly property real scheduleGutter:
+        scheduleText.implicitHeight / 2 + 4
+
     Timer {
         interval: 60 * 1000
         running: true
@@ -40,7 +43,11 @@ Item {
     StyledRect {
         id: panel
 
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: root.scheduleGutter
 
         radius: Appearance.rounding.large
 
@@ -49,52 +56,7 @@ Item {
             2
         )
 
-        border.color:
-            Colours.palette.m3outlineVariant
-
-        border.width: 1
-
-        Item {
-            id: scheduleBorderLabel
-
-            z: 20
-
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -24
-
-            width: 1
-            height: scheduleText.implicitWidth + 18
-
-            Rectangle {
-                anchors.centerIn: parent
-
-                width: 5
-                height: parent.height
-
-                color: panel.color
-            }
-
-            StyledText {
-                id: scheduleText
-
-                anchors.centerIn: parent
-
-                text: qsTr("SCHEDULE")
-                rotation: -90
-
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.62
-                )
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight: 400
-                font.letterSpacing: 0.8
-            }
-        }
+        border.width: 0
 
         RowLayout {
             anchors.fill: parent
@@ -169,6 +131,115 @@ Item {
                             : agendaComponent
                 }
             }
+        }
+    }
+
+    Canvas {
+        id: panelBorder
+
+        anchors.fill: panel
+        z: 10
+
+        property color lineColor:
+            Colours.palette.m3outlineVariant
+
+        onLineColorChanged:
+            requestPaint()
+
+        onPaint: {
+            const ctx = getContext("2d")
+            const inset = 0.5
+            const w = width
+            const h = height
+            const r = Math.min(
+                Appearance.rounding.large,
+                w / 2,
+                h / 2
+            )
+
+            const gapHeight = scheduleText.paintedWidth + 10
+            const centerY = h / 2
+            const gapTop = centerY - gapHeight / 2
+            const gapBottom = centerY + gapHeight / 2
+
+            ctx.clearRect(0, 0, w, h)
+            ctx.beginPath()
+            ctx.lineWidth = 1
+            ctx.strokeStyle = lineColor.toString()
+
+            ctx.moveTo(inset, gapBottom)
+            ctx.lineTo(inset, h - r)
+            ctx.quadraticCurveTo(
+                inset,
+                h - inset,
+                r,
+                h - inset
+            )
+            ctx.lineTo(w - r, h - inset)
+            ctx.quadraticCurveTo(
+                w - inset,
+                h - inset,
+                w - inset,
+                h - r
+            )
+            ctx.lineTo(w - inset, r)
+            ctx.quadraticCurveTo(
+                w - inset,
+                inset,
+                w - r,
+                inset
+            )
+            ctx.lineTo(r, inset)
+            ctx.quadraticCurveTo(
+                inset,
+                inset,
+                inset,
+                r
+            )
+            ctx.lineTo(inset, gapTop)
+            ctx.stroke()
+        }
+    }
+
+    Item {
+        id: scheduleBorderLabel
+
+        anchors.verticalCenter: panel.verticalCenter
+        x: panel.x - width / 2
+
+        width: scheduleText.implicitHeight + 6
+        height: scheduleText.implicitWidth + 14
+
+        z: 20
+
+        onYChanged:
+            panelBorder.requestPaint()
+
+        onHeightChanged:
+            panelBorder.requestPaint()
+
+        StyledText {
+            id: scheduleText
+
+            anchors.centerIn: parent
+
+            text: qsTr("SCHEDULE")
+            rotation: -90
+            transformOrigin: Item.Center
+
+            color: Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.62
+            )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 400
+            font.letterSpacing: 0.8
+
+            onPaintedWidthChanged:
+                panelBorder.requestPaint()
         }
     }
 
