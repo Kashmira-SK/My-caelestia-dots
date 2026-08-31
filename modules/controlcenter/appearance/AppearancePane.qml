@@ -54,6 +54,9 @@ Item {
     property real visualiserRounding: Config.background.visualiser.rounding ?? 1
     property real visualiserSpacing: Config.background.visualiser.spacing ?? 1
 
+    property bool dashboardEnabled: Config.dashboard.enabled ?? true
+    property bool dashboardShowOnHover: Config.dashboard.showOnHover ?? true
+
     anchors.fill: parent
 
     function saveConfig() {
@@ -94,6 +97,9 @@ Item {
         Config.border.rounding = root.borderRounding;
         Config.border.thickness = root.borderThickness;
 
+        Config.dashboard.enabled = root.dashboardEnabled;
+        Config.dashboard.showOnHover = root.dashboardShowOnHover;
+
         Config.save();
     }
 
@@ -112,9 +118,11 @@ Item {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.bottomMargin: Appearance.spacing.normal
+
                     text: qsTr("Wallpaper")
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: 600
+
+                    font.pointSize: Appearance.font.size.large
+                    font.weight: 500
                 }
 
                 Loader {
@@ -125,8 +133,9 @@ Item {
                     Layout.bottomMargin: -Appearance.padding.large * 2
 
                     active: {
-                        const isActive = root.session.activeIndex === 3;
-                        const isAdjacent = Math.abs(root.session.activeIndex - 3) === 1;
+                        const appearanceIndex = root.session.panes.indexOf("appearance");
+                        const isActive = root.session.activeIndex === appearanceIndex;
+                        const isAdjacent = Math.abs(root.session.activeIndex - appearanceIndex) === 1;
                         const splitLayout = root.children[0];
                         const loader = splitLayout && splitLayout.rightLoader ? splitLayout.rightLoader : null;
                         const shouldActivate = loader && loader.item !== null && (isActive || isAdjacent);
@@ -151,10 +160,11 @@ Item {
         anchors.fill: parent
 
         leftContent: Component {
-
             StyledFlickable {
                 id: sidebarFlickable
+
                 readonly property var rootPane: root
+
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: sidebarLayout.height
 
@@ -164,15 +174,30 @@ Item {
 
                 ColumnLayout {
                     id: sidebarLayout
+
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    spacing: Appearance.spacing.small
+
+                    spacing: Appearance.spacing.smaller
 
                     readonly property var rootPane: sidebarFlickable.rootPane
 
-                    readonly property bool allSectionsExpanded: themeModeSection.expanded && colorVariantSection.expanded && colorSchemeSection.expanded && animationsSection.expanded && fontsSection.expanded && scalesSection.expanded && transparencySection.expanded && borderSection.expanded && backgroundSection.expanded
+                    readonly property bool allSectionsExpanded:
+                        themeModeSection.expanded
+                        && colorVariantSection.expanded
+                        && colorSchemeSection.expanded
+                        && animationsSection.expanded
+                        && fontsSection.expanded
+                        && scalesSection.expanded
+                        && transparencySection.expanded
+                        && borderSection.expanded
+                        && backgroundSection.expanded
+                        && dashboardSection.expanded
 
                     RowLayout {
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: Appearance.spacing.small
+
                         spacing: Appearance.spacing.smaller
 
                         StyledText {
@@ -186,11 +211,18 @@ Item {
                         }
 
                         IconButton {
-                            icon: sidebarLayout.allSectionsExpanded ? "unfold_less" : "unfold_more"
+                            icon:
+                                sidebarLayout.allSectionsExpanded
+                                ? "unfold_less"
+                                : "unfold_more"
+
                             type: IconButton.Text
                             label.animate: true
+
                             onClicked: {
-                                const shouldExpand = !sidebarLayout.allSectionsExpanded;
+                                const shouldExpand =
+                                    !sidebarLayout.allSectionsExpanded;
+
                                 themeModeSection.expanded = shouldExpand;
                                 colorVariantSection.expanded = shouldExpand;
                                 colorSchemeSection.expanded = shouldExpand;
@@ -200,50 +232,76 @@ Item {
                                 transparencySection.expanded = shouldExpand;
                                 borderSection.expanded = shouldExpand;
                                 backgroundSection.expanded = shouldExpand;
+                                dashboardSection.expanded = shouldExpand;
                             }
                         }
                     }
 
                     ThemeModeSection {
                         id: themeModeSection
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     ColorVariantSection {
                         id: colorVariantSection
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     ColorSchemeSection {
                         id: colorSchemeSection
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     AnimationsSection {
                         id: animationsSection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     FontsSection {
                         id: fontsSection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     ScalesSection {
                         id: scalesSection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     TransparencySection {
                         id: transparencySection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     BorderSection {
                         id: borderSection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
 
                     BackgroundSection {
                         id: backgroundSection
                         rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
+                    }
+
+                    DashboardSection {
+                        id: dashboardSection
+                        rootPane: sidebarFlickable.rootPane
+                        flatStyle: true
+                        showBackground: false
                     }
                 }
             }
