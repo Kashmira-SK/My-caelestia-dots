@@ -15,32 +15,157 @@ Item {
     id: root
 
     required property Session session
+
     anchors.fill: parent
 
+    property string activePage: "tools"
+
+    readonly property var pages: [
+        { id: "tools",   index: "01", label: "TOOLS",   icon: "terminal" },
+        { id: "network", index: "02", label: "NETWORK", icon: "wifi" },
+        { id: "system",  index: "03", label: "SYSTEM",  icon: "settings" },
+        { id: "shell",   index: "04", label: "SHELL",   icon: "bolt" },
+        { id: "paths",   index: "05", label: "PATHS",   icon: "folder_open" },
+        { id: "fun",     index: "06", label: "FUN",     icon: "auto_awesome" }
+    ]
+
+    function pageData(): var {
+        for (const page of pages) {
+            if (page.id === activePage)
+                return page
+        }
+
+        return pages[0]
+    }
+
+    component CategoryTab: Item {
+        id: tab
+
+        required property var page
+
+        readonly property bool active:
+            root.activePage === page.id
+
+        implicitWidth:
+            tabContent.implicitWidth
+            + Appearance.padding.normal * 2
+
+        implicitHeight: 36
+
+        RowLayout {
+            id: tabContent
+
+            anchors.centerIn: parent
+            spacing: 6
+
+            StyledText {
+                text: tab.page.index
+
+                color:
+                    tab.active
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.34
+                    )
+
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: 500
+            }
+
+            StyledText {
+                text: tab.page.label
+
+                color:
+                    tab.active
+                    ? Colours.palette.m3onSurface
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.58
+                    )
+
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: tab.active ? 500 : 400
+                font.letterSpacing: 0.7
+            }
+        }
+
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+
+            width:
+                tab.active
+                ? Math.max(
+                    24,
+                    tabContent.implicitWidth * 0.42
+                )
+                : 0
+
+            height: 2
+            radius: 1
+            color: Colours.palette.m3primary
+
+            Behavior on width {
+                Anim {}
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: {
+                root.activePage = tab.page.id
+                flick.contentY = 0
+            }
+        }
+    }
+
     component InfoRow: Item {
-        id: infoRow
+        id: row
 
         required property string label
         required property string value
 
         Layout.fillWidth: true
-        implicitHeight: Math.max(labelText.implicitHeight, valueText.implicitHeight) + Appearance.padding.small * 1.5
+
+        implicitHeight:
+            Math.max(
+                labelText.implicitHeight,
+                valueText.implicitHeight
+            )
+            + Appearance.padding.normal * 1.4
 
         RowLayout {
             anchors.fill: parent
+
+            anchors.leftMargin: Appearance.padding.small
+            anchors.rightMargin: Appearance.padding.small
+            anchors.topMargin: Appearance.padding.small
+            anchors.bottomMargin: Appearance.padding.small
+
             spacing: Appearance.spacing.normal
 
             StyledText {
                 id: labelText
 
-                Layout.preferredWidth: 150
+                Layout.preferredWidth: 170
+                Layout.maximumWidth: 170
                 Layout.alignment: Qt.AlignTop
 
-                text: infoRow.label
+                text: row.label
+
                 color: Colours.palette.m3onSurface
+
                 font.family: Appearance.font.family.mono
                 font.pointSize: Appearance.font.size.small
                 font.weight: 500
+
+                wrapMode: Text.WordWrap
             }
 
             StyledText {
@@ -49,14 +174,17 @@ Item {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
-                text: infoRow.value
+                text: row.value
+
                 color: Qt.alpha(
                     Colours.palette.m3onSurfaceVariant,
-                    0.72
+                    0.64
                 )
-                wrapMode: Text.WordWrap
+
                 font.pointSize: Appearance.font.size.small
                 font.weight: 400
+
+                wrapMode: Text.WordWrap
             }
         }
 
@@ -64,83 +192,126 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
+
             height: 1
+
             color: Qt.alpha(
                 Colours.palette.m3outlineVariant,
-                0.28
+                0.20
             )
         }
     }
 
-    component CmdRow: ColumnLayout {
-        id: cmdRow
+    component CmdRow: Item {
+        id: row
 
         required property string label
         required property string cmd
 
+        property bool copied: false
+
         Layout.fillWidth: true
-        spacing: 4
 
-        StyledText {
-            text: cmdRow.label
-            color: Qt.alpha(
-                Colours.palette.m3onSurfaceVariant,
-                0.62
+        implicitHeight:
+            Math.max(
+                labelText.implicitHeight,
+                commandText.implicitHeight,
+                copyButton.implicitHeight
             )
-            font.pointSize: Appearance.font.size.smaller
-            font.weight: 400
-        }
+            + Appearance.padding.normal * 1.4
 
-        StyledRect {
-            Layout.fillWidth: true
-            implicitHeight:
-                Math.max(
-                    cmdText.implicitHeight,
-                    copyBtn.implicitHeight
+        RowLayout {
+            anchors.fill: parent
+
+            anchors.leftMargin: Appearance.padding.small
+            anchors.rightMargin: Appearance.padding.smaller
+            anchors.topMargin: Appearance.padding.small
+            anchors.bottomMargin: Appearance.padding.small
+
+            spacing: Appearance.spacing.normal
+
+            StyledText {
+                id: labelText
+
+                Layout.preferredWidth: 135
+                Layout.maximumWidth: 135
+                Layout.alignment: Qt.AlignTop
+
+                text: row.label
+
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.54
                 )
-                + Appearance.padding.small * 2
 
-            radius: Appearance.rounding.small
-            color: Colours.palette.m3surfaceContainerHighest
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: 400
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: Appearance.padding.normal
-                anchors.rightMargin: Appearance.padding.small
-                anchors.topMargin: Appearance.padding.small
-                anchors.bottomMargin: Appearance.padding.small
+                wrapMode: Text.WordWrap
+            }
 
-                spacing: Appearance.spacing.small
+            StyledText {
+                id: commandText
 
-                StyledText {
-                    id: cmdText
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
 
-                    Layout.fillWidth: true
+                text: row.cmd
 
-                    text: cmdRow.cmd
-                    color: Colours.palette.m3onSurface
-                    font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.small
-                    wrapMode: Text.WrapAnywhere
-                }
+                color: Colours.palette.m3onSurface
 
-                IconButton {
-                    id: copyBtn
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.small
 
-                    type: IconButton.Text
-                    icon: "content_copy"
+                wrapMode: Text.WrapAnywhere
+            }
 
-                    onClicked:
-                        Quickshell.execDetached([
-                            "wl-copy",
-                            cmdRow.cmd
-                        ])
+            IconButton {
+                id: copyButton
+
+                Layout.alignment: Qt.AlignTop
+
+                type: IconButton.Text
+                icon: row.copied ? "check" : "content_copy"
+                label.animate: true
+
+                onClicked: {
+                    Quickshell.execDetached([
+                        "wl-copy",
+                        row.cmd
+                    ])
+
+                    row.copied = true
+                    copiedTimer.restart()
                 }
             }
         }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            height: 1
+
+            color: Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.20
+            )
+        }
+
+        Timer {
+            id: copiedTimer
+
+            interval: 1100
+            repeat: false
+
+            onTriggered:
+                row.copied = false
+        }
     }
 
-    component Section: ColumnLayout {
+    component BorderSection: Item {
         id: section
 
         required property string title
@@ -150,274 +321,555 @@ Item {
             sectionContent.data
 
         Layout.fillWidth: true
-        spacing: Appearance.spacing.small
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.bottomMargin: 2
+        implicitHeight:
+            sectionContent.implicitHeight
+            + 46
 
-            spacing: Appearance.spacing.small
+        MaterialIcon {
+            id: sectionIcon
 
-            MaterialIcon {
-                text: section.icon
-                color: Colours.palette.m3primary
-                font.pointSize: Appearance.font.size.normal
-            }
+            x: 16
+            y: -height / 2 + 1
 
-            StyledText {
-                text: section.title
-                color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.normal
-                font.weight: 500
-            }
+            text: section.icon
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.leftMargin: Appearance.spacing.small
-                height: 1
-                color: Qt.alpha(
-                    Colours.palette.m3outlineVariant,
-                    0.48
+            color: Qt.alpha(
+                Colours.palette.m3primary,
+                0.78
+            )
+
+            font.pointSize: Appearance.font.size.small
+        }
+
+        StyledText {
+            id: sectionLabel
+
+            x:
+                sectionIcon.x
+                + sectionIcon.width
+                + 7
+
+            y: -height / 2
+
+            text: section.title
+
+            color: Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.72
+            )
+
+            font.pointSize: Appearance.font.size.smaller
+            font.weight: 500
+            font.letterSpacing: 0.8
+
+            onPaintedWidthChanged:
+                sectionBorder.requestPaint()
+        }
+
+        Canvas {
+            id: sectionBorder
+
+            anchors.fill: parent
+
+            onWidthChanged:
+                requestPaint()
+
+            onHeightChanged:
+                requestPaint()
+
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.reset()
+
+                const w = width
+                const h = height
+                const inset = 0.5
+                const r = Math.min(
+                    Appearance.rounding.normal,
+                    14
                 )
+
+                const gapLeft = Math.max(
+                    r + 8,
+                    sectionIcon.x - 7
+                )
+
+                const gapRight = Math.min(
+                    w - r - 8,
+                    sectionLabel.x
+                    + sectionLabel.paintedWidth
+                    + 8
+                )
+
+                ctx.strokeStyle =
+                    Qt.alpha(
+                        Colours.palette.m3outlineVariant,
+                        0.48
+                    )
+
+                ctx.lineWidth = 1
+                ctx.beginPath()
+
+                ctx.moveTo(
+                    gapRight,
+                    inset
+                )
+
+                ctx.lineTo(
+                    w - r,
+                    inset
+                )
+
+                ctx.quadraticCurveTo(
+                    w - inset,
+                    inset,
+                    w - inset,
+                    r
+                )
+
+                ctx.lineTo(
+                    w - inset,
+                    h - r
+                )
+
+                ctx.quadraticCurveTo(
+                    w - inset,
+                    h - inset,
+                    w - r,
+                    h - inset
+                )
+
+                ctx.lineTo(
+                    r,
+                    h - inset
+                )
+
+                ctx.quadraticCurveTo(
+                    inset,
+                    h - inset,
+                    inset,
+                    h - r
+                )
+
+                ctx.lineTo(
+                    inset,
+                    r
+                )
+
+                ctx.quadraticCurveTo(
+                    inset,
+                    inset,
+                    r,
+                    inset
+                )
+
+                ctx.lineTo(
+                    gapLeft,
+                    inset
+                )
+
+                ctx.stroke()
             }
         }
 
         ColumnLayout {
             id: sectionContent
 
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.smaller
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
+            anchors.topMargin: 20
+            anchors.bottomMargin: Appearance.padding.normal
+
+            spacing: 0
         }
     }
 
-    ClippingRectangle {
+    StyledRect {
         anchors.fill: parent
 
-        // Keep the cheatsheet visually identical whether opened
-        // from Super+G or from the control center.
         color: Colours.palette.m3surface
 
-        StyledFlickable {
-            id: flick
-
+        ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
 
-            contentHeight: mainCol.implicitHeight
-            flickableDirection: Flickable.VerticalFlick
+            anchors.leftMargin: Appearance.padding.large
+            anchors.rightMargin: Appearance.padding.large
+            anchors.topMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.normal
 
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: flick
-            }
+            spacing: 0
 
-            ColumnLayout {
-                id: mainCol
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 2
 
-                width: flick.width
-                spacing: Appearance.spacing.large
+                spacing: Appearance.spacing.small
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Appearance.spacing.small
+                StyledText {
+                    text: qsTr("CHEATSHEET")
 
-                    spacing: Appearance.spacing.normal
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.68
+                    )
 
-                    ColumnLayout {
-                        spacing: 1
-
-                        StyledText {
-                            text: qsTr("Cheatsheet")
-                            color: Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.extraLarge
-                            font.weight: 500
-                        }
-
-                        StyledText {
-                            text: qsTr("Commands, aliases, paths and quick references")
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.62
-                            )
-                            font.pointSize: Appearance.font.size.small
-                            font.weight: 400
-                        }
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    MaterialIcon {
-                        text: "menu_book"
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.46
-                        )
-                        font.pointSize: Appearance.font.size.larger
-                    }
+                    font.pointSize: Appearance.font.size.smaller
+                    font.weight: 500
+                    font.letterSpacing: 1.2
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
+
                     height: 1
+
                     color: Qt.alpha(
                         Colours.palette.m3outlineVariant,
-                        0.58
+                        0.28
                     )
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignTop
+                StyledText {
+                    text:
+                        root.pageData().index
+                        + " / "
+                        + String(root.pages.length).padStart(2, "0")
 
-                    spacing: Appearance.spacing.large
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.36
+                    )
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-
-                        spacing: Appearance.spacing.large
-
-                        Section {
-                            title: qsTr("CLI tools")
-                            icon: "terminal"
-
-                            InfoRow { label: "speedtest-cli"; value: "network speed test" }
-                            InfoRow { label: "ncdu"; value: "disk usage analyzer" }
-                            InfoRow { label: "duf"; value: "df but readable" }
-                            InfoRow { label: "tldr"; value: "simplified man pages" }
-                            InfoRow { label: "most"; value: "pager, alt to less" }
-                            InfoRow { label: "jq"; value: "json processor" }
-                            InfoRow { label: "yt-dlp"; value: "download video/audio" }
-                            InfoRow { label: "gh"; value: "github from terminal" }
-                            InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
-                            InfoRow { label: "ttyper"; value: "typing speed test" }
-                            InfoRow { label: "exiftool"; value: "image/file metadata" }
-                            InfoRow { label: "inxi"; value: "system info dump" }
-                            InfoRow { label: "nvtop"; value: "gpu usage monitor" }
-                            InfoRow { label: "termdown"; value: "countdown/stopwatch" }
-                            InfoRow { label: "gum"; value: "shell script UI prompts" }
-                            InfoRow { label: "epy"; value: "terminal ebook reader" }
-                        }
-
-                        Section {
-                            title: qsTr("WiFi")
-                            icon: "wifi"
-
-                            CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
-                            CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
-                            CmdRow { label: "saved connections"; cmd: "nmcli connection show" }
-                            CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
-                        }
-
-                        Section {
-                            title: qsTr("System maintenance")
-                            icon: "update"
-
-                            CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
-                            CmdRow { label: "full update + AUR"; cmd: "yay -Syu" }
-                            CmdRow { label: "refresh mirrors"; cmd: "sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist" }
-                            CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
-                            CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
-                            CmdRow { label: "check .pacnew files"; cmd: "sudo pacdiff" }
-                        }
-
-                        Section {
-                            title: qsTr("Games")
-                            icon: "sports_esports"
-
-                            InfoRow { label: "nsnake"; value: "snake" }
-                            InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
-                            InfoRow { label: "bastet"; value: "tetris that hates you" }
-                            InfoRow { label: "tty-solitaire"; value: "solitaire" }
-                            InfoRow { label: "2048-cli-git"; value: "2048" }
-                            InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
-                        }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-
-                        spacing: Appearance.spacing.large
-
-                        Section {
-                            title: qsTr("Zsh aliases")
-                            icon: "bolt"
-
-                            InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
-                            InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
-                            InfoRow { label: "zshconf"; value: "edit .zshrc" }
-                            InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
-                            InfoRow { label: "caeconf"; value: "edit shell.json" }
-                            InfoRow { label: "caefiles"; value: "cd to dots repo" }
-                            InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
-                            InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
-                            InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
-                            InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
-                        }
-
-                        Section {
-                            title: qsTr("Key paths")
-                            icon: "folder_open"
-
-                            InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
-                            InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
-                            InfoRow { label: "zshrc"; value: "~/.zshrc" }
-                            InfoRow { label: "starship"; value: "~/.config/starship.toml" }
-                            InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
-                            InfoRow { label: "startpage"; value: "~/.config/startpage/" }
-                            InfoRow { label: "immich db"; value: "~/immich-db" }
-                            InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
-                        }
-
-                        Section {
-                            title: qsTr("Terminal toys")
-                            icon: "auto_awesome"
-
-                            InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased, matrix rain" }
-                            InfoRow { label: "pipes"; value: "aliased, animated pipes" }
-                            InfoRow { label: "asciiquarium"; value: "aquarium animation" }
-                            InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
-                            InfoRow { label: "astroterm"; value: "starfield / space" }
-                            InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
-                            InfoRow { label: "tty-clock"; value: "big terminal clock" }
-                            InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
-                            InfoRow { label: "cowsay"; value: "cow says your text" }
-                            InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
-                        }
-
-                        Section {
-                            title: qsTr("Bluetooth")
-                            icon: "bluetooth"
-
-                            CmdRow { label: "scan for devices"; cmd: "bluetoothctl scan on" }
-                            CmdRow { label: "list paired"; cmd: "bluetoothctl devices" }
-                            CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
-                        }
-                    }
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.smaller
                 }
+            }
 
-                Section {
-                    Layout.fillWidth: true
-                    Layout.topMargin: Appearance.spacing.small
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.bottomMargin: Appearance.spacing.normal
 
-                    title: qsTr("Important commands")
-                    icon: "code"
+                spacing: Appearance.spacing.small
 
-                    CmdRow {
-                        label: "quickshell restart (safe)"
-                        cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown"
-                    }
+                Repeater {
+                    model: root.pages
 
-                    CmdRow {
-                        label: "clear qml cache"
-                        cmd: "rm -rf ~/.cache/quickshell/qmlcache"
+                    CategoryTab {
+                        required property var modelData
+
+                        page: modelData
                     }
                 }
 
                 Item {
-                    Layout.preferredHeight: Appearance.padding.large
+                    Layout.fillWidth: true
+                }
+            }
+
+            ClippingRectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                color: "transparent"
+
+                StyledFlickable {
+                    id: flick
+
+                    anchors.fill: parent
+
+                    clip: true
+
+                    contentHeight:
+                        pageContent.implicitHeight
+
+                    flickableDirection:
+                        Flickable.VerticalFlick
+
+                    StyledScrollBar.vertical:
+                        StyledScrollBar {
+                            flickable: flick
+                        }
+
+                    ColumnLayout {
+                        id: pageContent
+
+                        width: flick.width
+                        spacing: Appearance.spacing.normal
+
+                        // Top breathing room for border labels.
+                        // Labels intentionally sit partly above their section border,
+                        // so the first section must not begin at y: 0.
+                        Item {
+                            Layout.preferredHeight: Appearance.padding.normal
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "tools"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            BorderSection {
+                                title: qsTr("QUICK")
+                                icon: "priority_high"
+
+                                CmdRow {
+                                    label: "restart quickshell"
+                                    cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown"
+                                }
+
+                                CmdRow {
+                                    label: "clear qml cache"
+                                    cmd: "rm -rf ~/.cache/quickshell/qmlcache"
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+
+                                spacing: Appearance.spacing.normal
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("EVERYDAY")
+                                    icon: "terminal"
+
+                                    InfoRow { label: "speedtest-cli"; value: "network speed test" }
+                                    InfoRow { label: "ncdu"; value: "disk usage analyzer" }
+                                    InfoRow { label: "duf"; value: "df but readable" }
+                                    InfoRow { label: "tldr"; value: "simplified man pages" }
+                                    InfoRow { label: "most"; value: "pager, alt to less" }
+                                    InfoRow { label: "jq"; value: "json processor" }
+                                    InfoRow { label: "yt-dlp"; value: "download video/audio" }
+                                    InfoRow { label: "gh"; value: "github from terminal" }
+                                }
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("INSPECT")
+                                    icon: "search"
+
+                                    InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
+                                    InfoRow { label: "ttyper"; value: "typing speed test" }
+                                    InfoRow { label: "exiftool"; value: "image/file metadata" }
+                                    InfoRow { label: "inxi"; value: "system info dump" }
+                                    InfoRow { label: "nvtop"; value: "gpu usage monitor" }
+                                    InfoRow { label: "termdown"; value: "countdown/stopwatch" }
+                                    InfoRow { label: "gum"; value: "shell script UI prompts" }
+                                    InfoRow { label: "epy"; value: "terminal ebook reader" }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "network"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+
+                                spacing: Appearance.spacing.normal
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("WIFI")
+                                    icon: "wifi"
+
+                                    CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
+                                    CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
+                                    CmdRow { label: "saved"; cmd: "nmcli connection show" }
+                                    CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
+                                }
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("BLUETOOTH")
+                                    icon: "bluetooth"
+
+                                    CmdRow { label: "scan"; cmd: "bluetoothctl scan on" }
+                                    CmdRow { label: "paired"; cmd: "bluetoothctl devices" }
+                                    CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "system"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            BorderSection {
+                                title: qsTr("MAINTENANCE")
+                                icon: "update"
+
+                                CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
+                                CmdRow { label: "update + AUR"; cmd: "yay -Syu" }
+                                CmdRow { label: "refresh mirrors"; cmd: "sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist" }
+                                CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
+                                CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
+                                CmdRow { label: "check .pacnew"; cmd: "sudo pacdiff" }
+                            }
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "shell"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+
+                                spacing: Appearance.spacing.normal
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("CONFIG")
+                                    icon: "edit"
+
+                                    InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
+                                    InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
+                                    InfoRow { label: "zshconf"; value: "edit .zshrc" }
+                                    InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
+                                    InfoRow { label: "caeconf"; value: "edit shell.json" }
+                                }
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("SHORTCUTS")
+                                    icon: "bolt"
+
+                                    InfoRow { label: "caefiles"; value: "cd to dots repo" }
+                                    InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
+                                    InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
+                                    InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
+                                    InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "paths"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+
+                                spacing: Appearance.spacing.normal
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("CONFIG")
+                                    icon: "folder_open"
+
+                                    InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
+                                    InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
+                                    InfoRow { label: "zshrc"; value: "~/.zshrc" }
+                                    InfoRow { label: "starship"; value: "~/.config/starship.toml" }
+                                }
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("LOCAL")
+                                    icon: "folder"
+
+                                    InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
+                                    InfoRow { label: "startpage"; value: "~/.config/startpage/" }
+                                    InfoRow { label: "immich db"; value: "~/immich-db" }
+                                    InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            visible:
+                                root.activePage === "fun"
+
+                            Layout.fillWidth: true
+                            spacing: Appearance.spacing.normal
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+
+                                spacing: Appearance.spacing.normal
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("TOYS")
+                                    icon: "auto_awesome"
+
+                                    InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased matrix rain" }
+                                    InfoRow { label: "pipes"; value: "aliased animated pipes" }
+                                    InfoRow { label: "asciiquarium"; value: "aquarium animation" }
+                                    InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
+                                    InfoRow { label: "astroterm"; value: "starfield / space" }
+                                    InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
+                                    InfoRow { label: "tty-clock"; value: "big terminal clock" }
+                                    InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
+                                    InfoRow { label: "cowsay"; value: "cow says your text" }
+                                    InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
+                                }
+
+                                BorderSection {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+
+                                    title: qsTr("GAMES")
+                                    icon: "sports_esports"
+
+                                    InfoRow { label: "nsnake"; value: "snake" }
+                                    InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
+                                    InfoRow { label: "bastet"; value: "tetris that hates you" }
+                                    InfoRow { label: "tty-solitaire"; value: "solitaire" }
+                                    InfoRow { label: "2048-cli-git"; value: "2048" }
+                                    InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
+                                }
+                            }
+                        }
+
+                        Item {
+                            Layout.preferredHeight:
+                                Appearance.padding.large
+                        }
+                    }
                 }
             }
         }
