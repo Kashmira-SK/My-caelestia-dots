@@ -2,6 +2,30 @@
 
 Newest entries at the top.
 
+## [2026-08-31] - Cheatsheet navigation + dashboard-style redesign
+
+### Added
+- `modules/cheatsheet/Content.qml`: added category-based navigation so the cheatsheet no longer renders every reference section as one giant scroll page
+- Added 6 compact indexed categories: `01 TOOLS`, `02 NETWORK`, `03 SYSTEM`, `04 SHELL`, `05 PATHS`, `06 FUN`
+- Copy buttons now temporarily switch from the copy icon to a check mark after a command is copied
+- Added dashboard-style border-labelled content groups such as `QUICK`, `EVERYDAY`, `INSPECT`, `WIFI`, `BLUETOOTH`, `CONFIG`, `SHORTCUTS`, `TOYS` and `GAMES`
+
+### Changed
+- Reworked the cheatsheet visual style to better match the dashboard: compact indexed tabs, thin linework, restrained typography and labels integrated into section borders
+- Removed the oversized active-category heading and description that previously took up a large part of the page
+- Split larger categories into smaller two-column groups where useful instead of presenting everything as one long list
+- Command and info rows now use a flatter reference layout instead of large rounded cards
+- Switching categories now resets the content scroll position to the top
+
+### Fixed
+- Fixed cheatsheet content becoming invisible after redesigns by restoring the required `qs.components.containers` and `Quickshell.Widgets` imports
+- Fixed scrolled content drawing over the fixed category navigation by clipping the scroll viewport
+- Fixed the first border label being cut off by adding top breathing room inside the scroll content
+- Fixed long labels such as `matrix / matrixb / matrixc` colliding with their descriptions
+- Cheatsheet now provides its own themed surface background so its appearance is consistent when opened directly with `Super+G`
+
+---
+
 ## [2026-08-30] - Dashboard calendar + todo overhaul
 
 ### Added
