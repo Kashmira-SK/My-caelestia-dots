@@ -7,10 +7,8 @@ import qs.utils
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
 
 Item {
     id: root
@@ -20,12 +18,14 @@ Item {
 
     property real playerProgress: {
         const active = Players.active;
-        return active?.length ? active.position / active.length : 0;
+        return active?.length
+            ? Math.max(0, Math.min(1, active.position / active.length))
+            : 0;
     }
 
     function lengthStr(length: int): string {
         if (length < 0)
-            return "-1:-1";
+            return "--:--";
 
         const hours = Math.floor(length / 3600);
         const mins = Math.floor((length % 3600) / 60);
@@ -33,11 +33,12 @@ Item {
 
         if (hours > 0)
             return `${hours}:${mins.toString().padStart(2, "0")}:${secs}`;
+
         return `${mins}:${secs}`;
     }
 
-    implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
+    implicitWidth: 840
+    implicitHeight: 255
 
     Behavior on playerProgress {
         Anim {
@@ -61,392 +62,862 @@ Item {
         service: Audio.beatTracker
     }
 
-    Shape {
-        id: visualiser
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: Appearance.padding.large
 
-        readonly property real centerX: width / 2
-        readonly property real centerY: height / 2
-        readonly property real innerX: cover.implicitWidth / 2 + Appearance.spacing.small
-        readonly property real innerY: cover.implicitHeight / 2 + Appearance.spacing.small
-        property color colour: Colours.palette.m3primary
+        spacing: Appearance.spacing.large
 
-        anchors.fill: cover
-        anchors.margins: -Config.dashboard.sizes.mediaVisualiserSize
+        // Art + waveform
+        ColumnLayout {
+            id: artColumn
 
-        asynchronous: true
-        preferredRendererType: Shape.CurveRenderer
-        data: visualiserBars.instances
-    }
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 172
 
-    Variants {
-        id: visualiserBars
+            spacing: Appearance.spacing.small
 
-        model: Array.from({
-            length: Config.services.visualiserBars
-        }, (_, i) => i)
+            StyledClippingRect {
+                id: cover
 
-        ShapePath {
-            id: visualiserBar
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 138
+                Layout.preferredHeight: 138
 
-            required property int modelData
-            readonly property real value: Math.max(1e-3, Math.min(1, Audio.cava.values[modelData]))
+                radius: 34
 
-            readonly property real angle: modelData * 2 * Math.PI / Config.services.visualiserBars
-            readonly property real magnitude: value * Config.dashboard.sizes.mediaVisualiserSize
-            readonly property real cos: Math.cos(angle)
-            readonly property real sin: Math.sin(angle)
+                color:
+                    Colours.tPalette.m3surfaceContainerHigh
 
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
-            strokeWidth: 360 / Config.services.visualiserBars - Appearance.spacing.small / 4
-            strokeColor: Colours.palette.m3primary
+                border.width: 1
+                border.color:
+                    Qt.alpha(
+                        Colours.palette.m3outlineVariant,
+                        0.42
+                    )
 
-            startX: visualiser.centerX + (visualiser.innerX + strokeWidth / 2) * cos
-            startY: visualiser.centerY + (visualiser.innerY + strokeWidth / 2) * sin
+                MaterialIcon {
+                    anchors.centerIn: parent
 
-            PathLine {
-                x: visualiser.centerX + (visualiser.innerX + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.cos
-                y: visualiser.centerY + (visualiser.innerY + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.sin
+                    visible:
+                        !(Players.active?.trackArtUrl ?? "")
+
+                    text: "album"
+
+                    color:
+                        Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.42
+                        )
+
+                    font.pointSize:
+                        Appearance.font.size.extraLarge
+                }
+
+                Image {
+                    anchors.fill: parent
+
+                    source:
+                        Players.active?.trackArtUrl
+                        ?? ""
+
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+
+                    sourceSize.width: width * 2
+                    sourceSize.height: height * 2
+                }
             }
 
-            Behavior on strokeColor {
-                CAnim {}
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 34
+
+                Row {
+                    id: waveRow
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+
+                    spacing: 4
+
+                    Repeater {
+                        model: 18
+
+                        delegate: Rectangle {
+                            required property int index
+
+                            readonly property int cavaIndex:
+                                Math.min(
+                                    Config.services.visualiserBars - 1,
+                                    Math.floor(
+                                        index
+                                        * Config.services.visualiserBars
+                                        / 18
+                                    )
+                                )
+
+                            readonly property real cavaValue:
+                                Audio.cava.values[cavaIndex]
+                                ?? 0
+
+                            width: 4
+
+                            height:
+                                Players.active?.isPlaying
+                                ? 5 + cavaValue * 24
+                                : 5
+
+                            anchors.bottom:
+                                parent.bottom
+
+                            radius: 2
+
+                            color:
+                                Qt.alpha(
+                                    Colours.palette.m3primary,
+                                    Players.active?.isPlaying
+                                    ? 0.76
+                                    : 0.26
+                                )
+
+                            Behavior on height {
+                                NumberAnimation {
+                                    duration: 90
+                                }
+                            }
+
+                            Behavior on color {
+                                CAnim {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.topMargin: Appearance.padding.small
+            Layout.bottomMargin: Appearance.padding.small
+
+            implicitWidth: 1
+
+            color:
+                Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    0.30
+                )
+        }
+
+        // Player info
+        ColumnLayout {
+            id: details
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumWidth: 310
+
+            spacing: Appearance.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: qsTr("Now playing")
+
+                    color:
+                        Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.48
+                        )
+
+                    font.pointSize:
+                        Appearance.font.size.smaller
+
+                    font.weight: 500
+                    font.letterSpacing: 0.7
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 12
+
+                    implicitHeight: 1
+
+                    color:
+                        Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.26
+                        )
+                }
+
+                RowLayout {
+                    spacing: 9
+
+                    Repeater {
+                        model: Players.list
+
+                        delegate: SourceButton {
+                            required property var modelData
+
+                            player: modelData
+                        }
+                    }
+                }
+            }
+
+            Item {
+                Layout.preferredHeight:
+                    Appearance.spacing.smaller
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    (
+                        Players.active?.trackTitle
+                        ?? qsTr("No media")
+                    )
+                    || qsTr("Unknown title")
+
+                color:
+                    Players.active
+                    ? Colours.palette.m3onSurface
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.70
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.large
+
+                font.weight: 500
+
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    (
+                        Players.active?.trackArtist
+                        ?? qsTr("Play something to start.")
+                    )
+                    || qsTr("Unknown artist")
+
+                color:
+                    Players.active
+                    ? Qt.alpha(
+                        Colours.palette.m3secondary,
+                        0.82
+                    )
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.46
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.small
+
+                font.weight: 400
+
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.minimumHeight:
+                    Appearance.spacing.smaller
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+
+                spacing: Appearance.spacing.normal
+
+                TransportButton {
+                    icon: "skip_previous"
+
+                    canUse:
+                        Players.active?.canGoPrevious
+                        ?? false
+
+                    function onClicked(): void {
+                        Players.active?.previous();
+                    }
+                }
+
+                PlayButton {
+                    canUse:
+                        Players.active?.canTogglePlaying
+                        ?? false
+
+                    playing:
+                        Players.active?.isPlaying
+                        ?? false
+
+                    function onClicked(): void {
+                        Players.active?.togglePlaying();
+                    }
+                }
+
+                TransportButton {
+                    icon: "skip_next"
+
+                    canUse:
+                        Players.active?.canGoNext
+                        ?? false
+
+                    function onClicked(): void {
+                        Players.active?.next();
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                UtilityButton {
+                    icon: "move_up"
+
+                    canUse:
+                        Players.active?.canRaise
+                        ?? false
+
+                    function onClicked(): void {
+                        Players.active?.raise();
+                        root.visibilities.dashboard = false;
+                    }
+                }
+
+                UtilityButton {
+                    icon: "close"
+                    destructive: true
+
+                    canUse:
+                        Players.active?.canQuit
+                        ?? false
+
+                    function onClicked(): void {
+                        Players.active?.quit();
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+
+                spacing: 0
+
+                StyledSlider {
+                    id: slider
+
+                    Layout.fillWidth: true
+
+                    enabled: !!Players.active
+
+                    implicitHeight:
+                        Appearance.padding.normal * 2.1
+
+                    onMoved: {
+                        const active = Players.active;
+
+                        if (
+                            active?.canSeek
+                            && active?.positionSupported
+                        )
+                            active.position =
+                                value * active.length;
+                    }
+
+                    Binding {
+                        target: slider
+                        property: "value"
+                        value: root.playerProgress
+                        when: !slider.pressed
+                    }
+
+                    CustomMouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+
+                        function onWheel(
+                            event: WheelEvent
+                        ) {
+                            const active =
+                                Players.active;
+
+                            if (
+                                !active?.canSeek
+                                || !active?.positionSupported
+                            )
+                                return;
+
+                            event.accepted = true;
+
+                            const delta =
+                                event.angleDelta.y > 0
+                                ? 10
+                                : -10;
+
+                            Qt.callLater(() => {
+                                active.position =
+                                    Math.max(
+                                        0,
+                                        Math.min(
+                                            active.length,
+                                            active.position
+                                            + delta
+                                        )
+                                    );
+                            });
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    StyledText {
+                        text:
+                            root.lengthStr(
+                                Players.active?.position
+                                ?? -1
+                            )
+
+                        color:
+                            Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.46
+                            )
+
+                        font.family:
+                            Appearance.font.family.mono
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    StyledText {
+                        text:
+                            root.lengthStr(
+                                Players.active?.length
+                                ?? -1
+                            )
+
+                        color:
+                            Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.46
+                            )
+
+                        font.family:
+                            Appearance.font.family.mono
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.topMargin: Appearance.padding.small
+            Layout.bottomMargin: Appearance.padding.small
+
+            implicitWidth: 1
+
+            color:
+                Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    0.30
+                )
+        }
+
+        // Character
+        Item {
+            id: characterZone
+
+            Layout.fillHeight: true
+            Layout.preferredWidth: 150
+
+            property var gifList: [
+                "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
+                "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
+            ]
+
+            AnimatedImage {
+                anchors.fill: parent
+                anchors.margins: 2
+
+                playing:
+                    Players.active?.isPlaying
+                    ?? false
+
+                speed:
+                    Audio.beatTracker.bpm
+                    / Appearance.anim.mediaGifSpeedAdjustment
+
+                source:
+                    characterZone.gifList[
+                        root.state.gifIndex
+                    ]
+
+                asynchronous: true
+
+                fillMode:
+                    AnimatedImage.PreserveAspectFit
+            }
+
+            Item {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+
+                width:
+                    swapContent.implicitWidth + 10
+
+                height: 22
+
+                RowLayout {
+                    id: swapContent
+
+                    anchors.centerIn: parent
+
+                    spacing: 4
+
+                    MaterialIcon {
+                        text: "swap_horiz"
+
+                        color:
+                            Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                swapArea.containsMouse
+                                ? 0.82
+                                : 0.46
+                            )
+
+                        font.pointSize:
+                            Appearance.font.size.small
+                    }
+
+                    StyledText {
+                        text: qsTr("gif")
+
+                        color:
+                            Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                swapArea.containsMouse
+                                ? 0.72
+                                : 0.38
+                            )
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+                    }
+                }
+
+                MouseArea {
+                    id: swapArea
+
+                    anchors.fill: parent
+                    anchors.margins: -4
+
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: {
+                        root.state.gifIndex =
+                            (
+                                root.state.gifIndex + 1
+                            )
+                            % characterZone.gifList.length;
+                    }
+                }
             }
         }
     }
 
-    StyledClippingRect {
-        id: cover
+    component SourceButton: Item {
+        id: sourceButton
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: Appearance.padding.large + Config.dashboard.sizes.mediaVisualiserSize
+        required property var player
 
-        implicitWidth: Config.dashboard.sizes.mediaCoverArtSize
-        implicitHeight: Config.dashboard.sizes.mediaCoverArtSize
+        readonly property bool active:
+            sourceButton.player
+            === Players.active
 
-        color: Colours.tPalette.m3surfaceContainerHigh
-        radius: Infinity
+        implicitWidth:
+            Math.min(
+                84,
+                sourceLabel.implicitWidth + 6
+            )
+
+        implicitHeight:
+            sourceLabel.implicitHeight + 7
+
+        StyledText {
+            id: sourceLabel
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            text:
+                Players.getIdentity(
+                    sourceButton.player
+                )
+
+            color:
+                sourceButton.active
+                ? Colours.palette.m3primary
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    sourceMouse.containsMouse
+                    ? 0.68
+                    : 0.40
+                )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight:
+                sourceButton.active ? 500 : 400
+
+            horizontalAlignment:
+                Text.AlignHCenter
+
+            elide: Text.ElideRight
+            maximumLineCount: 1
+        }
+
+        Rectangle {
+            visible:
+                sourceButton.active
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            height: 1
+
+            color:
+                Colours.palette.m3primary
+        }
+
+        MouseArea {
+            id: sourceMouse
+
+            anchors.fill: parent
+            anchors.margins: -4
+
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked:
+                Players.manualActive =
+                    sourceButton.player
+        }
+    }
+
+    component TransportButton: Item {
+        id: button
+
+        required property string icon
+        required property bool canUse
+
+        function onClicked(): void {}
+
+        implicitWidth: 28
+        implicitHeight: 28
 
         MaterialIcon {
             anchors.centerIn: parent
 
-            grade: 200
-            text: "art_track"
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: (parent.width * 0.4) || 1
+            text: button.icon
+
+            color:
+                button.canUse
+                ? Qt.alpha(
+                    Colours.palette.m3onSurface,
+                    transportMouse.containsMouse
+                    ? 0.94
+                    : 0.68
+                )
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.22
+                )
+
+            font.pointSize:
+                Appearance.font.size.normal
         }
 
-        Image {
-            id: image
+        MouseArea {
+            id: transportMouse
+
+            anchors.fill: parent
+            anchors.margins: -3
+
+            enabled: button.canUse
+            hoverEnabled: true
+
+            cursorShape:
+                button.canUse
+                ? Qt.PointingHandCursor
+                : Qt.ArrowCursor
+
+            onClicked:
+                button.onClicked()
+        }
+    }
+
+    component PlayButton: Item {
+        id: button
+
+        required property bool canUse
+        required property bool playing
+
+        function onClicked(): void {}
+
+        implicitWidth: 40
+        implicitHeight: 40
+
+        StyledRect {
+            anchors.fill: parent
+
+            radius: Infinity
+
+            color:
+                Qt.alpha(
+                    Colours.palette.m3primary,
+                    button.canUse
+                    ? playMouse.containsMouse
+                        ? 0.18
+                        : 0.09
+                    : 0.04
+                )
+
+            border.width: 1
+
+            border.color:
+                Qt.alpha(
+                    Colours.palette.m3primary,
+                    button.canUse ? 0.52 : 0.14
+                )
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+
+            text:
+                button.playing
+                ? "pause"
+                : "play_arrow"
+
+            fill: 1
+
+            color:
+                button.canUse
+                ? Colours.palette.m3primary
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.22
+                )
+
+            font.pointSize:
+                Appearance.font.size.large
+        }
+
+        MouseArea {
+            id: playMouse
 
             anchors.fill: parent
 
-            source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
-            asynchronous: true
-            fillMode: Image.PreserveAspectCrop
-            sourceSize.width: width
-            sourceSize.height: height
+            enabled: button.canUse
+            hoverEnabled: true
+
+            cursorShape:
+                button.canUse
+                ? Qt.PointingHandCursor
+                : Qt.ArrowCursor
+
+            onClicked:
+                button.onClicked()
         }
     }
 
-    ColumnLayout {
-        id: details
+    component UtilityButton: Item {
+        id: button
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: visualiser.right
-        anchors.leftMargin: Appearance.spacing.normal
+        required property string icon
+        required property bool canUse
 
-        spacing: Appearance.spacing.small
+        property bool destructive: false
 
-        StyledText {
-            id: title
+        function onClicked(): void {}
 
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
+        implicitWidth: 26
+        implicitHeight: 26
 
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
-            color: Players.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.normal
-            elide: Text.ElideRight
-        }
-
-        StyledText {
-            id: album
-
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
-
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            visible: !!Players.active
-            text: Players.active?.trackAlbum || qsTr("Unknown album")
-            color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.small
-            elide: Text.ElideRight
-        }
-
-        StyledText {
-            id: artist
-
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
-
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            text: (Players.active?.trackArtist ?? qsTr("Play some music for stuff to show up here!")) || qsTr("Unknown artist")
-            color: Players.active ? Colours.palette.m3secondary : Colours.palette.m3outline
-            elide: Text.ElideRight
-            wrapMode: Players.active ? Text.NoWrap : Text.WordWrap
-        }
-
-        RowLayout {
-            id: controls
-
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Appearance.spacing.small
-            Layout.bottomMargin: Appearance.spacing.smaller
-
-            spacing: Appearance.spacing.small
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "skip_previous"
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canGoPrevious
-                onClicked: Players.active?.previous()
-            }
-
-            PlayerControl {
-                icon: Players.active?.isPlaying ? "pause" : "play_arrow"
-                label.animate: true
-                toggle: true
-                padding: Appearance.padding.small / 2
-                checked: Players.active?.isPlaying ?? false
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canTogglePlaying
-                onClicked: Players.active?.togglePlaying()
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "skip_next"
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canGoNext
-                onClicked: Players.active?.next()
-            }
-        }
-
-        StyledSlider {
-            id: slider
-
-            enabled: !!Players.active
-            implicitWidth: 280
-            implicitHeight: Appearance.padding.normal * 3
-
-            onMoved: {
-                const active = Players.active;
-                if (active?.canSeek && active?.positionSupported)
-                    active.position = value * active.length;
-            }
-
-            Binding {
-                target: slider
-                property: "value"
-                value: root.playerProgress
-                when: !slider.pressed
-            }
-
-            CustomMouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-
-                function onWheel(event: WheelEvent) {
-                    const active = Players.active;
-                    if (!active?.canSeek || !active?.positionSupported)
-                        return;
-
-                    event.accepted = true;
-                    const delta = event.angleDelta.y > 0 ? 10 : -10;    // Time 10 seconds
-                    Qt.callLater(() => {
-                        active.position = Math.max(0, Math.min(active.length, active.position + delta));
-                    });
-                }
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
-            implicitHeight: Math.max(position.implicitHeight, length.implicitHeight)
-
-            StyledText {
-                id: position
-
-                anchors.left: parent.left
-
-                text: root.lengthStr(Players.active?.position ?? -1)
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
-
-            StyledText {
-                id: length
-
-                anchors.right: parent.right
-
-                text: root.lengthStr(Players.active?.length ?? -1)
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
-        }
-
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "move_up"
-                inactiveOnColour: Colours.palette.m3secondary
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canRaise
-                onClicked: {
-                    Players.active?.raise();
-                    root.visibilities.dashboard = false;
-                }
-            }
-
-            SplitButton {
-                id: playerSelector
-
-                disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
-
-                menuItems: playerList.instances
-                fallbackIcon: "music_off"
-                fallbackText: qsTr("No players")
-
-                label.Layout.maximumWidth: slider.implicitWidth * 0.28
-                label.elide: Text.ElideRight
-
-                stateLayer.disabled: true
-                menuOnTop: true
-
-                Variants {
-                    id: playerList
-
-                    model: Players.list
-
-                    PlayerItem {}
-                }
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "delete"
-                inactiveOnColour: Colours.palette.m3error
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canQuit
-                onClicked: Players.active?.quit()
-            }
-        }
-    }
-
-    Item {
-        id: bongocat
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: details.right
-        anchors.leftMargin: Appearance.spacing.normal
-
-        implicitWidth: visualiser.width
-        implicitHeight: visualiser.height
-
-
-        
-        AnimatedImage {
-            id: gifImg
+        MaterialIcon {
             anchors.centerIn: parent
-            width: visualiser.width * 0.75
-            height: visualiser.height * 0.75
-            playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
-            source: [
-            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
-           ][root.state.gifIndex]
-          
-           asynchronous: true
-           fillMode: AnimatedImage.PreserveAspectFit
+
+            text: button.icon
+
+            color:
+                button.canUse
+                ? Qt.alpha(
+                    button.destructive
+                    ? Colours.palette.m3error
+                    : Colours.palette.m3onSurfaceVariant,
+                    utilityMouse.containsMouse
+                    ? 0.80
+                    : 0.44
+                )
+                : Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.16
+                )
+
+            font.pointSize:
+                Appearance.font.size.small
         }
 
-        property var gifList: [
-            "/home/kashmira/.config/quickshell/caelestia/assets/Citlali.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/EvernightGlass.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/rikka.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/yeee.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Cartwheel.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/Miku.gif",
-            "/home/kashmira/.config/quickshell/caelestia/assets/bongocat1.gif"
-        ]
+        MouseArea {
+            id: utilityMouse
 
-        Rectangle {
-           id: swapButton
-           anchors.horizontalCenter: parent.horizontalCenter
-           anchors.bottom: parent.bottom
-           anchors.bottomMargin: Appearance.padding.large
-           width: 40
-           height: 24
-           radius: 12
-           color: Colours.palette.m3surfaceContainerHigh
+            anchors.fill: parent
+            anchors.margins: -3
 
-         MouseArea {
-           anchors.fill: parent
-           z: 10
-           onClicked: {
-             root.state.gifIndex = (root.state.gifIndex + 1) % bongocat.gifList.length
-           }
-         }
+            enabled: button.canUse
+            hoverEnabled: true
 
-         Text {
-            anchors.centerIn: parent
-            text: "⇄"
-            color: "white"
-            font.pixelSize: 12
-         }
-        }
+            cursorShape:
+                button.canUse
+                ? Qt.PointingHandCursor
+                : Qt.ArrowCursor
 
-
-    }
-
-    component PlayerItem: MenuItem {
-        required property MprisPlayer modelData
-
-        icon: modelData === Players.active ? "check" : ""
-        text: Players.getIdentity(modelData)
-        activeIcon: "animated_images"
-    }
-
-    component PlayerControl: IconButton {
-        Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Appearance.padding.large : internalChecked ? Appearance.padding.smaller : 0)
-        radius: stateLayer.pressed ? Appearance.rounding.small / 2 : internalChecked ? Appearance.rounding.small : implicitHeight / 2
-        radiusAnim.duration: Appearance.anim.durations.expressiveFastSpatial
-        radiusAnim.easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-
-        Behavior on Layout.preferredWidth {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-            }
+            onClicked:
+                button.onClicked()
         }
     }
 }
