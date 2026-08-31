@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -10,958 +12,1474 @@ import qs.services
 Item {
     id: root
 
-    readonly property int minWidth: 400 + 400 + Appearance.spacing.normal + 120 + Appearance.padding.large * 2
+    property int currentDiskIndex: 0
+    property int diskCount: SystemUsage.disks.length
+
+    readonly property var currentDisk:
+        SystemUsage.disks.length > 0
+        ? SystemUsage.disks[
+            Math.min(
+                currentDiskIndex,
+                SystemUsage.disks.length - 1
+            )
+        ]
+        : null
+
+    readonly property bool showBattery:
+        UPower.displayDevice.isLaptopBattery
+        && Config.dashboard.performance.showBattery
+
+    readonly property bool showResources:
+        Config.dashboard.performance.showMemory
+        || Config.dashboard.performance.showStorage
+        || showBattery
 
     function displayTemp(temp: real): string {
-        return `${Math.ceil(Config.services.useFahrenheitPerformance ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheitPerformance ? "F" : "C"}`;
+        return `${Math.ceil(temp)}°C`;
     }
 
-    implicitWidth: Math.max(minWidth, content.implicitWidth)
-    implicitHeight: placeholder.visible ? placeholder.height : content.implicitHeight
+    function memoryText(): string {
+        const usedFmt =
+            SystemUsage.formatKib(
+                SystemUsage.memUsed
+            );
 
-    StyledRect {
+        const totalFmt =
+            SystemUsage.formatKib(
+                SystemUsage.memTotal
+            );
+
+        return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
+    }
+
+    function storageText(): string {
+        if (!currentDisk)
+            return "—";
+
+        const usedFmt =
+            SystemUsage.formatKib(
+                currentDisk.used
+            );
+
+        const totalFmt =
+            SystemUsage.formatKib(
+                currentDisk.total
+            );
+
+        return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
+    }
+
+    function batteryStatus(): string {
+        if (
+            UPower.displayDevice.state
+            === UPowerDeviceState.FullyCharged
+        )
+            return qsTr("Full");
+
+        if (
+            UPower.displayDevice.state
+            === UPowerDeviceState.Charging
+        )
+            return qsTr("Charging");
+
+        const s =
+            UPower.displayDevice.timeToEmpty;
+
+        if (s === 0)
+            return qsTr("...");
+
+        const hr =
+            Math.floor(s / 3600);
+
+        const min =
+            Math.floor((s % 3600) / 60);
+
+        return hr > 0
+            ? `${hr}h ${min}m`
+            : `${min}m`;
+    }
+
+    implicitWidth: 840
+
+    implicitHeight:
+        placeholder.visible
+        ? placeholder.implicitHeight
+        : content.implicitHeight
+
+    Ref {
+        service: SystemUsage
+    }
+
+    Ref {
+        service: NetworkUsage
+    }
+
+    Connections {
+        target: SystemUsage
+
+        function onDisksChanged() {
+            root.diskCount =
+                SystemUsage.disks.length;
+
+            if (
+                root.currentDiskIndex
+                >= root.diskCount
+            )
+                root.currentDiskIndex =
+                    Math.max(
+                        0,
+                        root.diskCount - 1
+                    );
+        }
+    }
+
+    Item {
         id: placeholder
 
-        anchors.centerIn: parent
-        width: 400
-        height: 350
-        radius: Appearance.rounding.large
-        color: Colours.tPalette.m3surfaceContainer
-        visible: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE") && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        anchors.horizontalCenter:
+            parent.horizontalCenter
+
+        implicitWidth: 440
+        implicitHeight: 170
+
+        visible:
+            !Config.dashboard.performance.showCpu
+            && !(
+                Config.dashboard.performance.showGpu
+                && SystemUsage.gpuType !== "NONE"
+            )
+            && !Config.dashboard.performance.showMemory
+            && !Config.dashboard.performance.showStorage
+            && !Config.dashboard.performance.showNetwork
+            && !root.showBattery
 
         ColumnLayout {
             anchors.centerIn: parent
-            spacing: Appearance.spacing.normal
 
-            MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
-                text: "tune"
-                font.pointSize: Appearance.font.size.extraLarge * 2
-                color: Colours.palette.m3onSurfaceVariant
+            spacing:
+                Appearance.spacing.small
+
+            StyledText {
+                Layout.alignment:
+                    Qt.AlignHCenter
+
+                text:
+                    qsTr("No performance modules enabled")
+
+                color:
+                    Colours.palette.m3onSurface
+
+                font.pointSize:
+                    Appearance.font.size.normal
+
+                font.weight: 500
             }
 
             StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: qsTr("No widgets enabled")
-                font.pointSize: Appearance.font.size.large
-                color: Colours.palette.m3onSurface
-            }
+                Layout.alignment:
+                    Qt.AlignHCenter
 
-            StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Enable widgets in dashboard settings")
-                font.pointSize: Appearance.font.size.small
-                color: Colours.palette.m3onSurfaceVariant
+                text:
+                    qsTr(
+                        "Enable them in dashboard settings."
+                    )
+
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.46
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.small
             }
         }
     }
 
-    RowLayout {
+    ColumnLayout {
         id: content
 
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: Appearance.spacing.normal
-        visible: !placeholder.visible
 
-        Ref {
-            service: SystemUsage
-        }
+        spacing:
+            Appearance.spacing.normal
 
-        ColumnLayout {
-            id: mainColumn
+        visible:
+            !placeholder.visible
 
+        RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.normal
+            Layout.topMargin: 8
 
-            RowLayout {
+            spacing:
+                Appearance.spacing.normal
+
+            PerfFrame {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-                visible: Config.dashboard.performance.showCpu || (Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE")
+                Layout.alignment: Qt.AlignTop
 
-                HeroCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 400
-                    Layout.preferredHeight: 150
-                    visible: Config.dashboard.performance.showCpu
-                    icon: "memory"
-                    title: SystemUsage.cpuName ? `CPU - ${SystemUsage.cpuName}` : qsTr("CPU")
-                    mainValue: `${Math.round(SystemUsage.cpuPerc * 100)}%`
-                    mainLabel: qsTr("Usage")
-                    secondaryValue: root.displayTemp(SystemUsage.cpuTemp)
-                    secondaryLabel: qsTr("Temp")
-                    usage: SystemUsage.cpuPerc
-                    temperature: SystemUsage.cpuTemp
-                    accentColor: Colours.palette.m3primary
-                }
+                visible:
+                    Config.dashboard.performance.showCpu
 
-                HeroCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 400
-                    Layout.preferredHeight: 150
-                    visible: Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE"
-                    icon: "desktop_windows"
-                    title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
-                    mainValue: `${Math.round(SystemUsage.gpuPerc * 100)}%`
-                    mainLabel: qsTr("Usage")
-                    secondaryValue: root.displayTemp(SystemUsage.gpuTemp)
-                    secondaryLabel: qsTr("Temp")
-                    usage: SystemUsage.gpuPerc
-                    temperature: SystemUsage.gpuTemp
-                    accentColor: Colours.palette.m3secondary
+                label: qsTr("CPU")
+                icon: "memory"
+
+                ProcessorBody {
+                    name:
+                        SystemUsage.cpuName
+                        || qsTr("Processor")
+
+                    percentage:
+                        SystemUsage.cpuPerc
+
+                    temperature:
+                        SystemUsage.cpuTemp
+
+                    accent:
+                        Colours.palette.m3primary
                 }
             }
 
-            RowLayout {
+            PerfFrame {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-                visible: Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork
+                Layout.alignment: Qt.AlignTop
 
-                GaugeCard {
-                    Layout.minimumWidth: 250
-                    Layout.preferredHeight: 220
-                    Layout.fillWidth: !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork
-                    icon: "memory_alt"
-                    title: qsTr("Memory")
-                    percentage: SystemUsage.memPerc
-                    subtitle: {
-                        const usedFmt = SystemUsage.formatKib(SystemUsage.memUsed);
-                        const totalFmt = SystemUsage.formatKib(SystemUsage.memTotal);
-                        return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
+                visible:
+                    Config.dashboard.performance.showGpu
+                    && SystemUsage.gpuType !== "NONE"
+
+                label: qsTr("GPU")
+                icon: "desktop_windows"
+
+                ProcessorBody {
+                    name:
+                        SystemUsage.gpuName
+                        || qsTr("Graphics")
+
+                    percentage:
+                        SystemUsage.gpuPerc
+
+                    temperature:
+                        SystemUsage.gpuTemp
+
+                    accent:
+                        Colours.palette.m3secondary
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.bottomMargin: 8
+
+            spacing:
+                Appearance.spacing.normal
+
+            PerfFrame {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 188
+                Layout.alignment: Qt.AlignTop
+
+                visible:
+                    root.showResources
+
+                label: qsTr("Resources")
+                icon: "monitoring"
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    spacing:
+                        Appearance.spacing.normal
+
+                    ResourceStat {
+                        Layout.fillWidth: true
+
+                        visible:
+                            Config.dashboard.performance.showMemory
+
+                        icon: "memory_alt"
+                        title: qsTr("Memory")
+
+                        value:
+                            `${Math.round(
+                                SystemUsage.memPerc * 100
+                            )}%`
+
+                        detail:
+                            root.memoryText()
+
+                        progress:
+                            SystemUsage.memPerc
+
+                        accent:
+                            Colours.palette.m3tertiary
                     }
-                    accentColor: Colours.palette.m3tertiary
-                    visible: Config.dashboard.performance.showMemory
-                }
 
-                StorageGaugeCard {
-                    Layout.minimumWidth: 250
-                    Layout.preferredHeight: 220
-                    Layout.fillWidth: !Config.dashboard.performance.showNetwork
-                    visible: Config.dashboard.performance.showStorage
-                }
+                    ResourceDivider {
+                        visible:
+                            Config.dashboard.performance.showMemory
+                            && (
+                                Config.dashboard.performance.showStorage
+                                || root.showBattery
+                            )
+                    }
 
-                NetworkCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 200
-                    Layout.preferredHeight: 220
-                    visible: Config.dashboard.performance.showNetwork
-                }
-            }
-        }
+                    ResourceStat {
+                        Layout.fillWidth: true
 
-        BatteryTank {
-            Layout.preferredWidth: 120
-            Layout.preferredHeight: mainColumn.implicitHeight
-            visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
-        }
-    }
+                        visible:
+                            Config.dashboard.performance.showStorage
 
-    component BatteryTank: StyledClippingRect {
-        id: batteryTank
+                        icon: "hard_disk"
 
-        property real percentage: UPower.displayDevice.percentage
-        property bool isCharging: UPower.displayDevice.state === UPowerDeviceState.Charging
-        property color accentColor: Colours.palette.m3primary
-        property real animatedPercentage: 0
+                        title:
+                            root.currentDisk
+                            ? root.currentDisk.mount
+                            : qsTr("Storage")
 
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.large
-        Component.onCompleted: animatedPercentage = percentage
-        onPercentageChanged: animatedPercentage = percentage
+                        value:
+                            root.currentDisk
+                            ? `${Math.round(
+                                root.currentDisk.perc * 100
+                            )}%`
+                            : "—"
 
-        // Background Fill
-        StyledRect {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: parent.height * batteryTank.animatedPercentage
-            color: Qt.alpha(batteryTank.accentColor, 0.15)
-        }
+                        detail:
+                            root.storageText()
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.small
+                        progress:
+                            root.currentDisk
+                            ? root.currentDisk.perc
+                            : 0
 
-            // Header Section
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.small
+                        accent:
+                            Colours.palette.m3secondary
 
-                MaterialIcon {
-                    text: {
-                        if (!UPower.displayDevice.isLaptopBattery) {
-                            if (PowerProfiles.profile === PowerProfile.PowerSaver)
-                                return "energy_savings_leaf";
+                        MouseArea {
+                            anchors.fill: parent
 
-                            if (PowerProfiles.profile === PowerProfile.Performance)
-                                return "rocket_launch";
+                            acceptedButtons:
+                                Qt.NoButton
 
-                            return "balance";
+                            onWheel: wheel => {
+                                if (
+                                    root.diskCount <= 1
+                                )
+                                    return;
+
+                                if (
+                                    wheel.angleDelta.y > 0
+                                )
+                                    root.currentDiskIndex =
+                                        (
+                                            root.currentDiskIndex
+                                            - 1
+                                            + root.diskCount
+                                        )
+                                        % root.diskCount;
+
+                                else if (
+                                    wheel.angleDelta.y < 0
+                                )
+                                    root.currentDiskIndex =
+                                        (
+                                            root.currentDiskIndex
+                                            + 1
+                                        )
+                                        % root.diskCount;
+                            }
                         }
-                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-                            return "battery_full";
-
-                        const perc = UPower.displayDevice.percentage;
-                        const charging = [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
-                        if (perc >= 0.99)
-                            return "battery_full";
-
-                        let level = Math.floor(perc * 7);
-                        if (charging && (level === 4 || level === 1))
-                            level--;
-
-                        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
                     }
-                    font.pointSize: Appearance.font.size.large
-                    color: batteryTank.accentColor
-                }
 
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Battery")
-                    font.pointSize: Appearance.font.size.normal
-                    color: Colours.palette.m3onSurface
+                    ResourceDivider {
+                        visible:
+                            root.showBattery
+                            && (
+                                Config.dashboard.performance.showMemory
+                                || Config.dashboard.performance.showStorage
+                            )
+                    }
+
+                    ResourceStat {
+                        Layout.fillWidth: true
+
+                        visible:
+                            root.showBattery
+
+                        icon: {
+                            if (
+                                UPower.displayDevice.state
+                                === UPowerDeviceState.FullyCharged
+                            )
+                                return "battery_full";
+
+                            if (
+                                UPower.displayDevice.state
+                                === UPowerDeviceState.Charging
+                            )
+                                return "battery_charging_full";
+
+                            return "battery_5_bar";
+                        }
+
+                        title:
+                            qsTr("Battery")
+
+                        value:
+                            `${Math.round(
+                                UPower.displayDevice.percentage
+                                * 100
+                            )}%`
+
+                        detail:
+                            root.batteryStatus()
+
+                        progress:
+                            UPower.displayDevice.percentage
+
+                        accent:
+                            Colours.palette.m3primary
+                    }
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
-            }
-
-            // Bottom Info Section
-            ColumnLayout {
+            PerfFrame {
                 Layout.fillWidth: true
-                spacing: -4
+                Layout.preferredHeight: 188
+                Layout.alignment: Qt.AlignTop
 
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: `${Math.round(batteryTank.percentage * 100)}%`
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: batteryTank.accentColor
-                }
+                visible:
+                    Config.dashboard.performance.showNetwork
 
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: {
-                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-                            return qsTr("Full");
+                label: qsTr("Network")
+                icon: "swap_vert"
 
-                        if (batteryTank.isCharging)
-                            return qsTr("Charging");
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                        const s = UPower.displayDevice.timeToEmpty;
-                        if (s === 0)
-                            return qsTr("...");
+                    spacing:
+                        Appearance.spacing.small
 
-                        const hr = Math.floor(s / 3600);
-                        const min = Math.floor((s % 3600) / 60);
-                        if (hr > 0)
-                            return `${hr}h ${min}m`;
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 88
 
-                        return `${min}m`;
+                        Canvas {
+                            id: sparklineCanvas
+
+                            property var downHistory:
+                                NetworkUsage.downloadHistory
+
+                            property var upHistory:
+                                NetworkUsage.uploadHistory
+
+                            property real targetMax: 1024
+                            property real smoothMax:
+                                targetMax
+
+                            property real slideProgress: 0
+                            property int _tickCount: 0
+                            property int _lastTickCount: -1
+
+                            function checkAndAnimate(): void {
+                                const currentLength =
+                                    (
+                                        downHistory
+                                        || []
+                                    ).length;
+
+                                if (
+                                    currentLength > 0
+                                    && _tickCount
+                                    !== _lastTickCount
+                                ) {
+                                    _lastTickCount =
+                                        _tickCount;
+
+                                    updateMax();
+                                }
+                            }
+
+                            function updateMax(): void {
+                                const downHist =
+                                    downHistory
+                                    || [];
+
+                                const upHist =
+                                    upHistory
+                                    || [];
+
+                                const allValues =
+                                    downHist.concat(
+                                        upHist
+                                    );
+
+                                targetMax =
+                                    Math.max(
+                                        ...allValues,
+                                        1024
+                                    );
+
+                                requestPaint();
+                            }
+
+                            anchors.fill: parent
+
+                            onDownHistoryChanged:
+                                checkAndAnimate()
+
+                            onUpHistoryChanged:
+                                checkAndAnimate()
+
+                            onSmoothMaxChanged:
+                                requestPaint()
+
+                            onSlideProgressChanged:
+                                requestPaint()
+
+                            onPaint: {
+                                const ctx =
+                                    getContext("2d");
+
+                                ctx.reset();
+
+                                const w = width;
+                                const h = height;
+
+                                const downHist =
+                                    downHistory || [];
+
+                                const upHist =
+                                    upHistory || [];
+
+                                if (
+                                    downHist.length < 2
+                                    && upHist.length < 2
+                                )
+                                    return;
+
+                                const maxVal =
+                                    smoothMax;
+
+                                const drawLine =
+                                    (
+                                        history,
+                                        color,
+                                        alpha
+                                    ) => {
+                                        if (
+                                            history.length < 2
+                                        )
+                                            return;
+
+                                        const len =
+                                            history.length;
+
+                                        const stepX =
+                                            w
+                                            / (
+                                                NetworkUsage.historyLength
+                                                - 1
+                                            );
+
+                                        const startX =
+                                            w
+                                            - (
+                                                len - 1
+                                            )
+                                            * stepX
+                                            - stepX
+                                            * slideProgress
+                                            + stepX;
+
+                                        ctx.beginPath();
+
+                                        ctx.moveTo(
+                                            startX,
+                                            h
+                                            - (
+                                                history[0]
+                                                / maxVal
+                                            )
+                                            * h
+                                        );
+
+                                        for (
+                                            let i = 1;
+                                            i < len;
+                                            i++
+                                        ) {
+                                            const x =
+                                                startX
+                                                + i
+                                                * stepX;
+
+                                            const y =
+                                                h
+                                                - (
+                                                    history[i]
+                                                    / maxVal
+                                                )
+                                                * h;
+
+                                            ctx.lineTo(
+                                                x,
+                                                y
+                                            );
+                                        }
+
+                                        ctx.strokeStyle =
+                                            color;
+
+                                        ctx.lineWidth = 1.5;
+                                        ctx.lineCap =
+                                            "round";
+
+                                        ctx.lineJoin =
+                                            "round";
+
+                                        ctx.stroke();
+
+                                        ctx.lineTo(
+                                            startX
+                                            + (
+                                                len - 1
+                                            )
+                                            * stepX,
+                                            h
+                                        );
+
+                                        ctx.lineTo(
+                                            startX,
+                                            h
+                                        );
+
+                                        ctx.closePath();
+
+                                        const c =
+                                            Qt.color(
+                                                color
+                                            );
+
+                                        ctx.fillStyle =
+                                            Qt.rgba(
+                                                c.r,
+                                                c.g,
+                                                c.b,
+                                                alpha
+                                            );
+
+                                        ctx.fill();
+                                    };
+
+                                drawLine(
+                                    upHist,
+                                    Colours.palette.m3secondary.toString(),
+                                    0.06
+                                );
+
+                                drawLine(
+                                    downHist,
+                                    Colours.palette.m3tertiary.toString(),
+                                    0.08
+                                );
+                            }
+
+                            Component.onCompleted:
+                                updateMax()
+
+                            Connections {
+                                target: Colours
+
+                                function onPaletteChanged() {
+                                    sparklineCanvas.requestPaint();
+                                }
+                            }
+
+                            Timer {
+                                interval:
+                                    Config.dashboard.resourceUpdateInterval
+
+                                running: true
+                                repeat: true
+
+                                onTriggered:
+                                    sparklineCanvas._tickCount++
+                            }
+
+                            NumberAnimation on slideProgress {
+                                from: 0
+                                to: 1
+
+                                duration:
+                                    Config.dashboard.resourceUpdateInterval
+
+                                loops:
+                                    Animation.Infinite
+
+                                running: true
+                            }
+
+                            Behavior on smoothMax {
+                                Anim {
+                                    duration:
+                                        Appearance.anim.durations.large
+                                }
+                            }
+                        }
+
+                        StyledText {
+                            anchors.centerIn: parent
+
+                            visible:
+                                NetworkUsage.downloadHistory.length
+                                < 2
+
+                            text:
+                                qsTr("Collecting data...")
+
+                            color:
+                                Qt.alpha(
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.38
+                                )
+
+                            font.pointSize:
+                                Appearance.font.size.smaller
+                        }
                     }
-                    font.pointSize: Appearance.font.size.smaller
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-            }
-        }
 
-        Behavior on animatedPercentage {
-            Anim {
-                duration: Appearance.anim.durations.large
+                    Rectangle {
+                        Layout.fillWidth: true
+
+                        implicitHeight: 1
+
+                        color:
+                            Qt.alpha(
+                                Colours.palette.m3outlineVariant,
+                                0.22
+                            )
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        spacing:
+                            Appearance.spacing.normal
+
+                        NetworkStat {
+                            Layout.fillWidth: true
+
+                            arrow: "↓"
+                            label: qsTr("Down")
+
+                            value: {
+                                const fmt =
+                                    NetworkUsage.formatBytes(
+                                        NetworkUsage.downloadSpeed
+                                        ?? 0
+                                    );
+
+                                return fmt
+                                    ? `${fmt.value.toFixed(1)} ${fmt.unit}`
+                                    : "0.0 B/s";
+                            }
+
+                            accent:
+                                Colours.palette.m3tertiary
+                        }
+
+                        NetworkStat {
+                            Layout.fillWidth: true
+
+                            arrow: "↑"
+                            label: qsTr("Up")
+
+                            value: {
+                                const fmt =
+                                    NetworkUsage.formatBytes(
+                                        NetworkUsage.uploadSpeed
+                                        ?? 0
+                                    );
+
+                                return fmt
+                                    ? `${fmt.value.toFixed(1)} ${fmt.unit}`
+                                    : "0.0 B/s";
+                            }
+
+                            accent:
+                                Colours.palette.m3secondary
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        StyledText {
+                            text:
+                                qsTr("Session")
+
+                            color:
+                                Qt.alpha(
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.38
+                                )
+
+                            font.pointSize:
+                                Appearance.font.size.smaller
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        StyledText {
+                            text: {
+                                const down =
+                                    NetworkUsage.formatBytesTotal(
+                                        NetworkUsage.downloadTotal
+                                        ?? 0
+                                    );
+
+                                const up =
+                                    NetworkUsage.formatBytesTotal(
+                                        NetworkUsage.uploadTotal
+                                        ?? 0
+                                    );
+
+                                return (
+                                    down && up
+                                )
+                                    ? `↓ ${down.value.toFixed(1)} ${down.unit}   ↑ ${up.value.toFixed(1)} ${up.unit}`
+                                    : "↓ 0.0 B   ↑ 0.0 B";
+                            }
+
+                            color:
+                                Qt.alpha(
+                                    Colours.palette.m3onSurfaceVariant,
+                                    0.54
+                                )
+
+                            font.family:
+                                Appearance.font.family.mono
+
+                            font.pointSize:
+                                Appearance.font.size.smaller
+                        }
+                    }
+                }
             }
         }
     }
 
-    component CardHeader: RowLayout {
-        property string icon
-        property string title
-        property color accentColor: Colours.palette.m3primary
+    component PerfFrame: Item {
+        id: frame
+
+        required property string label
+        required property string icon
+
+        default property alias content:
+            frameContent.data
 
         Layout.fillWidth: true
-        spacing: Appearance.spacing.small
+
+        implicitHeight:
+            frameContent.implicitHeight
+            + 42
 
         MaterialIcon {
-            text: parent.icon
-            fill: 1
-            color: parent.accentColor
-            font.pointSize: Appearance.spacing.large
+            id: frameIcon
+
+            x: 15
+            y: -height / 2 + 1
+
+            text:
+                frame.icon
+
+            color:
+                Qt.alpha(
+                    Colours.palette.m3primary,
+                    0.74
+                )
+
+            font.pointSize:
+                Appearance.font.size.small
         }
 
         StyledText {
-            Layout.fillWidth: true
-            text: parent.title
-            font.pointSize: Appearance.font.size.normal
-            elide: Text.ElideRight
+            id: frameLabel
+
+            x:
+                frameIcon.x
+                + frameIcon.width
+                + 7
+
+            y:
+                -height / 2
+
+            text:
+                frame.label
+
+            color:
+                Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.68
+                )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 500
+            font.letterSpacing: 0.7
+
+            onPaintedWidthChanged:
+                frameBorder.requestPaint()
         }
-    }
 
-    component ProgressBar: StyledRect {
-        id: progressBar
+        Canvas {
+            id: frameBorder
 
-        property real value: 0
-        property color fgColor: Colours.palette.m3primary
-        property color bgColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-        property real animatedValue: 0
+            anchors.fill: parent
 
-        color: bgColor
-        radius: Appearance.rounding.full
-        Component.onCompleted: animatedValue = value
-        onValueChanged: animatedValue = value
+            onWidthChanged:
+                requestPaint()
 
-        StyledRect {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: parent.width * progressBar.animatedValue
-            color: progressBar.fgColor
-            radius: Appearance.rounding.full
-        }
+            onHeightChanged:
+                requestPaint()
 
-        Behavior on animatedValue {
-            Anim {
-                duration: Appearance.anim.durations.large
+            onPaint: {
+                const ctx =
+                    getContext("2d");
+
+                ctx.reset();
+
+                const w = width;
+                const h = height;
+
+                const r =
+                    Math.min(
+                        Appearance.rounding.normal,
+                        14
+                    );
+
+                const gapLeft =
+                    Math.max(
+                        r + 7,
+                        frameIcon.x - 6
+                    );
+
+                const gapRight =
+                    Math.min(
+                        w - r - 7,
+                        frameLabel.x
+                        + frameLabel.paintedWidth
+                        + 7
+                    );
+
+                ctx.strokeStyle =
+                    Qt.alpha(
+                        Colours.palette.m3outlineVariant,
+                        0.44
+                    );
+
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    gapRight,
+                    0.5
+                );
+
+                ctx.lineTo(
+                    w - r,
+                    0.5
+                );
+
+                ctx.quadraticCurveTo(
+                    w - 0.5,
+                    0.5,
+                    w - 0.5,
+                    r
+                );
+
+                ctx.lineTo(
+                    w - 0.5,
+                    h - r
+                );
+
+                ctx.quadraticCurveTo(
+                    w - 0.5,
+                    h - 0.5,
+                    w - r,
+                    h - 0.5
+                );
+
+                ctx.lineTo(
+                    r,
+                    h - 0.5
+                );
+
+                ctx.quadraticCurveTo(
+                    0.5,
+                    h - 0.5,
+                    0.5,
+                    h - r
+                );
+
+                ctx.lineTo(
+                    0.5,
+                    r
+                );
+
+                ctx.quadraticCurveTo(
+                    0.5,
+                    0.5,
+                    r,
+                    0.5
+                );
+
+                ctx.lineTo(
+                    gapLeft,
+                    0.5
+                );
+
+                ctx.stroke();
             }
-        }
-    }
-
-    component HeroCard: StyledClippingRect {
-        id: heroCard
-
-        property string icon
-        property string title
-        property string mainValue
-        property string mainLabel
-        property string secondaryValue
-        property string secondaryLabel
-        property real usage: 0
-        property real temperature: 0
-        property color accentColor: Colours.palette.m3primary
-        readonly property real maxTemp: 100
-        readonly property real tempProgress: Math.min(1, Math.max(0, temperature / maxTemp))
-        property real animatedUsage: 0
-        property real animatedTemp: 0
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.large
-        Component.onCompleted: {
-            animatedUsage = usage;
-            animatedTemp = tempProgress;
-        }
-        onUsageChanged: animatedUsage = usage
-        onTempProgressChanged: animatedTemp = tempProgress
-
-        StyledRect {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: parent.width * heroCard.animatedUsage
-            color: Qt.alpha(heroCard.accentColor, 0.15)
         }
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.normal
-            spacing: Appearance.spacing.small
+            id: frameContent
 
-            CardHeader {
-                icon: heroCard.icon
-                title: heroCard.title
-                accentColor: heroCard.accentColor
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: Appearance.spacing.normal
-
-                Column {
-                    Layout.alignment: Qt.AlignBottom
-                    Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    Row {
-                        spacing: Appearance.spacing.small
-
-                        StyledText {
-                            text: heroCard.secondaryValue
-                            font.pointSize: Appearance.font.size.normal
-                            font.weight: Font.Medium
-                        }
-
-                        StyledText {
-                            text: heroCard.secondaryLabel
-                            font.pointSize: Appearance.font.size.small
-                            color: Colours.palette.m3onSurfaceVariant
-                            anchors.baseline: parent.children[0].baseline
-                        }
-                    }
-
-                    ProgressBar {
-                        width: parent.width * 0.5
-                        height: 6
-                        value: heroCard.tempProgress
-                        fgColor: heroCard.accentColor
-                        bgColor: Qt.alpha(heroCard.accentColor, 0.2)
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-            }
-        }
-
-        Column {
+            anchors.left: parent.left
             anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Appearance.padding.large
-            anchors.rightMargin: 32
-            spacing: 0
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
 
-            StyledText {
-                anchors.right: parent.right
-                text: heroCard.mainLabel
-                font.pointSize: Appearance.font.size.normal
-                color: Colours.palette.m3onSurfaceVariant
-            }
+            anchors.leftMargin:
+                Appearance.padding.normal
 
-            StyledText {
-                anchors.right: parent.right
-                text: heroCard.mainValue
-                font.pointSize: Appearance.font.size.extraLarge
-                font.weight: Font.Medium
-                color: heroCard.accentColor
-            }
-        }
+            anchors.rightMargin:
+                Appearance.padding.normal
 
-        Behavior on animatedUsage {
-            Anim {
-                duration: Appearance.anim.durations.large
-            }
-        }
+            anchors.topMargin: 20
+            anchors.bottomMargin:
+                Appearance.padding.normal
 
-        Behavior on animatedTemp {
-            Anim {
-                duration: Appearance.anim.durations.large
-            }
+            spacing:
+                Appearance.spacing.small
         }
     }
 
-    component GaugeCard: StyledRect {
-        id: gaugeCard
+    component ProcessorBody: ColumnLayout {
+        id: processor
 
-        property string icon
-        property string title
-        property real percentage: 0
-        property string subtitle
-        property color accentColor: Colours.palette.m3primary
-        readonly property real arcStartAngle: 0.75 * Math.PI
-        readonly property real arcSweep: 1.5 * Math.PI
-        property real animatedPercentage: 0
+        required property string name
+        required property real percentage
+        required property real temperature
+        required property color accent
 
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.large
-        clip: true
-        Component.onCompleted: animatedPercentage = percentage
-        onPercentageChanged: animatedPercentage = percentage
+        Layout.fillWidth: true
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.smaller
+        spacing:
+            Appearance.spacing.small
 
-            CardHeader {
-                icon: gaugeCard.icon
-                title: gaugeCard.title
-                accentColor: gaugeCard.accentColor
+        RowLayout {
+            Layout.fillWidth: true
+
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    processor.name
+
+                color:
+                    Colours.palette.m3onSurface
+
+                font.pointSize:
+                    Appearance.font.size.normal
+
+                font.weight: 500
+
+                elide:
+                    Text.ElideRight
+            }
+
+            StyledText {
+                text:
+                    `${Math.round(
+                        processor.percentage * 100
+                    )}%`
+
+                color:
+                    processor.accent
+
+                font.family:
+                    Appearance.font.family.mono
+
+                font.pointSize:
+                    Appearance.font.size.extraLarge
+
+                font.weight: 500
+            }
+        }
+
+        MeterLine {
+            label: qsTr("usage")
+            value: processor.percentage
+            valueText:
+                `${Math.round(
+                    processor.percentage * 100
+                )}%`
+
+            accent:
+                processor.accent
+        }
+
+        MeterLine {
+            label: qsTr("temp")
+            value:
+                Math.min(
+                    1,
+                    Math.max(
+                        0,
+                        processor.temperature
+                        / 100
+                    )
+                )
+
+            valueText:
+                root.displayTemp(
+                    processor.temperature
+                )
+
+            accent:
+                Qt.alpha(
+                    processor.accent,
+                    0.78
+                )
+        }
+    }
+
+    component MeterLine: ColumnLayout {
+        id: meter
+
+        required property string label
+        required property real value
+        required property string valueText
+        required property color accent
+
+        Layout.fillWidth: true
+
+        spacing: 3
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            StyledText {
+                text:
+                    meter.label
+
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.42
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
             }
 
             Item {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                Canvas {
-                    id: gaugeCanvas
-
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const cx = width / 2;
-                        const cy = height / 2;
-                        const radius = (Math.min(width, height) - 12) / 2;
-                        const lineWidth = 10;
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
-                        ctx.lineWidth = lineWidth;
-                        ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-                        ctx.stroke();
-                        if (gaugeCard.animatedPercentage > 0) {
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep * gaugeCard.animatedPercentage);
-                            ctx.lineWidth = lineWidth;
-                            ctx.lineCap = "round";
-                            ctx.strokeStyle = gaugeCard.accentColor;
-                            ctx.stroke();
-                        }
-                    }
-                    Component.onCompleted: requestPaint()
-
-                    Connections {
-                        function onAnimatedPercentageChanged() {
-                            gaugeCanvas.requestPaint();
-                        }
-
-                        target: gaugeCard
-                    }
-
-                    Connections {
-                        function onPaletteChanged() {
-                            gaugeCanvas.requestPaint();
-                        }
-
-                        target: Colours
-                    }
-                }
-
-                StyledText {
-                    anchors.centerIn: parent
-                    text: `${Math.round(gaugeCard.percentage * 100)}%`
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: gaugeCard.accentColor
-                }
             }
 
             StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: gaugeCard.subtitle
-                font.pointSize: Appearance.font.size.smaller
-                color: Colours.palette.m3onSurfaceVariant
+                text:
+                    meter.valueText
+
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.62
+                    )
+
+                font.family:
+                    Appearance.font.family.mono
+
+                font.pointSize:
+                    Appearance.font.size.smaller
             }
         }
 
-        Behavior on animatedPercentage {
-            Anim {
-                duration: Appearance.anim.durations.large
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 5
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter:
+                    parent.verticalCenter
+
+                height: 1
+
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3outlineVariant,
+                        0.32
+                    )
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.verticalCenter:
+                    parent.verticalCenter
+
+                width:
+                    parent.width
+                    * Math.max(
+                        0,
+                        Math.min(
+                            1,
+                            meter.value
+                        )
+                    )
+
+                height: 3
+                radius: 1.5
+
+                color:
+                    meter.accent
+
+                Behavior on width {
+                    Anim {
+                        duration:
+                            Appearance.anim.durations.large
+                    }
+                }
             }
         }
     }
 
-    component StorageGaugeCard: StyledRect {
-        id: storageGaugeCard
+    component ResourceDivider: Rectangle {
+        Layout.fillHeight: true
 
-        property int currentDiskIndex: 0
-        readonly property var currentDisk: SystemUsage.disks.length > 0 ? SystemUsage.disks[currentDiskIndex] : null
-        property int diskCount: 0
-        readonly property real arcStartAngle: 0.75 * Math.PI
-        readonly property real arcSweep: 1.5 * Math.PI
-        property real animatedPercentage: 0
-        property color accentColor: Colours.palette.m3secondary
+        implicitWidth: 1
 
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.large
-        clip: true
-        Component.onCompleted: {
-            diskCount = SystemUsage.disks.length;
-            if (currentDisk)
-                animatedPercentage = currentDisk.perc;
-        }
-        onCurrentDiskChanged: {
-            if (currentDisk)
-                animatedPercentage = currentDisk.perc;
-        }
+        color:
+            Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.24
+            )
+    }
 
-        // Update diskCount and animatedPercentage when disks data changes
-        Connections {
-            function onDisksChanged() {
-                if (SystemUsage.disks.length !== storageGaugeCard.diskCount)
-                    storageGaugeCard.diskCount = SystemUsage.disks.length;
+    component ResourceStat: Item {
+        id: stat
 
-                // Update animated percentage when disk data refreshes
-                if (storageGaugeCard.currentDisk)
-                    storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
-            }
+        required property string icon
+        required property string title
+        required property string value
+        required property string detail
+        required property real progress
+        required property color accent
 
-            target: SystemUsage
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onWheel: wheel => {
-                if (wheel.angleDelta.y > 0)
-                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex - 1 + storageGaugeCard.diskCount) % storageGaugeCard.diskCount;
-                else if (wheel.angleDelta.y < 0)
-                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex + 1) % storageGaugeCard.diskCount;
-            }
-        }
+        implicitHeight: 120
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.smaller
 
-            CardHeader {
-                icon: "hard_disk"
-                title: {
-                    const base = qsTr("Storage");
-                    if (!storageGaugeCard.currentDisk)
-                        return base;
+            spacing:
+                Appearance.spacing.small
 
-                    return `${base} - ${storageGaugeCard.currentDisk.mount}`;
-                }
-                accentColor: storageGaugeCard.accentColor
+            RowLayout {
+                Layout.fillWidth: true
 
-                // Scroll hint icon
+                spacing:
+                    Appearance.spacing.small
+
                 MaterialIcon {
-                    text: "unfold_more"
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.normal
-                    visible: storageGaugeCard.diskCount > 1
-                    opacity: 0.7
-                    ToolTip.visible: hintHover.hovered
-                    ToolTip.text: qsTr("Scroll to switch disks")
-                    ToolTip.delay: 500
+                    text:
+                        stat.icon
 
-                    HoverHandler {
-                        id: hintHover
-                    }
-                }
-            }
+                    color:
+                        Qt.alpha(
+                            stat.accent,
+                            0.78
+                        )
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                Canvas {
-                    id: storageGaugeCanvas
-
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const cx = width / 2;
-                        const cy = height / 2;
-                        const radius = (Math.min(width, height) - 12) / 2;
-                        const lineWidth = 10;
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
-                        ctx.lineWidth = lineWidth;
-                        ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-                        ctx.stroke();
-                        if (storageGaugeCard.animatedPercentage > 0) {
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep * storageGaugeCard.animatedPercentage);
-                            ctx.lineWidth = lineWidth;
-                            ctx.lineCap = "round";
-                            ctx.strokeStyle = storageGaugeCard.accentColor;
-                            ctx.stroke();
-                        }
-                    }
-                    Component.onCompleted: requestPaint()
-
-                    Connections {
-                        function onAnimatedPercentageChanged() {
-                            storageGaugeCanvas.requestPaint();
-                        }
-
-                        target: storageGaugeCard
-                    }
-
-                    Connections {
-                        function onPaletteChanged() {
-                            storageGaugeCanvas.requestPaint();
-                        }
-
-                        target: Colours
-                    }
+                    font.pointSize:
+                        Appearance.font.size.small
                 }
 
                 StyledText {
-                    anchors.centerIn: parent
-                    text: storageGaugeCard.currentDisk ? `${Math.round(storageGaugeCard.currentDisk.perc * 100)}%` : "—"
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: storageGaugeCard.accentColor
+                    Layout.fillWidth: true
+
+                    text:
+                        stat.title
+
+                    color:
+                        Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.62
+                        )
+
+                    font.pointSize:
+                        Appearance.font.size.small
+
+                    elide:
+                        Text.ElideRight
                 }
             }
 
             StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: {
-                    if (!storageGaugeCard.currentDisk)
-                        return "—";
+                text:
+                    stat.value
 
-                    const usedFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.used);
-                    const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
-                    return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
-                }
-                font.pointSize: Appearance.font.size.smaller
-                color: Colours.palette.m3onSurfaceVariant
-            }
-        }
+                color:
+                    stat.accent
 
-        Behavior on animatedPercentage {
-            Anim {
-                duration: Appearance.anim.durations.large
-            }
-        }
-    }
+                font.family:
+                    Appearance.font.family.mono
 
-    component NetworkCard: StyledRect {
-        id: networkCard
+                font.pointSize:
+                    Appearance.font.size.extraLarge
 
-        property color accentColor: Colours.palette.m3primary
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.large
-        clip: true
-
-        Ref {
-            service: NetworkUsage
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.small
-
-            CardHeader {
-                icon: "swap_vert"
-                title: qsTr("Network")
-                accentColor: networkCard.accentColor
+                font.weight: 500
             }
 
-            // Sparkline graph
+            StyledText {
+                Layout.fillWidth: true
+
+                text:
+                    stat.detail
+
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.46
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                elide:
+                    Text.ElideRight
+            }
+
+            Item {
+                Layout.fillHeight: true
+            }
+
             Item {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.preferredHeight: 5
 
-                Canvas {
-                    id: sparklineCanvas
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter:
+                        parent.verticalCenter
 
-                    property var downHistory: NetworkUsage.downloadHistory
-                    property var upHistory: NetworkUsage.uploadHistory
-                    property real targetMax: 1024
-                    property real smoothMax: targetMax
-                    property real slideProgress: 0
-                    property int _tickCount: 0
-                    property int _lastTickCount: -1
+                    height: 1
 
-                    function checkAndAnimate(): void {
-                        const currentLength = (downHistory || []).length;
-                        if (currentLength > 0 && _tickCount !== _lastTickCount) {
-                            _lastTickCount = _tickCount;
-                            updateMax();
-                        }
-                    }
+                    color:
+                        Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.30
+                        )
+                }
 
-                    function updateMax(): void {
-                        const downHist = downHistory || [];
-                        const upHist = upHistory || [];
-                        const allValues = downHist.concat(upHist);
-                        targetMax = Math.max(...allValues, 1024);
-                        requestPaint();
-                    }
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.verticalCenter:
+                        parent.verticalCenter
 
-                    anchors.fill: parent
-                    onDownHistoryChanged: checkAndAnimate()
-                    onUpHistoryChanged: checkAndAnimate()
-                    onSmoothMaxChanged: requestPaint()
-                    onSlideProgressChanged: requestPaint()
+                    width:
+                        parent.width
+                        * Math.max(
+                            0,
+                            Math.min(
+                                1,
+                                stat.progress
+                            )
+                        )
 
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const w = width;
-                        const h = height;
-                        const downHist = downHistory || [];
-                        const upHist = upHistory || [];
-                        if (downHist.length < 2 && upHist.length < 2)
-                            return;
+                    height: 3
+                    radius: 1.5
 
-                        const maxVal = smoothMax;
+                    color:
+                        stat.accent
 
-                        const drawLine = (history, color, fillAlpha) => {
-                            if (history.length < 2)
-                                return;
-
-                            const len = history.length;
-                            const stepX = w / (NetworkUsage.historyLength - 1);
-                            const startX = w - (len - 1) * stepX - stepX * slideProgress + stepX;
-                            ctx.beginPath();
-                            ctx.moveTo(startX, h - (history[0] / maxVal) * h);
-                            for (let i = 1; i < len; i++) {
-                                const x = startX + i * stepX;
-                                const y = h - (history[i] / maxVal) * h;
-                                ctx.lineTo(x, y);
-                            }
-                            ctx.strokeStyle = color;
-                            ctx.lineWidth = 2;
-                            ctx.lineCap = "round";
-                            ctx.lineJoin = "round";
-                            ctx.stroke();
-                            ctx.lineTo(startX + (len - 1) * stepX, h);
-                            ctx.lineTo(startX, h);
-                            ctx.closePath();
-                            ctx.fillStyle = Qt.rgba(Qt.color(color).r, Qt.color(color).g, Qt.color(color).b, fillAlpha);
-                            ctx.fill();
-                        };
-
-                        drawLine(upHist, Colours.palette.m3secondary.toString(), 0.15);
-                        drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
-                    }
-
-                    Component.onCompleted: updateMax()
-
-                    Connections {
-                        function onPaletteChanged() {
-                            sparklineCanvas.requestPaint();
-                        }
-
-                        target: Colours
-                    }
-
-                    Timer {
-                        interval: Config.dashboard.resourceUpdateInterval
-                        running: true
-                        repeat: true
-                        onTriggered: sparklineCanvas._tickCount++
-                    }
-
-                    NumberAnimation on slideProgress {
-                        from: 0
-                        to: 1
-                        duration: Config.dashboard.resourceUpdateInterval
-                        loops: Animation.Infinite
-                        running: true
-                    }
-
-                    Behavior on smoothMax {
+                    Behavior on width {
                         Anim {
-                            duration: Appearance.anim.durations.large
+                            duration:
+                                Appearance.anim.durations.large
                         }
                     }
                 }
+            }
+        }
+    }
 
-                // "No data" placeholder
-                StyledText {
-                    anchors.centerIn: parent
-                    text: qsTr("Collecting data...")
-                    font.pointSize: Appearance.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                    visible: NetworkUsage.downloadHistory.length < 2
-                    opacity: 0.6
-                }
+    component NetworkStat: ColumnLayout {
+        id: stat
+
+        required property string arrow
+        required property string label
+        required property string value
+        required property color accent
+
+        spacing: 1
+
+        RowLayout {
+            spacing: 5
+
+            StyledText {
+                text:
+                    stat.arrow
+
+                color:
+                    stat.accent
+
+                font.family:
+                    Appearance.font.family.mono
+
+                font.pointSize:
+                    Appearance.font.size.small
             }
 
-            // Download row
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
+            StyledText {
+                text:
+                    stat.label
 
-                MaterialIcon {
-                    text: "download"
-                    color: Colours.palette.m3tertiary
-                    font.pointSize: Appearance.font.size.normal
-                }
+                color:
+                    Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.42
+                    )
 
-                StyledText {
-                    text: qsTr("Download")
-                    font.pointSize: Appearance.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
-                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                    }
-                    font.pointSize: Appearance.font.size.normal
-                    font.weight: Font.Medium
-                    color: Colours.palette.m3tertiary
-                }
+                font.pointSize:
+                    Appearance.font.size.smaller
             }
+        }
 
-            // Upload row
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
+        StyledText {
+            text:
+                stat.value
 
-                MaterialIcon {
-                    text: "upload"
-                    color: Colours.palette.m3secondary
-                    font.pointSize: Appearance.font.size.normal
-                }
+            color:
+                Colours.palette.m3onSurface
 
-                StyledText {
-                    text: qsTr("Upload")
-                    font.pointSize: Appearance.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
+            font.family:
+                Appearance.font.family.mono
 
-                Item {
-                    Layout.fillWidth: true
-                }
+            font.pointSize:
+                Appearance.font.size.normal
 
-                StyledText {
-                    text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
-                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                    }
-                    font.pointSize: Appearance.font.size.normal
-                    font.weight: Font.Medium
-                    color: Colours.palette.m3secondary
-                }
-            }
-
-            // Session totals
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-
-                MaterialIcon {
-                    text: "history"
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.normal
-                }
-
-                StyledText {
-                    text: qsTr("Total")
-                    font.pointSize: Appearance.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    text: {
-                        const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal ?? 0);
-                        const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal ?? 0);
-                        return (down && up) ? `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}` : "↓0.0B ↑0.0B";
-                    }
-                    font.pointSize: Appearance.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-            }
+            font.weight: 500
         }
     }
 }
