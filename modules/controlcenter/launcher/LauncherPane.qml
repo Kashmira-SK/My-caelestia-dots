@@ -25,6 +25,8 @@ Item {
     property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
     property bool favouriteChecked: false
+    property string searchText: ""
+    property list<var> filteredApps: []
 
     anchors.fill: parent
 
@@ -35,6 +37,7 @@ Item {
 
     Connections {
         target: root.session.launcher
+
         function onActiveChanged() {
             root.selectedApp = root.session.launcher.active;
             updateToggleState();
@@ -50,28 +53,44 @@ Item {
 
         const appId = root.selectedApp.id || root.selectedApp.entry?.id;
 
-        root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
-        root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+        root.hideFromLauncherChecked =
+            Config.launcher.hiddenApps
+            && Config.launcher.hiddenApps.length > 0
+            && Strings.testRegexList(
+                Config.launcher.hiddenApps,
+                appId
+            );
+
+        root.favouriteChecked =
+            Config.launcher.favouriteApps
+            && Config.launcher.favouriteApps.length > 0
+            && Strings.testRegexList(
+                Config.launcher.favouriteApps,
+                appId
+            );
     }
 
     function saveHiddenApps(isHidden) {
-        if (!root.selectedApp) {
+        if (!root.selectedApp)
             return;
-        }
 
-        const appId = root.selectedApp.id || root.selectedApp.entry?.id;
+        const appId =
+            root.selectedApp.id
+            || root.selectedApp.entry?.id;
 
-        const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
+        const hiddenApps =
+            Config.launcher.hiddenApps
+            ? [...Config.launcher.hiddenApps]
+            : [];
 
         if (isHidden) {
-            if (!hiddenApps.includes(appId)) {
+            if (!hiddenApps.includes(appId))
                 hiddenApps.push(appId);
-            }
         } else {
             const index = hiddenApps.indexOf(appId);
-            if (index !== -1) {
+
+            if (index !== -1)
                 hiddenApps.splice(index, 1);
-            }
         }
 
         Config.launcher.hiddenApps = hiddenApps;
@@ -86,56 +105,62 @@ Item {
         entries: DesktopEntries.applications.values
     }
 
-    property string searchText: ""
-
     function filterApps(search: string): list<var> {
         if (!search || search.trim() === "") {
             const apps = [];
-            for (let i = 0; i < allAppsDb.apps.length; i++) {
+
+            for (let i = 0; i < allAppsDb.apps.length; i++)
                 apps.push(allAppsDb.apps[i]);
-            }
+
             return apps;
         }
 
-        if (!allAppsDb.apps || allAppsDb.apps.length === 0) {
+        if (!allAppsDb.apps || allAppsDb.apps.length === 0)
             return [];
-        }
 
         const preparedApps = [];
+
         for (let i = 0; i < allAppsDb.apps.length; i++) {
             const app = allAppsDb.apps[i];
-            const name = app.name || app.entry?.name || "";
+            const name =
+                app.name
+                || app.entry?.name
+                || "";
+
             preparedApps.push({
                 _item: app,
                 name: Fuzzy.prepare(name)
             });
         }
 
-        const results = Fuzzy.go(search, preparedApps, {
-            all: true,
-            keys: ["name"],
-            scoreFn: r => r[0].score
-        });
+        const results = Fuzzy.go(
+            search,
+            preparedApps,
+            {
+                all: true,
+                keys: ["name"],
+                scoreFn: r => r[0].score
+            }
+        );
 
-        return results.sort((a, b) => b._score - a._score).map(r => r.obj._item);
+        return results
+            .sort((a, b) => b._score - a._score)
+            .map(r => r.obj._item);
     }
-
-    property list<var> filteredApps: []
 
     function updateFilteredApps() {
         filteredApps = filterApps(searchText);
     }
 
-    onSearchTextChanged: {
-        updateFilteredApps();
-    }
+    onSearchTextChanged:
+        updateFilteredApps()
 
-    Component.onCompleted: {
-        updateFilteredApps();
-    }
+    Component.onCompleted:
+        updateFilteredApps()
 
     Connections {
         target: allAppsDb
+
         function onAppsChanged() {
             updateFilteredApps();
         }
@@ -145,78 +170,135 @@ Item {
         anchors.fill: parent
 
         leftContent: Component {
-
             ColumnLayout {
                 id: leftLauncherLayout
-                anchors.fill: parent
 
-                spacing: Appearance.spacing.small
+                anchors.fill: parent
+                spacing: Appearance.spacing.normal
 
                 RowLayout {
-                    spacing: Appearance.spacing.smaller
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: Appearance.spacing.small
+                    spacing: Appearance.spacing.small
 
                     StyledText {
-                        text: qsTr("Launcher")
+                        text: qsTr("LAUNCHER")
                         font.pointSize: Appearance.font.size.large
                         font.weight: 500
                     }
 
-                    Item {
+                    Rectangle {
                         Layout.fillWidth: true
+                        implicitHeight: 1
+
+                        color: Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.22
+                        )
                     }
 
-                    ToggleButton {
-                        toggled: !root.session.launcher.active
+                    ToolButton {
+                        active:
+                            root.session.launcher.active === null
+
                         icon: "settings"
-                        accent: "Primary"
-                        iconSize: Appearance.font.size.normal
-                        horizontalPadding: Appearance.padding.normal
-                        verticalPadding: Appearance.padding.smaller
-                        tooltip: qsTr("Launcher settings")
+                        text: qsTr("Settings")
 
                         onClicked: {
                             if (root.session.launcher.active) {
                                 root.session.launcher.active = null;
-                            } else {
-                                if (root.filteredApps.length > 0) {
-                                    root.session.launcher.active = root.filteredApps[0];
-                                }
+                            } else if (root.filteredApps.length > 0) {
+                                root.session.launcher.active =
+                                    root.filteredApps[0];
                             }
                         }
                     }
                 }
 
-                StyledText {
-                    Layout.topMargin: Appearance.spacing.large
-                    text: qsTr("Applications (%1)").arg(root.searchText ? root.filteredApps.length : allAppsDb.apps.length)
-                    font.pointSize: Appearance.font.size.normal
-                    font.weight: 500
-                }
-
-                StyledText {
-                    text: qsTr("All applications available in the launcher")
-                    color: Colours.palette.m3outline
-                }
-
-                StyledRect {
+                RowLayout {
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.spacing.normal
-                    Layout.bottomMargin: Appearance.spacing.small
+                    spacing: Appearance.spacing.small
 
-                    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-                    radius: Appearance.rounding.full
+                    StyledText {
+                        text:
+                            qsTr("APPLICATIONS")
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.72
+                        )
+                        font.pointSize:
+                            Appearance.font.size.smaller
+                        font.weight: 500
+                        font.letterSpacing: 0.8
+                    }
 
-                    implicitHeight: Math.max(searchIcon.implicitHeight, searchField.implicitHeight, clearIcon.implicitHeight)
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+
+                        color: Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.20
+                        )
+                    }
+
+                    StyledText {
+                        text:
+                            qsTr("%1")
+                            .arg(
+                                root.searchText
+                                ? root.filteredApps.length
+                                : allAppsDb.apps.length
+                            )
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.46
+                        )
+
+                        font.family:
+                            Appearance.font.family.mono
+
+                        font.pointSize:
+                            Appearance.font.size.smaller
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 42
+
+                    Rectangle {
+                        anchors.fill: parent
+
+                        radius: Appearance.rounding.small
+                        color: "transparent"
+
+                        border.width: 1
+                        border.color: searchField.activeFocus
+                            ? Qt.alpha(
+                                Colours.palette.m3primary,
+                                0.62
+                            )
+                            : Qt.alpha(
+                                Colours.palette.m3outlineVariant,
+                                0.28
+                            )
+                    }
 
                     MaterialIcon {
                         id: searchIcon
 
-                        anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.leftMargin: Appearance.padding.normal
+                        anchors.verticalCenter: parent.verticalCenter
 
                         text: "search"
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.62
+                        )
+                        font.pointSize: Appearance.font.size.small
                     }
 
                     StyledTextField {
@@ -224,164 +306,212 @@ Item {
 
                         anchors.left: searchIcon.right
                         anchors.right: clearIcon.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+
                         anchors.leftMargin: Appearance.spacing.small
                         anchors.rightMargin: Appearance.spacing.small
 
-                        topPadding: Appearance.padding.normal
-                        bottomPadding: Appearance.padding.normal
+                        topPadding: 0
+                        bottomPadding: 0
 
-                        placeholderText: qsTr("Search applications...")
+                        placeholderText:
+                            qsTr("Search applications")
 
-                        onTextChanged: {
-                            root.searchText = text;
-                        }
+                        onTextChanged:
+                            root.searchText = text
                     }
 
                     MaterialIcon {
                         id: clearIcon
 
-                        anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
                         anchors.rightMargin: Appearance.padding.normal
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        width: searchField.text ? implicitWidth : implicitWidth / 2
-                        opacity: {
-                            if (!searchField.text)
-                                return 0;
-                            if (clearMouse.pressed)
-                                return 0.7;
-                            if (clearMouse.containsMouse)
-                                return 0.8;
-                            return 1;
-                        }
-
+                        visible: searchField.text !== ""
                         text: "close"
-                        color: Colours.palette.m3onSurfaceVariant
+
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            clearMouse.containsMouse ? 0.86 : 0.58
+                        )
+
+                        font.pointSize: Appearance.font.size.small
 
                         MouseArea {
                             id: clearMouse
 
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: searchField.text ? Qt.PointingHandCursor : undefined
+                            cursorShape: Qt.PointingHandCursor
 
-                            onClicked: searchField.text = ""
-                        }
-
-                        Behavior on width {
-                            Anim {
-                                duration: Appearance.anim.durations.small
-                            }
-                        }
-
-                        Behavior on opacity {
-                            Anim {
-                                duration: Appearance.anim.durations.small
-                            }
+                            onClicked:
+                                searchField.text = ""
                         }
                     }
                 }
 
                 Loader {
                     id: appsListLoader
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+
                     asynchronous: true
                     active: true
 
                     sourceComponent: StyledListView {
                         id: appsListView
 
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
                         model: root.filteredApps
-                        spacing: Appearance.spacing.small / 2
+                        spacing: 2
                         clip: true
 
-                        StyledScrollBar.vertical: StyledScrollBar {
-                            flickable: parent
-                        }
-
-                        delegate: StyledRect {
+                        delegate: Item {
                             required property var modelData
 
-                        width: parent ? parent.width : 0
-                        implicitHeight: 40
+                            width:
+                                parent
+                                ? parent.width
+                                : 0
 
-                            readonly property bool isSelected: root.selectedApp === modelData
+                            implicitHeight: 46
 
-                            color: isSelected ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
-                            radius: Appearance.rounding.normal
+                            readonly property bool isSelected:
+                                root.selectedApp === modelData
 
-                            opacity: 0
+                            Rectangle {
+                                anchors.fill: parent
 
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 1000
-                                    easing.type: Easing.OutCubic
-                                }
+                                radius: Appearance.rounding.small
+
+                                color: isSelected
+                                    ? Qt.alpha(
+                                        Colours.palette.m3primary,
+                                        0.055
+                                    )
+                                    : appMouse.containsMouse
+                                        ? Qt.alpha(
+                                            Colours.palette.m3onSurface,
+                                            0.025
+                                        )
+                                        : "transparent"
                             }
 
-                            Component.onCompleted: {
-                                opacity = 1;
-                            }
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
 
-                            StateLayer {
-                                function onClicked(): void {
-                                    root.session.launcher.active = modelData;
+                                width: 2
+                                height: isSelected ? 24 : 0
+                                radius: 1
+
+                                color: Colours.palette.m3primary
+
+                                Behavior on height {
+                                    Anim {}
                                 }
                             }
 
                             RowLayout {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.normal
+                                anchors.fill: parent
+
+                                anchors.leftMargin:
+                                    Appearance.padding.normal
+
+                                anchors.rightMargin:
+                                    Appearance.padding.normal
 
                                 spacing: Appearance.spacing.normal
 
                                 IconImage {
                                     Layout.alignment: Qt.AlignVCenter
-                                    implicitSize: 32
+                                    implicitSize: 28
+
                                     source: {
                                         const entry = modelData.entry;
-                                        return entry ? Quickshell.iconPath(entry.icon, "image-missing") : "image-missing";
+
+                                        return entry
+                                            ? Quickshell.iconPath(
+                                                entry.icon,
+                                                "image-missing"
+                                            )
+                                            : "image-missing";
                                     }
                                 }
 
                                 StyledText {
                                     Layout.fillWidth: true
-                                    text: modelData.name || modelData.entry?.name || qsTr("Unknown")
-                                    font.pointSize: Appearance.font.size.normal
+
+                                    text:
+                                        modelData.name
+                                        || modelData.entry?.name
+                                        || qsTr("Unknown")
+
+                                    color: isSelected
+                                        ? Colours.palette.m3onSurface
+                                        : Qt.alpha(
+                                            Colours.palette.m3onSurface,
+                                            0.82
+                                        )
+
+                                    font.pointSize:
+                                        Appearance.font.size.small
+
+                                    font.weight:
+                                        isSelected ? 500 : 400
+
+                                    elide: Text.ElideRight
                                 }
 
-                                Loader {
-                                    Layout.alignment: Qt.AlignVCenter
-                                    readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
-                                    readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
-                                    active: isHidden || isFav
+                                MaterialIcon {
+                                    visible:
+                                        modelData
+                                        && Strings.testRegexList(
+                                            Config.launcher.hiddenApps,
+                                            modelData.id
+                                        )
 
-                                    sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
+                                    text: "visibility_off"
+                                    fill: 1
+
+                                    color:
+                                        Colours.palette.m3primary
+
+                                    font.pointSize:
+                                        Appearance.font.size.small
                                 }
 
-                                Component {
-                                    id: hiddenIcon
-                                    MaterialIcon {
-                                        text: "visibility_off"
-                                        fill: 1
-                                        color: Colours.palette.m3primary
-                                    }
-                                }
+                                MaterialIcon {
+                                    visible:
+                                        modelData
+                                        && Strings.testRegexList(
+                                            Config.launcher.favouriteApps,
+                                            modelData.id
+                                        )
 
-                                Component {
-                                    id: favouriteIcon
-                                    MaterialIcon {
-                                        text: "favorite"
-                                        fill: 1
-                                        color: Colours.palette.m3primary
-                                    }
+                                    text: "favorite"
+                                    fill: 1
+
+                                    color:
+                                        Colours.palette.m3primary
+
+                                    font.pointSize:
+                                        Appearance.font.size.small
                                 }
+                            }
+
+                            MouseArea {
+                                id: appMouse
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked:
+                                    root.session.launcher.active =
+                                        modelData
                             }
                         }
                     }
@@ -393,20 +523,39 @@ Item {
             Item {
                 id: rightLauncherPane
 
-                property var pane: root.session.launcher.active
-                property string paneId: pane ? (pane.id || pane.entry?.id || "") : ""
-                property Component targetComponent: settings
-                property Component nextComponent: settings
+                property var pane:
+                    root.session.launcher.active
+
+                property string paneId:
+                    pane
+                    ? (
+                        pane.id
+                        || pane.entry?.id
+                        || ""
+                    )
+                    : ""
+
+                property Component targetComponent:
+                    settings
+
+                property Component nextComponent:
+                    settings
+
                 property var displayedApp: null
 
                 function getComponentForPane() {
-                    return pane ? appDetails : settings;
+                    return pane
+                        ? appDetails
+                        : settings;
                 }
 
                 Component.onCompleted: {
                     displayedApp = pane;
-                    targetComponent = getComponentForPane();
-                    nextComponent = targetComponent;
+                    targetComponent =
+                        getComponentForPane();
+
+                    nextComponent =
+                        targetComponent;
                 }
 
                 Loader {
@@ -416,17 +565,27 @@ Item {
 
                     opacity: 1
                     scale: 1
-                    transformOrigin: Item.Center
-                    clip: false
 
-                    sourceComponent: rightLauncherPane.targetComponent
+                    transformOrigin: Item.Center
+                    clip: true
+
+                    sourceComponent:
+                        rightLauncherPane.targetComponent
+
                     active: true
 
-                    property var displayedApp: rightLauncherPane.displayedApp
+                    property var displayedApp:
+                        rightLauncherPane.displayedApp
 
                     onItemChanged: {
-                        if (item && rightLauncherPane.pane && rightLauncherPane.displayedApp !== rightLauncherPane.pane) {
-                            rightLauncherPane.displayedApp = rightLauncherPane.pane;
+                        if (
+                            item
+                            && rightLauncherPane.pane
+                            && rightLauncherPane.displayedApp
+                                !== rightLauncherPane.pane
+                        ) {
+                            rightLauncherPane.displayedApp =
+                                rightLauncherPane.pane;
                         }
                     }
                 }
@@ -434,6 +593,7 @@ Item {
                 Behavior on paneId {
                     PaneTransition {
                         target: rightLauncherLoader
+
                         propertyActions: [
                             PropertyAction {
                                 target: rightLauncherPane
@@ -460,15 +620,40 @@ Item {
                 }
 
                 onPaneChanged: {
-                    nextComponent = getComponentForPane();
-                    paneId = pane ? (pane.id || pane.entry?.id || "") : "";
+                    nextComponent =
+                        getComponentForPane();
+
+                    paneId =
+                        pane
+                        ? (
+                            pane.id
+                            || pane.entry?.id
+                            || ""
+                        )
+                        : "";
                 }
 
                 onDisplayedAppChanged: {
                     if (displayedApp) {
-                        const appId = displayedApp.id || displayedApp.entry?.id;
-                        root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
-                        root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+                        const appId =
+                            displayedApp.id
+                            || displayedApp.entry?.id;
+
+                        root.hideFromLauncherChecked =
+                            Config.launcher.hiddenApps
+                            && Config.launcher.hiddenApps.length > 0
+                            && Strings.testRegexList(
+                                Config.launcher.hiddenApps,
+                                appId
+                            );
+
+                        root.favouriteChecked =
+                            Config.launcher.favouriteApps
+                            && Config.launcher.favouriteApps.length > 0
+                            && Strings.testRegexList(
+                                Config.launcher.favouriteApps,
+                                appId
+                            );
                     } else {
                         root.hideFromLauncherChecked = false;
                         root.favouriteChecked = false;
@@ -483,12 +668,12 @@ Item {
 
         StyledFlickable {
             id: settingsFlickable
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: settingsInner.height
 
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: settingsFlickable
-            }
+            flickableDirection:
+                Flickable.VerticalFlick
+
+            contentHeight:
+                settingsInner.height
 
             Settings {
                 id: settingsInner
@@ -496,6 +681,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
+
                 session: root.session
             }
         }
@@ -504,155 +690,403 @@ Item {
     Component {
         id: appDetails
 
-        ColumnLayout {
-            id: appDetailsLayout
-            anchors.fill: parent
+        StyledFlickable {
+            id: appDetailsFlickable
 
-            readonly property var displayedApp: parent && parent.displayedApp !== undefined ? parent.displayedApp : null
+            readonly property var displayedApp:
+                parent
+                && parent.displayedApp !== undefined
+                ? parent.displayedApp
+                : null
 
-            spacing: Appearance.spacing.normal
+            flickableDirection:
+                Flickable.VerticalFlick
 
-            SettingsHeader {
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
-                Layout.topMargin: Appearance.padding.large * 2
-                visible: displayedApp === null
-                icon: "apps"
-                title: qsTr("Launcher Applications")
-            }
+            contentHeight:
+                appDetailsLayout.height
 
-            Item {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
-                Layout.topMargin: Appearance.padding.large * 2
-                visible: displayedApp !== null
-                implicitWidth: Math.max(appIconImage.implicitWidth, appTitleText.implicitWidth)
-                implicitHeight: appIconImage.implicitHeight + Appearance.spacing.normal + appTitleText.implicitHeight
+            ColumnLayout {
+                id: appDetailsLayout
 
-                ColumnLayout {
-                    anchors.centerIn: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+
+                spacing: Appearance.spacing.large
+
+                RowLayout {
+                    Layout.fillWidth: true
                     spacing: Appearance.spacing.normal
 
                     IconImage {
-                        id: appIconImage
-                        Layout.alignment: Qt.AlignHCenter
-                        implicitSize: Appearance.font.size.extraLarge * 3 * 2
+                        Layout.alignment: Qt.AlignVCenter
+                        implicitSize: 64
+
                         source: {
-                            const app = appDetailsLayout.displayedApp;
+                            const app =
+                                appDetailsFlickable.displayedApp;
+
                             if (!app)
                                 return "image-missing";
+
                             const entry = app.entry;
-                            if (entry && entry.icon) {
-                                return Quickshell.iconPath(entry.icon, "image-missing");
-                            }
-                            return "image-missing";
+
+                            return entry && entry.icon
+                                ? Quickshell.iconPath(
+                                    entry.icon,
+                                    "image-missing"
+                                )
+                                : "image-missing";
                         }
-                    }
-
-                    StyledText {
-                        id: appTitleText
-                        Layout.alignment: Qt.AlignHCenter
-                        text: displayedApp ? (displayedApp.name || displayedApp.entry?.name || qsTr("Application Details")) : ""
-                        font.pointSize: Appearance.font.size.large
-                        font.bold: true
-                    }
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.topMargin: Appearance.spacing.large
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
-
-                StyledFlickable {
-                    id: detailsFlickable
-                    anchors.fill: parent
-                    flickableDirection: Flickable.VerticalFlick
-                    contentHeight: debugLayout.height
-
-                    StyledScrollBar.vertical: StyledScrollBar {
-                        flickable: parent
                     }
 
                     ColumnLayout {
-                        id: debugLayout
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: Appearance.spacing.normal
+                        Layout.fillWidth: true
+                        spacing: 2
 
-                        SwitchRow {
-                            Layout.topMargin: Appearance.spacing.normal
-                            visible: appDetailsLayout.displayedApp !== null
-                            label: qsTr("Mark as favourite")
-                            checked: root.favouriteChecked
-                            // disabled if:
-                            // * app is hidden
-                            // * app isn't in favouriteApps array but marked as favourite anyway
-                            // ^^^ This means that this app is favourited because of a regex check
-                            //     this button can not toggle regexed apps
-                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked && (Config.launcher.favouriteApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.favouriteChecked)
-                            opacity: enabled ? 1 : 0.6
-                            onToggled: checked => {
-                                root.favouriteChecked = checked;
-                                const app = appDetailsLayout.displayedApp;
-                                if (app) {
-                                    const appId = app.id || app.entry?.id;
-                                    const favouriteApps = Config.launcher.favouriteApps ? [...Config.launcher.favouriteApps] : [];
-                                    if (checked) {
-                                        if (!favouriteApps.includes(appId)) {
-                                            favouriteApps.push(appId);
-                                        }
-                                    } else {
-                                        const index = favouriteApps.indexOf(appId);
-                                        if (index !== -1) {
-                                            favouriteApps.splice(index, 1);
-                                        }
-                                    }
-                                    Config.launcher.favouriteApps = favouriteApps;
-                                    Config.save();
-                                }
-                            }
+                        StyledText {
+                            Layout.fillWidth: true
+
+                            text:
+                                appDetailsFlickable.displayedApp
+                                ? (
+                                    appDetailsFlickable.displayedApp.name
+                                    || appDetailsFlickable.displayedApp.entry?.name
+                                    || qsTr("Application")
+                                )
+                                : ""
+
+                            font.pointSize:
+                                Appearance.font.size.large
+
+                            font.weight: 500
+                            elide: Text.ElideRight
                         }
-                        SwitchRow {
-                            Layout.topMargin: Appearance.spacing.normal
-                            visible: appDetailsLayout.displayedApp !== null
-                            label: qsTr("Hide from launcher")
-                            checked: root.hideFromLauncherChecked
-                            // disabled if:
-                            // * app is favourited
-                            // * app isn't in hiddenApps array but marked as hidden anyway
-                            // ^^^ This means that this app is hidden because of a regex check
-                            //     this button can not toggle regexed apps
-                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && (Config.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
-                            opacity: enabled ? 1 : 0.6
-                            onToggled: checked => {
-                                root.hideFromLauncherChecked = checked;
-                                const app = appDetailsLayout.displayedApp;
-                                if (app) {
-                                    const appId = app.id || app.entry?.id;
-                                    const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
-                                    if (checked) {
-                                        if (!hiddenApps.includes(appId)) {
-                                            hiddenApps.push(appId);
-                                        }
-                                    } else {
-                                        const index = hiddenApps.indexOf(appId);
-                                        if (index !== -1) {
-                                            hiddenApps.splice(index, 1);
-                                        }
-                                    }
-                                    Config.launcher.hiddenApps = hiddenApps;
-                                    Config.save();
-                                }
+
+                        StyledText {
+                            Layout.fillWidth: true
+
+                            text:
+                                appDetailsFlickable.displayedApp
+                                ? (
+                                    appDetailsFlickable.displayedApp.id
+                                    || appDetailsFlickable.displayedApp.entry?.id
+                                    || ""
+                                )
+                                : ""
+
+                            color: Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.52
+                            )
+
+                            font.family:
+                                Appearance.font.family.mono
+
+                            font.pointSize:
+                                Appearance.font.size.smaller
+
+                            elide: Text.ElideMiddle
+                        }
+                    }
+                }
+
+                SectionTitle {
+                    title: qsTr("APPLICATION")
+                }
+
+                DetailRow {
+                    label: qsTr("Favourite")
+
+                    StyledSwitch {
+                        checked:
+                            root.favouriteChecked
+
+                        enabled:
+                            appDetailsFlickable.displayedApp !== null
+                            && !root.hideFromLauncherChecked
+                            && (
+                                Config.launcher.favouriteApps.indexOf(
+                                    appDetailsFlickable.displayedApp.id
+                                    || appDetailsFlickable.displayedApp.entry?.id
+                                ) !== -1
+                                || !root.favouriteChecked
+                            )
+
+                        opacity:
+                            enabled ? 1 : 0.6
+
+                        onToggled: {
+                            root.favouriteChecked = checked;
+
+                            const app =
+                                appDetailsFlickable.displayedApp;
+
+                            if (!app)
+                                return;
+
+                            const appId =
+                                app.id
+                                || app.entry?.id;
+
+                            const favouriteApps =
+                                Config.launcher.favouriteApps
+                                ? [...Config.launcher.favouriteApps]
+                                : [];
+
+                            if (checked) {
+                                if (!favouriteApps.includes(appId))
+                                    favouriteApps.push(appId);
+                            } else {
+                                const index =
+                                    favouriteApps.indexOf(appId);
+
+                                if (index !== -1)
+                                    favouriteApps.splice(index, 1);
                             }
+
+                            Config.launcher.favouriteApps =
+                                favouriteApps;
+
+                            Config.save();
+                        }
+                    }
+                }
+
+                DetailRow {
+                    label: qsTr("Hide from launcher")
+
+                    StyledSwitch {
+                        checked:
+                            root.hideFromLauncherChecked
+
+                        enabled:
+                            appDetailsFlickable.displayedApp !== null
+                            && !root.favouriteChecked
+                            && (
+                                Config.launcher.hiddenApps.indexOf(
+                                    appDetailsFlickable.displayedApp.id
+                                    || appDetailsFlickable.displayedApp.entry?.id
+                                ) !== -1
+                                || !root.hideFromLauncherChecked
+                            )
+
+                        opacity:
+                            enabled ? 1 : 0.6
+
+                        onToggled: {
+                            root.hideFromLauncherChecked = checked;
+
+                            const app =
+                                appDetailsFlickable.displayedApp;
+
+                            if (!app)
+                                return;
+
+                            const appId =
+                                app.id
+                                || app.entry?.id;
+
+                            const hiddenApps =
+                                Config.launcher.hiddenApps
+                                ? [...Config.launcher.hiddenApps]
+                                : [];
+
+                            if (checked) {
+                                if (!hiddenApps.includes(appId))
+                                    hiddenApps.push(appId);
+                            } else {
+                                const index =
+                                    hiddenApps.indexOf(appId);
+
+                                if (index !== -1)
+                                    hiddenApps.splice(index, 1);
+                            }
+
+                            Config.launcher.hiddenApps =
+                                hiddenApps;
+
+                            Config.save();
                         }
                     }
                 }
             }
+        }
+    }
+
+    component ToolButton: Item {
+        id: toolButton
+
+        required property string icon
+        required property string text
+
+        property bool active: false
+
+        signal clicked
+
+        implicitWidth:
+            buttonRow.implicitWidth
+            + Appearance.padding.normal * 2
+
+        implicitHeight: 34
+
+        Rectangle {
+            anchors.fill: parent
+
+            radius: Appearance.rounding.small
+
+            color: toolButton.active
+                ? Qt.alpha(
+                    Colours.palette.m3primary,
+                    0.07
+                )
+                : buttonMouse.containsMouse
+                    ? Qt.alpha(
+                        Colours.palette.m3onSurface,
+                        0.03
+                    )
+                    : "transparent"
+
+            border.width: 1
+
+            border.color: toolButton.active
+                ? Qt.alpha(
+                    Colours.palette.m3primary,
+                    0.44
+                )
+                : Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    0.24
+                )
+        }
+
+        RowLayout {
+            id: buttonRow
+
+            anchors.centerIn: parent
+            spacing: 5
+
+            MaterialIcon {
+                text: toolButton.icon
+                fill: toolButton.active ? 1 : 0
+
+                color: toolButton.active
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.64
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.small
+            }
+
+            StyledText {
+                text: toolButton.text
+
+                color: toolButton.active
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.72
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight:
+                    toolButton.active ? 500 : 400
+            }
+        }
+
+        MouseArea {
+            id: buttonMouse
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked:
+                toolButton.clicked()
+        }
+    }
+
+    component SectionTitle: RowLayout {
+        id: sectionTitle
+
+        required property string title
+
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.small
+
+        StyledText {
+            text: sectionTitle.title
+
+            color: Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.72
+            )
+
+            font.pointSize:
+                Appearance.font.size.smaller
+
+            font.weight: 500
+            font.letterSpacing: 0.8
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+
+            color: Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.22
+            )
+        }
+    }
+
+    component DetailRow: Item {
+        id: detailRow
+
+        required property string label
+
+        default property alias control:
+            controlHost.data
+
+        Layout.fillWidth: true
+        implicitHeight: 54
+
+        StyledText {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+
+            text: detailRow.label
+
+            color:
+                Colours.palette.m3onSurface
+
+            font.pointSize:
+                Appearance.font.size.small
+        }
+
+        RowLayout {
+            id: controlHost
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            height: 1
+
+            color: Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.15
+            )
         }
     }
 }
