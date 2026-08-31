@@ -2,6 +2,49 @@
 
 Newest entries at the top.
 
+## [2026-08-30] - Dashboard calendar + todo overhaul
+
+### Added
+- Replaced the old Weather dashboard slot with a full Calendar / Todo page while keeping the existing 4-tab dashboard structure
+- `modules/dashboard/calendar/TodoEditor.qml`: todo creation/editing with Small / Medium / Hard priorities, optional deadlines and recurrence
+- Todo subtasks: added after a todo exists, displayed compactly beneath the parent task
+- `services/Calendar.qml`: persistent todo storage, effective urgency calculation, overdue handling, recurrence advancement and subtask support
+- Todo recurrence supports daily / weekly / monthly / yearly intervals
+- Calendar month view now distinguishes events and todos with separate minimal indicators instead of one generic item dot
+
+### Changed
+- `modules/dashboard/CalendarPage.qml`: moved the month name onto the top border
+- `modules/dashboard/CalendarPage.qml`: moved the year onto the left border as a vertical label
+- `modules/dashboard/CalendarPage.qml`: moved the live time onto the top-right border
+- Calendar border lines now stop and resume around border labels instead of drawing underneath them
+- Tuned the calendar module's top / right / bottom / left spacing against the full dashboard borders
+- `modules/dashboard/calendar/MonthView.qml`: simplified event / todo markers to keep busy dates from looking cluttered
+- Todo tab is now a global active task list instead of being scoped only to the currently selected calendar date
+- Active todos sort by effective urgency: Overdue → Hard → Medium → Small, then nearest deadline
+- Todo priority automatically escalates as deadlines approach:
+  - within 72 hours → at least Medium
+  - within 24 hours → Hard
+  - passed deadline → Overdue
+- `modules/dashboard/calendar/AgendaView.qml`: event rows now use visible Edit / Delete actions and expandable descriptions instead of tiny controls
+- Todo rows now show priority, due date, recurrence and subtask information directly in the compact row
+- Completed normal todos are retained instead of immediately being deleted
+- Kept all calendar / dashboard styling tied to wallpaper-driven dynamic theming
+
+### Fixed
+- `modules/dashboard/CalendarPage.qml` / `MonthView.qml`: clicking the month heading to return to today now updates the actual month grid instead of only changing the displayed month label
+- Date-only todo deadlines now expire at the end of the due day instead of the beginning
+- Recurring todos now advance from their intended recurrence date and skip missed occurrences instead of drifting based on when the task was completed
+- Expanded todo content no longer disappears after model refreshes; expansion now tracks the todo ID and refreshed live todo data
+- Calendar border-label clipping and spacing issues corrected after moving month / year / time onto the frame
+- `modules/drawers/Interactions.qml`: removed stale `cheatsheet` `IpcHandler` that was being instantiated once per screen and producing duplicate `target: "cheatsheet"` warnings
+
+### Notes
+- Calendar / todo data remains stored in `~/.local/state/caelestia/calendar.json`
+- Todo deletion is permanent; the planned Trash system was dropped
+- `Super+G` continues to open the cheatsheet through `caelestia shell controlCenter open cheatsheet`
+
+---
+
 ## [2026-08-28] - Calendar Dashboard
 
 ## [2026-08-29] - Fix dynamic border colors under Lua config
