@@ -15,187 +15,145 @@ Item {
     required property Session session
     required property bool initialOpeningComplete
 
-    implicitWidth: layout.implicitWidth + Appearance.padding.larger * 4
-    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
+    implicitHeight: 44
 
-    ColumnLayout {
-        id: layout
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
 
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Appearance.padding.larger * 2
-        spacing: Appearance.spacing.normal
-
-        states: State {
-            name: "expanded"
-            when: root.session.navExpanded
-
-            PropertyChanges {
-                layout.spacing: Appearance.spacing.small
-            }
-        }
-
-        transitions: Transition {
-            Anim {
-                properties: "spacing"
-            }
-        }
-
-        Loader {
-            Layout.topMargin: Appearance.spacing.large
-            active: !root.session.floating
-            visible: active
-
-            sourceComponent: StyledRect {
-                readonly property int nonAnimWidth: normalWinIcon.implicitWidth + (root.session.navExpanded ? normalWinLabel.anchors.leftMargin + normalWinLabel.implicitWidth : 0) + normalWinIcon.anchors.leftMargin * 2
-
-                implicitWidth: nonAnimWidth
-                implicitHeight: root.session.navExpanded ? normalWinIcon.implicitHeight + Appearance.padding.normal * 2 : nonAnimWidth
-
-                color: Colours.palette.m3primaryContainer
-                radius: Appearance.rounding.small
-
-                StateLayer {
-                    id: normalWinState
-
-                    color: Colours.palette.m3onPrimaryContainer
-
-                    function onClicked(): void {
-                        root.session.root.close();
-                        WindowFactory.create(null, {
-                            active: root.session.active,
-                            navExpanded: root.session.navExpanded
-                        });
-                    }
-                }
-
-                MaterialIcon {
-                    id: normalWinIcon
-
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: Appearance.padding.large
-
-                    text: "select_window"
-                    color: Colours.palette.m3onPrimaryContainer
-                    font.pointSize: Appearance.font.size.large
-                    fill: 1
-                }
-
-                StyledText {
-                    id: normalWinLabel
-
-                    anchors.left: normalWinIcon.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: Appearance.spacing.normal
-
-                    text: qsTr("Float window")
-                    color: Colours.palette.m3onPrimaryContainer
-                    opacity: root.session.navExpanded ? 1 : 0
-
-                    Behavior on opacity {
-                        Anim {
-                            duration: Appearance.anim.durations.small
-                        }
-                    }
-                }
-
-                Behavior on implicitWidth {
-                    Anim {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                    }
-                }
-
-                Behavior on implicitHeight {
-                    Anim {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                    }
-                }
-            }
-        }
+        spacing: Appearance.spacing.small
 
         Repeater {
             model: PaneRegistry.count
 
             NavItem {
                 required property int index
-                Layout.topMargin: index === 0 ? Appearance.spacing.large * 2 : 0
+
+                Layout.fillWidth: true
+
+                paneIndex: index
                 icon: PaneRegistry.getByIndex(index).icon
                 label: PaneRegistry.getByIndex(index).label
             }
         }
+
+        Loader {
+            active: !root.session.floating
+            visible: active
+
+            sourceComponent: Item {
+                implicitWidth: 30
+                implicitHeight: 30
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+
+                    text: "select_window"
+
+                    color: Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        floatMouse.containsMouse ? 0.84 : 0.46
+                    )
+
+                    font.pointSize: Appearance.font.size.small
+                }
+
+                MouseArea {
+                    id: floatMouse
+
+                    anchors.fill: parent
+
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: {
+                        root.session.root.close();
+
+                        WindowFactory.create(null, {
+                            active: root.session.active,
+                            navExpanded: root.session.navExpanded
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        height: 1
+
+        color: Qt.alpha(
+            Colours.palette.m3outlineVariant,
+            0.24
+        )
     }
 
     component NavItem: Item {
         id: item
 
+        required property int paneIndex
         required property string icon
         required property string label
-        readonly property bool active: root.session.active === label
 
-        implicitWidth: background.implicitWidth
-        implicitHeight: background.implicitHeight + smallLabel.implicitHeight + smallLabel.anchors.topMargin
+        readonly property bool active:
+            root.session.active === label
 
-        states: State {
-            name: "expanded"
-            when: root.session.navExpanded
+        implicitHeight: 43
 
-            PropertyChanges {
-                expandedLabel.opacity: 1
-                smallLabel.opacity: 0
-                background.implicitWidth: icon.implicitWidth + icon.anchors.leftMargin * 2 + expandedLabel.anchors.leftMargin + expandedLabel.implicitWidth
-                background.implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
-                item.implicitHeight: background.implicitHeight
-            }
-        }
+        RowLayout {
+            id: itemContent
 
-        transitions: Transition {
-            Anim {
-                property: "opacity"
-                duration: Appearance.anim.durations.small
-            }
+            anchors.centerIn: parent
 
-            Anim {
-                properties: "implicitWidth,implicitHeight"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-        }
+            spacing: 6
 
-        StyledRect {
-            id: background
+            StyledText {
+                text:
+                    String(
+                        item.paneIndex + 1
+                    ).padStart(2, "0")
 
-            radius: Appearance.rounding.full
-            color: Qt.alpha(Colours.palette.m3secondaryContainer, item.active ? 1 : 0)
+                color:
+                    item.active
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.26
+                    )
 
-            implicitWidth: icon.implicitWidth + icon.anchors.leftMargin * 2
-            implicitHeight: icon.implicitHeight + Appearance.padding.small
+                font.family:
+                    Appearance.font.family.mono
 
-            StateLayer {
-                color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                font.pointSize:
+                    Appearance.font.size.smaller
 
-                function onClicked(): void {
-                    // Prevent tab switching during initial opening animation to avoid blank pages
-                    if (!root.initialOpeningComplete) {
-                        return;
-                    }
-                    root.session.active = item.label;
-                }
+                font.weight: 500
             }
 
             MaterialIcon {
-                id: icon
-
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.padding.large
-
                 text: item.icon
-                color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.large
-                fill: item.active ? 1 : 0
+
+                fill:
+                    item.active ? 1 : 0
+
+                color:
+                    item.active
+                    ? Qt.alpha(
+                        Colours.palette.m3primary,
+                        0.82
+                    )
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        navMouse.containsMouse ? 0.68 : 0.40
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.small
 
                 Behavior on fill {
                     Anim {}
@@ -203,28 +161,67 @@ Item {
             }
 
             StyledText {
-                id: expandedLabel
-
-                anchors.left: icon.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.spacing.normal
-
-                opacity: 0
                 text: item.label
-                color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                font.capitalization: Font.Capitalize
+
+                font.capitalization:
+                    Font.Capitalize
+
+                color:
+                    item.active
+                    ? Colours.palette.m3onSurface
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        navMouse.containsMouse ? 0.68 : 0.42
+                    )
+
+                font.pointSize:
+                    Appearance.font.size.smaller
+
+                font.weight:
+                    item.active ? 500 : 400
             }
+        }
 
-            StyledText {
-                id: smallLabel
+        Rectangle {
+            anchors.horizontalCenter:
+                parent.horizontalCenter
 
-                anchors.horizontalCenter: icon.horizontalCenter
-                anchors.top: icon.bottom
-                anchors.topMargin: Appearance.spacing.small / 2
+            anchors.bottom:
+                parent.bottom
 
-                text: item.label
-                font.pointSize: Appearance.font.size.small
-                font.capitalization: Font.Capitalize
+            width:
+                item.active
+                ? Math.max(
+                    24,
+                    itemContent.implicitWidth * 0.36
+                )
+                : 0
+
+            height: 2
+            radius: 1
+
+            color:
+                Colours.palette.m3primary
+
+            Behavior on width {
+                Anim {}
+            }
+        }
+
+        MouseArea {
+            id: navMouse
+
+            anchors.fill: parent
+
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: {
+                if (!root.initialOpeningComplete)
+                    return;
+
+                root.session.active =
+                    item.label;
             }
         }
     }
