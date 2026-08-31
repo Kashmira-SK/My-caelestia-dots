@@ -186,7 +186,7 @@ ColumnLayout {
 
         ActionItem {
             icon: root.adapter?.enabled ? "bluetooth" : "bluetooth_disabled"
-            label: root.adapter?.enabled ? qsTr("Bluetooth on") : qsTr("Bluetooth off")
+            label: root.adapter?.enabled ? qsTr("On") : qsTr("Off")
             active: root.adapter?.enabled ?? false
             enabled: root.adapter !== null
 
@@ -208,7 +208,7 @@ ColumnLayout {
 
         ActionItem {
             icon: root.adapter?.discovering ? "progress_activity" : "bluetooth_searching"
-            label: root.adapter?.discovering ? qsTr("Scanning") : qsTr("Scan")
+            label: qsTr("Scan")
             active: root.adapter?.discovering ?? false
             enabled: (root.adapter?.enabled ?? false) && !(root.adapter?.discovering ?? false)
 
@@ -263,12 +263,12 @@ ColumnLayout {
                 root.sameDevice(root.session.bt.active, modelData)
 
             readonly property bool loading:
-                modelData.pairing
-                || modelData.state === BluetoothDeviceState.Connecting
-                || modelData.state === BluetoothDeviceState.Disconnecting
+                (modelData?.pairing ?? false)
+                || modelData?.state === BluetoothDeviceState.Connecting
+                || modelData?.state === BluetoothDeviceState.Disconnecting
 
             readonly property bool connected:
-                modelData.state === BluetoothDeviceState.Connected
+                modelData?.state === BluetoothDeviceState.Connected
 
             width: ListView.view ? ListView.view.width : 0
             implicitHeight: 52
@@ -308,7 +308,7 @@ ColumnLayout {
                 spacing: 9
 
                 MaterialIcon {
-                    text: Icons.getBluetoothIcon(device.modelData.icon || "")
+                    text: Icons.getBluetoothIcon(device.modelData?.icon || "")
                     fill: device.connected ? 1 : 0
                     color: device.connected
                         ? Colours.palette.m3primary
@@ -322,7 +322,7 @@ ColumnLayout {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: device.modelData.name || qsTr("Unknown")
+                        text: device.modelData?.name || qsTr("Unknown")
                         color: Colours.palette.m3onSurface
                         font.pointSize: Appearance.font.size.small
                         font.weight: device.connected ? 500 : 400
@@ -336,13 +336,13 @@ ColumnLayout {
 
                         StyledText {
                             text: {
-                                if (device.modelData.pairing)
+                                if (device.modelData?.pairing ?? false)
                                     return qsTr("Pairing…");
 
                                 if (device.connected)
                                     return qsTr("Connected");
 
-                                if (device.modelData.bonded)
+                                if (device.modelData?.bonded ?? false)
                                     return qsTr("Paired");
 
                                 return qsTr("Available");
@@ -362,7 +362,7 @@ ColumnLayout {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.modelData.address || ""
+                            text: device.modelData?.address || ""
                             color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
                             font.family: Appearance.font.family.mono
                             font.pointSize: Appearance.font.size.smaller
@@ -370,8 +370,8 @@ ColumnLayout {
                         }
 
                         StyledText {
-                            visible: device.modelData.batteryAvailable
-                            text: qsTr("%1%").arg(Math.round(device.modelData.battery * 100))
+                            visible: device.modelData?.batteryAvailable ?? false
+                            text: qsTr("%1%").arg(Math.round((device.modelData?.battery ?? 0) * 100))
                             color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
                             font.family: Appearance.font.family.mono
                             font.pointSize: Appearance.font.size.smaller
@@ -422,13 +422,18 @@ ColumnLayout {
 
                         anchors.fill: parent
                         z: 2
-                        enabled: (root.adapter?.enabled ?? false) && !device.loading
+                        enabled: (root.adapter?.enabled ?? false)
+                            && device.modelData !== null
+                            && !device.loading
                         hoverEnabled: true
                         cursorShape: enabled
                             ? Qt.PointingHandCursor
                             : Qt.ArrowCursor
 
                         onClicked: {
+                            if (!device.modelData)
+                                return;
+
                             root.selectDevice(device.modelData);
 
                             if (device.connected) {
@@ -451,7 +456,10 @@ ColumnLayout {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
 
-                onClicked: root.selectDevice(device.modelData)
+                onClicked: {
+                    if (device.modelData)
+                        root.selectDevice(device.modelData);
+                }
             }
 
             Rectangle {
