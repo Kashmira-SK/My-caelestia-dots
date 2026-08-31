@@ -18,9 +18,27 @@ ColumnLayout {
         text: root.label
     }
 
-    StyledText {
-        text: root.value
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
+    Item {
+        Layout.fillWidth: true
+        implicitHeight: valueText.contentHeight
+
+        TextEdit {
+            id: valueText
+
+            width: parent.width
+            height: contentHeight
+
+            text: root.value
+            color: Colours.palette.m3outline
+
+            font.pointSize: Appearance.font.size.small
+
+            readOnly: true
+            selectByMouse: true
+            activeFocusOnTab: false
+
+            wrapMode: TextEdit.WrapAnywhere
+            textFormat: TextEdit.PlainText
+        }
     }
 }

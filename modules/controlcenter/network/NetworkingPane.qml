@@ -22,9 +22,12 @@ Item {
 
     anchors.fill: parent
 
-    SplitPaneLayout {
-        id: splitLayout
+    Component.onCompleted: {
+        if (root.session.vpn)
+            root.session.vpn.active = null;
+    }
 
+    SplitPaneLayout {
         anchors.fill: parent
 
         leftContent: Component {
@@ -32,7 +35,7 @@ Item {
                 id: leftFlickable
 
                 flickableDirection: Flickable.VerticalFlick
-                contentHeight: leftContent.height
+                contentHeight: leftContent.implicitHeight
 
                 StyledScrollBar.vertical: StyledScrollBar {
                     flickable: leftFlickable
@@ -41,128 +44,119 @@ Item {
                 ColumnLayout {
                     id: leftContent
 
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                    width: leftFlickable.width
                     spacing: Appearance.spacing.normal
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.spacing.smaller
+                        Layout.bottomMargin: Appearance.spacing.small
+                        spacing: Appearance.spacing.normal
 
-                        StyledText {
-                            text: qsTr("Network")
-                            font.pointSize: Appearance.font.size.large
-                            font.weight: 500
+                        ColumnLayout {
+                            spacing: 1
+
+                            StyledText {
+                                text: qsTr("NETWORK")
+                                color: Colours.palette.m3onSurface
+                                font.pointSize: Appearance.font.size.large
+                                font.weight: 500
+                                font.letterSpacing: 0.8
+                            }
+
+                            RowLayout {
+                                spacing: 6
+
+                                Rectangle {
+                                    implicitWidth: 5
+                                    implicitHeight: 5
+                                    radius: 3
+                                    color: Nmcli.active || Nmcli.activeEthernet
+                                        ? Colours.palette.m3primary
+                                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.28)
+                                }
+
+                                StyledText {
+                                    text: Nmcli.active || Nmcli.activeEthernet
+                                        ? qsTr("Connected")
+                                        : qsTr("No active connection")
+                                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48)
+                                    font.pointSize: Appearance.font.size.smaller
+                                    font.weight: 400
+                                }
+                            }
                         }
 
                         Item {
                             Layout.fillWidth: true
                         }
 
-                        ToggleButton {
-                            toggled: Nmcli.wifiEnabled
-                            icon: "wifi"
-                            accent: "Tertiary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
-                            tooltip: qsTr("Toggle WiFi")
+                        ActionItem {
+                            icon: Nmcli.wifiEnabled ? "wifi" : "wifi_off"
+                            label: Nmcli.wifiEnabled ? qsTr("WiFi on") : qsTr("WiFi off")
+                            active: Nmcli.wifiEnabled
 
                             onClicked: {
-                                Nmcli.toggleWifi(null);
+                                if (Nmcli.scanning)
+                                    return;
+
+                                Nmcli.toggleWifi(result => {
+                                    if (result && result.success && Nmcli.wifiEnabled && !Nmcli.scanning)
+                                        Nmcli.rescanWifi();
+                                });
                             }
                         }
 
-                        ToggleButton {
-                            toggled: Nmcli.scanning
-                            icon: "wifi_find"
-                            accent: "Secondary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
-                            tooltip: qsTr("Scan for networks")
+                        ActionItem {
+                            icon: Nmcli.scanning ? "progress_activity" : "refresh"
+                            label: Nmcli.scanning ? qsTr("Scanning") : qsTr("Refresh")
+                            enabled: Nmcli.wifiEnabled && !Nmcli.scanning
 
-                            onClicked: {
-                                Nmcli.rescanWifi();
-                            }
+                            onClicked: Nmcli.rescanWifi()
                         }
 
-                        ToggleButton {
-                            toggled: !root.session.ethernet.active && !root.session.network.active
-                            icon: "settings"
-                            accent: "Primary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
-                            tooltip: qsTr("Network settings")
+                        ActionItem {
+                            icon: "tune"
+                            label: qsTr("Overview")
+                            active: !root.session.ethernet.active && !root.session.network.active
 
                             onClicked: {
-                                if (root.session.ethernet.active || root.session.network.active) {
-                                    root.session.ethernet.active = null;
-                                    root.session.network.active = null;
-                                } else {
-                                    if (Nmcli.ethernetDevices.length > 0) {
-                                        root.session.ethernet.active = Nmcli.ethernetDevices[0];
-                                    } else if (Nmcli.networks.length > 0) {
-                                        root.session.network.active = Nmcli.networks[0];
-                                    }
-                                }
+                                root.session.ethernet.active = null;
+                                root.session.network.active = null;
+
+                                if (root.session.vpn)
+                                    root.session.vpn.active = null;
                             }
                         }
                     }
 
-                    CollapsibleSection {
-                        id: vpnListSection
-
-                        Layout.fillWidth: true
-                        title: qsTr("VPN")
-                        expanded: true
-
-                        Loader {
-                            Layout.fillWidth: true
-                            sourceComponent: Component {
-                                VpnList {
-                                    session: root.session
-                                    showHeader: false
-                                }
-                            }
-                        }
+                    SectionLabel {
+                        text: qsTr("ETHERNET")
+                        detail: qsTr("%1").arg(Nmcli.ethernetDevices.length)
                     }
 
-                    CollapsibleSection {
-                        id: ethernetListSection
-
+                    EthernetList {
                         Layout.fillWidth: true
-                        title: qsTr("Ethernet")
-                        expanded: true
-
-                        Loader {
-                            Layout.fillWidth: true
-                            sourceComponent: Component {
-                                EthernetList {
-                                    session: root.session
-                                    showHeader: false
-                                }
-                            }
-                        }
+                        session: root.session
+                        showHeader: false
                     }
 
-                    CollapsibleSection {
-                        id: wirelessListSection
+                    SectionLabel {
+                        Layout.topMargin: Appearance.spacing.small
+                        text: qsTr("WI-FI")
+                        detail: Nmcli.scanning
+                            ? qsTr("SCANNING")
+                            : qsTr("%1 FOUND").arg(Nmcli.networks.length)
+                    }
 
+                    WirelessList {
                         Layout.fillWidth: true
-                        title: qsTr("Wireless")
-                        expanded: true
+                        session: root.session
+                        showHeader: false
+                    }
 
-                        Loader {
-                            Layout.fillWidth: true
-                            sourceComponent: Component {
-                                WirelessList {
-                                    session: root.session
-                                    showHeader: false
-                                }
-                            }
-                        }
+                    Item {
+                        Layout.fillWidth: true
+                        implicitHeight: Appearance.padding.normal
                     }
                 }
             }
@@ -172,21 +166,32 @@ Item {
             Item {
                 id: rightPaneItem
 
-                property var vpnPane: root.session && root.session.vpn ? root.session.vpn.active : null
-                property var ethernetPane: root.session && root.session.ethernet ? root.session.ethernet.active : null
-                property var wirelessPane: root.session && root.session.network ? root.session.network.active : null
-                property var pane: vpnPane || ethernetPane || wirelessPane
-                property string paneId: vpnPane ? ("vpn:" + (vpnPane.name || "")) : (ethernetPane ? ("eth:" + (ethernetPane.interface || "")) : (wirelessPane ? ("wifi:" + (wirelessPane.ssid || wirelessPane.bssid || "")) : "settings"))
+                property var ethernetPane: root.session && root.session.ethernet
+                    ? root.session.ethernet.active
+                    : null
+
+                property var wirelessPane: root.session && root.session.network
+                    ? root.session.network.active
+                    : null
+
+                property var pane: ethernetPane || wirelessPane
+
+                property string paneId: ethernetPane
+                    ? ("eth:" + (ethernetPane.interface || ""))
+                    : wirelessPane
+                        ? ("wifi:" + (wirelessPane.bssid || wirelessPane.ssid || ""))
+                        : "settings"
+
                 property Component targetComponent: settingsComponent
                 property Component nextComponent: settingsComponent
 
                 function getComponentForPane() {
-                    if (vpnPane)
-                        return vpnDetailsComponent;
                     if (ethernetPane)
                         return ethernetDetailsComponent;
+
                     if (wirelessPane)
                         return wirelessDetailsComponent;
+
                     return settingsComponent;
                 }
 
@@ -196,49 +201,39 @@ Item {
                 }
 
                 Connections {
-                    target: root.session && root.session.vpn ? root.session.vpn : null
+                    target: root.session && root.session.ethernet
+                        ? root.session.ethernet
+                        : null
                     enabled: target !== null
 
                     function onActiveChanged() {
-                        // Clear others when VPN is selected
-                        if (root.session && root.session.vpn && root.session.vpn.active) {
-                            if (root.session.ethernet && root.session.ethernet.active)
-                                root.session.ethernet.active = null;
-                            if (root.session.network && root.session.network.active)
-                                root.session.network.active = null;
-                        }
-                        rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
-                    }
-                }
-
-                Connections {
-                    target: root.session && root.session.ethernet ? root.session.ethernet : null
-                    enabled: target !== null
-
-                    function onActiveChanged() {
-                        // Clear others when ethernet is selected
                         if (root.session && root.session.ethernet && root.session.ethernet.active) {
-                            if (root.session.vpn && root.session.vpn.active)
-                                root.session.vpn.active = null;
                             if (root.session.network && root.session.network.active)
                                 root.session.network.active = null;
+
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
                         }
+
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }
                 }
 
                 Connections {
-                    target: root.session && root.session.network ? root.session.network : null
+                    target: root.session && root.session.network
+                        ? root.session.network
+                        : null
                     enabled: target !== null
 
                     function onActiveChanged() {
-                        // Clear others when wireless is selected
                         if (root.session && root.session.network && root.session.network.active) {
-                            if (root.session.vpn && root.session.vpn.active)
-                                root.session.vpn.active = null;
                             if (root.session.ethernet && root.session.ethernet.active)
                                 root.session.ethernet.active = null;
+
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
                         }
+
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }
                 }
@@ -247,12 +242,10 @@ Item {
                     id: rightLoader
 
                     anchors.fill: parent
-
                     opacity: 1
                     scale: 1
                     transformOrigin: Item.Center
                     clip: false
-
                     asynchronous: true
                     sourceComponent: rightPaneItem.targetComponent
                 }
@@ -278,6 +271,7 @@ Item {
 
         StyledFlickable {
             id: settingsFlickable
+
             flickableDirection: Flickable.VerticalFlick
             contentHeight: settingsInner.height
 
@@ -301,6 +295,7 @@ Item {
 
         StyledFlickable {
             id: ethernetFlickable
+
             flickableDirection: Flickable.VerticalFlick
             contentHeight: ethernetDetailsInner.height
 
@@ -324,6 +319,7 @@ Item {
 
         StyledFlickable {
             id: wirelessFlickable
+
             flickableDirection: Flickable.VerticalFlick
             contentHeight: wirelessDetailsInner.height
 
@@ -342,32 +338,114 @@ Item {
         }
     }
 
-    Component {
-        id: vpnDetailsComponent
-
-        StyledFlickable {
-            id: vpnFlickable
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: vpnDetailsInner.height
-
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: vpnFlickable
-            }
-
-            VpnDetails {
-                id: vpnDetailsInner
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                session: root.session
-            }
-        }
-    }
-
     WirelessPasswordDialog {
         anchors.fill: parent
         session: root.session
         z: 1000
+    }
+
+    component SectionLabel: Item {
+        id: section
+
+        required property string text
+        property string detail: ""
+
+        Layout.fillWidth: true
+        implicitHeight: 24
+
+        RowLayout {
+            anchors.fill: parent
+            spacing: 8
+
+            StyledText {
+                text: section.text
+                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: 500
+                font.letterSpacing: 0.7
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+                color: Qt.alpha(Colours.palette.m3outlineVariant, 0.24)
+            }
+
+            StyledText {
+                visible: section.detail !== ""
+                text: section.detail
+                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.30)
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: 400
+            }
+        }
+    }
+
+    component ActionItem: Item {
+        id: action
+
+        required property string icon
+        required property string label
+        property bool active: false
+
+        signal clicked
+
+        implicitWidth: actionRow.implicitWidth + 14
+        implicitHeight: 30
+        opacity: enabled ? 1 : 0.34
+
+        StyledRect {
+            anchors.fill: parent
+            radius: Appearance.rounding.small
+            color: Qt.alpha(
+                Colours.palette.m3primary,
+                actionMouse.containsMouse ? 0.05 : 0
+            )
+        }
+
+        RowLayout {
+            id: actionRow
+
+            anchors.centerIn: parent
+            spacing: 5
+
+            MaterialIcon {
+                text: action.icon
+                fill: action.active ? 1 : 0
+                color: action.active
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        actionMouse.containsMouse ? 0.72 : 0.48
+                    )
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                text: action.label
+                color: action.active
+                    ? Colours.palette.m3onSurface
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        actionMouse.containsMouse ? 0.72 : 0.48
+                    )
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: action.active ? 500 : 400
+            }
+        }
+
+        MouseArea {
+            id: actionMouse
+
+            anchors.fill: parent
+            enabled: action.enabled
+            hoverEnabled: true
+            cursorShape: action.enabled
+                ? Qt.PointingHandCursor
+                : Qt.ArrowCursor
+
+            onClicked: action.clicked()
+        }
     }
 }

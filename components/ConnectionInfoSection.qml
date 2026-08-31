@@ -16,10 +16,8 @@ ColumnLayout {
         text: qsTr("IP Address")
     }
 
-    StyledText {
-        text: root.deviceDetails?.ipAddress || qsTr("Not available")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
+    SelectableValue {
+        value: root.deviceDetails?.ipAddress || qsTr("Not available")
     }
 
     StyledText {
@@ -27,10 +25,8 @@ ColumnLayout {
         text: qsTr("Subnet Mask")
     }
 
-    StyledText {
-        text: root.deviceDetails?.subnet || qsTr("Not available")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
+    SelectableValue {
+        value: root.deviceDetails?.subnet || qsTr("Not available")
     }
 
     StyledText {
@@ -38,10 +34,8 @@ ColumnLayout {
         text: qsTr("Gateway")
     }
 
-    StyledText {
-        text: root.deviceDetails?.gateway || qsTr("Not available")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
+    SelectableValue {
+        value: root.deviceDetails?.gateway || qsTr("Not available")
     }
 
     StyledText {
@@ -49,11 +43,37 @@ ColumnLayout {
         text: qsTr("DNS Servers")
     }
 
-    StyledText {
-        text: (root.deviceDetails && root.deviceDetails.dns && root.deviceDetails.dns.length > 0) ? root.deviceDetails.dns.join(", ") : qsTr("Not available")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
-        wrapMode: Text.Wrap
-        Layout.maximumWidth: parent.width
+    SelectableValue {
+        value: (root.deviceDetails && root.deviceDetails.dns && root.deviceDetails.dns.length > 0)
+            ? root.deviceDetails.dns.join(", ")
+            : qsTr("Not available")
+    }
+
+    component SelectableValue: Item {
+        id: selectable
+
+        required property string value
+
+        Layout.fillWidth: true
+        implicitHeight: valueText.contentHeight
+
+        TextEdit {
+            id: valueText
+
+            width: parent.width
+            height: contentHeight
+
+            text: selectable.value
+            color: Colours.palette.m3outline
+
+            font.pointSize: Appearance.font.size.small
+
+            readOnly: true
+            selectByMouse: true
+            activeFocusOnTab: false
+
+            wrapMode: TextEdit.WrapAnywhere
+            textFormat: TextEdit.PlainText
+        }
     }
 }

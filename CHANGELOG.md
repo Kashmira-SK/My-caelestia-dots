@@ -2,6 +2,23 @@
 
 Newest entries at the top.
 
+## [2026-08-31] - Network settings redesign
+
+### Changed
+- `modules/controlcenter/network/NetworkingPane.qml`: redesigned the Network pane around compact Ethernet and Wi-Fi sections and removed VPN controls from the visible settings UI.
+- `modules/controlcenter/network/WirelessList.qml`: redesigned network rows, added stable BSSID/SSID-based selection across rescans, and improved connection state feedback.
+- `modules/controlcenter/network/EthernetList.qml`: redesigned Ethernet rows with compact connection and selection states.
+- `components/PropertyRow.qml`: made displayed property values mouse-selectable while preserving the existing visual style.
+- `components/ConnectionInfoSection.qml`: made IP, subnet, gateway, and DNS values mouse-selectable.
+
+### Fixed
+- Changed Wi-Fi refresh from toggle-like behaviour to a one-shot action that is disabled while scanning or while Wi-Fi is off.
+- Wi-Fi enable now refreshes available networks after successfully turning the radio on.
+- Network Overview now reliably clears device selection instead of selecting the first available device.
+- Wi-Fi details now remain associated with the selected network after the network model is rebuilt by a rescan.
+
+---
+
 ## [2026-08-31] - Cheatsheet navigation + dashboard-style redesign
 
 ### Added
