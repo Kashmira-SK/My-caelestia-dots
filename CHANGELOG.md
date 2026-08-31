@@ -2,6 +2,27 @@
 
 Newest entries at the top.
 
+## [2026-08-31] - Bluetooth device list redesign
+
+### Changed
+- `modules/controlcenter/bluetooth/BtPane.qml`: updated the Bluetooth split pane to use the redesigned device list layout.
+- `modules/controlcenter/bluetooth/DeviceList.qml`: redesigned the device list with compact status, device rows, connection states, battery information, and address-based selection.
+- Simplified the Bluetooth header to Bluetooth power, Scan, and Overview controls.
+- Kept paired and known devices visible while the Bluetooth adapter is disabled.
+
+### Fixed
+- Changed Bluetooth discovery from a toggle-style action to a timed scan action.
+- Prevented repeated Scan clicks from immediately cancelling active discovery.
+- Added clear scanning state and automatically stops scans started by the settings pane after 15 seconds.
+- Bluetooth device selection now survives device-model refreshes by matching device addresses instead of object identity.
+- Overview now consistently opens Bluetooth settings instead of selecting the first device.
+- Shortened header actions so scanning state no longer pushes controls outside the left pane.
+
+### Notes
+- Bluetooth device details and the full Bluetooth settings pane still use the existing layout and will be redesigned separately.
+
+---
+
 ## [2026-08-31] - Network settings redesign
 
 ### Changed

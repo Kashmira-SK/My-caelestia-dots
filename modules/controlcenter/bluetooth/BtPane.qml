@@ -28,7 +28,7 @@ SplitPaneWithDetails {
             id: leftFlickable
 
             flickableDirection: Flickable.VerticalFlick
-            contentHeight: deviceList.height
+            contentHeight: deviceList.implicitHeight
 
             StyledScrollBar.vertical: StyledScrollBar {
                 flickable: leftFlickable
@@ -37,8 +37,7 @@ SplitPaneWithDetails {
             DeviceList {
                 id: deviceList
 
-                anchors.left: parent.left
-                anchors.right: parent.right
+                width: leftFlickable.width
                 session: root.session
             }
         }
@@ -53,6 +52,7 @@ SplitPaneWithDetails {
     rightSettingsComponent: Component {
         StyledFlickable {
             id: settingsFlickable
+
             flickableDirection: Flickable.VerticalFlick
             contentHeight: settingsInner.height
 
