@@ -51,8 +51,10 @@ Item {
     Component.onCompleted: {
         if (Config.bar.entries) {
             entriesModel.clear();
+
             for (let i = 0; i < Config.bar.entries.length; i++) {
                 const entry = Config.bar.entries[i];
+
                 entriesModel.append({
                     id: entry.id,
                     enabled: entry.enabled !== false
@@ -90,17 +92,20 @@ Item {
         Config.bar.popouts.statusIcons = root.popoutStatusIcons;
 
         const entries = [];
+
         for (let i = 0; i < entriesModel.count; i++) {
             const entry = entriesModel.get(i);
             let enabled = entry.enabled;
-            if (entryIndex !== undefined && i === entryIndex) {
+
+            if (entryIndex !== undefined && i === entryIndex)
                 enabled = entryEnabled;
-            }
+
             entries.push({
                 id: entry.id,
                 enabled: enabled
             });
         }
+
         Config.bar.entries = entries;
         Config.save();
     }
@@ -110,7 +115,7 @@ Item {
     }
 
     StyledFlickable {
-        id: sidebarFlickable
+        id: taskbarFlickable
 
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.large
@@ -119,505 +124,596 @@ Item {
         anchors.bottomMargin: Appearance.padding.large
 
         flickableDirection: Flickable.VerticalFlick
-        contentHeight: sidebarLayout.height
+        contentHeight: contentLayout.height
 
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: sidebarFlickable
+        ColumnLayout {
+            id: contentLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            spacing: Appearance.spacing.large * 1.7
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: qsTr("TASKBAR")
+                    font.pointSize: Appearance.font.size.large
+                    font.weight: 500
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Qt.alpha(
+                        Colours.palette.m3outlineVariant,
+                        0.22
+                    )
+                }
             }
 
-            ColumnLayout {
-                id: sidebarLayout
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+            Section {
+                title: qsTr("STATUS ICONS")
 
-                spacing: Appearance.spacing.normal
-
-                RowLayout {
-                    spacing: Appearance.spacing.smaller
-
-                    StyledText {
-                        text: qsTr("Taskbar")
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: 500
-                    }
-                }
-
-                SectionContainer {
+                GridLayout {
                     Layout.fillWidth: true
-                    alignTop: true
+                    columns: 4
+                    columnSpacing: Appearance.spacing.normal
+                    rowSpacing: Appearance.spacing.normal
 
-                    StyledText {
-                        text: qsTr("Status Icons")
-                        font.pointSize: Appearance.font.size.normal
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Speakers")
+                        icon: "volume_up"
+                        checked: root.showAudio
+                        onToggled: checked => {
+                            root.showAudio = checked;
+                            root.saveConfig();
+                        }
                     }
 
-                    ConnectedButtonGroup {
-                        rootItem: root
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Microphone")
+                        icon: "mic"
+                        checked: root.showMicrophone
+                        onToggled: checked => {
+                            root.showMicrophone = checked;
+                            root.saveConfig();
+                        }
+                    }
 
-                        options: [
-                            {
-                                label: qsTr("Speakers"),
-                                propertyName: "showAudio",
-                                onToggled: function (checked) {
-                                    root.showAudio = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Microphone"),
-                                propertyName: "showMicrophone",
-                                onToggled: function (checked) {
-                                    root.showMicrophone = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Keyboard"),
-                                propertyName: "showKbLayout",
-                                onToggled: function (checked) {
-                                    root.showKbLayout = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Network"),
-                                propertyName: "showNetwork",
-                                onToggled: function (checked) {
-                                    root.showNetwork = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Wifi"),
-                                propertyName: "showWifi",
-                                onToggled: function (checked) {
-                                    root.showWifi = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Bluetooth"),
-                                propertyName: "showBluetooth",
-                                onToggled: function (checked) {
-                                    root.showBluetooth = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Battery"),
-                                propertyName: "showBattery",
-                                onToggled: function (checked) {
-                                    root.showBattery = checked;
-                                    root.saveConfig();
-                                }
-                            },
-                            {
-                                label: qsTr("Capslock"),
-                                propertyName: "showLockStatus",
-                                onToggled: function (checked) {
-                                    root.showLockStatus = checked;
-                                    root.saveConfig();
-                                }
-                            }
-                        ]
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Keyboard")
+                        icon: "keyboard"
+                        checked: root.showKbLayout
+                        onToggled: checked => {
+                            root.showKbLayout = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Network")
+                        icon: "lan"
+                        checked: root.showNetwork
+                        onToggled: checked => {
+                            root.showNetwork = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Wi-Fi")
+                        icon: "wifi"
+                        checked: root.showWifi
+                        onToggled: checked => {
+                            root.showWifi = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Bluetooth")
+                        icon: "bluetooth"
+                        checked: root.showBluetooth
+                        onToggled: checked => {
+                            root.showBluetooth = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Battery")
+                        icon: "battery_full"
+                        checked: root.showBattery
+                        onToggled: checked => {
+                            root.showBattery = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Capslock")
+                        icon: "keyboard_capslock"
+                        checked: root.showLockStatus
+                        onToggled: checked => {
+                            root.showLockStatus = checked;
+                            root.saveConfig();
+                        }
                     }
                 }
+            }
 
-                RowLayout {
-                    id: mainRowLayout
+            // Deliberate middle band: two similarly weighted sections.
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Appearance.spacing.large * 2
+
+                Section {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.normal
+                    Layout.alignment: Qt.AlignTop
+                    title: qsTr("WORKSPACES")
 
-                    ColumnLayout {
-                        id: leftColumnLayout
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: Appearance.spacing.normal
+                    SettingRow {
+                        label: qsTr("Shown")
 
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
+                        CustomSpinBox {
+                            min: 1
+                            max: 20
+                            value: root.workspacesShown
 
-                            StyledText {
-                                text: qsTr("Workspaces")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            StyledRect {
-                                Layout.fillWidth: true
-                                implicitHeight: workspacesShownRow.implicitHeight + Appearance.padding.large * 2
-                                radius: Appearance.rounding.normal
-                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-
-                                Behavior on implicitHeight {
-                                    Anim {}
-                                }
-
-                                RowLayout {
-                                    id: workspacesShownRow
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.margins: Appearance.padding.large
-                                    spacing: Appearance.spacing.normal
-
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Shown")
-                                    }
-
-                                    CustomSpinBox {
-                                        min: 1
-                                        max: 20
-                                        value: root.workspacesShown
-                                        onValueModified: value => {
-                                            root.workspacesShown = value;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                }
-                            }
-
-                            StyledRect {
-                                Layout.fillWidth: true
-                                implicitHeight: workspacesActiveIndicatorRow.implicitHeight + Appearance.padding.large * 2
-                                radius: Appearance.rounding.normal
-                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-
-                                Behavior on implicitHeight {
-                                    Anim {}
-                                }
-
-                                RowLayout {
-                                    id: workspacesActiveIndicatorRow
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.margins: Appearance.padding.large
-                                    spacing: Appearance.spacing.normal
-
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Active indicator")
-                                    }
-
-                                    StyledSwitch {
-                                        checked: root.workspacesActiveIndicator
-                                        onToggled: {
-                                            root.workspacesActiveIndicator = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                }
-                            }
-
-                            StyledRect {
-                                Layout.fillWidth: true
-                                implicitHeight: workspacesOccupiedBgRow.implicitHeight + Appearance.padding.large * 2
-                                radius: Appearance.rounding.normal
-                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-
-                                Behavior on implicitHeight {
-                                    Anim {}
-                                }
-
-                                RowLayout {
-                                    id: workspacesOccupiedBgRow
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.margins: Appearance.padding.large
-                                    spacing: Appearance.spacing.normal
-
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Occupied background")
-                                    }
-
-                                    StyledSwitch {
-                                        checked: root.workspacesOccupiedBg
-                                        onToggled: {
-                                            root.workspacesOccupiedBg = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                }
-                            }
-
-                            StyledRect {
-                                Layout.fillWidth: true
-                                implicitHeight: workspacesShowWindowsRow.implicitHeight + Appearance.padding.large * 2
-                                radius: Appearance.rounding.normal
-                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-
-                                Behavior on implicitHeight {
-                                    Anim {}
-                                }
-
-                                RowLayout {
-                                    id: workspacesShowWindowsRow
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.margins: Appearance.padding.large
-                                    spacing: Appearance.spacing.normal
-
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Show windows")
-                                    }
-
-                                    StyledSwitch {
-                                        checked: root.workspacesShowWindows
-                                        onToggled: {
-                                            root.workspacesShowWindows = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                }
-                            }
-
-                            StyledRect {
-                                Layout.fillWidth: true
-                                implicitHeight: workspacesPerMonitorRow.implicitHeight + Appearance.padding.large * 2
-                                radius: Appearance.rounding.normal
-                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-
-                                Behavior on implicitHeight {
-                                    Anim {}
-                                }
-
-                                RowLayout {
-                                    id: workspacesPerMonitorRow
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.margins: Appearance.padding.large
-                                    spacing: Appearance.spacing.normal
-
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Per monitor workspaces")
-                                    }
-
-                                    StyledSwitch {
-                                        checked: root.workspacesPerMonitor
-                                        onToggled: {
-                                            root.workspacesPerMonitor = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
-
-                            StyledText {
-                                text: qsTr("Scroll Actions")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            ConnectedButtonGroup {
-                                rootItem: root
-
-                                options: [
-                                    {
-                                        label: qsTr("Workspaces"),
-                                        propertyName: "scrollWorkspaces",
-                                        onToggled: function (checked) {
-                                            root.scrollWorkspaces = checked;
-                                            root.saveConfig();
-                                        }
-                                    },
-                                    {
-                                        label: qsTr("Volume"),
-                                        propertyName: "scrollVolume",
-                                        onToggled: function (checked) {
-                                            root.scrollVolume = checked;
-                                            root.saveConfig();
-                                        }
-                                    },
-                                    {
-                                        label: qsTr("Brightness"),
-                                        propertyName: "scrollBrightness",
-                                        onToggled: function (checked) {
-                                            root.scrollBrightness = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                ]
+                            onValueModified: value => {
+                                root.workspacesShown = value;
+                                root.saveConfig();
                             }
                         }
                     }
 
-                    ColumnLayout {
-                        id: middleColumnLayout
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: Appearance.spacing.normal
+                    SettingRow {
+                        label: qsTr("Active indicator")
 
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
+                        StyledSwitch {
+                            checked: root.workspacesActiveIndicator
 
-                            StyledText {
-                                text: qsTr("Clock")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Show clock icon")
-                                checked: root.clockShowIcon
-                                onToggled: checked => {
-                                    root.clockShowIcon = checked;
-                                    root.saveConfig();
-                                }
-                            }
-                        }
-
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
-
-                            StyledText {
-                                text: qsTr("Bar Behavior")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Persistent")
-                                checked: root.persistent
-                                onToggled: checked => {
-                                    root.persistent = checked;
-                                    root.saveConfig();
-                                }
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Show on hover")
-                                checked: root.showOnHover
-                                onToggled: checked => {
-                                    root.showOnHover = checked;
-                                    root.saveConfig();
-                                }
-                            }
-
-                            SectionContainer {
-                                contentSpacing: Appearance.spacing.normal
-
-                                SliderInput {
-                                    Layout.fillWidth: true
-
-                                    label: qsTr("Drag threshold")
-                                    value: root.dragThreshold
-                                    from: 0
-                                    to: 100
-                                    suffix: "px"
-                                    validator: IntValidator {
-                                        bottom: 0
-                                        top: 100
-                                    }
-                                    formatValueFunction: val => Math.round(val).toString()
-                                    parseValueFunction: text => parseInt(text)
-
-                                    onValueModified: newValue => {
-                                        root.dragThreshold = Math.round(newValue);
-                                        root.saveConfig();
-                                    }
-                                }
+                            onToggled: {
+                                root.workspacesActiveIndicator = checked;
+                                root.saveConfig();
                             }
                         }
                     }
 
-                    ColumnLayout {
-                        id: rightColumnLayout
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: Appearance.spacing.normal
+                    SettingRow {
+                        label: qsTr("Occupied background")
 
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
+                        StyledSwitch {
+                            checked: root.workspacesOccupiedBg
 
-                            StyledText {
-                                text: qsTr("Popouts")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Active window")
-                                checked: root.popoutActiveWindow
-                                onToggled: checked => {
-                                    root.popoutActiveWindow = checked;
-                                    root.saveConfig();
-                                }
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Tray")
-                                checked: root.popoutTray
-                                onToggled: checked => {
-                                    root.popoutTray = checked;
-                                    root.saveConfig();
-                                }
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Status icons")
-                                checked: root.popoutStatusIcons
-                                onToggled: checked => {
-                                    root.popoutStatusIcons = checked;
-                                    root.saveConfig();
-                                }
+                            onToggled: {
+                                root.workspacesOccupiedBg = checked;
+                                root.saveConfig();
                             }
                         }
+                    }
 
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
+                    SettingRow {
+                        label: qsTr("Show windows")
 
-                            StyledText {
-                                text: qsTr("Tray Settings")
-                                font.pointSize: Appearance.font.size.normal
+                        StyledSwitch {
+                            checked: root.workspacesShowWindows
+
+                            onToggled: {
+                                root.workspacesShowWindows = checked;
+                                root.saveConfig();
                             }
+                        }
+                    }
 
-                            ConnectedButtonGroup {
-                                rootItem: root
+                    SettingRow {
+                        label: qsTr("Per monitor workspaces")
 
-                                options: [
-                                    {
-                                        label: qsTr("Background"),
-                                        propertyName: "trayBackground",
-                                        onToggled: function (checked) {
-                                            root.trayBackground = checked;
-                                            root.saveConfig();
-                                        }
-                                    },
-                                    {
-                                        label: qsTr("Compact"),
-                                        propertyName: "trayCompact",
-                                        onToggled: function (checked) {
-                                            root.trayCompact = checked;
-                                            root.saveConfig();
-                                        }
-                                    },
-                                    {
-                                        label: qsTr("Recolour"),
-                                        propertyName: "trayRecolour",
-                                        onToggled: function (checked) {
-                                            root.trayRecolour = checked;
-                                            root.saveConfig();
-                                        }
-                                    }
-                                ]
+                        StyledSwitch {
+                            checked: root.workspacesPerMonitor
+
+                            onToggled: {
+                                root.workspacesPerMonitor = checked;
+                                root.saveConfig();
                             }
                         }
                     }
                 }
+
+                Section {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    title: qsTr("BAR")
+
+                    SettingRow {
+                        label: qsTr("Show clock icon")
+
+                        StyledSwitch {
+                            checked: root.clockShowIcon
+
+                            onToggled: {
+                                root.clockShowIcon = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+
+                    SettingRow {
+                        label: qsTr("Persistent")
+
+                        StyledSwitch {
+                            checked: root.persistent
+
+                            onToggled: {
+                                root.persistent = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+
+                    SettingRow {
+                        label: qsTr("Show on hover")
+
+                        StyledSwitch {
+                            checked: root.showOnHover
+
+                            onToggled: {
+                                root.showOnHover = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+
+                    SliderInput {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Appearance.spacing.normal
+                        Layout.bottomMargin: Appearance.spacing.small
+
+                        label: qsTr("Drag threshold")
+                        value: root.dragThreshold
+                        from: 0
+                        to: 100
+                        suffix: "px"
+
+                        validator: IntValidator {
+                            bottom: 0
+                            top: 100
+                        }
+
+                        formatValueFunction:
+                            val => Math.round(val).toString()
+
+                        parseValueFunction:
+                            text => parseInt(text)
+
+                        onValueModified: newValue => {
+                            root.dragThreshold = Math.round(newValue);
+                            root.saveConfig();
+                        }
+                    }
+                }
+            }
+
+            // Deliberate bottom band: three equal modules on one baseline.
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                spacing: Appearance.spacing.large * 2
+
+                Section {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    title: qsTr("SCROLL ACTIONS")
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Workspaces")
+                        icon: "swap_vert"
+                        checked: root.scrollWorkspaces
+
+                        onToggled: checked => {
+                            root.scrollWorkspaces = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Volume")
+                        icon: "volume_up"
+                        checked: root.scrollVolume
+
+                        onToggled: checked => {
+                            root.scrollVolume = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Brightness")
+                        icon: "brightness_6"
+                        checked: root.scrollBrightness
+
+                        onToggled: checked => {
+                            root.scrollBrightness = checked;
+                            root.saveConfig();
+                        }
+                    }
+                }
+
+                Section {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    title: qsTr("POPOUTS")
+
+                    SettingRow {
+                        label: qsTr("Active window")
+
+                        StyledSwitch {
+                            checked: root.popoutActiveWindow
+
+                            onToggled: {
+                                root.popoutActiveWindow = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+
+                    SettingRow {
+                        label: qsTr("Tray")
+
+                        StyledSwitch {
+                            checked: root.popoutTray
+
+                            onToggled: {
+                                root.popoutTray = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+
+                    SettingRow {
+                        label: qsTr("Status icons")
+
+                        StyledSwitch {
+                            checked: root.popoutStatusIcons
+
+                            onToggled: {
+                                root.popoutStatusIcons = checked;
+                                root.saveConfig();
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    title: qsTr("TRAY")
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Background")
+                        icon: "rectangle"
+                        checked: root.trayBackground
+
+                        onToggled: checked => {
+                            root.trayBackground = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Compact")
+                        icon: "compress"
+                        checked: root.trayCompact
+
+                        onToggled: checked => {
+                            root.trayCompact = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    ToggleTile {
+                        Layout.fillWidth: true
+                        label: qsTr("Recolour")
+                        icon: "palette"
+                        checked: root.trayRecolour
+
+                        onToggled: checked => {
+                            root.trayRecolour = checked;
+                            root.saveConfig();
+                        }
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: Appearance.padding.large
             }
         }
+    }
+
+    component Section: ColumnLayout {
+        id: section
+
+        required property string title
+
+        default property alias content:
+            body.data
+
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.normal
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Appearance.spacing.small
+            spacing: Appearance.spacing.small
+
+            StyledText {
+                text: section.title
+                color: Qt.alpha(
+                    Colours.palette.m3onSurfaceVariant,
+                    0.72
+                )
+                font.pointSize: Appearance.font.size.smaller
+                font.weight: 500
+                font.letterSpacing: 0.9
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+                color: Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    0.24
+                )
+            }
+        }
+
+        ColumnLayout {
+            id: body
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.smaller
+        }
+    }
+
+    component SettingRow: Item {
+        id: settingRow
+
+        required property string label
+
+        default property alias control:
+            trailing.data
+
+        Layout.fillWidth: true
+        implicitHeight: 54
+
+        StyledText {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+
+            text: settingRow.label
+            color: Colours.palette.m3onSurface
+            font.pointSize: Appearance.font.size.small
+        }
+
+        RowLayout {
+            id: trailing
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            spacing: Appearance.spacing.small
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            height: 1
+            color: Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.15
+            )
+        }
+    }
+
+    component ToggleTile: Item {
+        id: tile
+
+        required property string label
+        required property string icon
+        property bool checked: false
+
+        signal toggled(bool checked)
+
+        implicitHeight: 46
+        opacity: enabled ? 1 : 0.32
+
+        Rectangle {
+            anchors.fill: parent
+
+            radius: Appearance.rounding.small
+            color: tile.checked
+                ? Qt.alpha(
+                    Colours.palette.m3primary,
+                    0.07
+                )
+                : "transparent"
+
+            border.width: 1
+            border.color: tile.checked
+                ? Qt.alpha(
+                    Colours.palette.m3primary,
+                    0.48
+                )
+                : Qt.alpha(
+                    Colours.palette.m3outlineVariant,
+                    tileMouse.containsMouse ? 0.46 : 0.24
+                )
+        }
+
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.smaller
+
+            MaterialIcon {
+                text: tile.icon
+                fill: tile.checked ? 1 : 0
+                color: tile.checked
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.62
+                    )
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                text: tile.label
+                color: tile.checked
+                    ? Colours.palette.m3primary
+                    : Qt.alpha(
+                        Colours.palette.m3onSurfaceVariant,
+                        0.72
+                    )
+                font.pointSize: Appearance.font.size.small
+                font.weight: tile.checked ? 500 : 400
+            }
+        }
+
+        MouseArea {
+            id: tileMouse
+
+            anchors.fill: parent
+            enabled: tile.enabled
+            hoverEnabled: true
+
+            cursorShape: tile.enabled
+                ? Qt.PointingHandCursor
+                : Qt.ArrowCursor
+
+            onClicked:
+                tile.toggled(!tile.checked)
+        }
+    }
 }
