@@ -504,52 +504,7 @@ Item {
 
             spacing: 0
 
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.bottomMargin: 2
-
-                spacing: Appearance.spacing.small
-
-                StyledText {
-                    text: qsTr("CHEATSHEET")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.68
-                    )
-
-                    font.pointSize: Appearance.font.size.smaller
-                    font.weight: 500
-                    font.letterSpacing: 1.2
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-
-                    height: 1
-
-                    color: Qt.alpha(
-                        Colours.palette.m3outlineVariant,
-                        0.28
-                    )
-                }
-
-                StyledText {
-                    text:
-                        root.pageData().index
-                        + " / "
-                        + String(root.pages.length).padStart(2, "0")
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.36
-                    )
-
-                    font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.smaller
-                }
-            }
-
+            
             RowLayout {
                 Layout.fillWidth: true
                 Layout.bottomMargin: Appearance.spacing.normal

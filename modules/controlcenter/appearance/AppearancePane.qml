@@ -115,14 +115,30 @@ Item {
                 anchors.fill: parent
                 spacing: 0
 
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
+                                RowLayout {
+                    Layout.fillWidth: true
                     Layout.bottomMargin: Appearance.spacing.normal
+                    spacing: Appearance.spacing.small
 
-                    text: qsTr("Wallpaper")
+                    StyledText {
+                        text: qsTr("WALLPAPER")
+                        color: Qt.alpha(
+                            Colours.palette.m3onSurfaceVariant,
+                            0.72
+                        )
+                        font.pointSize: Appearance.font.size.smaller
+                        font.weight: 500
+                        font.letterSpacing: 0.9
+                    }
 
-                    font.pointSize: Appearance.font.size.large
-                    font.weight: 500
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Qt.alpha(
+                            Colours.palette.m3outlineVariant,
+                            0.22
+                        )
+                    }
                 }
 
                 Loader {
@@ -194,46 +210,30 @@ Item {
                         && backgroundSection.expanded
                         && dashboardSection.expanded
 
+                    
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.bottomMargin: Appearance.spacing.small
-
-                        spacing: Appearance.spacing.smaller
+                        Layout.bottomMargin: 0
+                        spacing: Appearance.spacing.small
 
                         StyledText {
-                            text: qsTr("Appearance")
-                            font.pointSize: Appearance.font.size.large
+                            text: qsTr("THEME")
+                            color: Qt.alpha(
+                                Colours.palette.m3onSurfaceVariant,
+                                0.72
+                            )
+                            font.pointSize: Appearance.font.size.smaller
                             font.weight: 500
+                            font.letterSpacing: 0.9
                         }
 
-                        Item {
+                        Rectangle {
                             Layout.fillWidth: true
-                        }
-
-                        IconButton {
-                            icon:
-                                sidebarLayout.allSectionsExpanded
-                                ? "unfold_less"
-                                : "unfold_more"
-
-                            type: IconButton.Text
-                            label.animate: true
-
-                            onClicked: {
-                                const shouldExpand =
-                                    !sidebarLayout.allSectionsExpanded;
-
-                                themeModeSection.expanded = shouldExpand;
-                                colorVariantSection.expanded = shouldExpand;
-                                colorSchemeSection.expanded = shouldExpand;
-                                animationsSection.expanded = shouldExpand;
-                                fontsSection.expanded = shouldExpand;
-                                scalesSection.expanded = shouldExpand;
-                                transparencySection.expanded = shouldExpand;
-                                borderSection.expanded = shouldExpand;
-                                backgroundSection.expanded = shouldExpand;
-                                dashboardSection.expanded = shouldExpand;
-                            }
+                            implicitHeight: 1
+                            color: Qt.alpha(
+                                Colours.palette.m3outlineVariant,
+                                0.22
+                            )
                         }
                     }
 

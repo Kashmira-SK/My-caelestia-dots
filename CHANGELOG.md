@@ -2,6 +2,86 @@
 
 Newest entries at the top.
 
+## [2026-09-01] - Control Center Settings Redesign
+
+### Added
+- `modules/controlcenter/appearance/sections/DashboardSection.qml`: added a compact Dashboard section under Appearance containing only the settings still relevant to the current dashboard:
+  - `Enabled` → `Config.dashboard.enabled`
+  - `Show on hover` → `Config.dashboard.showOnHover`
+- `components/controls/CollapsibleSection.qml`: added an opt-in `flatStyle` mode for denser settings sections without changing the default appearance of existing users of the component
+
+### Changed
+- `modules/controlcenter/PaneRegistry.qml`: removed the standalone Dashboard settings pane, reducing the Control Center navigation from 8 tabs to 7:
+  - Cheatsheet
+  - Network
+  - Bluetooth
+  - Audio
+  - Appearance
+  - Taskbar
+  - Launcher
+- `modules/controlcenter/Panes.qml`: removed the unused Dashboard settings import after the pane was removed from `PaneRegistry`
+- `modules/controlcenter/Panes.qml`: changed pane sizing/clipping so previously visited panes remain loaded without visually bleeding through the currently active transparent pane
+- `modules/controlcenter/components/SplitPaneLayout.qml`: changed the shared split-pane shell to the open/transparent layout used by the redesigned settings pages and reduced the center divider to a subtle `m3outlineVariant` line
+- `modules/controlcenter/components/SplitPaneLayout.qml`: added the missing `qs.services` import required for `Colours`
+
+- `modules/controlcenter/appearance/AppearancePane.qml`: switched Appearance's collapsible controls to the new flat section style with transparent section backgrounds and tighter headers
+- `modules/controlcenter/appearance/AppearancePane.qml`: moved Dashboard `Enabled` and `Show on hover` into the Appearance sidebar instead of keeping a mostly empty dedicated settings page
+- `modules/controlcenter/appearance/AppearancePane.qml`: changed wallpaper loading to resolve the Appearance pane index from `session.panes` instead of relying on the old hardcoded tab index
+- `modules/controlcenter/appearance/AppearancePane.qml`: removed the redundant `Appearance` page title and the leftover expand/collapse-all utility row
+- `modules/controlcenter/appearance/AppearancePane.qml`: added a small `THEME` section rail above the left-side appearance controls and restyled `WALLPAPER` as a matching section rail on the right
+- `modules/controlcenter/appearance/AppearancePane.qml`: explicitly top-aligned the sidebar so removing the old header does not leave an empty gap above Theme mode
+
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: replaced the previous stack of large filled settings cards with a flat grouped layout
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: replaced the temporary text-with-underline status toggles with outlined icon toggle tiles
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: arranged Status Icons as a dedicated full-width section
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: arranged Workspaces and Bar controls side-by-side as the main settings band
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: arranged Scroll Actions, Popouts and Tray as three aligned lower sections instead of uneven independent columns
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: removed the visible scrollbar while preserving vertical scrolling
+- `modules/controlcenter/taskbar/TaskbarPane.qml`: removed the redundant internal `TASKBAR` heading now that the top navigation identifies the active pane
+
+- `modules/controlcenter/launcher/LauncherPane.qml`: redesigned the application browser with a compact outlined search field instead of the previous large pill search
+- `modules/controlcenter/launcher/LauncherPane.qml`: changed selected applications to use a subtle theme tint and narrow primary-color selection rail
+- `modules/controlcenter/launcher/LauncherPane.qml`: removed visible scrollbars from the application list and app-details pane while retaining scrolling
+- `modules/controlcenter/launcher/LauncherPane.qml`: replaced the oversized centered application icon/details layout with a compact icon, application name and ID header
+- `modules/controlcenter/launcher/LauncherPane.qml`: moved the Settings action into the `APPLICATIONS` heading instead of leaving a separate launcher header row
+- `modules/controlcenter/launcher/Settings.qml`: removed the large centered Launcher Settings icon/title treatment and the old filled `SectionContainer` cards
+- `modules/controlcenter/launcher/Settings.qml`: rearranged launcher settings into purpose-built groups:
+  - General as a 2×2 control grid
+  - Display / Prefixes / Hidden Apps on one aligned row
+  - Fuzzy Search as a horizontal toggle strip
+  - Sizes as a 2×2 value grid
+
+- `modules/controlcenter/audio/AudioPane.qml`: redesigned Audio into an open two-column layout with device selection on the left and active audio controls on the right
+- `modules/controlcenter/audio/AudioPane.qml`: separated available Output and Input devices into compact lists with a primary-colored rail/check treatment for the selected device
+- `modules/controlcenter/audio/AudioPane.qml`: grouped active Output volume, Input volume and per-application stream controls in the right pane
+- `modules/controlcenter/audio/AudioPane.qml`: removed the redundant internal `AUDIO` and `Audio controls` page headings so the pane begins directly with useful device/control sections
+
+- `modules/controlcenter/network/NetworkingPane.qml`: removed the redundant internal Network page name while retaining Wi-Fi state, scanning and settings actions as the pane's useful top row
+- `modules/controlcenter/bluetooth/DeviceList.qml`: removed the redundant internal Bluetooth page name while retaining adapter state and scan/actions
+- `modules/controlcenter/bluetooth/Settings.qml`: removed the duplicate `Bluetooth Settings` heading from the overview pane
+
+- `modules/cheatsheet/Content.qml`: removed the redundant Cheatsheet page-title/header row after moving Control Center navigation to the top
+- `modules/cheatsheet/Content.qml`: removed the separate `01 / 06` counter and separator above the cheatsheet categories because the internal tabs already carry numbered labels such as `01 TOOLS`, `02 NETWORK`, etc.
+- `modules/cheatsheet/Content.qml`: retained the existing QUICK / EVERYDAY / INSPECT border-labelled layout and real border gaps around section labels
+
+### Fixed
+- `modules/controlcenter/Panes.qml`: fixed ghosted content from previously opened settings panes showing underneath the active pane
+- `modules/controlcenter/components/SplitPaneLayout.qml`: fixed `ReferenceError: Colours is not defined` after the divider was changed to use the shared dynamic theme palette
+- `modules/controlcenter/appearance/AppearancePane.qml`: fixed the Wallpaper loader still assuming Appearance was at the old hardcoded tab index
+- `modules/controlcenter/appearance/AppearancePane.qml`: fixed the large empty area at the top of the left sidebar left behind after removing the old Appearance title
+- `modules/controlcenter/appearance/AppearancePane.qml`: fixed the orphan unfold icon/header row remaining visible after the page title cleanup
+- Control Center panes now treat the top navigation as the page title instead of repeating the same name again inside each page
+
+### Notes
+- All redesigned Control Center elements continue to use wallpaper-derived `Colours.palette` / `Colours.tPalette` values; no fixed visible color scheme was introduced
+- The standalone Dashboard settings page was intentionally removed rather than padded with controls that are no longer useful to the redesigned dashboard
+- Dashboard performance-module settings and the old update-interval control were dropped from the visible settings UI
+- `modules/controlcenter/dashboard/DashboardPane.qml` was restored instead of keeping the abandoned experimental Dashboard settings redesign
+- `modules/controlcenter/AudioPane.qml` still exists as an older duplicate; the registered/active pane is `modules/controlcenter/audio/AudioPane.qml`. Confirm the old file has no remaining references before deleting it
+- VPN UI was intentionally left out of this visual redesign pass
+
+---
+
 ## [2026-08-31] - Bluetooth device list redesign
 
 ### Changed

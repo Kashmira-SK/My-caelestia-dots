@@ -48,33 +48,7 @@ Item {
                 width: devicesFlickable.width
                 spacing: Appearance.spacing.larger
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Appearance.spacing.small
-                    spacing: Appearance.spacing.normal
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 1
-
-                        StyledText {
-                            text: qsTr("AUDIO")
-                            color: Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.large
-                            font.weight: 500
-                            font.letterSpacing: 0.8
-                        }
-
-                        StyledText {
-                            text: qsTr("%1 output · %2 input")
-                                .arg(Audio.sinks.length)
-                                .arg(Audio.sources.length)
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
-                            font.pointSize: Appearance.font.size.smaller
-                        }
-                    }
-                }
-
+                
                 SectionLabel {
                     text: qsTr("OUTPUT")
                     detail: qsTr("%1").arg(Audio.sinks.length)
@@ -197,41 +171,7 @@ Item {
                 width: mixerFlickable.width
                 spacing: Appearance.spacing.larger
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Appearance.spacing.small
-                    spacing: Appearance.spacing.normal
-
-                    MaterialIcon {
-                        text: Audio.muted ? "volume_off" : "volume_up"
-                        color: Audio.muted
-                            ? Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
-                            : Colours.palette.m3primary
-                        fill: Audio.muted ? 0 : 1
-                        font.pointSize: Appearance.font.size.large
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 1
-
-                        StyledText {
-                            text: qsTr("Audio controls")
-                            color: Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.larger
-                            font.weight: 500
-                        }
-
-                        StyledText {
-                            text: Audio.sink?.description
-                                || qsTr("No active output device")
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
-                            font.pointSize: Appearance.font.size.small
-                            elide: Text.ElideRight
-                        }
-                    }
-                }
-
+                
                 SectionHeading {
                     title: qsTr("Output")
                     description: Audio.sink?.description

@@ -135,26 +135,7 @@ Item {
 
             spacing: Appearance.spacing.large * 1.7
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.small
-
-                StyledText {
-                    text: qsTr("TASKBAR")
-                    font.pointSize: Appearance.font.size.large
-                    font.weight: 500
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 1
-                    color: Qt.alpha(
-                        Colours.palette.m3outlineVariant,
-                        0.22
-                    )
-                }
-            }
-
+            
             Section {
                 title: qsTr("STATUS ICONS")
 

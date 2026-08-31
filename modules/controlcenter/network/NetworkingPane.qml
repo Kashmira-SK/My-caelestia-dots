@@ -55,14 +55,7 @@ Item {
                         ColumnLayout {
                             spacing: 1
 
-                            StyledText {
-                                text: qsTr("NETWORK")
-                                color: Colours.palette.m3onSurface
-                                font.pointSize: Appearance.font.size.large
-                                font.weight: 500
-                                font.letterSpacing: 0.8
-                            }
-
+                            
                             RowLayout {
                                 spacing: 6
 

@@ -16,26 +16,7 @@ ColumnLayout {
 
     spacing: Appearance.spacing.large * 1.8
 
-    RowLayout {
-        Layout.fillWidth: true
-        spacing: Appearance.spacing.small
-
-        StyledText {
-            text: qsTr("LAUNCHER SETTINGS")
-            font.pointSize: Appearance.font.size.large
-            font.weight: 500
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Qt.alpha(
-                Colours.palette.m3outlineVariant,
-                0.22
-            )
-        }
-    }
-
+    
     // General is the primary block, kept full width and split evenly.
     Section {
         title: qsTr("GENERAL")

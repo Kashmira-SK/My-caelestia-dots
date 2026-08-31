@@ -176,45 +176,7 @@ Item {
                 anchors.fill: parent
                 spacing: Appearance.spacing.normal
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Appearance.spacing.small
-                    spacing: Appearance.spacing.small
-
-                    StyledText {
-                        text: qsTr("LAUNCHER")
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: 500
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-
-                        color: Qt.alpha(
-                            Colours.palette.m3outlineVariant,
-                            0.22
-                        )
-                    }
-
-                    ToolButton {
-                        active:
-                            root.session.launcher.active === null
-
-                        icon: "settings"
-                        text: qsTr("Settings")
-
-                        onClicked: {
-                            if (root.session.launcher.active) {
-                                root.session.launcher.active = null;
-                            } else if (root.filteredApps.length > 0) {
-                                root.session.launcher.active =
-                                    root.filteredApps[0];
-                            }
-                        }
-                    }
-                }
-
+                
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Appearance.spacing.small
@@ -262,7 +224,24 @@ Item {
                         font.pointSize:
                             Appearance.font.size.smaller
                     }
-                }
+                
+                    ToolButton {
+                        active:
+                            root.session.launcher.active === null
+
+                        icon: "settings"
+                        text: qsTr("Settings")
+
+                        onClicked: {
+                            if (root.session.launcher.active) {
+                                root.session.launcher.active = null;
+                            } else if (root.filteredApps.length > 0) {
+                                root.session.launcher.active =
+                                    root.filteredApps[0];
+                            }
+                        }
+                    }
+}
 
                 Item {
                     Layout.fillWidth: true
