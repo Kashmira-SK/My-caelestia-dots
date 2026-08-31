@@ -176,7 +176,7 @@ Item {
                 anchors.fill: parent
                 spacing: Appearance.spacing.normal
 
-                
+
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Appearance.spacing.small
@@ -224,7 +224,7 @@ Item {
                         font.pointSize:
                             Appearance.font.size.smaller
                     }
-                
+
                     ToolButton {
                         active:
                             root.session.launcher.active === null

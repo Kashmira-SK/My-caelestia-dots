@@ -504,7 +504,7 @@ Item {
 
             spacing: 0
 
-            
+
             RowLayout {
                 Layout.fillWidth: true
                 Layout.bottomMargin: Appearance.spacing.normal

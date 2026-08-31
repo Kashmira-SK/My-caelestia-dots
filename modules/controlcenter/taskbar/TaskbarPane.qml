@@ -135,7 +135,7 @@ Item {
 
             spacing: Appearance.spacing.large * 1.7
 
-            
+
             Section {
                 title: qsTr("STATUS ICONS")
 

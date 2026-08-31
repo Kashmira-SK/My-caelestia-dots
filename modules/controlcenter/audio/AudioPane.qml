@@ -48,7 +48,7 @@ Item {
                 width: devicesFlickable.width
                 spacing: Appearance.spacing.larger
 
-                
+
                 SectionLabel {
                     text: qsTr("OUTPUT")
                     detail: qsTr("%1").arg(Audio.sinks.length)
@@ -171,7 +171,7 @@ Item {
                 width: mixerFlickable.width
                 spacing: Appearance.spacing.larger
 
-                
+
                 SectionHeading {
                     title: qsTr("Output")
                     description: Audio.sink?.description

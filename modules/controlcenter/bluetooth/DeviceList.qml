@@ -128,7 +128,7 @@ ColumnLayout {
         ColumnLayout {
             spacing: 1
 
-            
+
             RowLayout {
                 spacing: 6
 

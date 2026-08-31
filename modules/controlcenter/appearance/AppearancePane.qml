@@ -210,7 +210,7 @@ Item {
                         && backgroundSection.expanded
                         && dashboardSection.expanded
 
-                    
+
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 0

@@ -16,7 +16,7 @@ ColumnLayout {
 
     spacing: Appearance.spacing.large * 1.8
 
-    
+
     // General is the primary block, kept full width and split evenly.
     Section {
         title: qsTr("GENERAL")
