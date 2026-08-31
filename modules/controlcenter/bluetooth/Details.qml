@@ -18,6 +18,12 @@ StyledFlickable {
 
     required property Session session
     readonly property BluetoothDevice device: session.bt.active
+    readonly property bool connected: root.device?.connected ?? false
+    readonly property bool paired: root.device?.paired ?? false
+    readonly property bool loading: root.device
+        && (root.device.state === BluetoothDeviceState.Connecting
+            || root.device.state === BluetoothDeviceState.Disconnecting
+            || root.device.pairing)
 
     flickableDirection: Flickable.VerticalFlick
     contentHeight: detailsWrapper.height
@@ -45,9 +51,55 @@ StyledFlickable {
             device: root.device
 
             headerComponent: Component {
-                SettingsHeader {
-                    icon: Icons.getBluetoothIcon(root.device?.icon ?? "")
-                    title: root.device?.name ?? ""
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.normal
+
+                    MaterialIcon {
+                        text: Icons.getBluetoothIcon(root.device?.icon ?? "")
+                        color: root.connected
+                            ? Colours.palette.m3primary
+                            : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.58)
+                        fill: root.connected ? 1 : 0
+                        font.pointSize: Appearance.font.size.large
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: root.device?.name ?? qsTr("Unknown device")
+                            color: Colours.palette.m3onSurface
+                            font.pointSize: Appearance.font.size.larger
+                            font.weight: 500
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            text: root.loading
+                                ? qsTr("Working…")
+                                : root.connected
+                                    ? qsTr("Connected")
+                                    : root.paired
+                                        ? qsTr("Paired")
+                                        : qsTr("Available")
+                            color: root.connected
+                                ? Colours.palette.m3primary
+                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.44)
+                            font.pointSize: Appearance.font.size.smaller
+                            font.weight: root.connected ? 500 : 400
+                        }
+                    }
+
+                    StyledText {
+                        visible: root.device?.batteryAvailable ?? false
+                        text: qsTr("%1%").arg(Math.round((root.device?.battery ?? 0) * 100))
+                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
+                        font.family: Appearance.font.family.mono
+                        font.pointSize: Appearance.font.size.small
+                    }
                 }
             }
 
@@ -56,265 +108,97 @@ StyledFlickable {
                     ColumnLayout {
                         spacing: Appearance.spacing.normal
 
-                        StyledText {
-                            Layout.topMargin: Appearance.spacing.large
-                            text: qsTr("Connection status")
-                            font.pointSize: Appearance.font.size.larger
-                            font.weight: 500
+                        SectionHeading {
+                            title: qsTr("Connection")
+                            description: qsTr("Pair and connect this device")
                         }
 
-                        StyledText {
-                            text: qsTr("Connection settings for this device")
-                            color: Colours.palette.m3outline
-                        }
-
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: deviceStatus.implicitHeight + Appearance.padding.large * 2
-
-                            radius: Appearance.rounding.normal
-                            color: Colours.tPalette.m3surfaceContainer
+                        SectionBox {
+                            contentHeight: connectionContent.implicitHeight
 
                             ColumnLayout {
-                                id: deviceStatus
+                                id: connectionContent
 
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.margins: Appearance.padding.large
-
-                                spacing: Appearance.spacing.larger
-
-                                Toggle {
-                                    label: qsTr("Connected")
-                                    checked: root.device?.connected ?? false
-                                    toggle.onToggled: root.device.connected = checked
-                                }
-
-                                Toggle {
-                                    label: qsTr("Paired")
-                                    checked: root.device?.paired ?? false
-                                    toggle.onToggled: {
-                                        if (root.device.paired)
-                                            root.device.forget();
-                                        else
-                                            root.device.pair();
-                                    }
-                                }
-
-                                Toggle {
-                                    label: qsTr("Blocked")
-                                    checked: root.device?.blocked ?? false
-                                    toggle.onToggled: root.device.blocked = checked
-                                }
-                            }
-                        }
-                    }
-                },
-                Component {
-                    ColumnLayout {
-                        spacing: Appearance.spacing.normal
-
-                        StyledText {
-                            Layout.topMargin: Appearance.spacing.large
-                            text: qsTr("Device properties")
-                            font.pointSize: Appearance.font.size.larger
-                            font.weight: 500
-                        }
-
-                        StyledText {
-                            text: qsTr("Additional settings")
-                            color: Colours.palette.m3outline
-                        }
-
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: deviceProps.implicitHeight + Appearance.padding.large * 2
-
-                            radius: Appearance.rounding.normal
-                            color: Colours.tPalette.m3surfaceContainer
-
-                            ColumnLayout {
-                                id: deviceProps
-
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-
-                                spacing: Appearance.spacing.larger
+                                spacing: Appearance.spacing.normal
 
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: Appearance.spacing.small
 
-                                    Item {
-                                        id: renameDevice
-
+                                    ActionButton {
                                         Layout.fillWidth: true
-                                        Layout.rightMargin: Appearance.spacing.small
+                                        icon: root.connected ? "link_off" : "bluetooth_connected"
+                                        text: root.connected ? qsTr("Disconnect") : qsTr("Connect")
+                                        active: root.connected
+                                        busy: root.loading
 
-                                        implicitHeight: renameLabel.implicitHeight + deviceNameEdit.implicitHeight
+                                        onClicked: {
+                                            if (!root.device || root.loading)
+                                                return;
 
-                                        states: State {
-                                            name: "editingDeviceName"
-                                            when: root.session.bt.editingDeviceName
-
-                                            AnchorChanges {
-                                                target: deviceNameEdit
-                                                anchors.top: renameDevice.top
-                                            }
-                                            PropertyChanges {
-                                                renameDevice.implicitHeight: deviceNameEdit.implicitHeight
-                                                renameLabel.opacity: 0
-                                                deviceNameEdit.padding: Appearance.padding.normal
-                                            }
-                                        }
-
-                                        transitions: Transition {
-                                            AnchorAnimation {
-                                                duration: Appearance.anim.durations.normal
-                                                easing.type: Easing.BezierSpline
-                                                easing.bezierCurve: Appearance.anim.curves.standard
-                                            }
-                                            Anim {
-                                                properties: "implicitHeight,opacity,padding"
-                                            }
-                                        }
-
-                                        StyledText {
-                                            id: renameLabel
-
-                                            anchors.left: parent.left
-
-                                            text: qsTr("Device name")
-                                            color: Colours.palette.m3outline
-                                            font.pointSize: Appearance.font.size.small
-                                        }
-
-                                        StyledTextField {
-                                            id: deviceNameEdit
-
-                                            anchors.left: parent.left
-                                            anchors.right: parent.right
-                                            anchors.top: renameLabel.bottom
-                                            anchors.leftMargin: root.session.bt.editingDeviceName ? 0 : -Appearance.padding.normal
-
-                                            text: root.device?.name ?? ""
-                                            readOnly: !root.session.bt.editingDeviceName
-                                            onAccepted: {
-                                                root.session.bt.editingDeviceName = false;
-                                                root.device.name = text;
-                                            }
-
-                                            leftPadding: Appearance.padding.normal
-                                            rightPadding: Appearance.padding.normal
-
-                                            background: StyledRect {
-                                                radius: Appearance.rounding.small
-                                                border.width: 2
-                                                border.color: Colours.palette.m3primary
-                                                opacity: root.session.bt.editingDeviceName ? 1 : 0
-
-                                                Behavior on border.color {
-                                                    CAnim {}
-                                                }
-
-                                                Behavior on opacity {
-                                                    Anim {}
-                                                }
-                                            }
-
-                                            Behavior on anchors.leftMargin {
-                                                Anim {}
+                                            if (root.connected) {
+                                                root.device.connected = false;
+                                            } else if (root.paired) {
+                                                root.device.connected = true;
+                                            } else {
+                                                root.device.pair();
                                             }
                                         }
                                     }
 
-                                    StyledRect {
-                                        implicitWidth: implicitHeight
-                                        implicitHeight: cancelEditIcon.implicitHeight + Appearance.padding.smaller * 2
+                                    ActionButton {
+                                        Layout.fillWidth: true
+                                        icon: root.paired ? "delete_outline" : "add_link"
+                                        text: root.paired ? qsTr("Forget") : qsTr("Pair")
+                                        active: root.paired
+                                        enabled: !root.loading
 
-                                        radius: Appearance.rounding.small
-                                        color: Colours.palette.m3secondaryContainer
-                                        opacity: root.session.bt.editingDeviceName ? 1 : 0
-                                        scale: root.session.bt.editingDeviceName ? 1 : 0.5
+                                        onClicked: {
+                                            if (!root.device || root.loading)
+                                                return;
 
-                                        StateLayer {
-                                            color: Colours.palette.m3onSecondaryContainer
-                                            disabled: !root.session.bt.editingDeviceName
-
-                                            function onClicked(): void {
-                                                root.session.bt.editingDeviceName = false;
-                                                deviceNameEdit.text = Qt.binding(() => root.device?.name ?? "");
-                                            }
-                                        }
-
-                                        MaterialIcon {
-                                            id: cancelEditIcon
-
-                                            anchors.centerIn: parent
-                                            animate: true
-                                            text: "cancel"
-                                            color: Colours.palette.m3onSecondaryContainer
-                                        }
-
-                                        Behavior on opacity {
-                                            Anim {}
-                                        }
-
-                                        Behavior on scale {
-                                            Anim {
-                                                duration: Appearance.anim.durations.expressiveFastSpatial
-                                                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                                            }
-                                        }
-                                    }
-
-                                    StyledRect {
-                                        implicitWidth: implicitHeight
-                                        implicitHeight: editIcon.implicitHeight + Appearance.padding.smaller * 2
-
-                                        radius: root.session.bt.editingDeviceName ? Appearance.rounding.small : implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
-                                        color: Qt.alpha(Colours.palette.m3primary, root.session.bt.editingDeviceName ? 1 : 0)
-
-                                        StateLayer {
-                                            color: root.session.bt.editingDeviceName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-
-                                            function onClicked(): void {
-                                                root.session.bt.editingDeviceName = !root.session.bt.editingDeviceName;
-                                                if (root.session.bt.editingDeviceName)
-                                                    deviceNameEdit.forceActiveFocus();
-                                                else
-                                                    deviceNameEdit.accepted();
-                                            }
-                                        }
-
-                                        MaterialIcon {
-                                            id: editIcon
-
-                                            anchors.centerIn: parent
-                                            animate: true
-                                            text: root.session.bt.editingDeviceName ? "check_circle" : "edit"
-                                            color: root.session.bt.editingDeviceName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                                        }
-
-                                        Behavior on radius {
-                                            Anim {}
+                                            if (root.paired)
+                                                root.device.forget();
+                                            else
+                                                root.device.pair();
                                         }
                                     }
                                 }
 
-                                Toggle {
+                                ThinLine {}
+
+                                SwitchRow {
+                                    label: qsTr("Blocked")
+                                    description: qsTr("Prevent connections from this device")
+                                    checked: root.device?.blocked ?? false
+                                    onChanged: checked => {
+                                        if (root.device)
+                                            root.device.blocked = checked;
+                                    }
+                                }
+
+                                SwitchRow {
                                     label: qsTr("Trusted")
+                                    description: qsTr("Allow trusted reconnection behaviour")
                                     checked: root.device?.trusted ?? false
-                                    toggle.onToggled: root.device.trusted = checked
+                                    onChanged: checked => {
+                                        if (root.device)
+                                            root.device.trusted = checked;
+                                    }
                                 }
 
-                                Toggle {
+                                SwitchRow {
                                     label: qsTr("Wake allowed")
+                                    description: qsTr("Allow this device to wake the system")
                                     checked: root.device?.wakeAllowed ?? false
-                                    toggle.onToggled: root.device.wakeAllowed = checked
+                                    onChanged: checked => {
+                                        if (root.device)
+                                            root.device.wakeAllowed = checked;
+                                    }
                                 }
                             }
                         }
@@ -324,107 +208,160 @@ StyledFlickable {
                     ColumnLayout {
                         spacing: Appearance.spacing.normal
 
-                        StyledText {
-                            Layout.topMargin: Appearance.spacing.large
-                            text: qsTr("Device information")
-                            font.pointSize: Appearance.font.size.larger
-                            font.weight: 500
+                        SectionHeading {
+                            title: qsTr("Device name")
+                            description: qsTr("Name shown for this Bluetooth device")
                         }
 
-                        StyledText {
-                            text: qsTr("Information about this device")
-                            color: Colours.palette.m3outline
-                        }
+                        SectionBox {
+                            contentHeight: nameContent.implicitHeight
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: deviceInfo.implicitHeight + Appearance.padding.large * 2
-
-                            radius: Appearance.rounding.normal
-                            color: Colours.tPalette.m3surfaceContainer
-
-                            ColumnLayout {
-                                id: deviceInfo
+                            RowLayout {
+                                id: nameContent
 
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.margins: Appearance.padding.large
+                                spacing: Appearance.spacing.small
 
-                                spacing: Appearance.spacing.small / 2
+                                StyledTextField {
+                                    id: deviceNameEdit
 
-                                StyledText {
-                                    text: root.device?.batteryAvailable ? qsTr("Device battery (%1%)").arg(root.device.battery * 100) : qsTr("Battery unavailable")
+                                    Layout.fillWidth: true
+                                    text: root.device?.name ?? ""
+                                    readOnly: !root.session.bt.editingDeviceName
+                                    selectByMouse: true
+
+                                    onAccepted: {
+                                        if (!root.device)
+                                            return;
+
+                                        root.device.name = text;
+                                        root.session.bt.editingDeviceName = false;
+                                    }
+
+                                    background: StyledRect {
+                                        radius: Appearance.rounding.small
+                                        color: Qt.alpha(
+                                            Colours.palette.m3primary,
+                                            root.session.bt.editingDeviceName ? 0.055 : 0
+                                        )
+                                        border.width: root.session.bt.editingDeviceName ? 1 : 0
+                                        border.color: Qt.alpha(Colours.palette.m3primary, 0.55)
+                                    }
                                 }
 
-                                RowLayout {
-                                    id: batteryPercent
-                                    Layout.topMargin: Appearance.spacing.small / 2
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: Appearance.padding.smaller
-                                    spacing: Appearance.spacing.small / 2
+                                SmallIconButton {
+                                    icon: root.session.bt.editingDeviceName ? "close" : "edit"
+                                    visible: root.device !== null
 
-                                    StyledRect {
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        radius: Appearance.rounding.full
-                                        color: Colours.palette.m3secondaryContainer
-
-                                        StyledRect {
-                                            anchors.left: parent.left
-                                            anchors.top: parent.top
-                                            anchors.bottom: parent.bottom
-                                            anchors.margins: parent.height * 0.25
-
-                                            implicitWidth: root.device?.batteryAvailable ? batteryPercent.width * root.device.battery : 0
-                                            radius: Appearance.rounding.full
-                                            color: Colours.palette.m3primary
+                                    onClicked: {
+                                        if (root.session.bt.editingDeviceName) {
+                                            root.session.bt.editingDeviceName = false;
+                                            deviceNameEdit.text = Qt.binding(() => root.device?.name ?? "");
+                                        } else {
+                                            root.session.bt.editingDeviceName = true;
+                                            deviceNameEdit.forceActiveFocus();
+                                            deviceNameEdit.selectAll();
                                         }
                                     }
                                 }
 
-                                StyledText {
-                                    Layout.topMargin: Appearance.spacing.normal
-                                    text: qsTr("Dbus path")
+                                SmallIconButton {
+                                    icon: "check"
+                                    visible: root.session.bt.editingDeviceName
+
+                                    onClicked: deviceNameEdit.accepted()
+                                }
+                            }
+                        }
+                    }
+                },
+                Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        SectionHeading {
+                            title: qsTr("Device information")
+                            description: qsTr("Technical details")
+                        }
+
+                        SectionBox {
+                            contentHeight: infoContent.implicitHeight
+
+                            ColumnLayout {
+                                id: infoContent
+
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins: Appearance.padding.large
+                                spacing: Appearance.spacing.small / 2
+
+                                RowLayout {
+                                    visible: root.device?.batteryAvailable ?? false
+                                    Layout.fillWidth: true
+                                    Layout.bottomMargin: Appearance.spacing.normal
+                                    spacing: Appearance.spacing.small
+
+                                    StyledText {
+                                        text: qsTr("Battery")
+                                        color: Colours.palette.m3onSurface
+                                    }
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                    }
+
+                                    StyledText {
+                                        text: qsTr("%1%").arg(Math.round((root.device?.battery ?? 0) * 100))
+                                        color: Colours.palette.m3primary
+                                        font.family: Appearance.font.family.mono
+                                        font.pointSize: Appearance.font.size.small
+                                        font.weight: 500
+                                    }
                                 }
 
-                                StyledText {
-                                    text: root.device?.dbusPath ?? ""
-                                    color: Colours.palette.m3outline
-                                    font.pointSize: Appearance.font.size.small
+                                StyledRect {
+                                    visible: root.device?.batteryAvailable ?? false
+                                    Layout.fillWidth: true
+                                    Layout.bottomMargin: Appearance.spacing.normal
+                                    implicitHeight: 4
+                                    radius: 2
+                                    color: Qt.alpha(Colours.palette.m3outlineVariant, 0.24)
+
+                                    StyledRect {
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: parent.width * Math.max(0, Math.min(1, root.device?.battery ?? 0))
+                                        radius: parent.radius
+                                        color: Colours.palette.m3primary
+                                    }
                                 }
 
-                                StyledText {
-                                    Layout.topMargin: Appearance.spacing.normal
-                                    text: qsTr("MAC address")
+                                PropertyRow {
+                                    label: qsTr("MAC address")
+                                    value: root.device?.address ?? ""
                                 }
 
-                                StyledText {
-                                    text: root.device?.address ?? ""
-                                    color: Colours.palette.m3outline
-                                    font.pointSize: Appearance.font.size.small
+                                PropertyRow {
+                                    showTopMargin: true
+                                    label: qsTr("System name")
+                                    value: root.device?.deviceName ?? ""
                                 }
 
-                                StyledText {
-                                    Layout.topMargin: Appearance.spacing.normal
-                                    text: qsTr("Bonded")
+                                PropertyRow {
+                                    showTopMargin: true
+                                    label: qsTr("Bonded")
+                                    value: root.device?.bonded ? qsTr("Yes") : qsTr("No")
                                 }
 
-                                StyledText {
-                                    text: root.device?.bonded ? qsTr("Yes") : qsTr("No")
-                                    color: Colours.palette.m3outline
-                                    font.pointSize: Appearance.font.size.small
-                                }
-
-                                StyledText {
-                                    Layout.topMargin: Appearance.spacing.normal
-                                    text: qsTr("System name")
-                                }
-
-                                StyledText {
-                                    text: root.device?.deviceName ?? ""
-                                    color: Colours.palette.m3outline
-                                    font.pointSize: Appearance.font.size.small
+                                PropertyRow {
+                                    showTopMargin: true
+                                    label: qsTr("D-Bus path")
+                                    value: root.device?.dbusPath ?? ""
                                 }
                             }
                         }
@@ -434,238 +371,183 @@ StyledFlickable {
         }
     }
 
-    ColumnLayout {
-        anchors.right: fabRoot.right
-        anchors.bottom: fabRoot.top
-        anchors.bottomMargin: Appearance.padding.normal
+    component SectionHeading: ColumnLayout {
+        id: heading
 
-        Repeater {
-            id: fabMenu
+        required property string title
+        property string description: ""
 
-            model: ListModel {
-                ListElement {
-                    name: "trust"
-                    icon: "handshake"
-                }
-                ListElement {
-                    name: "block"
-                    icon: "block"
-                }
-                ListElement {
-                    name: "pair"
-                    icon: "missing_controller"
-                }
-                ListElement {
-                    name: "connect"
-                    icon: "bluetooth_connected"
-                }
-            }
+        Layout.fillWidth: true
+        Layout.topMargin: Appearance.spacing.large
+        spacing: 2
 
-            StyledClippingRect {
-                id: fabMenuItem
+        StyledText {
+            text: heading.title
+            color: Colours.palette.m3onSurface
+            font.pointSize: Appearance.font.size.larger
+            font.weight: 500
+        }
 
-                required property var modelData
-                required property int index
-
-                Layout.alignment: Qt.AlignRight
-
-                implicitHeight: fabMenuItemInner.implicitHeight + Appearance.padding.larger * 2
-
-                radius: Appearance.rounding.full
-                color: Colours.palette.m3primaryContainer
-
-                opacity: 0
-
-                states: State {
-                    name: "visible"
-                    when: root.session.bt.fabMenuOpen
-
-                    PropertyChanges {
-                        fabMenuItem.implicitWidth: fabMenuItemInner.implicitWidth + Appearance.padding.large * 2
-                        fabMenuItem.opacity: 1
-                        fabMenuItemInner.opacity: 1
-                    }
-                }
-
-                transitions: [
-                    Transition {
-                        to: "visible"
-
-                        SequentialAnimation {
-                            PauseAnimation {
-                                duration: (fabMenu.count - 1 - fabMenuItem.index) * Appearance.anim.durations.small / 8
-                            }
-                            ParallelAnimation {
-                                Anim {
-                                    property: "implicitWidth"
-                                    duration: Appearance.anim.durations.expressiveFastSpatial
-                                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                                }
-                                Anim {
-                                    property: "opacity"
-                                    duration: Appearance.anim.durations.small
-                                }
-                            }
-                        }
-                    },
-                    Transition {
-                        from: "visible"
-
-                        SequentialAnimation {
-                            PauseAnimation {
-                                duration: fabMenuItem.index * Appearance.anim.durations.small / 8
-                            }
-                            ParallelAnimation {
-                                Anim {
-                                    property: "implicitWidth"
-                                    duration: Appearance.anim.durations.expressiveFastSpatial
-                                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                                }
-                                Anim {
-                                    property: "opacity"
-                                    duration: Appearance.anim.durations.small
-                                }
-                            }
-                        }
-                    }
-                ]
-
-                StateLayer {
-                    function onClicked(): void {
-                        root.session.bt.fabMenuOpen = false;
-
-                        const name = fabMenuItem.modelData.name;
-                        if (fabMenuItem.modelData.name !== "pair")
-                            root.device[`${name}ed`] = !root.device[`${name}ed`];
-                        else if (root.device.paired)
-                            root.device.forget();
-                        else
-                            root.device.pair();
-                    }
-                }
-
-                RowLayout {
-                    id: fabMenuItemInner
-
-                    anchors.centerIn: parent
-                    spacing: Appearance.spacing.normal
-                    opacity: 0
-
-                    MaterialIcon {
-                        text: fabMenuItem.modelData.icon
-                        color: Colours.palette.m3onPrimaryContainer
-                        fill: 1
-                    }
-
-                    StyledText {
-                        animate: true
-                        text: (root.device && root.device[`${fabMenuItem.modelData.name}ed`] ? fabMenuItem.modelData.name === "connect" ? "dis" : "un" : "") + fabMenuItem.modelData.name
-                        color: Colours.palette.m3onPrimaryContainer
-                        font.capitalization: Font.Capitalize
-                        Layout.preferredWidth: implicitWidth
-
-                        Behavior on Layout.preferredWidth {
-                            Anim {
-                                duration: Appearance.anim.durations.small
-                            }
-                        }
-                    }
-                }
-            }
+        StyledText {
+            visible: heading.description !== ""
+            text: heading.description
+            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
+            font.pointSize: Appearance.font.size.small
         }
     }
 
-    Item {
-        id: fabRoot
+    component SectionBox: StyledRect {
+        property real contentHeight: 0
 
-        x: root.contentX + root.width - width
-        y: root.contentY + root.height - height
-        width: 64
-        height: 64
-        z: 10000
-
-        StyledRect {
-            id: fabBg
-
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            implicitWidth: 64
-            implicitHeight: 64
-
-            radius: Appearance.rounding.normal
-            color: root.session.bt.fabMenuOpen ? Colours.palette.m3primary : Colours.palette.m3primaryContainer
-
-            states: State {
-                name: "expanded"
-                when: root.session.bt.fabMenuOpen
-
-                PropertyChanges {
-                    fabBg.implicitWidth: 48
-                    fabBg.implicitHeight: 48
-                    fabBg.radius: 48 / 2
-                    fab.font.pointSize: Appearance.font.size.larger
-                }
-            }
-
-            transitions: Transition {
-                Anim {
-                    properties: "implicitWidth,implicitHeight"
-                    duration: Appearance.anim.durations.expressiveFastSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                }
-                Anim {
-                    properties: "radius,font.pointSize"
-                }
-            }
-
-            Elevation {
-                anchors.fill: parent
-                radius: parent.radius
-                z: -1
-                level: fabState.containsMouse && !fabState.pressed ? 4 : 3
-            }
-
-            StateLayer {
-                id: fabState
-
-                color: root.session.bt.fabMenuOpen ? Colours.palette.m3onPrimary : Colours.palette.m3onPrimaryContainer
-
-                function onClicked(): void {
-                    root.session.bt.fabMenuOpen = !root.session.bt.fabMenuOpen;
-                }
-            }
-
-            MaterialIcon {
-                id: fab
-
-                anchors.centerIn: parent
-                animate: true
-                text: root.session.bt.fabMenuOpen ? "close" : "settings"
-                color: root.session.bt.fabMenuOpen ? Colours.palette.m3onPrimary : Colours.palette.m3onPrimaryContainer
-                font.pointSize: Appearance.font.size.large
-                fill: 1
-            }
-        }
+        Layout.fillWidth: true
+        implicitHeight: contentHeight + Appearance.padding.large * 2
+        radius: Appearance.rounding.small
+        color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
+        border.width: 1
+        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
     }
 
-    component Toggle: RowLayout {
+    component ThinLine: Rectangle {
+        Layout.fillWidth: true
+        implicitHeight: 1
+        color: Qt.alpha(Colours.palette.m3outlineVariant, 0.18)
+    }
+
+    component SwitchRow: RowLayout {
+        id: switchRow
+
         required property string label
-        property alias checked: toggle.checked
-        property alias toggle: toggle
+        property string description: ""
+        property bool checked: false
+
+        signal changed(bool checked)
 
         Layout.fillWidth: true
         spacing: Appearance.spacing.normal
 
-        StyledText {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: parent.label
+            spacing: 1
+
+            StyledText {
+                text: switchRow.label
+                color: Colours.palette.m3onSurface
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                visible: switchRow.description !== ""
+                text: switchRow.description
+                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.38)
+                font.pointSize: Appearance.font.size.smaller
+            }
         }
 
         StyledSwitch {
-            id: toggle
-
+            checked: switchRow.checked
             cLayer: 2
+            onToggled: switchRow.changed(checked)
+        }
+    }
+
+    component ActionButton: Item {
+        id: action
+
+        required property string icon
+        required property string text
+        property bool active: false
+        property bool busy: false
+
+        signal clicked
+
+        implicitHeight: 38
+
+        StyledRect {
+            anchors.fill: parent
+            radius: Appearance.rounding.small
+            color: action.active
+                ? Qt.alpha(Colours.palette.m3primary, 0.12)
+                : Qt.alpha(Colours.palette.m3onSurfaceVariant, actionMouse.containsMouse ? 0.055 : 0.025)
+            border.width: 1
+            border.color: action.active
+                ? Qt.alpha(Colours.palette.m3primary, 0.30)
+                : Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
+        }
+
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: 7
+
+            CircularIndicator {
+                implicitWidth: 18
+                implicitHeight: 18
+                running: action.busy
+            }
+
+            MaterialIcon {
+                visible: !action.busy
+                text: action.icon
+                color: action.active
+                    ? Colours.palette.m3primary
+                    : Colours.palette.m3onSurface
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                text: action.text
+                color: action.active
+                    ? Colours.palette.m3primary
+                    : Colours.palette.m3onSurface
+                font.pointSize: Appearance.font.size.small
+                font.weight: action.active ? 500 : 400
+            }
+        }
+
+        MouseArea {
+            id: actionMouse
+            anchors.fill: parent
+            enabled: action.enabled && !action.busy
+            hoverEnabled: true
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: action.clicked()
+        }
+    }
+
+    component SmallIconButton: Item {
+        id: smallButton
+
+        required property string icon
+
+        signal clicked
+
+        implicitWidth: 32
+        implicitHeight: 32
+
+        StyledRect {
+            anchors.fill: parent
+            radius: Appearance.rounding.small
+            color: Qt.alpha(
+                Colours.palette.m3primary,
+                smallButtonMouse.containsMouse ? 0.07 : 0
+            )
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: smallButton.icon
+            color: Qt.alpha(
+                Colours.palette.m3onSurface,
+                smallButtonMouse.containsMouse ? 1 : 0.65
+            )
+            font.pointSize: Appearance.font.size.small
+        }
+
+        MouseArea {
+            id: smallButtonMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: smallButton.clicked()
         }
     }
 }
