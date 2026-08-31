@@ -1,9 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.effects
 import qs.config
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 
@@ -30,40 +28,38 @@ RowLayout {
         Layout.minimumWidth: root.leftMinimumWidth
         Layout.fillHeight: true
 
-        ClippingRectangle {
-            id: leftClippingRect
+        Loader {
+            id: leftLoader
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
-            anchors.leftMargin: 0
-            anchors.rightMargin: Appearance.padding.normal / 2
+            anchors.leftMargin: Appearance.padding.large
+            anchors.rightMargin: Appearance.padding.large
+            anchors.topMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.large
 
-            radius: leftBorder.innerRadius
-            color: "transparent"
+            sourceComponent: root.leftContent
 
-            Loader {
-                id: leftLoader
-
-                anchors.fill: parent
-                anchors.margins: Appearance.padding.large + Appearance.padding.normal
-                anchors.leftMargin: Appearance.padding.large
-                anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
-
-                sourceComponent: root.leftContent
-
-                Component.onCompleted: {
-                    for (const key in root.leftLoaderProperties) {
-                        leftLoader[key] = root.leftLoaderProperties[key];
-                    }
-                }
+            Component.onCompleted: {
+                for (const key in root.leftLoaderProperties)
+                    leftLoader[key] = root.leftLoaderProperties[key];
             }
         }
+    }
 
-        InnerBorder {
-            id: leftBorder
+    Item {
+        Layout.preferredWidth: Appearance.spacing.large + 1
+        Layout.fillHeight: true
 
-            leftThickness: 0
-            rightThickness: Appearance.padding.normal / 2
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.topMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.large
+
+            width: 1
+            color: Colours.palette.m3outlineVariant
+            opacity: 0.18
         }
     }
 
@@ -73,37 +69,21 @@ RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        ClippingRectangle {
-            id: rightClippingRect
+        Loader {
+            id: rightLoader
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
-            anchors.leftMargin: 0
-            anchors.rightMargin: Appearance.padding.normal / 2
+            anchors.leftMargin: Appearance.padding.large
+            anchors.rightMargin: Appearance.padding.large
+            anchors.topMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.large
 
-            radius: rightBorder.innerRadius
-            color: "transparent"
+            sourceComponent: root.rightContent
 
-            Loader {
-                id: rightLoader
-
-                anchors.fill: parent
-                anchors.margins: Appearance.padding.large * 2
-
-                sourceComponent: root.rightContent
-
-                Component.onCompleted: {
-                    for (const key in root.rightLoaderProperties) {
-                        rightLoader[key] = root.rightLoaderProperties[key];
-                    }
-                }
+            Component.onCompleted: {
+                for (const key in root.rightLoaderProperties)
+                    rightLoader[key] = root.rightLoaderProperties[key];
             }
-        }
-
-        InnerBorder {
-            id: rightBorder
-
-            leftThickness: Appearance.padding.normal / 2
         }
     }
 }

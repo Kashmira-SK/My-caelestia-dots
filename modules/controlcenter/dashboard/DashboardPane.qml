@@ -24,13 +24,13 @@ Item {
     property bool showOnHover: Config.dashboard.showOnHover ?? true
     property int updateInterval: Config.dashboard.updateInterval ?? 1000
     property int dragThreshold: Config.dashboard.dragThreshold ?? 50
-    
+
     // Performance Resources
     property bool showBattery: Config.dashboard.performance.showBattery ?? false
     property bool showGpu: Config.dashboard.performance.showGpu ?? true
     property bool showCpu: Config.dashboard.performance.showCpu ?? true
     property bool showMemory: Config.dashboard.performance.showMemory ?? true
-    property bool showStorage: Config.dashboard.performance.showStorage ?? true 
+    property bool showStorage: Config.dashboard.performance.showStorage ?? true
     property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
 
     anchors.fill: parent
@@ -46,77 +46,50 @@ Item {
         Config.dashboard.performance.showMemory = root.showMemory;
         Config.dashboard.performance.showStorage = root.showStorage;
         Config.dashboard.performance.showNetwork = root.showNetwork;
-        // Note: sizes properties are readonly and cannot be modified
         Config.save();
     }
 
-    ClippingRectangle {
-        id: dashboardClippingRect
+    StyledFlickable {
+        id: dashboardFlickable
+
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
-        anchors.leftMargin: 0
-        anchors.rightMargin: Appearance.padding.normal
+        anchors.leftMargin: Appearance.padding.large
+        anchors.rightMargin: Appearance.padding.large
+        anchors.topMargin: Appearance.padding.normal
+        anchors.bottomMargin: Appearance.padding.large
 
-        radius: dashboardBorder.innerRadius
-        color: "transparent"
+        flickableDirection: Flickable.VerticalFlick
+        contentHeight: dashboardLayout.height
 
-        Loader {
-            id: dashboardLoader
-
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-
-            sourceComponent: dashboardContentComponent
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: dashboardFlickable
         }
-    }
 
-    InnerBorder {
-        id: dashboardBorder
-        leftThickness: 0
-        rightThickness: Appearance.padding.normal
-    }
+        ColumnLayout {
+            id: dashboardLayout
 
-    Component {
-        id: dashboardContentComponent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
 
-        StyledFlickable {
-            id: dashboardFlickable
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: dashboardLayout.height
+            spacing: Appearance.spacing.normal
 
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: dashboardFlickable
+            RowLayout {
+                spacing: Appearance.spacing.smaller
+
+                StyledText {
+                    text: qsTr("Dashboard")
+                    font.pointSize: Appearance.font.size.large
+                    font.weight: 500
+                }
             }
 
-            ColumnLayout {
-                id: dashboardLayout
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+            GeneralSection {
+                rootItem: root
+            }
 
-                spacing: Appearance.spacing.normal
-
-                RowLayout {
-                    spacing: Appearance.spacing.smaller
-
-                    StyledText {
-                        text: qsTr("Dashboard")
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: 500
-                    }
-                }
-
-                // General Settings Section
-                GeneralSection {
-                    rootItem: root
-                }
-
-                // Performance Resources Section
-                PerformanceSection {
-                    rootItem: root
-                }
+            PerformanceSection {
+                rootItem: root
             }
         }
     }

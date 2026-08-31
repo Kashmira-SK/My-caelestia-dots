@@ -109,41 +109,17 @@ Item {
         id: entriesModel
     }
 
-    ClippingRectangle {
-        id: taskbarClippingRect
+    StyledFlickable {
+        id: sidebarFlickable
+
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
-        anchors.leftMargin: 0
-        anchors.rightMargin: Appearance.padding.normal
+        anchors.leftMargin: Appearance.padding.large
+        anchors.rightMargin: Appearance.padding.large
+        anchors.topMargin: Appearance.padding.normal
+        anchors.bottomMargin: Appearance.padding.large
 
-        radius: taskbarBorder.innerRadius
-        color: "transparent"
-
-        Loader {
-            id: taskbarLoader
-
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-
-            sourceComponent: taskbarContentComponent
-        }
-    }
-
-    InnerBorder {
-        id: taskbarBorder
-        leftThickness: 0
-        rightThickness: Appearance.padding.normal
-    }
-
-    Component {
-        id: taskbarContentComponent
-
-        StyledFlickable {
-            id: sidebarFlickable
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: sidebarLayout.height
+        flickableDirection: Flickable.VerticalFlick
+        contentHeight: sidebarLayout.height
 
             StyledScrollBar.vertical: StyledScrollBar {
                 flickable: sidebarFlickable
@@ -644,5 +620,4 @@ Item {
                 }
             }
         }
-    }
 }

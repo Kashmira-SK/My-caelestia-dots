@@ -20,9 +20,11 @@ ClippingRectangle {
 
     required property Session session
 
-    readonly property bool initialOpeningComplete: layout.initialOpeningComplete
+    readonly property bool initialOpeningComplete:
+        layout.initialOpeningComplete
 
-    color: "transparent"
+    color: Colours.tPalette.m3surface
+
     clip: true
     focus: false
     activeFocusOnTab: false
@@ -30,7 +32,8 @@ ClippingRectangle {
     MouseArea {
         anchors.fill: parent
         z: -1
-        onPressed: function (mouse) {
+
+        onPressed: function(mouse) {
             root.focus = true;
             mouse.accepted = false;
         }
@@ -47,8 +50,14 @@ ClippingRectangle {
     ColumnLayout {
         id: layout
 
+        width: root.width
+
         spacing: 0
-        y: -root.session.activeIndex * root.height
+
+        y:
+            -root.session.activeIndex
+            * root.height
+
         clip: true
 
         property bool animationComplete: true
@@ -56,19 +65,24 @@ ClippingRectangle {
 
         Timer {
             id: animationDelayTimer
-            interval: Appearance.anim.durations.normal
-            onTriggered: {
-                layout.animationComplete = true;
-            }
+
+            interval:
+                Appearance.anim.durations.normal
+
+            onTriggered:
+                layout.animationComplete = true
         }
 
         Timer {
             id: initialOpeningTimer
-            interval: Appearance.anim.durations.large
+
+            interval:
+                Appearance.anim.durations.large
+
             running: true
-            onTriggered: {
-                layout.initialOpeningComplete = true;
-            }
+
+            onTriggered:
+                layout.initialOpeningComplete = true
         }
 
         Repeater {
@@ -76,17 +90,24 @@ ClippingRectangle {
 
             Pane {
                 required property int index
+
                 paneIndex: index
-                componentPath: PaneRegistry.getByIndex(index).component
+
+                componentPath:
+                    PaneRegistry.getByIndex(index).component
             }
         }
 
         Behavior on y {
-            Anim {}
+            Anim {
+                duration:
+                    Appearance.anim.durations.normal
+            }
         }
 
         Connections {
             target: root.session
+
             function onActiveIndexChanged(): void {
                 layout.animationComplete = false;
                 animationDelayTimer.restart();
@@ -100,14 +121,25 @@ ClippingRectangle {
         required property int paneIndex
         required property string componentPath
 
-        implicitWidth: root.width
-        implicitHeight: root.height
+        Layout.fillWidth: true
+        Layout.preferredHeight: root.height
+        Layout.minimumHeight: root.height
+        Layout.maximumHeight: root.height
+
+        clip: true
 
         property bool hasBeenLoaded: false
 
         function updateActive(): void {
-            const diff = Math.abs(root.session.activeIndex - pane.paneIndex);
-            const isActivePane = diff === 0;
+            const diff =
+                Math.abs(
+                    root.session.activeIndex
+                    - pane.paneIndex
+                );
+
+            const isActivePane =
+                diff === 0;
+
             let shouldBeActive = false;
 
             if (!layout.initialOpeningComplete) {
@@ -118,45 +150,63 @@ ClippingRectangle {
                 } else if (pane.hasBeenLoaded) {
                     shouldBeActive = true;
                 } else {
-                    shouldBeActive = layout.animationComplete;
+                    shouldBeActive =
+                        layout.animationComplete;
                 }
             }
 
-            loader.active = shouldBeActive;
+            loader.active =
+                shouldBeActive;
         }
 
         Loader {
             id: loader
 
             anchors.fill: parent
-            clip: false
+
+            // Each loaded settings page must be clipped to its own page.
+            // Several panes intentionally use transparent/open layouts now,
+            // so allowing their children to paint outside this viewport causes
+            // the previous/next page to bleed through during navigation.
+            clip: true
             active: false
 
             Component.onCompleted: {
-                Qt.callLater(pane.updateActive);
+                Qt.callLater(
+                    pane.updateActive
+                );
             }
 
             onActiveChanged: {
-                if (active && !pane.hasBeenLoaded) {
+                if (
+                    active
+                    && !pane.hasBeenLoaded
+                )
                     pane.hasBeenLoaded = true;
-                }
 
-                if (active && !item) {
-                    loader.setSource(pane.componentPath, {
-                        "session": root.session
-                    });
+                if (
+                    active
+                    && !item
+                ) {
+                    loader.setSource(
+                        pane.componentPath,
+                        {
+                            "session":
+                                root.session
+                        }
+                    );
                 }
             }
 
             onItemChanged: {
-                if (item) {
+                if (item)
                     pane.hasBeenLoaded = true;
-                }
             }
         }
 
         Connections {
             target: root.session
+
             function onActiveIndexChanged(): void {
                 pane.updateActive();
             }
@@ -164,9 +214,11 @@ ClippingRectangle {
 
         Connections {
             target: layout
+
             function onInitialOpeningCompleteChanged(): void {
                 pane.updateActive();
             }
+
             function onAnimationCompleteChanged(): void {
                 pane.updateActive();
             }
