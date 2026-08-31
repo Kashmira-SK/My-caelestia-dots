@@ -37,6 +37,19 @@ Item {
         return `${mins}:${secs}`;
     }
 
+    function playerLabel(player): string {
+        const identity = Players.getIdentity(player) || "";
+        const lower = identity.toLowerCase();
+
+        if (lower.includes("kash"))
+            return "Kash";
+
+        if (lower.includes("firefox"))
+            return "Firefox";
+
+        return identity;
+    }
+
     implicitWidth: 840
     implicitHeight: 255
 
@@ -682,7 +695,7 @@ Item {
             anchors.top: parent.top
 
             text:
-                Players.getIdentity(
+                root.playerLabel(
                     sourceButton.player
                 )
 
