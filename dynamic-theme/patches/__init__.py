@@ -3,20 +3,16 @@ import sys
 import colorsys
 from pathlib import Path
 from PIL import Image
-from caelestia.utils.paths import compute_hash, scheme_cache_dir, wallpaper_thumbnail_path
+from caelestia.utils.paths import compute_hash, scheme_cache_dir, wallpaper_path_path
 
 def _score_color(r, g, b):
     h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
     if v < 0.15 or v > 0.97: return -1
-    if s < 0.10: return -1
-    # Prefer mid-range brightness — very bright colors make washed out themes
-    if v > 0.80 and s < 0.50: return -1
+    if s < 0.05: return -1
     chroma = s * v
-    # Prefer mid brightness — penalize very bright colors
-    brightness_penalty = max(0, v - 0.65) * 1.5
     warm_bonus   =  0.25 if (h <= 0.15 or h >= 0.75) else 0.0
     blue_penalty =  0.15 if (0.5 <= h <= 0.75 and s < 0.5) else 0.0
-    return chroma + warm_bonus - blue_penalty - brightness_penalty
+    return chroma + warm_bonus - blue_penalty
 
 def _extract_vibrant(image_path: str):
     print("VIBRANT EXTRACTOR HIT", file=sys.stderr)
@@ -25,7 +21,6 @@ def _extract_vibrant(image_path: str):
     FALLBACK = "6750A4"
     try:
         img = Image.open(image_path).convert("RGB")
-        img = img.resize((256, 256), Image.LANCZOS)
         quantized = img.quantize(colors=16, method=Image.Quantize.MEDIANCUT)
         palette = quantized.getcolors()
         raw = quantized.getpalette()
@@ -55,7 +50,9 @@ def get_score_for_image(image: Path | str, cache_base: Path):
     cache.write_text(str(s.to_int()))
     return s
 
-def get_colours_for_image(image: Path | str = wallpaper_thumbnail_path, scheme=None) -> dict[str, str]:
+def get_colours_for_image(image: Path | str | None = None, scheme=None) -> dict[str, str]:
+    if image is None:
+        image = Path(wallpaper_path_path.read_text().strip())
     if scheme is None:
         from caelestia.utils.scheme import get_scheme
         scheme = get_scheme()
