@@ -34,8 +34,8 @@ def extract_seed(image_path):
     # colourful images, however, a substantially more common and more
     # chromatic alternative better represents the wallpaper visually.
     #
-    # Keep very light/dark top candidates stable; promotion is only intended
-    # for ambiguous mid-tone accent candidates.
+    # Keep very light/dark top candidates stable; this promotion is intended
+    # only for ambiguous mid-tone accent candidates.
     if 20 <= base.tone <= 80 and base_population > 0:
         for candidate in ranked[1:4]:
             colour = Hct.from_int(candidate)
@@ -46,8 +46,67 @@ def extract_seed(image_path):
                 and population >= base_population * 1.75
                 and colour.chroma >= base.chroma * 1.50
             ):
-                selected = candidate
-                break
+                return candidate
+
+    # A very dark top-ranked seed can sometimes represent a shadow or
+    # background region rather than the wallpaper's chromatic identity.
+    #
+    # Do not replace it for one isolated accent. Require at least two other
+    # Material-ranked colours to agree on a nearby hue family and require
+    # that family to have stronger population and chroma support.
+    if base.tone < 20 and base_population > 0:
+        alternatives = []
+
+        for candidate in ranked[1:5]:
+            colour = Hct.from_int(candidate)
+            population = quantized.get(candidate, 0)
+
+            if colour.chroma >= 12 and 20 <= colour.tone <= 80:
+                alternatives.append((candidate, colour, population))
+
+        best_family = None
+        best_support = 0
+
+        def hue_distance(a, b):
+            distance = abs(a - b)
+            return min(distance, 360 - distance)
+
+        for _, centre, _ in alternatives:
+            family = [
+                item
+                for item in alternatives
+                if hue_distance(item[1].hue, centre.hue) <= 35
+            ]
+
+            if len(family) < 2:
+                continue
+
+            family_population = sum(item[2] for item in family)
+            chroma_mass = sum(
+                item[2] * item[1].chroma
+                for item in family
+            )
+
+            if chroma_mass > best_support:
+                best_support = chroma_mass
+                best_family = (
+                    family,
+                    family_population,
+                    chroma_mass,
+                )
+
+        if best_family:
+            family, family_population, family_chroma_mass = best_family
+            base_chroma_mass = base_population * base.chroma
+
+            if (
+                family_population >= base_population * 1.10
+                and family_chroma_mass >= base_chroma_mass * 1.20
+            ):
+                selected = max(
+                    family,
+                    key=lambda item: item[2],
+                )[0]
 
     return selected
 
