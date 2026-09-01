@@ -2,6 +2,7 @@ pragma Singleton
 
 import ".."
 import qs.config
+import qs.services
 import qs.utils
 import Quickshell
 import QtQuick
@@ -55,7 +56,7 @@ Searcher {
 
         function onClicked(list: AppList): void {
             list.visibilities.launcher = false;
-            Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
+            Colours.setVariant(variant);
         }
     }
 }

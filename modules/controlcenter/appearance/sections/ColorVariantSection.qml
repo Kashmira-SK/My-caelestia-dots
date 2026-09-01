@@ -38,7 +38,7 @@ CollapsibleSection {
                         const variant = modelData.variant;
 
                         Schemes.currentVariant = variant;
-                        Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
+                        Colours.setVariant(variant);
 
                         Qt.callLater(() => {
                             reloadTimer.restart();

@@ -75,7 +75,49 @@ Singleton {
     }
 
     function setMode(mode: string): void {
-        Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
+        console.log(
+            "[Colours.setMode]",
+            "mode =", mode,
+            "scheme =", scheme
+        );
+
+        if (scheme === "dynamic") {
+            Quickshell.execDetached([
+                "python3",
+                `${Paths.config}/apply_theme.py`,
+                "--mode",
+                mode,
+                "--no-smart"
+            ]);
+        } else {
+            Quickshell.execDetached([
+                "caelestia",
+                "scheme",
+                "set",
+                "--notify",
+                "-m",
+                mode
+            ]);
+        }
+    }
+
+    function setVariant(variant: string): void {
+        if (scheme === "dynamic") {
+            Quickshell.execDetached([
+                "python3",
+                `${Paths.config}/apply_theme.py`,
+                "--variant",
+                variant
+            ]);
+        } else {
+            Quickshell.execDetached([
+                "caelestia",
+                "scheme",
+                "set",
+                "-v",
+                variant
+            ]);
+        }
     }
 
     FileView {
