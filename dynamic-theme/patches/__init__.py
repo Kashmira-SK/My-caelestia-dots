@@ -11,10 +11,38 @@ FALLBACK_ARGB = 0xFF6750A4
 
 
 def _extract_material_seed(image_path):
+    from materialyoucolor.hct import Hct
+
     quantized = ImageQuantizeCelebi(str(image_path), 5, 128)
     ranked = Score.score(quantized)
 
-    return ranked[0] if ranked else FALLBACK_ARGB
+    if not ranked:
+        return FALLBACK_ARGB
+
+    selected = ranked[0]
+    base = Hct.from_int(selected)
+    base_population = quantized.get(selected, 0)
+
+    # Material's top-ranked colour is normally an excellent seed. In some
+    # colourful images, however, a substantially more common and more
+    # chromatic alternative better represents the wallpaper visually.
+    #
+    # Keep very light/dark top candidates stable; promotion is only intended
+    # for ambiguous mid-tone accent candidates.
+    if 20 <= base.tone <= 80 and base_population > 0:
+        for candidate in ranked[1:4]:
+            colour = Hct.from_int(candidate)
+            population = quantized.get(candidate, 0)
+
+            if (
+                20 <= colour.tone <= 80
+                and population >= base_population * 1.75
+                and colour.chroma >= base.chroma * 1.50
+            ):
+                selected = candidate
+                break
+
+    return selected
 
 
 def get_score_for_image(image: Path | str, cache_base: Path):
