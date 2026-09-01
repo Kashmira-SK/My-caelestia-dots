@@ -35,17 +35,6 @@ def extract_hex(image_path):
             best_hex = f"{r:02x}{g:02x}{b:02x}"
     return best_hex or FALLBACK_HEX
 
-def patch_firefox_vars(scheme_path, css_path):
-    import json, re
-    scheme_data = json.loads(open(scheme_path).read())
-    c = scheme_data["colours"]
-    css = open(css_path).read()
-    css = re.sub(r'--zen-bg-dark:\s*#[0-9a-fA-F]+', f'--zen-bg-dark: #{c["surfaceContainer"]}', css)
-    css = re.sub(r'--zen-bg-base:\s*#[0-9a-fA-F]+', f'--zen-bg-base: #{c["surfaceContainerHigh"]}', css)
-    css = re.sub(r'--zen-accent:\s*#[0-9a-fA-F]+', f'--zen-accent: #{c["primary"]}', css)
-    open(css_path, "w").write(css)
-    print("[apply_theme] Firefox vars patched.")
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: apply_theme.py <wallpaper_path>", file=sys.stderr)
@@ -85,10 +74,6 @@ def main():
     print("[apply_theme] Border colors persisted.")
 
     apply_startpage(colours)
-    patch_firefox_vars(
-        "/home/kashmira/.local/state/caelestia/scheme.json",
-        "/home/kashmira/.config/mozilla/firefox/kkyzicg3.default-release/chrome/zen-modules/_variables.css"
-    )
     subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])
     print(f"[apply_theme] GTK portal restarted.")
 
