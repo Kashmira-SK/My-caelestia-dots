@@ -35,27 +35,50 @@ def extract_hex(image_path):
             best_hex = f"{r:02x}{g:02x}{b:02x}"
     return best_hex or FALLBACK_HEX
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: apply_theme.py <wallpaper_path>", file=sys.stderr)
-        sys.exit(1)
-    wallpaper = sys.argv[1]
-    hex_color = extract_hex(wallpaper)
-    print(f"[apply_theme] Seed color: #{hex_color}")
+def get_current_wallpaper():
+    from caelestia.utils.paths import wallpaper_path_path
+
+    return wallpaper_path_path.read_text().strip()
+
+
+def generate_dynamic_scheme(wallpaper, mode=None, variant=None):
     from materialyoucolor.hct import Hct
     from caelestia.utils.scheme import get_scheme
     from caelestia.utils.material.generator import gen_scheme
-    from caelestia.utils.theme import apply_colours
-    primary = Hct.from_int(int(f"0xFF{hex_color}", 16))
+
+    hex_color = extract_hex(wallpaper)
     scheme = get_scheme()
-    scheme._mode    = "dark"
-    scheme._name    = "dynamic"
+
+    scheme._name = "dynamic"
+    scheme._mode = mode or scheme.mode
+    scheme._variant = variant or scheme.variant
+
+    if scheme.flavour not in ("default", "hard"):
+        scheme._flavour = "default"
+
+    primary = Hct.from_int(int(f"0xFF{hex_color}", 16))
     colours = gen_scheme(scheme, primary)
+
+    return scheme, colours, hex_color
+
+
+def apply_dynamic_scheme(wallpaper, mode=None, variant=None):
+    from caelestia.utils.theme import apply_colours
+
+    scheme, colours, hex_color = generate_dynamic_scheme(
+        wallpaper,
+        mode=mode,
+        variant=variant,
+    )
+
+    print(f"[apply_theme] Seed color: #{hex_color}")
+
     scheme._colours = colours
     scheme.save()
-    print(f"[apply_theme] Scheme saved.")
-    apply_colours(colours, "dark")
-    print(f"[apply_theme] Colours applied.")
+    print("[apply_theme] Scheme saved.")
+
+    apply_colours(colours, scheme.mode)
+    print("[apply_theme] Colours applied.")
 
     # Hyprland border colors
     active = colours["primary"]
@@ -66,7 +89,7 @@ def main():
         '} })'
     )
     subprocess.run(["hyprctl", "eval", border_lua])
-    print(f"[apply_theme] Hyprland borders updated.")
+    print("[apply_theme] Hyprland borders updated.")
 
     # Persist border colors for startup
     with open("/home/kashmira/.config/hypr/border_colors.lua", "w") as f:
@@ -75,7 +98,25 @@ def main():
 
     apply_startpage(colours)
     subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])
-    print(f"[apply_theme] GTK portal restarted.")
+    print("[apply_theme] GTK portal restarted.")
+
+
+def preview_dynamic_scheme(wallpaper, mode=None, variant=None):
+    import json
+
+    scheme, colours, _ = generate_dynamic_scheme(
+        wallpaper,
+        mode=mode,
+        variant=variant,
+    )
+
+    print(json.dumps({
+        "name": scheme.name,
+        "flavour": scheme.flavour,
+        "mode": scheme.mode,
+        "variant": scheme.variant,
+        "colours": colours,
+    }))
 
 def apply_startpage(colours):
     from pathlib import Path
@@ -102,11 +143,54 @@ def apply_startpage(colours):
         print(f"[apply_theme] Updated {page.name}")
 
 if __name__ == "__main__":
-    import sys
-    if "--startpage-only" in sys.argv:
-        import json
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(
+        description="Generate and apply the system dynamic theme."
+    )
+    parser.add_argument(
+        "wallpaper",
+        nargs="?",
+        help="Wallpaper to extract the dynamic theme from.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("light", "dark"),
+        help="Override the current theme mode.",
+    )
+    parser.add_argument(
+        "--variant",
+        help="Override the current Material theme variant.",
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Print the generated scheme as JSON without applying it.",
+    )
+    parser.add_argument(
+        "--startpage-only",
+        action="store_true",
+        help="Reapply startpage colours from the current scheme.json.",
+    )
+    args = parser.parse_args()
+
+    if args.startpage_only:
         with open("/home/kashmira/.local/state/caelestia/scheme.json") as f:
             scheme = json.load(f)
         apply_startpage(scheme["colours"])
     else:
-        main()
+        wallpaper = args.wallpaper or get_current_wallpaper()
+
+        if args.preview:
+            preview_dynamic_scheme(
+                wallpaper,
+                mode=args.mode,
+                variant=args.variant,
+            )
+        else:
+            apply_dynamic_scheme(
+                wallpaper,
+                mode=args.mode,
+                variant=args.variant,
+            )
