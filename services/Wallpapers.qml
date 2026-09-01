@@ -82,7 +82,13 @@ Searcher {
     Process {
         id: getPreviewColoursProc
 
-        command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
+        command: [
+            "python3",
+            `${Paths.config}/apply_theme.py`,
+            "--preview",
+            root.previewPath,
+            ...root.smartArg
+        ]
         stdout: StdioCollector {
            onStreamFinished: {
                Colours.load(text, true);
