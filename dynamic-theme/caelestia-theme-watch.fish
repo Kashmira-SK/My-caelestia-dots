@@ -6,7 +6,6 @@ function update_theme
     mkdir -p $state/scheme
     jq -r '.colours | to_entries[] | "\(.key) \(.value)"' $scheme_json >$state/scheme/current.txt
     jq -r '.mode' $scheme_json >$state/scheme/current-mode.txt
-    fish ~/git/gtk/monitor/update.fish
     fish ~/git/qt/monitor/update.fish
     python ~/.config/caelestia/apply_theme.py --startpage-only
 
