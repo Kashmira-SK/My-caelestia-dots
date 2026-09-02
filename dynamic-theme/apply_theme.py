@@ -145,6 +145,62 @@ def get_current_wallpaper():
 
 
 
+DYNAMIC_PROFILES = {
+    "baseline": None,
+    "vivid": "vibrant",
+    "muted": "neutral",
+}
+
+DYNAMIC_PROFILE_PATH = (
+    Path.home() / ".local/state/caelestia/dynamic-profile.txt"
+)
+
+
+def get_dynamic_profile():
+    try:
+        profile = DYNAMIC_PROFILE_PATH.read_text().strip()
+    except OSError:
+        return "baseline"
+
+    return profile if profile in DYNAMIC_PROFILES else "baseline"
+
+
+def set_dynamic_profile(profile):
+    DYNAMIC_PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DYNAMIC_PROFILE_PATH.write_text(profile + "\n")
+
+
+def mute_hex(colour, amount=0.38):
+    import colorsys
+
+    value = colour.lstrip("#")
+
+    if len(value) != 6:
+        return colour
+
+    r = int(value[0:2], 16) / 255
+    g = int(value[2:4], 16) / 255
+    b = int(value[4:6], 16) / 255
+
+    h, l, sat = colorsys.rgb_to_hls(r, g, b)
+    sat *= 1 - amount
+
+    r, g, b = colorsys.hls_to_rgb(h, l, sat)
+
+    return (
+        f"{round(r * 255):02x}"
+        f"{round(g * 255):02x}"
+        f"{round(b * 255):02x}"
+    )
+
+
+def mute_palette(colours):
+    return {
+        name: mute_hex(colour)
+        for name, colour in colours.items()
+    }
+
+
 def blend_hex(base, tint, amount):
     base_rgb = tuple(int(base[i:i + 2], 16) for i in (0, 2, 4))
     tint_rgb = tuple(int(tint[i:i + 2], 16) for i in (0, 2, 4))
@@ -182,7 +238,7 @@ def tint_light_surfaces(colours):
 
     return colours
 
-def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
+def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None, profile=None):
     from materialyoucolor.hct import Hct
     from caelestia.utils.scheme import get_scheme
     from caelestia.utils.material.generator import gen_scheme
@@ -190,6 +246,7 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
     seed = extract_seed(wallpaper)
     hex_color = seed_hex(seed)
     scheme = get_scheme()
+    profile = profile or get_dynamic_profile()
 
     scheme._name = "dynamic"
     scheme._mode = mode or scheme.mode
@@ -198,6 +255,8 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
 
     if variant is not None:
         scheme._variant = variant
+    elif profile == "vivid":
+        scheme._variant = "vibrant"
     else:
         if smart is None:
             smart = smart_scheme_enabled()
@@ -214,10 +273,13 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
     if scheme.mode == "light":
         colours = tint_light_surfaces(colours)
 
+    if profile == "muted":
+        colours = mute_palette(colours)
+
     return scheme, colours, hex_color, colourfulness
 
 
-def apply_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
+def apply_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None, profile=None):
     from caelestia.utils.theme import apply_colours
 
     scheme, colours, hex_color, colourfulness = generate_dynamic_scheme(
@@ -225,6 +287,7 @@ def apply_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
         mode=mode,
         variant=variant,
         smart=smart,
+        profile=profile,
     )
 
     print(f"[apply_theme] Seed color: #{hex_color}")
@@ -262,12 +325,13 @@ def apply_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
     print("[apply_theme] GTK portal restarted.")
 
 
-def preview_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
+def preview_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None, profile=None):
     scheme, colours, _, _ = generate_dynamic_scheme(
         wallpaper,
         mode=mode,
         variant=variant,
         smart=smart,
+        profile=profile,
     )
 
     print(json.dumps({
@@ -317,19 +381,38 @@ def list_schemes():
     # an in-memory preview. generate_dynamic_scheme() does not save or apply.
     try:
         wallpaper = get_current_wallpaper()
-        scheme, colours, _, _ = generate_dynamic_scheme(
-            wallpaper,
-            mode=current.mode,
-        )
+        schemes["dynamic"] = {}
 
-        schemes["dynamic"] = {
-            "default": colours,
-        }
+        for profile in DYNAMIC_PROFILES:
+            scheme, colours, _, _ = generate_dynamic_scheme(
+                wallpaper,
+                mode=current.mode,
+                profile=profile,
+            )
+            schemes["dynamic"][profile] = colours
     except (OSError, ValueError):
         # Keep the static picker usable even if no valid wallpaper is set.
         pass
 
     print(json.dumps(schemes))
+
+
+
+def print_current_selection():
+    from caelestia.utils.scheme import get_scheme
+
+    scheme = get_scheme()
+    flavour = (
+        get_dynamic_profile()
+        if scheme.name == "dynamic"
+        else scheme.flavour
+    )
+
+    print(json.dumps({
+        "name": scheme.name,
+        "flavour": flavour,
+        "variant": scheme.variant,
+    }))
 
 
 def apply_startpage(colours):
@@ -378,6 +461,16 @@ if __name__ == "__main__":
         help="Override the current Material theme variant.",
     )
     parser.add_argument(
+        "--profile",
+        choices=tuple(DYNAMIC_PROFILES),
+        help="Select a persistent Dynamic colour profile.",
+    )
+    parser.add_argument(
+        "--current-selection",
+        action="store_true",
+        help="Print the currently selected scheme/profile as JSON.",
+    )
+    parser.add_argument(
         "--preview",
         action="store_true",
         help="Print the generated scheme as JSON without applying it.",
@@ -401,6 +494,8 @@ if __name__ == "__main__":
 
     if args.list_schemes:
         list_schemes()
+    elif args.current_selection:
+        print_current_selection()
     elif args.startpage_only:
         with open("/home/kashmira/.local/state/caelestia/scheme.json") as f:
             scheme = json.load(f)
@@ -414,11 +509,16 @@ if __name__ == "__main__":
                 mode=args.mode,
                 variant=args.variant,
                 smart=False if args.no_smart else None,
+                profile=args.profile,
             )
         else:
+            if args.profile:
+                set_dynamic_profile(args.profile)
+
             apply_dynamic_scheme(
                 wallpaper,
                 mode=args.mode,
                 variant=args.variant,
                 smart=False if args.no_smart else None,
+                profile=args.profile,
             )

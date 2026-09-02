@@ -78,7 +78,9 @@ Singleton {
         if (name === "dynamic") {
             Quickshell.execDetached([
                 "python3",
-                `${Paths.config}/apply_theme.py`
+                `${Paths.config}/apply_theme.py`,
+                "--profile",
+                flavour
             ]);
         } else {
             Quickshell.execDetached([

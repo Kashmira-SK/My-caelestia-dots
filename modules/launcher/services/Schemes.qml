@@ -60,7 +60,7 @@ Searcher {
                 
                 // --- YOUR CUSTOM FILTERS ---
                 // Only these themes will show up:
-                const allowedThemes = ["dynamic", "catppuccin", "rose pine"];
+                const allowedThemes = ["dynamic"];
                 
                 // These flavours will be killed (doesn't affect mocha, frappe, etc.):
                 const blockedFlavours = ["hard", "soft", "medium"];
@@ -98,12 +98,16 @@ Searcher {
         id: getCurrent
 
         running: true
-        command: ["caelestia", "scheme", "get", "-nfv"]
+        command: [
+            "python3",
+            `${Paths.config}/apply_theme.py`,
+            "--current-selection"
+        ]
         stdout: StdioCollector {
             onStreamFinished: {
-                const [name, flavour, variant] = text.trim().split("\n");
-                root.currentScheme = `${name} ${flavour}`;
-                root.currentVariant = variant;
+                const current = JSON.parse(text);
+                root.currentScheme = `${current.name} ${current.flavour}`;
+                root.currentVariant = current.variant;
             }
         }
     }
