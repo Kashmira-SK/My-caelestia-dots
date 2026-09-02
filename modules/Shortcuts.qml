@@ -1,6 +1,7 @@
 import qs.components.misc
 import qs.modules.controlcenter
 import qs.services
+import qs.config
 import Caelestia
 import Quickshell
 import Quickshell.Io
@@ -92,6 +93,66 @@ Scope {
         }
     }
     
+    IpcHandler {
+        target: "wallpaperTransition"
+
+        function transitionNames(): var {
+            return [
+                "radial",
+                "ripple",
+                "diagonal",
+                "corner",
+                "cross",
+                "random"
+            ];
+        }
+
+        function get(): string {
+            return Config.background.wallpaperTransition;
+        }
+
+        function set(name: string): void {
+            if (!transitionNames().includes(name)) {
+                console.warn(`[IPC] Unknown wallpaper transition "${name}"`);
+                return;
+            }
+
+            Config.background.wallpaperTransition = name;
+            Config.save();
+
+            Toaster.toast(
+                qsTr("Wallpaper transition"),
+                name.charAt(0).toUpperCase() + name.slice(1),
+                "animation",
+                Toast.Info
+            );
+        }
+
+        function next(): void {
+            const current =
+                transitionNames().indexOf(Config.background.wallpaperTransition);
+
+            const nextIndex =
+                current < 0
+                    ? 0
+                    : (current + 1) % transitionNames().length;
+
+            set(transitionNames()[nextIndex]);
+        }
+
+        function previous(): void {
+            const current =
+                transitionNames().indexOf(Config.background.wallpaperTransition);
+
+            const previousIndex =
+                current <= 0
+                    ? transitionNames().length - 1
+                    : current - 1;
+
+            set(transitionNames()[previousIndex]);
+        }
+    }
+
     IpcHandler {
         target: "drawers"
 
