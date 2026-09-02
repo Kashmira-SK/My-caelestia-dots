@@ -31,9 +31,22 @@ sudo cmake --install build
 # Symlink dotfiles
 ln -sf ~/.config/quickshell/caelestia/dotfiles/zshrc ~/.zshrc
 ln -sf ~/.config/quickshell/caelestia/dotfiles/hyprland.conf ~/.config/hypr/hyprland.conf
-ln -sf ~/.config/quickshell/caelestia/dotfiles/starship.toml ~/.config/starship.toml
 sudo cp dotfiles/japanese_aesthetic.conf \
         /usr/share/sddm/themes/japanese-aesthetic/theme.conf
+
+# Install dynamic theme watcher
+mkdir -p ~/.local/bin ~/.config/systemd/user
+
+ln -sfn \
+    ~/.config/quickshell/caelestia/dynamic-theme/caelestia-theme-watch.fish \
+    ~/.local/bin/caelestia-theme-watch.fish
+
+ln -sfn \
+    ~/.config/quickshell/caelestia/dynamic-theme/caelestia-theme.service \
+    ~/.config/systemd/user/caelestia-theme.service
+
+systemctl --user daemon-reload
+systemctl --user enable --now caelestia-theme.service
 
 # Apply dynamic theme patches
 sudo cp dynamic-theme/patches/__init__.py \
@@ -52,14 +65,17 @@ fc-cache -f
 
 ## Dotfiles
 
-Stored in `dotfiles/`, symlinked to their real locations.
-Editing either path edits the same file — git always sees the latest version.
+Stored in `dotfiles/`. Most are symlinked to their live locations.
+
+`starship.toml` is different: it is a stable template. The dynamic theme
+watcher generates `~/.config/starship.toml` from that template and injects
+the active theme primary colour for the `kash` prompt segment.
 
 | File | What it is | Symlinked to |
 |---|---|---|
 | `dotfiles/zshrc` | Zsh config, aliases, kitty color fix | `~/.zshrc` |
 | `dotfiles/hyprland.conf` | Hyprland config — keybinds, window rules, autostart | `~/.config/hypr/hyprland.conf` |
-| `dotfiles/starship.toml` | Starship prompt (`󰣇 kash ❯`) | `~/.config/starship.toml` |
+| `dotfiles/starship.toml` | Starship prompt template (`󰣇 kash ❯`) | Generates `~/.config/starship.toml` via theme watcher |
 | `dotfiles/japanese_aesthetic.conf` | SDDM login screen theme config | manual copy only — see fresh install |
 
 ---

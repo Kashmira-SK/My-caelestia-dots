@@ -1,0 +1,10 @@
+[Unit]
+Description=Caelestia GTK/Qt theme watcher
+After=default.target
+
+[Service]
+ExecStart=/usr/bin/fish %h/.local/bin/caelestia-theme-watch.fish
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
