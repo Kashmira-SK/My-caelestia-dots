@@ -74,6 +74,25 @@ Singleton {
         }
     }
 
+    function setScheme(name: string, flavour: string): void {
+        if (name === "dynamic") {
+            Quickshell.execDetached([
+                "python3",
+                `${Paths.config}/apply_theme.py`
+            ]);
+        } else {
+            Quickshell.execDetached([
+                "caelestia",
+                "scheme",
+                "set",
+                "-n",
+                name,
+                "-f",
+                flavour
+            ]);
+        }
+    }
+
     function setMode(mode: string): void {
         console.log(
             "[Colours.setMode]",

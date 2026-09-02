@@ -2,6 +2,7 @@ pragma Singleton
 
 import ".."
 import qs.config
+import qs.services
 import qs.utils
 import Quickshell
 import Quickshell.Io
@@ -110,7 +111,7 @@ Searcher {
 
         function onClicked(list: AppList): void {
             list.visibilities.launcher = false;
-            Quickshell.execDetached(["caelestia", "scheme", "set", "-n", name, "-f", flavour]);
+            Colours.setScheme(name, flavour);
         }
     }
 }
