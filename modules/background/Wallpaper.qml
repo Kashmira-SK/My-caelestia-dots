@@ -12,7 +12,7 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property Image current: one
+    property Item current: one
 
     onSourceChanged: {
         if (!source)
@@ -105,41 +105,74 @@ Item {
         id: two
     }
 
-    component Img: CachingImage {
+    component Img: Item {
         id: img
 
+        property alias path: wallpaper.path
+        property real revealProgress: 0
+
         function update(): void {
-            if (path === root.source)
-                root.current = this;
-            else
-                path = root.source;
+            if (path === root.source) {
+                if (wallpaper.status === Image.Ready)
+                    showLoaded();
+                return;
+            }
+
+            revealAnim.stop();
+            revealProgress = 0;
+            path = root.source;
+        }
+
+        function showLoaded(): void {
+            revealAnim.stop();
+            revealProgress = 0;
+            root.current = img;
+            revealAnim.start();
         }
 
         anchors.fill: parent
+        z: root.current === img ? 1 : 0
 
-        opacity: 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
+        Item {
+            id: reveal
 
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
-        }
+            anchors.centerIn: parent
 
-        states: State {
-            name: "visible"
-            when: root.current === img
+            width: Math.max(1, root.width * img.revealProgress)
+            height: Math.max(1, root.height * img.revealProgress)
 
-            PropertyChanges {
-                img.opacity: 1
-                img.scale: 1
+            clip: true
+
+            CachingImage {
+                id: wallpaper
+
+                width: root.width
+                height: root.height
+
+                x: (reveal.width - width) / 2
+                y: (reveal.height - height) / 2
+
+                scale: 1.035 - img.revealProgress * 0.035
+
+                onStatusChanged: {
+                    if (status === Image.Ready)
+                        img.showLoaded();
+                }
             }
         }
 
-        transitions: Transition {
-            Anim {
-                target: img
-                properties: "opacity,scale"
-            }
+        NumberAnimation {
+            id: revealAnim
+
+            target: img
+            property: "revealProgress"
+
+            from: 0
+            to: 1
+
+            duration: 700
+            easing.type: Easing.OutCubic
         }
     }
+
 }

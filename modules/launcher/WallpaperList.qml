@@ -54,13 +54,6 @@ PathView {
     }
 
     Component.onCompleted: currentIndex = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent)
-    Component.onDestruction: Wallpapers.stopPreview()
-
-    onCurrentItemChanged: {
-        if (currentItem)
-            Wallpapers.preview(currentItem.modelData.path);
-    }
-
     implicitWidth: Math.min(numItems, count) * itemWidth
     pathItemCount: numItems
     cacheItemCount: 4

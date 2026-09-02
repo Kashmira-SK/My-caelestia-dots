@@ -13,29 +13,12 @@ Searcher {
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
     readonly property list<string> smartArg: Config.services.smartScheme ? [] : ["--no-smart"]
 
-    property bool showPreview: false
-    readonly property string current: showPreview ? previewPath : actualCurrent
-    property string previewPath
+    readonly property string current: actualCurrent
     property string actualCurrent
-    property bool previewColourLock
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
         Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
-    }
-
-    function preview(path: string): void {
-        previewPath = path;
-        showPreview = true;
-
-        if (Colours.scheme === "dynamic")
-            getPreviewColoursProc.running = true;
-    }
-
-    function stopPreview(): void {
-        showPreview = false;
-        if (!previewColourLock)
-            Colours.showPreview = false;
     }
 
     list: wallpapers.entries
@@ -67,11 +50,6 @@ Searcher {
         onFileChanged: reload()
         onLoaded: {
             root.actualCurrent = text().trim();
-
-            if (root.previewColourLock) {
-                root.previewColourLock = false;
-                Colours.showPreview = false;
-            }
         }
     }
 
@@ -83,24 +61,4 @@ Searcher {
         filter: FileSystemModel.Images
     }
 
-    Process {
-        id: getPreviewColoursProc
-
-        command: [
-            "python3",
-            `${Paths.config}/apply_theme.py`,
-            "--preview",
-            root.previewPath,
-            ...root.smartArg
-        ]
-        stdout: StdioCollector {
-           onStreamFinished: {
-                if (!root.showPreview && !root.previewColourLock)
-                    return;
-
-                Colours.load(text, true);
-                Colours.showPreview = true;
-            }
-        }
-    }
 }
