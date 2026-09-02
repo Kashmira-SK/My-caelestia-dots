@@ -217,7 +217,6 @@ def apply_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
         f.write(border_lua + "\n")
     print("[apply_theme] Border colors persisted.")
 
-    apply_startpage(colours)
     subprocess.run(["systemctl", "--user", "restart", "xdg-desktop-portal-gtk"])
     print("[apply_theme] GTK portal restarted.")
 
