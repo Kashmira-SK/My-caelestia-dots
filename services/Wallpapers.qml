@@ -27,7 +27,7 @@ Searcher {
     function preview(path: string): void {
         previewPath = path;
         showPreview = true;
-        
+
         if (Colours.scheme === "dynamic")
             getPreviewColoursProc.running = true;
     }
@@ -67,7 +67,11 @@ Searcher {
         onFileChanged: reload()
         onLoaded: {
             root.actualCurrent = text().trim();
-            root.previewColourLock = false;
+
+            if (root.previewColourLock) {
+                root.previewColourLock = false;
+                Colours.showPreview = false;
+            }
         }
     }
 
@@ -91,9 +95,12 @@ Searcher {
         ]
         stdout: StdioCollector {
            onStreamFinished: {
-               Colours.load(text, true);
-               Colours.showPreview = true;
-           }
+                if (!root.showPreview && !root.previewColourLock)
+                    return;
+
+                Colours.load(text, true);
+                Colours.showPreview = true;
+            }
         }
     }
 }

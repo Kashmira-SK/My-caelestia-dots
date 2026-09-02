@@ -144,6 +144,44 @@ def get_current_wallpaper():
     return wallpaper_path_path.read_text().strip()
 
 
+
+def blend_hex(base, tint, amount):
+    base_rgb = tuple(int(base[i:i + 2], 16) for i in (0, 2, 4))
+    tint_rgb = tuple(int(tint[i:i + 2], 16) for i in (0, 2, 4))
+
+    mixed = tuple(
+        round(a * (1 - amount) + b * amount)
+        for a, b in zip(base_rgb, tint_rgb)
+    )
+
+    return "".join(f"{channel:02x}" for channel in mixed)
+
+
+def tint_light_surfaces(colours):
+    tint = colours.get("primaryContainer")
+
+    if not tint:
+        return colours
+
+    strengths = {
+        "background": 0.60,
+        "surface": 0.60,
+        "surfaceBright": 0.55,
+        "surfaceDim": 0.65,
+        "surfaceContainerLowest": 0.55,
+        "surfaceContainerLow": 0.63,
+        "surfaceContainer": 0.70,
+        "surfaceContainerHigh": 0.75,
+        "surfaceContainerHighest": 0.80,
+        "surfaceVariant": 0.75,
+    }
+
+    for name, amount in strengths.items():
+        if name in colours:
+            colours[name] = blend_hex(colours[name], tint, amount)
+
+    return colours
+
 def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
     from materialyoucolor.hct import Hct
     from caelestia.utils.scheme import get_scheme
@@ -172,6 +210,9 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
 
     primary = Hct.from_int(seed)
     colours = gen_scheme(scheme, primary)
+
+    if scheme.mode == "light":
+        colours = tint_light_surfaces(colours)
 
     return scheme, colours, hex_color, colourfulness
 
