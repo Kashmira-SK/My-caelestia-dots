@@ -49,6 +49,7 @@ Variants {
                 visibilities.launcher = false;
                 visibilities.session = false;
                 visibilities.dashboard = false;
+                visibilities.wallpaperPicker = false;
             }
 
             screen: scope.modelData
@@ -57,6 +58,7 @@ Variants {
             WlrLayershell.keyboardFocus:
             visibilities.launcher
             || visibilities.session
+            || visibilities.wallpaperPicker
             || (!Config.dashboard.showOnHover
                 && visibilities.dashboard)
                 ? WlrKeyboardFocus.OnDemand
@@ -98,6 +100,7 @@ Variants {
 
                 active: (visibilities.launcher && Config.launcher.enabled)
                 || (visibilities.session && Config.session.enabled)
+                || visibilities.wallpaperPicker
                 || (visibilities.sidebar && Config.sidebar.enabled)
                 || (visibilities.dashboard && Config.dashboard.enabled)
                 || (panels.popouts.currentName.startsWith("traymenu")
@@ -109,6 +112,7 @@ Variants {
                     visibilities.session = false;
                     visibilities.sidebar = false;
                     visibilities.dashboard = false;
+                    visibilities.wallpaperPicker = false;
                     panels.popouts.hasCurrent = false;
                     bar.closeTray();
                 }
@@ -152,6 +156,7 @@ Variants {
                 property bool session
                 property bool launcher
                 property bool dashboard
+                property bool wallpaperPicker
                 property bool utilities
                 property bool sidebar
 

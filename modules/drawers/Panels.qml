@@ -3,6 +3,7 @@ import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.launcher as Launcher
+import qs.modules.wallpaperpicker as WallpaperPicker
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
@@ -22,6 +23,7 @@ Item {
     readonly property alias notifications: notifications
     readonly property alias session: session
     readonly property alias launcher: launcher
+    readonly property alias wallpaperPicker: wallpaperPicker
     readonly property alias dashboard: dashboard
     readonly property alias popouts: popouts
     readonly property alias utilities: utilities
@@ -72,6 +74,14 @@ Item {
         screen: root.screen
         visibilities: root.visibilities
         panels: root
+
+        anchors.centerIn: parent
+    }
+
+    WallpaperPicker.Wrapper {
+        id: wallpaperPicker
+
+        visibilities: root.visibilities
 
         anchors.centerIn: parent
     }
