@@ -145,11 +145,11 @@ def get_current_wallpaper():
 
 
 
-DYNAMIC_PROFILES = {
-    "baseline": None,
-    "vivid": "vibrant",
-    "muted": "neutral",
-}
+DYNAMIC_PROFILES = (
+    "baseline",
+    "vivid",
+    "muted",
+)
 
 DYNAMIC_PROFILE_PATH = (
     Path.home() / ".local/state/caelestia/dynamic-profile.txt"
@@ -170,35 +170,87 @@ def set_dynamic_profile(profile):
     DYNAMIC_PROFILE_PATH.write_text(profile + "\n")
 
 
-def mute_hex(colour, amount=0.38):
-    import colorsys
+ACCENT_FILL_ROLES = {
+    "primary",
+    "primaryContainer",
+    "inversePrimary",
+    "secondary",
+    "secondaryContainer",
+    "tertiary",
+    "tertiaryContainer",
+    "primaryFixed",
+    "primaryFixedDim",
+    "secondaryFixed",
+    "secondaryFixedDim",
+    "tertiaryFixed",
+    "tertiaryFixedDim",
+    "surfaceTint",
+    "primary_paletteKeyColor",
+    "secondary_paletteKeyColor",
+    "tertiary_paletteKeyColor",
+    "primaryPaletteKeyColor",
+    "secondaryPaletteKeyColor",
+    "tertiaryPaletteKeyColor",
+}
+
+VIVID_ACCENT_ROLES = ACCENT_FILL_ROLES | {
+    "onPrimary",
+    "onPrimaryContainer",
+    "onSecondary",
+    "onSecondaryContainer",
+    "onTertiary",
+    "onTertiaryContainer",
+    "onPrimaryFixed",
+    "onPrimaryFixedVariant",
+    "onSecondaryFixed",
+    "onSecondaryFixedVariant",
+    "onTertiaryFixed",
+    "onTertiaryFixedVariant",
+}
+
+
+def adjust_hct_chroma(colour, factor):
+    from materialyoucolor.hct import Hct
 
     value = colour.lstrip("#")
+    hct = Hct.from_int(int(f"0xFF{value}", 16))
 
-    if len(value) != 6:
-        return colour
-
-    r = int(value[0:2], 16) / 255
-    g = int(value[2:4], 16) / 255
-    b = int(value[4:6], 16) / 255
-
-    h, l, sat = colorsys.rgb_to_hls(r, g, b)
-    sat *= 1 - amount
-
-    r, g, b = colorsys.hls_to_rgb(h, l, sat)
-
-    return (
-        f"{round(r * 255):02x}"
-        f"{round(g * 255):02x}"
-        f"{round(b * 255):02x}"
+    adjusted = Hct.from_hct(
+        hct.hue,
+        max(0, hct.chroma * factor),
+        hct.tone,
     )
 
+    return f"{adjusted.to_int() & 0xFFFFFF:06x}"
 
-def mute_palette(colours):
-    return {
-        name: mute_hex(colour)
-        for name, colour in colours.items()
-    }
+
+def vivid_palette(colours, scheme, primary):
+    import copy
+    from caelestia.utils.material.generator import gen_scheme
+
+    # Generate a Vibrant palette only as an accent source.
+    # The actual selected Material variant is never changed.
+    accent_scheme = copy.copy(scheme)
+    accent_scheme._variant = "vibrant"
+    vivid = gen_scheme(accent_scheme, primary)
+
+    result = dict(colours)
+
+    for name in VIVID_ACCENT_ROLES:
+        if name in vivid:
+            result[name] = vivid[name]
+
+    return result
+
+
+def muted_palette(colours):
+    result = dict(colours)
+
+    for name in ACCENT_FILL_ROLES:
+        if name in result:
+            result[name] = adjust_hct_chroma(result[name], 0.35)
+
+    return result
 
 
 def blend_hex(base, tint, amount):
@@ -255,8 +307,6 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None, prof
 
     if variant is not None:
         scheme._variant = variant
-    elif profile == "vivid":
-        scheme._variant = "vibrant"
     else:
         if smart is None:
             smart = smart_scheme_enabled()
@@ -273,8 +323,10 @@ def generate_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None, prof
     if scheme.mode == "light":
         colours = tint_light_surfaces(colours)
 
-    if profile == "muted":
-        colours = mute_palette(colours)
+    if profile == "vivid":
+        colours = vivid_palette(colours, scheme, primary)
+    elif profile == "muted":
+        colours = muted_palette(colours)
 
     return scheme, colours, hex_color, colourfulness
 
@@ -387,6 +439,8 @@ def list_schemes():
             scheme, colours, _, _ = generate_dynamic_scheme(
                 wallpaper,
                 mode=current.mode,
+                variant=current.variant,
+                smart=False,
                 profile=profile,
             )
             schemes["dynamic"][profile] = colours
@@ -508,7 +562,7 @@ if __name__ == "__main__":
                 wallpaper,
                 mode=args.mode,
                 variant=args.variant,
-                smart=False if args.no_smart else None,
+                smart=False if (args.no_smart or args.profile) else None,
                 profile=args.profile,
             )
         else:
@@ -519,6 +573,6 @@ if __name__ == "__main__":
                 wallpaper,
                 mode=args.mode,
                 variant=args.variant,
-                smart=False if args.no_smart else None,
+                smart=False if (args.no_smart or args.profile) else None,
                 profile=args.profile,
             )
