@@ -238,6 +238,60 @@ def preview_dynamic_scheme(wallpaper, mode=None, variant=None, smart=None):
         "colours": colours,
     }))
 
+def list_schemes():
+    from caelestia.utils.paths import scheme_data_dir
+    from caelestia.utils.scheme import (
+        get_scheme,
+        get_scheme_flavours,
+        get_scheme_modes,
+        get_scheme_names,
+        read_colours_from_file,
+    )
+
+    current = get_scheme()
+    schemes = {}
+
+    # Static schemes are already stored on disk. Read them directly instead
+    # of constructing Scheme objects and calling _update_colours().
+    for name in get_scheme_names():
+        if name == "dynamic":
+            continue
+
+        schemes[name] = {}
+
+        for flavour in get_scheme_flavours(name):
+            modes = get_scheme_modes(name, flavour)
+
+            if not modes:
+                continue
+
+            mode = current.mode if current.mode in modes else modes[0]
+            path = (scheme_data_dir / name / flavour / mode).with_suffix(".txt")
+
+            try:
+                schemes[name][flavour] = read_colours_from_file(path)
+            except OSError:
+                continue
+
+    # Dynamic is generated through our central wallpaper engine, but only as
+    # an in-memory preview. generate_dynamic_scheme() does not save or apply.
+    try:
+        wallpaper = get_current_wallpaper()
+        scheme, colours, _, _ = generate_dynamic_scheme(
+            wallpaper,
+            mode=current.mode,
+        )
+
+        schemes["dynamic"] = {
+            "default": colours,
+        }
+    except (OSError, ValueError):
+        # Keep the static picker usable even if no valid wallpaper is set.
+        pass
+
+    print(json.dumps(schemes))
+
+
 def apply_startpage(colours):
     from pathlib import Path
     import re
@@ -298,9 +352,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Reapply startpage colours from the current scheme.json.",
     )
+    parser.add_argument(
+        "--list-schemes",
+        action="store_true",
+        help="Print scheme-picker palette data without applying anything.",
+    )
     args = parser.parse_args()
 
-    if args.startpage_only:
+    if args.list_schemes:
+        list_schemes()
+    elif args.startpage_only:
         with open("/home/kashmira/.local/state/caelestia/scheme.json") as f:
             scheme = json.load(f)
         apply_startpage(scheme["colours"])

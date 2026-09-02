@@ -24,6 +24,7 @@ Searcher {
 
     function reload(): void {
         getCurrent.running = true;
+        getSchemes.running = true;
     }
 
     list: schemes.instances
@@ -41,7 +42,11 @@ Searcher {
         id: getSchemes
 
         running: true
-        command: ["caelestia", "scheme", "list"]
+        command: [
+            "python3",
+            `${Paths.config}/apply_theme.py`,
+            "--list-schemes"
+        ]
         stdout: StdioCollector {
             onStreamFinished: {
                 const schemeData = JSON.parse(text);
