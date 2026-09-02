@@ -139,13 +139,14 @@ def set_wallpaper(wall: Path | str, no_smart: bool) -> None:
 
     scheme = get_scheme()
 
-    # For dynamic scheme, skip built-in colour update — postHook handles it
-    # with our vibrant extractor using the full-res original wallpaper
+    # Dynamic colours are handled by the central postHook theme engine.
+    # Static schemes continue through Caelestia's normal update path.
     if scheme.name != "dynamic":
-        if scheme.name != "dynamic" and not no_smart:
+        if not no_smart:
             smart_opts = get_smart_opts(wall, cache)
             scheme.mode = smart_opts["mode"]
             scheme.variant = smart_opts["variant"]
+
         scheme.update_colours()
         apply_colours(scheme.colours, scheme.mode)
 
