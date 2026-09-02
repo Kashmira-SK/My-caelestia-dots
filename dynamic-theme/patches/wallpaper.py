@@ -10,7 +10,6 @@ from materialyoucolor.utils.color_utils import argb_from_rgb
 from PIL import Image
 
 from caelestia.utils.hypr import message
-from caelestia.utils.material import get_colours_for_image
 from caelestia.utils.paths import (
     compute_hash,
     user_config_path,
@@ -95,31 +94,25 @@ def get_smart_opts(wall: Path, cache: Path) -> str:
     return opts
 
 
-def get_colours_for_wall(wall: Path | str, no_smart: bool) -> None:
-    scheme = get_scheme()
-    cache = wallpapers_cache_dir / compute_hash(wall)
+def get_colours_for_wall(wall: Path | str, no_smart: bool) -> dict:
+    command = [
+        "python3",
+        str(Path.home() / ".config/caelestia/apply_theme.py"),
+        "--preview",
+        str(Path(wall).resolve()),
+    ]
 
-    name = "dynamic"
+    if no_smart:
+        command.append("--no-smart")
 
-    if not no_smart:
-        smart_opts = get_smart_opts(wall, cache)
-        scheme = Scheme(
-            {
-                "name": name,
-                "flavour": scheme.flavour,
-                "mode": "dark",
-                "variant": smart_opts["variant"],
-                "colours": scheme.colours,
-            }
-        )
+    result = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
-    return {
-        "name": name,
-        "flavour": scheme.flavour,
-        "mode": scheme.mode,
-        "variant": scheme.variant,
-        "colours": get_colours_for_image(wall, scheme),
-    }
+    return json.loads(result.stdout)
 
 
 def set_wallpaper(wall: Path | str, no_smart: bool) -> None:
