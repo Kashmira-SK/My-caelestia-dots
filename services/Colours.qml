@@ -94,12 +94,6 @@ Singleton {
     }
 
     function setMode(mode: string): void {
-        console.log(
-            "[Colours.setMode]",
-            "mode =", mode,
-            "scheme =", scheme
-        );
-
         if (scheme === "dynamic") {
             Quickshell.execDetached([
                 "python3",
