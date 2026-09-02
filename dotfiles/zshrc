@@ -113,6 +113,32 @@ eval "$(zoxide init zsh)"
 # Prompt
 eval "$(starship init zsh)"
 
+# Live theme prompt refresh
+_caelestia_starship_refresh() {
+    local fd=$1
+    local changed
+
+    if ! IFS= read -r changed <&$fd; then
+        zle -F $fd
+        return
+    fi
+
+    if [[ "$changed" == "$HOME/.config/starship.toml" ]]; then
+        zle reset-prompt
+    fi
+}
+
+if [[ -o interactive ]] && (( $+commands[inotifywait] )) && [[ -z ${CAELESTIA_STARSHIP_FD:-} ]]; then
+    exec {CAELESTIA_STARSHIP_FD}< <(
+        inotifywait -q -m \
+            -e close_write,moved_to,create \
+            --format '%w%f' \
+            "$HOME/.config"
+    )
+
+    zle -F $CAELESTIA_STARSHIP_FD _caelestia_starship_refresh
+fi
+
 # Caelestia (remove after switching)
 cat ~/.local/state/caelestia/sequences.txt 2>/dev/null
 
