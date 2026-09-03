@@ -89,8 +89,17 @@ Variants {
 
                     x: modelData.x + bar.implicitWidth
                     y: modelData.y + Config.border.thickness
-                    width: modelData.width
-                    height: modelData.height
+
+                    width: modelData === panels.wallpaperPicker
+                        && !visibilities.wallpaperPicker
+                            ? 0
+                            : modelData.width
+
+                    height: modelData === panels.wallpaperPicker
+                        && !visibilities.wallpaperPicker
+                            ? 0
+                            : modelData.height
+
                     intersection: Intersection.Subtract
                 }
             }
