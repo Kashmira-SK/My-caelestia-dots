@@ -131,6 +131,8 @@ hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("caelestia shell controlCenter open c
 hl.bind(mainMod .. " + Slash", hl.dsp.exec_cmd("/home/kashmira/.local/bin/combo-pick"))
 hl.bind(mainMod .. " + equal", hl.dsp.exec_cmd("/home/kashmira/.local/bin/emoji-pick"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd('grim -g "$(slurp -c 00000000 -b 00000088)" - | wl-copy'))
+hl.bind(mainMod .. " + U", hl.dsp.exec_cmd("caelestia shell drawers toggle wallpaperPicker"))
+hl.bind(mainMod .. " + SHIFT + U", hl.dsp.exec_cmd("caelestia shell wallpaperTransition next"))
 hl.bind(
 	"Print",
 	hl.dsp.exec_cmd('grim -g "$(slurp -c 00000000 -b 00000088)" ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png')
