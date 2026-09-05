@@ -152,7 +152,7 @@ Item {
         readonly property int transitionDuration: {
             switch (activeTransition) {
             case "ripple":
-                return 1650;
+                return 1550;
             case "split":
                 return 720;
             case "blinds":
