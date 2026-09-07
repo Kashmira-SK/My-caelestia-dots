@@ -2,6 +2,89 @@
 
 Newest entries at the top.
 
+## [2026-09-07] - Wallpaper picker and transition overhaul
+
+### Added
+
+- `modules/wallpaperpicker/Wrapper.qml`
+  - Added a dedicated wallpaper picker integrated with the existing drawer visibility and focus system.
+  - Keeps the picker visually minimal and centered without a surrounding panel, labels, filenames, counters, or navigation text.
+  - Supports keyboard navigation, Enter to apply, Escape to close, and mouse selection.
+
+- `modules/wallpaperpicker/Content.qml`
+  - Added a three-image carousel showing the previous, selected, and next wallpapers.
+  - Limited simultaneous wallpaper previews to reduce the unreliable multi-thumbnail loading seen with the earlier filmstrip design.
+  - Added retry handling for failed preview image loads.
+
+- `modules/drawers/Panels.qml`
+  - Registered the wallpaper picker as a first-class drawer panel.
+
+- `modules/drawers/Drawers.qml`
+  - Added `wallpaperPicker` visibility state, keyboard focus, fullscreen handling, and Hyprland focus-grab integration.
+
+- `modules/Shortcuts.qml`
+  - Exposed the wallpaper picker through the generic drawer IPC.
+  - Added wallpaper transition IPC controls for selecting, cycling, and querying the active transition.
+
+- `config/BackgroundConfig.qml`
+  - Added persistent `wallpaperTransition` configuration.
+
+- `config/Config.qml`
+  - Added wallpaper transition serialization to the background configuration.
+
+- `components/effects/RippleTransition.qml`
+  - Added a dedicated two-texture shader effect for wallpaper ripple transitions.
+
+- `assets/shaders/ripple.frag`
+  - Added a Qt Quick fragment shader for a true two-wallpaper ripple transition.
+  - Distorts the outgoing wallpaper while blending into the incoming wallpaper rather than using a radial alpha mask.
+
+- `assets/shaders/ripple-v2.frag.qsb`
+  - Added the compiled Qt shader package used by the ripple transition.
+
+### Changed
+
+- `services/Wallpapers.qml`
+  - Removed launcher-driven live wallpaper preview state.
+  - Wallpaper and theme changes now remain unchanged while browsing and are applied only after a wallpaper is explicitly selected.
+
+- `modules/launcher/WallpaperList.qml`
+  - Removed live desktop wallpaper changes while cycling through launcher wallpaper entries.
+  - Retained the existing launcher wallpaper picker alongside the new dedicated picker.
+
+- `modules/background/Wallpaper.qml`
+  - Reworked wallpaper changes around a double-buffered old-to-new transition lifecycle.
+  - Keeps the previous wallpaper visible until the incoming wallpaper has finished loading.
+  - Added configurable transition handling with random effect selection.
+  - Added and retained the final transition set:
+    - `radial`
+    - `ripple`
+    - `diagonal`
+    - `corner`
+    - `cross`
+    - `random`
+  - Refined the radial transition with a visible center origin and slower initial expansion before accelerating outward.
+  - Reworked ripple from a single-texture radial-style reveal into a true two-texture transition using `ShaderEffectSource`.
+  - Increased the final ripple duration to `1750 ms` for a smoother and more readable transition.
+  - Removed rejected experimental transition implementations including split, blinds, wipe, curtain, columns, and slices.
+
+### Fixed
+
+- `modules/drawers/Drawers.qml`
+  - Fixed the hidden wallpaper picker continuing to occupy part of the layer-shell input region after closing.
+  - Prevented the invisible picker area from intercepting application mouse hover, clicks, and scrolling.
+
+- `modules/wallpaperpicker/Content.qml`
+  - Fixed the picker overlay attempting to use an undefined radius value.
+  - Uses the configured appearance rounding directly and removes the repeated `Unable to assign [undefined] to double` warning.
+
+- `modules/background/Wallpaper.qml`
+  - Prevented wallpaper browsing from changing the desktop or theme before confirmation.
+  - Preserved the previous wallpaper beneath transition animations to avoid black frames during image loading.
+  - Removed obsolete transition code after narrowing the final effect set.
+
+---
+
 ## 2026-09-02 — Dynamic Theme Engine Cleanup, Light Mode Fixes & Dynamic Profiles
 
 ### `dynamic-theme/apply_theme.py`
