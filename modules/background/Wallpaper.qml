@@ -15,6 +15,16 @@ Item {
     property string source: Wallpapers.current
     property Item current: one
 
+    property Item rippleFrom
+    property Item rippleTo
+    property bool rippleActive: false
+
+    function clearRipple(): void {
+        rippleActive = false;
+        rippleFrom = null;
+        rippleTo = null;
+    }
+
     onSourceChanged: {
         if (!source)
             current = null;
@@ -106,12 +116,58 @@ Item {
         id: two
     }
 
+    ShaderEffectSource {
+        id: rippleFromTexture
+
+        visible: false
+        live: true
+
+        sourceItem:
+            root.rippleActive && root.rippleFrom
+                ? root.rippleFrom.wallpaperItem
+                : null
+    }
+
+    ShaderEffectSource {
+        id: rippleToTexture
+
+        visible: false
+        live: true
+
+        sourceItem:
+            root.rippleActive && root.rippleTo
+                ? root.rippleTo.wallpaperItem
+                : null
+    }
+
+    RippleTransition {
+        id: rippleTransition
+
+        anchors.fill: parent
+        z: 2
+
+        visible: root.rippleActive
+
+        fromSource: rippleFromTexture
+        toSource: rippleToTexture
+
+        progress:
+            root.rippleTo
+                ? root.rippleTo.transitionProgress
+                : 0
+
+        amplitude: 100
+        speed: 50
+    }
+
     component Img: Item {
         id: img
 
         property alias path: wallpaper.path
         property real transitionProgress: 0
         property string activeTransition: "radial"
+
+        readonly property Item wallpaperItem: wallpaper
 
         readonly property bool usesMask:
             [
@@ -219,6 +275,19 @@ Item {
             activeTransition = chooseTransition();
             transitionProgress = 0;
 
+            root.clearRipple();
+
+            if (
+                activeTransition === "ripple"
+                && root.current
+                && root.current !== img
+                && root.current.wallpaperItem.status === Image.Ready
+            ) {
+                root.rippleFrom = root.current;
+                root.rippleTo = img;
+                root.rippleActive = true;
+            }
+
             root.current = img;
 
             if (activeTransition === "radial")
@@ -235,19 +304,6 @@ Item {
 
             OpacityMask {
                 maskSource: img.activeMask
-            }
-        }
-
-        Component {
-            id: rippleLayerEffect
-
-            RippleTransition {
-                progress: img.transitionProgress
-
-                aspectRatio:
-                    root.height > 0
-                        ? root.width / root.height
-                        : 1
             }
         }
 
@@ -277,14 +333,8 @@ Item {
                 cache: true
                 smooth: true
 
-                layer.enabled:
-                    img.usesMask
-                    || img.activeTransition === "ripple"
-
-                layer.effect:
-                    img.activeTransition === "ripple"
-                        ? rippleLayerEffect
-                        : maskLayerEffect
+                layer.enabled: img.usesMask
+                layer.effect: maskLayerEffect
 
                 onStatusChanged: {
                     if (status === Image.Ready)
@@ -709,6 +759,14 @@ Item {
 
             duration: img.transitionDuration
             easing.type: Easing.InOutCubic
+
+            onFinished: {
+                if (
+                    img.activeTransition === "ripple"
+                    && root.rippleTo === img
+                )
+                    root.clearRipple();
+            }
         }
     }
 

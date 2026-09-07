@@ -1,18 +1,15 @@
 import QtQuick
 
 ShaderEffect {
-    id: root
-
-    required property Item source
+    required property Item fromSource
+    required property Item toSource
 
     property real progress: 0
-    property real aspectRatio: 1
+    property real amplitude: 100
+    property real speed: 50
 
-    readonly property url shaderUrl:
-        Qt.resolvedUrl("../../assets/shaders/ripple-v2.frag.qsb")
-
-    fragmentShader: shaderUrl
-
-    Component.onCompleted:
-        console.log("[ripple] shader:", shaderUrl)
+    fragmentShader:
+        Qt.resolvedUrl(
+            "../../assets/shaders/ripple-v2.frag.qsb"
+        )
 }
