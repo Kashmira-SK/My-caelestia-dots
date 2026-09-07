@@ -172,30 +172,15 @@ Item {
         readonly property bool usesMask:
             [
                 "radial",
-                "split",
-                "blinds",
-                "curtain",
-                "columns",
                 "diagonal",
-                "slices",
                 "corner",
                 "cross"
             ].indexOf(activeTransition) >= 0
 
         readonly property Item activeMask: {
             switch (activeTransition) {
-            case "split":
-                return splitMask;
-            case "blinds":
-                return blindsMask;
-            case "curtain":
-                return curtainMask;
-            case "columns":
-                return columnsMask;
             case "diagonal":
                 return diagonalMask;
-            case "slices":
-                return slicesMask;
             case "corner":
                 return cornerMask;
             case "cross":
@@ -209,20 +194,8 @@ Item {
             switch (activeTransition) {
             case "ripple":
                 return 1750;
-            case "split":
-                return 720;
-            case "blinds":
-                return 820;
-            case "wipe":
-                return 650;
-            case "curtain":
-                return 760;
-            case "columns":
-                return 850;
             case "diagonal":
                 return 900;
-            case "slices":
-                return 950;
             case "corner":
                 return 950;
             case "cross":
@@ -313,13 +286,8 @@ Item {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
 
-            width: img.activeTransition === "wipe"
-                ? Math.max(1, root.width * img.transitionProgress)
-                : root.width
-
+            width: root.width
             height: root.height
-
-            clip: img.activeTransition === "wipe"
 
             CachingImage {
                 id: wallpaper
@@ -374,161 +342,6 @@ Item {
             }
         }
 
-        Item {
-            id: splitMask
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            Rectangle {
-                x:
-                    root.width / 2
-                    - root.width / 2
-                    * img.transitionProgress
-
-                y: 0
-
-                width:
-                    root.width / 2
-                    * img.transitionProgress
-
-                height: root.height
-                color: "white"
-            }
-
-            Rectangle {
-                x: root.width / 2
-                y: 0
-
-                width:
-                    root.width / 2
-                    * img.transitionProgress
-
-                height: root.height
-                color: "white"
-            }
-        }
-
-        Item {
-            id: blindsMask
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            readonly property int rows: 9
-
-            Repeater {
-                model: blindsMask.rows
-
-                Rectangle {
-                    required property int index
-
-                    readonly property real rowHeight:
-                        root.height / blindsMask.rows
-
-                    y: index * rowHeight
-
-                    width:
-                        root.width
-                        * img.transitionProgress
-
-                    height: rowHeight + 1
-
-                    x: index % 2 === 0
-                        ? 0
-                        : root.width - width
-
-                    color: "white"
-                }
-            }
-        }
-
-        // curtain
-        //
-        // Opens upward and downward from the horizontal centre.
-
-        Item {
-            id: curtainMask
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            Rectangle {
-                x: 0
-
-                y:
-                    root.height / 2
-                    - root.height / 2
-                    * img.transitionProgress
-
-                width: root.width
-
-                height:
-                    root.height / 2
-                    * img.transitionProgress
-
-                color: "white"
-            }
-
-            Rectangle {
-                x: 0
-                y: root.height / 2
-
-                width: root.width
-
-                height:
-                    root.height / 2
-                    * img.transitionProgress
-
-                color: "white"
-            }
-        }
-
-        // columns
-        //
-        // Alternating vertical shutters from top and bottom.
-
-        Item {
-            id: columnsMask
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            readonly property int columns: 11
-            readonly property real columnWidth:
-                root.width / columns
-
-            Repeater {
-                model: columnsMask.columns
-
-                Rectangle {
-                    required property int index
-
-                    x:
-                        index
-                        * columnsMask.columnWidth
-
-                    width:
-                        columnsMask.columnWidth + 1
-
-                    height:
-                        root.height
-                        * img.transitionProgress
-
-                    y:
-                        index % 2 === 0
-                            ? 0
-                            : root.height - height
-
-                    color: "white"
-                }
-            }
-        }
-
         // diagonal
         //
         // Horizontal strips begin at slightly different times.
@@ -579,65 +392,6 @@ Item {
 
                     height:
                         diagonalMask.rowHeight + 1
-
-                    color: "white"
-                }
-            }
-        }
-
-        // slices
-        //
-        // Vertical strips arrive with staggered timing.
-
-        Item {
-            id: slicesMask
-
-            anchors.fill: parent
-            visible: false
-            layer.enabled: true
-
-            readonly property int columns: 13
-            readonly property real columnWidth:
-                root.width / columns
-
-            Repeater {
-                model: slicesMask.columns
-
-                Rectangle {
-                    required property int index
-
-                    readonly property real delay:
-                        index
-                        / Math.max(1, slicesMask.columns - 1)
-                        * 0.34
-
-                    readonly property real progress:
-                        Math.max(
-                            0,
-                            Math.min(
-                                1,
-                                (
-                                    img.transitionProgress
-                                    - delay
-                                ) / 0.66
-                            )
-                        )
-
-                    x:
-                        index
-                        * slicesMask.columnWidth
-
-                    width:
-                        slicesMask.columnWidth + 1
-
-                    height:
-                        root.height
-                        * progress
-
-                    y:
-                        index % 2 === 0
-                            ? 0
-                            : root.height - height
 
                     color: "white"
                 }

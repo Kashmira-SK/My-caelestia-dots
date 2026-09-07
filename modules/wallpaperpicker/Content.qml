@@ -285,7 +285,7 @@ Item {
 
                 anchors.fill: parent
 
-                radius: parent.radius
+                radius: Appearance.rounding.large
 
                 color: Qt.alpha(
                     Colours.palette.m3surface,
