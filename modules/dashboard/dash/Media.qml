@@ -21,20 +21,17 @@ Item {
             && Number.isFinite(active.length)
             && active.length > 0;
     }
-    property real playerProgress: {
+    readonly property real playerProgress: {
         const active = Players.active;
         return root.hasTimeline
             ? Math.max(0, Math.min(1, active.position / active.length))
             : 0;
     }
 
-    Behavior on playerProgress {
-        Anim { duration: Appearance.anim.durations.large }
-    }
-
     Timer {
         running:
-            root.hasTimeline
+            root.visible
+            && (Players.active?.positionSupported ?? false)
             && (Players.active?.isPlaying ?? false)
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true

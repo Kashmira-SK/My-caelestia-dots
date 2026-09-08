@@ -26,7 +26,7 @@ Item {
     }
     readonly property bool canSeek:
         root.hasTimeline && (Players.active?.canSeek ?? false)
-    property real playerProgress: {
+    readonly property real playerProgress: {
         const active = Players.active;
         return root.hasTimeline
             ? Math.max(0, Math.min(1, active.position / active.length))
@@ -63,15 +63,10 @@ Item {
     implicitWidth: 840
     implicitHeight: 255
 
-    Behavior on playerProgress {
-        Anim {
-            duration: Appearance.anim.durations.large
-        }
-    }
-
     Timer {
         running:
-            root.hasTimeline
+            root.visible
+            && (Players.active?.positionSupported ?? false)
             && (Players.active?.isPlaying ?? false)
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
@@ -422,6 +417,14 @@ Item {
 
                     property real dragValue: 0
                     property var dragPlayer: null
+                    property var dragTrack: null
+                    property bool dragging: false
+                    property bool dragMoved: false
+
+                    function seekTo(progress: real): void {
+                        if (root.canSeek)
+                            Players.active.position = Math.max(0, Math.min(1, progress)) * Players.active.length;
+                    }
 
                     Layout.fillWidth: true
 
@@ -431,24 +434,34 @@ Item {
                         Appearance.padding.normal * 2.1
 
                     onMoved: {
-                        if (pressed) {
+                        if (dragging) {
                             dragValue = value;
-                        } else if (root.canSeek) {
-                            const active = Players.active;
-                            active.position = value * active.length;
+                            dragMoved = true;
+                        } else {
+                            seekTo(value);
                         }
                     }
 
                     onPressedChanged: {
                         if (pressed) {
+                            dragging = true;
+                            dragMoved = false;
                             dragValue = value;
                             dragPlayer = Players.active;
+                            dragTrack = Players.active?.uniqueId;
                         } else {
-                            const active = Players.active;
-                            if (root.canSeek && active === dragPlayer)
-                                active.position = dragValue * active.length;
-
-                            dragPlayer = null;
+                            // Keep playback updates detached until Qt has delivered the
+                            // final moved signal and the player's seek notifications.
+                            Qt.callLater(() => {
+                                if (slider.pressed)
+                                    return;
+                                if (slider.dragMoved && Players.active === slider.dragPlayer
+                                        && Players.active?.uniqueId === slider.dragTrack)
+                                    slider.seekTo(slider.dragValue);
+                                slider.dragPlayer = null;
+                                slider.dragTrack = null;
+                                slider.dragging = false;
+                            });
                         }
                     }
 
@@ -456,7 +469,10 @@ Item {
                         target: slider
                         property: "value"
                         value: root.playerProgress
-                        when: !slider.pressed
+                        when: !slider.dragging
+                        // Coalesce transient position notifications during a seek.
+                        delayed: true
+                        restoreMode: Binding.RestoreNone
                     }
 
                     CustomMouseArea {
@@ -469,9 +485,7 @@ Item {
                             const active =
                                 Players.active;
 
-                            if (
-                                !root.canSeek
-                            )
+                            if (!root.canSeek || slider.dragging)
                                 return;
 
                             const wheelDelta =
@@ -487,20 +501,7 @@ Item {
                                 ? 10
                                 : -10;
 
-                            Qt.callLater(() => {
-                                if (active !== Players.active)
-                                    return;
-
-                                active.position =
-                                    Math.max(
-                                        0,
-                                        Math.min(
-                                            active.length,
-                                            active.position
-                                            + seconds
-                                        )
-                                    );
-                            });
+                            slider.seekTo((active.position + seconds) / active.length);
                         }
                     }
                 }
@@ -531,6 +532,18 @@ Item {
                     }
 
                     Item {
+                        Layout.fillWidth: true
+                    }
+
+                    StyledText {
+                        visible: !!Players.active && !root.hasTimeline
+                        text: qsTr("Timeline unavailable")
+                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
+                        font.pointSize: Appearance.font.size.smaller
+                    }
+
+                    Item {
+                        visible: !!Players.active && !root.hasTimeline
                         Layout.fillWidth: true
                     }
 
