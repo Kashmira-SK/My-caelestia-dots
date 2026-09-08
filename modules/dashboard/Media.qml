@@ -13,18 +13,28 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    required property PersistentProperties visibilities
     required property PersistentProperties state
 
+    readonly property bool hasTimeline: {
+        const active = Players.active;
+        return !!active
+            && active.positionSupported
+            && active.lengthSupported
+            && Number.isFinite(active.position)
+            && Number.isFinite(active.length)
+            && active.length > 0;
+    }
+    readonly property bool canSeek:
+        root.hasTimeline && (Players.active?.canSeek ?? false)
     property real playerProgress: {
         const active = Players.active;
-        return active?.length
+        return root.hasTimeline
             ? Math.max(0, Math.min(1, active.position / active.length))
             : 0;
     }
 
-    function lengthStr(length: int): string {
-        if (length < 0)
+    function lengthStr(length: real): string {
+        if (!Number.isFinite(length) || length < 0)
             return "--:--";
 
         const hours = Math.floor(length / 3600);
@@ -60,7 +70,9 @@ Item {
     }
 
     Timer {
-        running: Players.active?.isPlaying ?? false
+        running:
+            root.hasTimeline
+            && (Players.active?.isPlaying ?? false)
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
@@ -398,32 +410,6 @@ Item {
                 Item {
                     Layout.fillWidth: true
                 }
-
-                UtilityButton {
-                    icon: "move_up"
-
-                    canUse:
-                        Players.active?.canRaise
-                        ?? false
-
-                    function onClicked(): void {
-                        Players.active?.raise();
-                        root.visibilities.dashboard = false;
-                    }
-                }
-
-                UtilityButton {
-                    icon: "close"
-                    destructive: true
-
-                    canUse:
-                        Players.active?.canQuit
-                        ?? false
-
-                    function onClicked(): void {
-                        Players.active?.quit();
-                    }
-                }
             }
 
             ColumnLayout {
@@ -434,22 +420,36 @@ Item {
                 StyledSlider {
                     id: slider
 
+                    property real dragValue: 0
+                    property var dragPlayer: null
+
                     Layout.fillWidth: true
 
-                    enabled: !!Players.active
+                    enabled: root.canSeek
 
                     implicitHeight:
                         Appearance.padding.normal * 2.1
 
                     onMoved: {
-                        const active = Players.active;
+                        if (pressed) {
+                            dragValue = value;
+                        } else if (root.canSeek) {
+                            const active = Players.active;
+                            active.position = value * active.length;
+                        }
+                    }
 
-                        if (
-                            active?.canSeek
-                            && active?.positionSupported
-                        )
-                            active.position =
-                                value * active.length;
+                    onPressedChanged: {
+                        if (pressed) {
+                            dragValue = value;
+                            dragPlayer = Players.active;
+                        } else {
+                            const active = Players.active;
+                            if (root.canSeek && active === dragPlayer)
+                                active.position = dragValue * active.length;
+
+                            dragPlayer = null;
+                        }
                     }
 
                     Binding {
@@ -470,26 +470,34 @@ Item {
                                 Players.active;
 
                             if (
-                                !active?.canSeek
-                                || !active?.positionSupported
+                                !root.canSeek
                             )
+                                return;
+
+                            const wheelDelta =
+                                event.angleDelta.y;
+
+                            if (wheelDelta === 0)
                                 return;
 
                             event.accepted = true;
 
-                            const delta =
-                                event.angleDelta.y > 0
+                            const seconds =
+                                wheelDelta > 0
                                 ? 10
                                 : -10;
 
                             Qt.callLater(() => {
+                                if (active !== Players.active)
+                                    return;
+
                                 active.position =
                                     Math.max(
                                         0,
                                         Math.min(
                                             active.length,
                                             active.position
-                                            + delta
+                                            + seconds
                                         )
                                     );
                             });
@@ -503,8 +511,10 @@ Item {
                     StyledText {
                         text:
                             root.lengthStr(
-                                Players.active?.position
-                                ?? -1
+                                Players.active
+                                    ?.positionSupported
+                                ? Players.active.position
+                                : -1
                             )
 
                         color:
@@ -527,8 +537,10 @@ Item {
                     StyledText {
                         text:
                             root.lengthStr(
-                                Players.active?.length
-                                ?? -1
+                                Players.active
+                                    ?.lengthSupported
+                                ? Players.active.length
+                                : -1
                             )
 
                         color:
@@ -864,62 +876,6 @@ Item {
             id: playMouse
 
             anchors.fill: parent
-
-            enabled: button.canUse
-            hoverEnabled: true
-
-            cursorShape:
-                button.canUse
-                ? Qt.PointingHandCursor
-                : Qt.ArrowCursor
-
-            onClicked:
-                button.onClicked()
-        }
-    }
-
-    component UtilityButton: Item {
-        id: button
-
-        required property string icon
-        required property bool canUse
-
-        property bool destructive: false
-
-        function onClicked(): void {}
-
-        implicitWidth: 26
-        implicitHeight: 26
-
-        MaterialIcon {
-            anchors.centerIn: parent
-
-            text: button.icon
-
-            color:
-                button.canUse
-                ? Qt.alpha(
-                    button.destructive
-                    ? Colours.palette.m3error
-                    : Colours.palette.m3onSurfaceVariant,
-                    utilityMouse.containsMouse
-                    ? 0.80
-                    : 0.44
-                )
-                : Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.16
-                )
-
-            font.pointSize:
-                Appearance.font.size.small
-        }
-
-        MouseArea {
-            id: utilityMouse
-
-            anchors.fill: parent
-            anchors.margins: -3
 
             enabled: button.canUse
             hoverEnabled: true

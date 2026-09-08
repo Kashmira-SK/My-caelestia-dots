@@ -12,9 +12,18 @@ Item {
 
     required property PersistentProperties state
 
+    readonly property bool hasTimeline: {
+        const active = Players.active;
+        return !!active
+            && active.positionSupported
+            && active.lengthSupported
+            && Number.isFinite(active.position)
+            && Number.isFinite(active.length)
+            && active.length > 0;
+    }
     property real playerProgress: {
         const active = Players.active;
-        return active?.length > 0
+        return root.hasTimeline
             ? Math.max(0, Math.min(1, active.position / active.length))
             : 0;
     }
@@ -24,7 +33,9 @@ Item {
     }
 
     Timer {
-        running: Players.active?.isPlaying ?? false
+        running:
+            root.hasTimeline
+            && (Players.active?.isPlaying ?? false)
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
@@ -128,8 +139,6 @@ Item {
                 width: parent.width * root.playerProgress
                 radius: Appearance.rounding.full
                 color: Colours.palette.m3primary
-
-                Behavior on width { Anim { duration: Appearance.anim.durations.large } }
             }
         }
 

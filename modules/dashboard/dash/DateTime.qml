@@ -124,8 +124,9 @@ Item {
             }
 
             Behavior on rotation {
-                Anim {
+                RotationAnimation {
                     duration: Appearance.anim.durations.large
+                    direction: RotationAnimation.Clockwise
                     easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
@@ -149,8 +150,9 @@ Item {
             }
 
             Behavior on rotation {
-                Anim {
+                RotationAnimation {
                     duration: Appearance.anim.durations.large
+                    direction: RotationAnimation.Clockwise
                     easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
@@ -174,7 +176,10 @@ Item {
             }
 
             Behavior on rotation {
-                Anim { duration: 200 }
+                RotationAnimation {
+                    duration: 200
+                    direction: RotationAnimation.Clockwise
+                }
             }
         }
 
@@ -196,29 +201,20 @@ Item {
         spacing: 5
 
         StyledText {
-            text: {
-                const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-                return days[new Date().getDay()] + ",";
-            }
+            text: Qt.formatDateTime(Time.date, "dddd,")
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.smaller
         }
 
         StyledText {
-            text: {
-                const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-                return months[new Date().getMonth()];
-            }
+            text: Qt.formatDateTime(Time.date, "MMMM")
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.smaller
             font.weight: 500
         }
 
         StyledText {
-            text: {
-                const d = new Date();
-                return d.getDate() + ", " + d.getFullYear();
-            }
+            text: Qt.formatDateTime(Time.date, "d, yyyy")
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.smaller
         }
