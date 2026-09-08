@@ -8,14 +8,18 @@ Item {
     id: root
 
     readonly property var quotes: [
-        { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" },
-        { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
-        { text: "The wound is the place where the light enters you.", author: "Rumi" },
-        { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
-        { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
-        { text: "Stars can't shine without darkness.", author: "" },
-        { text: "The quieter you become, the more you are able to hear.", author: "Rumi" },
-        { text: "Focus is the bridge between goals and accomplishment.", author: "" }
+        { text: "Everything that lives is designed to end.", author: "2B, NieR:Automata" },
+        { text: "A future is not given to you. It is something you must take for yourself.", author: "Pod 042, NieR:Automata" },
+        { text: "Perhaps now we understand that not everything has to have an answer.", author: "NieR:Automata" },
+        { text: "Wanting something does not give you the right to have it.", author: "Ezio Audito" },
+        { text: "I use Arch, btw.", author: "" },
+        { text: "It isn't broken. It's configured differently.", author: "" },
+        { text: "There are no bugs, only undocumented features.", author: "" },
+        { text: "The config was perfect. Then I touched it.", author: "" },
+        { text: "I'll fix it properly later.", author: "" },
+        { text: "If it works, don't update it.", author: "" },
+        { text: "Home is something you configure.", author: "" },
+        { text: "Take your time. The cursor is still blinking", author: "" }
     ]
 
     readonly property var picked: quotes[Math.floor(Math.random() * quotes.length)]
