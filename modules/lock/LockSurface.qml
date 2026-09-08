@@ -14,6 +14,8 @@ WlSessionLockSurface {
     required property Pam pam
 
     readonly property alias unlocking: unlockAnim.running
+    readonly property real panelWidth: Math.min((root.screen?.width ?? 1920) * 0.85, (root.screen?.height ?? 1080) * Config.lock.sizes.heightMult * Config.lock.sizes.ratio, 1100)
+    readonly property real panelHeight: Math.min((root.screen?.height ?? 1080) * 0.85, Math.max(content.implicitHeight + Appearance.padding.large * 4, (root.screen?.height ?? 1080) * 0.52))
 
     color: "transparent"
 
@@ -144,14 +146,14 @@ WlSessionLockSurface {
                 Anim {
                     target: lockContent
                     property: "implicitWidth"
-                    to: (root.screen?.height ?? 0) * Config.lock.sizes.heightMult * Config.lock.sizes.ratio
+                    to: root.panelWidth
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
                 Anim {
                     target: lockContent
                     property: "implicitHeight"
-                    to: (root.screen?.height ?? 0) * Config.lock.sizes.heightMult
+                    to: root.panelHeight
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
@@ -219,8 +221,8 @@ WlSessionLockSurface {
             id: content
 
             anchors.centerIn: parent
-            width: (root.screen?.height ?? 0) * Config.lock.sizes.heightMult * Config.lock.sizes.ratio - Appearance.padding.large * 2
-            height: (root.screen?.height ?? 0) * Config.lock.sizes.heightMult - Appearance.padding.large * 2
+            width: root.panelWidth - Appearance.padding.large * 2
+            height: root.panelHeight - Appearance.padding.large * 2
 
             lock: root
             opacity: 0

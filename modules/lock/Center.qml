@@ -13,6 +13,7 @@ ColumnLayout {
     id: root
 
     required property var lock
+    property bool showClock: true
     readonly property real centerScale: Math.min(1, (lock.screen?.height ?? 1440) / 1440)
     readonly property int centerWidth: Config.lock.sizes.centerWidth * centerScale
 
@@ -23,6 +24,7 @@ ColumnLayout {
     spacing: Appearance.spacing.large * 2
 
     RowLayout {
+        visible: root.showClock
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small
 
@@ -71,14 +73,17 @@ ColumnLayout {
     }
 
     StyledText {
+        Layout.fillWidth: true
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: -Appearance.padding.large * 2
+        Layout.topMargin: root.showClock ? -Appearance.padding.large * 2 : 0
 
         text: Time.format("dddd, d MMMM yyyy")
         color: Colours.palette.m3tertiary
         font.pointSize: Math.floor(Appearance.font.size.extraLarge * root.centerScale)
         font.family: Appearance.font.family.mono
         font.bold: true
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.WordWrap
     }
 
     StyledClippingRect {

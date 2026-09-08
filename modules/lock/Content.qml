@@ -10,133 +10,124 @@ import QtQuick.Layouts
 RowLayout {
     id: root
     required property var lock
-    spacing: Appearance.spacing.large * 3
+    spacing: Appearance.spacing.large * 2
 
     Center {
         lock: root.lock
+        showClock: false
+        Layout.preferredWidth: (root.width - root.spacing) * 0.43
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignVCenter
+        Layout.leftMargin: Appearance.padding.large
+        Layout.topMargin: Appearance.padding.large
+        Layout.bottomMargin: Appearance.padding.large
     }
 
-    Item {
+    ColumnLayout {
+        id: details
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignVCenter
+        spacing: Appearance.spacing.large
+        Layout.rightMargin: Appearance.padding.large
 
         readonly property bool mediaPlaying: Players.active?.isPlaying ?? false
 
-        // ── Glitch clock top-right ──────────────────────────────────────────
+        // Render disjoint strips: the actual digits shift during each glitch.
         Item {
             id: clockItem
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.topMargin: Appearance.padding.large * 3
-            anchors.rightMargin: Appearance.padding.large * 2
-            width: 300
-            height: 90
+            Layout.alignment: Qt.AlignHCenter
+            implicitWidth: clockMetrics.implicitWidth + 24
+            implicitHeight: clockMetrics.implicitHeight
+            property real displacement: 0
 
             StyledText {
-                id: clockBase
-                x: 0
-                y: 0
+                id: clockMetrics
+                visible: false
                 text: Time.hourStr + ":" + Time.minuteStr
-                color: Colours.palette.m3primary
-                font.pointSize: Appearance.font.size.extraLarge * 2.4
                 font.family: "Rubik Glitch"
-                font.bold: true
+                font.pointSize: Appearance.font.size.extraLarge * 2
+                renderType: Text.CurveRendering
             }
 
-            // Subtle white ghost 1 — left
-            StyledText {
-                id: g1
-                x: 0
-                y: 0
-                text: clockBase.text
-                color: Colours.palette.m3primary
-                font.pointSize: Appearance.font.size.extraLarge * 2.4
-                font.family: "Rubik Glitch"
-                font.bold: true
-                opacity: 0
-            }
+            Repeater {
+                model: 5
+                delegate: Item {
+                    id: strip
+                    required property int index
+                    readonly property real stripHeight: clockMetrics.implicitHeight / 5
+                    x: 12 + clockItem.displacement * (index % 2 === 0 ? 1 : -1)
+                    y: index * stripHeight
+                    width: clockMetrics.implicitWidth
+                    height: stripHeight
+                    clip: true
 
-            // Subtle white ghost 2 — right
-            StyledText {
-                id: g2
-                x: 0
-                y: 0
-                text: clockBase.text
-                color: Colours.palette.m3primary
-                font.pointSize: Appearance.font.size.extraLarge * 2.4
-                font.family: "Rubik Glitch"
-                font.bold: true
-                opacity: 0
+                    StyledText {
+                        y: -strip.index * strip.stripHeight
+                        text: clockMetrics.text
+                        font: clockMetrics.font
+                        renderType: Text.CurveRendering
+                        color: Colours.palette.m3primary
+                    }
+                }
             }
 
             Timer {
-                interval: 3500
-                running: true
+                interval: 4800
+                running: root.visible && !root.lock.unlocking
+                repeat: true
                 onTriggered: glitchAnim.restart()
             }
 
             SequentialAnimation {
                 id: glitchAnim
-                ParallelAnimation {
-                    PropertyAction { target: g1; property: "x"; value: -14 }
-                    PropertyAction { target: g1; property: "y"; value: -1 }
-                    PropertyAction { target: g1; property: "opacity"; value: 0.4 }
-                    PropertyAction { target: g2; property: "x"; value: 12 }
-                    PropertyAction { target: g2; property: "y"; value: 1 }
-                    PropertyAction { target: g2; property: "opacity"; value: 0.3 }
-                }
-                PauseAnimation { duration: 70 }
-                ParallelAnimation {
-                    PropertyAction { target: g1; property: "x"; value: 16 }
-                    PropertyAction { target: g2; property: "x"; value: -12 }
-                }
+                PropertyAction { target: clockItem; property: "displacement"; value: 5 }
+                PauseAnimation { duration: 55 }
+                PropertyAction { target: clockItem; property: "displacement"; value: -7 }
                 PauseAnimation { duration: 45 }
-                ParallelAnimation {
-                    PropertyAction { target: g1; property: "opacity"; value: 0 }
-                    PropertyAction { target: g1; property: "x"; value: 0 }
-                    PropertyAction { target: g1; property: "y"; value: 0 }
-                    PropertyAction { target: g2; property: "opacity"; value: 0 }
-                    PropertyAction { target: g2; property: "x"; value: 0 }
-                    PropertyAction { target: g2; property: "y"; value: 0 }
-                }
+                PropertyAction { target: clockItem; property: "displacement"; value: 2 }
+                PauseAnimation { duration: 45 }
+                PropertyAction { target: clockItem; property: "displacement"; value: 0 }
             }
         }
 
         // ── Greeting — vertically centered ─────────────────────────────────
         ColumnLayout {
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: 60
-            spacing: Appearance.spacing.large * 3
-            opacity: parent.mediaPlaying ? 0 : 1
-            visible: opacity > 0
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
 
             Behavior on opacity {
                 NumberAnimation { duration: 600; easing.type: Easing.InOutQuad }
             }
 
             StyledText {
-                Layout.alignment: Qt.AlignLeft
-                readonly property int hr: new Date().getHours()
+                Layout.fillWidth: true
+                Layout.topMargin: Appearance.spacing.small
+                horizontalAlignment: Text.AlignHCenter
+                readonly property int hr: Time.hours
                 text: hr < 12 ? "Good morning," : hr < 17 ? "Good afternoon," : hr < 21 ? "Good evening," : "Good night,"
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.extraLarge
+                font.pointSize: Appearance.font.size.larger
                 font.family: Appearance.font.family.sans
             }
 
             Item {
-                Layout.alignment: Qt.AlignLeft
-                implicitWidth: nameText.implicitWidth
-                implicitHeight: nameText.implicitHeight
+                Layout.fillWidth: true
+                implicitHeight: nameText.implicitHeight + Appearance.padding.normal * 2
 
                 Text {
                     id: nameText
+                    anchors.centerIn: parent
+                    width: parent.width - Appearance.padding.large * 2
                     text: "Kashmira"
                     color: Colours.palette.m3primary
                     font.pointSize: Appearance.font.size.extraLarge * 4
+                    minimumPointSize: Appearance.font.size.large
+                    fontSizeMode: Text.HorizontalFit
+                    horizontalAlignment: Text.AlignHCenter
+                    renderType: Text.CurveRendering
                     font.family: "Great Vibes"
                     font.weight: Font.Normal
-                    rotation: -8
-                    transformOrigin: Item.Left
                 }
             }
 
@@ -144,9 +135,10 @@ RowLayout {
 
 
             StyledText {
-                Layout.alignment: Qt.AlignLeft
-                Layout.maximumWidth: 400
-                readonly property int hr: new Date().getHours()
+                Layout.fillWidth: true
+                visible: !details.mediaPlaying
+                horizontalAlignment: Text.AlignHCenter
+                readonly property int hr: Time.hours
                 readonly property var msgs: hr < 12 ? [
                     "The morning light is soft and new,\nmay all your plans come gently true.",
                     "A brand new day is yours to own,\nthe seeds you plant today are sown.",
@@ -175,27 +167,18 @@ RowLayout {
                 wrapMode: Text.WordWrap
                 lineHeight: 1.5
             }
-        }
 
-        // ── Media centered ──────────────────────────────────────────────────
-        Item {
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: 60
-            width: parent.width * 0.85
-            implicitHeight: mediaWidget.implicitHeight
-            opacity: parent.mediaPlaying ? 1 : 0
-            visible: opacity > 0
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: mediaWidget.implicitHeight
+                visible: details.mediaPlaying
 
-            Behavior on opacity {
-                NumberAnimation { duration: 600; easing.type: Easing.InOutQuad }
+                Media {
+                    id: mediaWidget
+                    lock: root.lock
+                }
             }
 
-            Media {
-                id: mediaWidget
-                lock: root.lock
-                anchors.left: parent.left
-                anchors.right: parent.right
-            }
         }
     }
 }
