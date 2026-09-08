@@ -24,94 +24,53 @@ Item {
 
     readonly property var picked: quotes[Math.floor(Math.random() * quotes.length)]
 
-    StyledText {
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: -Appearance.padding.large
-        anchors.leftMargin: Appearance.padding.normal
-        text: "\u201C"
-        color: Qt.alpha(Colours.palette.m3tertiary, 0.10)
-        font.pointSize: 96
-        font.weight: 700
-    }
-
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.leftMargin: Appearance.padding.large * 1.5
+        anchors.rightMargin: Appearance.padding.large * 1.5
+        anchors.topMargin: Appearance.padding.large
+        anchors.bottomMargin: Appearance.padding.large
+        spacing: Appearance.spacing.small
 
         Item {
             Layout.fillHeight: true
         }
 
-        Row {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 6
-
-            Rectangle {
-                width: 30
-                height: 1
-                color: Colours.palette.m3outlineVariant
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            StyledText {
-                text: "✦"
-                color: Colours.palette.m3tertiary
-                font.pointSize: 8
-            }
-
-            Rectangle {
-                width: 30
-                height: 1
-                color: Colours.palette.m3outlineVariant
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-
         StyledText {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
-            text: `"${root.picked.text}"`
+            text: root.picked.text
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.normal
-            font.italic: true
+            font.weight: 500
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
+        }
+
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: Appearance.spacing.small
+            Layout.bottomMargin: Appearance.spacing.small
+            implicitWidth: 28
+            implicitHeight: 1
+            color: Qt.alpha(
+                Colours.palette.m3outlineVariant,
+                0.7
+            )
         }
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
             visible: root.picked.author !== ""
             text: `— ${root.picked.author}`
-            color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.normal
-            font.weight: 600
-        }
-
-        Row {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 6
-
-            Rectangle {
-                width: 30
-                height: 1
-                color: Colours.palette.m3outlineVariant
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            StyledText {
-                text: "✦"
-                color: Colours.palette.m3tertiary
-                font.pointSize: 8
-            }
-
-            Rectangle {
-                width: 30
-                height: 1
-                color: Colours.palette.m3outlineVariant
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            color: Qt.alpha(
+                Colours.palette.m3onSurfaceVariant,
+                0.6
+            )
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            font.italic: true
+            font.weight: 400
         }
 
         Item {
