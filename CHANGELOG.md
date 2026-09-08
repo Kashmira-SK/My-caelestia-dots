@@ -2,6 +2,30 @@
 
 Newest entries at the top.
 
+## [2026-09-08] - Dashboard and lock screen refinements
+
+### Added
+
+- `modules/dashboard/dash/Quote.qml`: new game/Linux quotes and simpler styling — centered text, short divider, smaller author line
+- `modules/lock/Content.qml`: reworked two-column layout and repeating sliced-digit glitch clock; greeting and name stay visible during playback
+- `modules/lock/Media.qml`: compact media card with cover art, fallback icon, track details, and smaller transport controls
+- `modules/dashboard/Media.qml`: "Timeline unavailable" label for players without usable timeline data
+
+### Fixed
+
+- `modules/dashboard/dash/DateTime.qml`: clock hands now move clockwise across 12 instead of spinning backward; date updates after midnight
+- `modules/dashboard/Media.qml`: removed obsolete raise/close buttons and their unused component and visibility wiring
+- Dashboard media bars: removed stale progress animations causing seek snap-back and checked position/duration support before displaying progress
+- `modules/dashboard/Media.qml`: drag seeks once on release, waits for the final drag event, and cancels if the player or track changes; click, keyboard, and wheel seeking retained
+- `modules/lock/Center.qml` / `Content.qml` / `LockSurface.qml`: removed duplicate clock from the main layout, improved date/name fitting and panel sizing, and made greetings update with the time service
+
+### Notes
+
+- Browser seeking is still unresolved: Firefox reported no video duration and position zero while paused despite advertising seek support. The bar stays disabled without a usable duration; pause/resume behavior needs further investigation
+- Seek interaction tests and QML checks passed; live YouTube click/drag and paused seeking still need verification
+
+---
+
 ## [2026-09-07] - Wallpaper picker and transition overhaul
 
 ### Added
