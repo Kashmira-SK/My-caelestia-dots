@@ -8,6 +8,7 @@ Newest entries at the top.
 
 - Launcher frame with an integrated `LAUNCHER` edge label and flat search header in `modules/launcher/Content.qml`
 - Launcher results use a palette-tinted selection with an accent marker; app and command rows emphasize the selected name and show an Enter hint
+- Calmer launcher surface with a single edge frame, larger search text, compact result spacing, quieter favourite icons, and keyboard hints
 - Up/Down arrow navigation in the dedicated wallpaper picker, alongside Left/Right
 
 ### Fixed

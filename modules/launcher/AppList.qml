@@ -61,7 +61,7 @@ StyledListView {
         onValuesChanged: root.currentIndex = 0
     }
 
-    spacing: Appearance.spacing.small
+    spacing: Appearance.spacing.small / 2
     orientation: Qt.Vertical
     implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
 
@@ -71,8 +71,8 @@ StyledListView {
 
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
-        radius: Appearance.rounding.normal
-        color: Qt.alpha(Colours.palette.m3primary, 0.12)
+        radius: Appearance.rounding.small
+        color: Qt.alpha(Colours.palette.m3primary, 0.1)
         visible: !!root.currentItem
 
         y: root.currentItem?.y ?? 0

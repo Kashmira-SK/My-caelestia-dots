@@ -18,7 +18,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.small
 
         function onClicked(): void {
             root.modelData?.onClicked(root.list);
@@ -65,7 +65,7 @@ Item {
                 text: root.modelData?.desc ?? ""
                 visible: text.length > 0
                 font.pointSize: Appearance.font.size.small
-                color: Colours.palette.m3outline
+                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, root.selected ? 0.9 : 0.65)
 
                 elide: Text.ElideRight
                 width: parent.width

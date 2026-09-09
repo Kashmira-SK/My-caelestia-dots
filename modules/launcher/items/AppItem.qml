@@ -22,7 +22,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.small
 
         function onClicked(): void {
             Apps.launch(root.modelData);
@@ -40,7 +40,7 @@ Item {
             id: icon
 
             source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
-            implicitSize: parent.height * 0.8
+            implicitSize: parent.height * 0.7
 
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -70,7 +70,7 @@ Item {
                 text: root.description
                 visible: text.length > 0 && text.toLowerCase() !== name.text.trim().toLowerCase()
                 font.pointSize: Appearance.font.size.small
-                color: Colours.palette.m3outline
+                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, root.selected ? 0.9 : 0.65)
 
                 elide: Text.ElideRight
                 width: parent.width
@@ -92,8 +92,9 @@ Item {
 
                 sourceComponent: MaterialIcon {
                     text: "favorite"
-                    fill: 1
-                    color: Colours.palette.m3primary
+                    fill: 0
+                    font.pointSize: Appearance.font.size.small
+                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.5)
                 }
             }
 

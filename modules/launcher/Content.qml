@@ -20,23 +20,23 @@ Item {
     readonly property real labelInset: frameLabel.implicitHeight / 2
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 3 + labelInset
+    implicitHeight: searchWrapper.height + listWrapper.height + footer.implicitHeight + padding * 4 + labelInset
 
     StyledRect {
         anchors.fill: parent
+        anchors.topMargin: root.labelInset
         radius: root.rounding
-        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
+        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Math.max(0.94, Colours.transparency.base) : 1)
     }
 
     Canvas {
         id: frame
 
         anchors.fill: parent
-        anchors.margins: root.padding / 2
-        anchors.topMargin: root.padding / 2 + root.labelInset
+        anchors.topMargin: root.labelInset
         antialiasing: true
 
-        property color outline: Colours.palette.m3outlineVariant
+        property color outline: Qt.alpha(Colours.palette.m3outlineVariant, 0.7)
         property real rounding: root.rounding
         property real gapStart: frameLabel.x - x - Appearance.spacing.small
         property real gapEnd: gapStart + frameLabel.width + Appearance.spacing.small * 2
@@ -75,11 +75,11 @@ Item {
         id: frameLabel
 
         x: root.padding + root.rounding
-        y: root.padding / 2
+        y: 0
         text: qsTr("LAUNCHER")
-        color: Colours.palette.m3outline
+        color: Colours.palette.m3onSurfaceVariant
         font.family: Appearance.font.family.mono
-        font.pointSize: Appearance.font.size.smaller
+        font.pointSize: Appearance.font.size.small
         font.weight: 600
         font.letterSpacing: 2
     }
@@ -88,7 +88,7 @@ Item {
         id: listWrapper
 
         implicitWidth: list.width
-        implicitHeight: list.height + root.padding
+        implicitHeight: list.height
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: searchWrapper.bottom
@@ -98,7 +98,7 @@ Item {
             id: list
 
             visibilities: root.visibilities
-            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 4 - root.labelInset
+            maxHeight: Math.max(0, root.maxHeight - searchWrapper.implicitHeight - footer.implicitHeight - root.padding * 4 - root.labelInset)
             search: search
         }
     }
@@ -143,9 +143,9 @@ Item {
 
             topPadding: Appearance.padding.larger
             bottomPadding: Appearance.padding.larger
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Appearance.font.size.larger
 
-            placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
+            placeholderText: qsTr("Search applications…")
 
             onAccepted: {
                 const currentItem = list.currentList?.currentItem;
@@ -242,6 +242,37 @@ Item {
                     duration: Appearance.anim.durations.small
                 }
             }
+        }
+    }
+
+    Item {
+        id: footer
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: listWrapper.bottom
+        anchors.topMargin: root.padding
+        anchors.leftMargin: root.padding * 2
+        anchors.rightMargin: root.padding * 2
+        implicitHeight: Math.max(commandHint.implicitHeight, navigationHint.implicitHeight)
+
+        StyledText {
+            id: commandHint
+
+            text: qsTr("%1 commands").arg(Config.launcher.actionPrefix)
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+        }
+
+        StyledText {
+            id: navigationHint
+
+            anchors.right: parent.right
+            text: qsTr("↑↓ select   esc close")
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3outline
         }
     }
 }
