@@ -39,15 +39,15 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.OutQuint
+            duration: root.shouldBeActive ? Appearance.anim.durations.normal : 260
+            easing.type: root.shouldBeActive ? Easing.OutQuint : Easing.InOutCubic
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.OutBack
+            duration: root.shouldBeActive ? Appearance.anim.durations.normal : 260
+            easing.type: root.shouldBeActive ? Easing.OutBack : Easing.InOutCubic
         }
     }
 

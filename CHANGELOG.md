@@ -2,7 +2,7 @@
 
 Newest entries at the top.
 
-## [2026-09-09] - Wallpaper carousel navigation
+## [2026-09-09] - Wallpaper picker refinements
 
 ### Added
 
@@ -10,27 +10,10 @@ Newest entries at the top.
 
 ### Fixed
 
-- `modules/wallpaperpicker/Content.qml`: synchronize the selection before showing the picker so reopening starts on the current wallpaper
-- Replaced preview swapping with a 340 ms sliding carousel; adjacent cards stay loaded at a fixed image size as they move into the centre
-- Removed load-dependent navigation delays and capped queued input so held arrows do not build up delayed movement
-- `modules/wallpaperpicker/PreviewCard.qml`: tied thumbnail shading directly to slide progress to prevent the delayed brightness jump when a side card reaches the centre
-
-### Notes
-
-- Headless QML checks cover opening/reopening, physical card movement, arrow keys, rapid reversals, and confirmation/cancellation during a slide; the shell reloaded successfully
-- Opening, sliding, and centre brightness confirmed working on the desktop; the shading regression check also passes
-
----
-
-## [2026-09-09] - Remove launcher wallpaper picker
-
-### Fixed
-
-- Removed the launcher's `>wallpaper` picker entry and routing, including the entry retained in saved launcher settings
-
-### Notes
-
-- Confirmed working in the launcher; QML parsing and saved-action filtering checks passed
+- Removed the launcher's `>wallpaper` entry and picker routing, including the entry retained in saved settings
+- Picker now opens on the current wallpaper without briefly showing another thumbnail
+- Smoother sliding carousel with preloaded neighboring images and consistent brightness as cards reach the centre
+- Graceful closing animation, including when dismissed during a slide, and more responsive cycling with a gentler slowdown
 
 ---
 

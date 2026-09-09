@@ -153,9 +153,8 @@ Item {
                 root.syncToCurrent();
                 Qt.callLater(() => root.forceActiveFocus());
             } else {
-                root.presentationReady = false;
+                // Keep the last rendered frame for the wrapper's exit animation.
                 slide.stop();
-                root.travel = 0;
             }
         }
     }
@@ -164,12 +163,12 @@ Item {
         target: Wallpapers
 
         function onActualCurrentChanged(): void {
-            if (!root.visibilities.wallpaperPicker || !root.browsed)
+            if (root.visibilities.wallpaperPicker && !root.browsed)
                 root.syncToCurrent();
         }
 
         function onListChanged(): void {
-            if (!root.visibilities.wallpaperPicker || !root.browsed)
+            if (root.visibilities.wallpaperPicker && !root.browsed)
                 root.syncToCurrent();
         }
     }
@@ -180,8 +179,8 @@ Item {
         property: "travel"
         from: 0
         to: root.direction
-        duration: 340
-        easing.type: Easing.InOutCubic
+        duration: 360
+        easing.type: Easing.OutCubic
         onFinished: root.finishSlide()
     }
 
