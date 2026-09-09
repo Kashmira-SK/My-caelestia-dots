@@ -26,7 +26,7 @@ Item {
         anchors.fill: parent
         anchors.topMargin: root.labelInset
         radius: root.rounding
-        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Math.max(0.94, Colours.transparency.base) : 1)
+        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Math.max(0.97, Colours.transparency.base) : 1)
     }
 
     Canvas {
