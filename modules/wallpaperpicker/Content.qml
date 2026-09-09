@@ -1,5 +1,5 @@
-import qs.components
-import qs.components.images
+pragma ComponentBehavior: Bound
+
 import qs.services
 import qs.config
 import Quickshell
@@ -11,305 +11,229 @@ Item {
     required property PersistentProperties visibilities
 
     property int selectedIndex: 0
+    property int pendingStep: 0
+    property bool pendingApply: false
+    property int direction: 1
+    property real travel: 0
+    property bool initialized: false
+    property bool presentationReady: false
+    property bool browsed: false
 
     readonly property int wallpaperCount: Wallpapers.list.length
-
-    readonly property var selectedWallpaper:
-        wallpaperCount > 0
-            ? Wallpapers.list[wrappedIndex(selectedIndex)]
-            : null
-
-    readonly property var previousWallpaper:
-        wallpaperCount > 1
-            ? Wallpapers.list[wrappedIndex(selectedIndex - 1)]
-            : null
-
-    readonly property var nextWallpaper:
-        wallpaperCount > 1
-            ? Wallpapers.list[wrappedIndex(selectedIndex + 1)]
-            : null
-
-    readonly property bool selectedIsCurrent:
-        selectedWallpaper
-        && selectedWallpaper.path === Wallpapers.actualCurrent
+    readonly property var currentCard: cardAtSlot(0)
+    readonly property bool moving: slide.running
 
     implicitWidth: 980
     implicitHeight: 430
-
     focus: visibilities.wallpaperPicker
 
     function wrappedIndex(index: int): int {
-        if (wallpaperCount <= 0)
-            return 0;
+        return wallpaperCount > 0
+            ? ((index % wallpaperCount) + wallpaperCount) % wallpaperCount
+            : 0;
+    }
 
-        return ((index % wallpaperCount) + wallpaperCount) % wallpaperCount;
+    function cardAtSlot(slot: int): var {
+        for (let i = 0; i < cards.count; i++) {
+            const card = cards.itemAt(i);
+            if (card && card.slot === slot)
+                return card;
+        }
+        return null;
+    }
+
+    function pathAtOffset(offset: int): string {
+        if (wallpaperCount === 0 || (wallpaperCount === 1 && offset !== 0))
+            return "";
+        return Wallpapers.list[wrappedIndex(selectedIndex + offset)].path;
+    }
+
+    function revealCurrent(): void {
+        if (initialized && currentCard && (currentCard.ready || currentCard.failed))
+            presentationReady = true;
     }
 
     function syncToCurrent(): void {
-        if (wallpaperCount <= 0) {
-            selectedIndex = 0;
+        if (!initialized)
+            return;
+
+        presentationReady = false;
+        slide.stop();
+        travel = 0;
+        pendingStep = 0;
+        pendingApply = false;
+        browsed = false;
+        const index = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent);
+        selectedIndex = index >= 0 ? index : 0;
+
+        for (let i = 0; i < cards.count; i++) {
+            const card = cards.itemAt(i);
+            card.slot = i - 2;
+            // The wallpaper list may still be loading when the picker opens.
+            card.imagePath = card.slot === 0 && Wallpapers.actualCurrent
+                ? Wallpapers.actualCurrent : pathAtOffset(card.slot);
+        }
+        Qt.callLater(revealCurrent);
+    }
+
+    function navigate(step: int, autoRepeat: bool): void {
+        if (!visibilities.wallpaperPicker || !presentationReady || wallpaperCount <= 1 || (step !== -1 && step !== 1))
+            return;
+
+        pendingApply = false;
+        if (moving) {
+            // Queue one deliberate press without accumulating held-key repeats.
+            if (!autoRepeat)
+                pendingStep = step;
             return;
         }
-
-        const index = Wallpapers.list.findIndex(
-            wallpaper => wallpaper.path === Wallpapers.actualCurrent
-        );
-
-        selectedIndex = index >= 0 ? index : 0;
+        pendingStep = 0;
+        browsed = true;
+        direction = step;
+        slide.start();
     }
 
-    function previous(): void {
-        if (wallpaperCount <= 1)
-            return;
-
-        selectedIndex = wrappedIndex(selectedIndex - 1);
-        navigationAnim.restart();
-    }
-
-    function next(): void {
-        if (wallpaperCount <= 1)
-            return;
-
-        selectedIndex = wrappedIndex(selectedIndex + 1);
-        navigationAnim.restart();
+    function finishSlide(): void {
+        selectedIndex = wrappedIndex(selectedIndex + direction);
+        for (let i = 0; i < cards.count; i++) {
+            const card = cards.itemAt(i);
+            let slot = card.slot - direction;
+            if (slot < -2 || slot > 2) {
+                slot = slot < -2 ? 2 : -2;
+                // Only recycle the card beyond the visible edge. All other
+                // cards retain their textures as they move through the centre.
+                card.imagePath = pathAtOffset(slot);
+            }
+            card.slot = slot;
+        }
+        travel = 0;
+        if (pendingApply)
+            applySelected();
+        else if (pendingStep) {
+            const step = pendingStep;
+            pendingStep = 0;
+            Qt.callLater(() => root.navigate(step, false));
+        }
     }
 
     function applySelected(): void {
-        if (!selectedWallpaper)
+        pendingStep = 0;
+        if (moving) {
+            pendingApply = true;
             return;
-
-        if (!selectedIsCurrent)
-            Wallpapers.setWallpaper(selectedWallpaper.path);
-
+        }
+        pendingApply = false;
+        if (!currentCard?.imagePath || !currentCard.ready)
+            return;
+        if (currentCard.imagePath !== Wallpapers.actualCurrent)
+            Wallpapers.setWallpaper(currentCard.imagePath);
         visibilities.wallpaperPicker = false;
     }
 
-    Keys.onLeftPressed: previous()
-    Keys.onRightPressed: next()
+    Keys.onLeftPressed: event => navigate(-1, event.isAutoRepeat)
+    Keys.onUpPressed: event => navigate(-1, event.isAutoRepeat)
+    Keys.onRightPressed: event => navigate(1, event.isAutoRepeat)
+    Keys.onDownPressed: event => navigate(1, event.isAutoRepeat)
     Keys.onReturnPressed: applySelected()
     Keys.onEnterPressed: applySelected()
+    Keys.onEscapePressed: visibilities.wallpaperPicker = false
 
-    Keys.onEscapePressed: {
-        visibilities.wallpaperPicker = false;
+    Component.onCompleted: {
+        initialized = true;
+        syncToCurrent();
     }
 
     Connections {
         target: root.visibilities
 
         function onWallpaperPickerChanged(): void {
-            if (!root.visibilities.wallpaperPicker)
-                return;
-
-            root.syncToCurrent();
-            Qt.callLater(() => root.forceActiveFocus());
+            root.pendingStep = 0;
+            root.pendingApply = false;
+            if (root.visibilities.wallpaperPicker) {
+                root.syncToCurrent();
+                Qt.callLater(() => root.forceActiveFocus());
+            } else {
+                root.presentationReady = false;
+                slide.stop();
+                root.travel = 0;
+            }
         }
+    }
+
+    Connections {
+        target: Wallpapers
+
+        function onActualCurrentChanged(): void {
+            if (!root.visibilities.wallpaperPicker || !root.browsed)
+                root.syncToCurrent();
+        }
+
+        function onListChanged(): void {
+            if (!root.visibilities.wallpaperPicker || !root.browsed)
+                root.syncToCurrent();
+        }
+    }
+
+    NumberAnimation {
+        id: slide
+        target: root
+        property: "travel"
+        from: 0
+        to: root.direction
+        duration: 340
+        easing.type: Easing.InOutCubic
+        onFinished: root.finishSlide()
     }
 
     Item {
         id: gallery
 
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.fill: parent
+        visible: root.presentationReady
+        clip: true
 
-        anchors.verticalCenter: parent.verticalCenter
+        // Three visible cards, plus one preloaded card beyond each edge.
+        Repeater {
+            id: cards
+            model: 5
 
-        height: 405
+            PreviewCard {
+                id: card
+                required property int index
+                property int slot: index - 2
+                readonly property real position: slot - root.travel
+                readonly property real distance: Math.abs(position)
+                readonly property real centre: {
+                    const side = position < 0 ? -1 : 1;
+                    if (distance <= 1)
+                        return gallery.width / 2 + position * 300;
+                    return gallery.width / 2 + side * (300 + (distance - 1) * 420);
+                }
 
-        PreviewCard {
-            id: previousCard
+                width: 660
+                height: 372
+                x: centre - width / 2
+                y: (gallery.height - height) / 2
+                scale: 1 - Math.min(distance, 1) * 0.48
+                opacity: distance <= 1 ? 1 - distance * 0.45 : Math.max(0, 0.55 * (2 - distance))
+                z: 2 - distance
+                visible: imagePath !== "" && distance < 2
+                overlayOpacity: Math.min(distance, 1) * 0.18
+                borderWidth: imagePath === Wallpapers.actualCurrent ? 2 : 1
+                borderColour: imagePath === Wallpapers.actualCurrent
+                    ? Qt.alpha(Colours.palette.m3primary, 0.8)
+                    : Qt.alpha(Colours.palette.m3outlineVariant, 0.4)
 
-            anchors.left: parent.left
-            anchors.leftMargin: 30
-            anchors.verticalCenter: parent.verticalCenter
-
-            width: 330
-            height: 286
-
-            z: 0
-            scale: 0.9
-            opacity: 0.5
-
-            imagePath:
-                root.previousWallpaper?.path ?? ""
-
-            overlayOpacity: 0.18
-
-            onActivated: {
-                root.forceActiveFocus();
-                root.previous();
-            }
-        }
-
-        PreviewCard {
-            id: nextCard
-
-            anchors.right: parent.right
-            anchors.rightMargin: 30
-            anchors.verticalCenter: parent.verticalCenter
-
-            width: 330
-            height: 286
-
-            z: 0
-            scale: 0.9
-            opacity: 0.5
-
-            imagePath:
-                root.nextWallpaper?.path ?? ""
-
-            overlayOpacity: 0.18
-
-            onActivated: {
-                root.forceActiveFocus();
-                root.next();
-            }
-        }
-
-        PreviewCard {
-            id: heroCard
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-
-            width: 660
-            height: 372
-
-            z: 2
-
-            imagePath:
-                root.selectedWallpaper?.path ?? ""
-
-            borderWidth: root.selectedIsCurrent ? 2 : 1
-
-            borderColour: root.selectedIsCurrent
-                ? Qt.alpha(Colours.palette.m3primary, 0.8)
-                : Qt.alpha(Colours.palette.m3outlineVariant, 0.4)
-
-            onActivated: {
-                root.forceActiveFocus();
-                root.applySelected();
-            }
-
-        }
-    }
-
-    ParallelAnimation {
-        id: navigationAnim
-
-        NumberAnimation {
-            target: heroCard
-            property: "scale"
-
-            from: 0.975
-            to: 1
-
-            duration: 220
-            easing.type: Easing.OutCubic
-        }
-
-        NumberAnimation {
-            target: heroCard
-            property: "opacity"
-
-            from: 0.72
-            to: 1
-
-            duration: 180
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    component PreviewCard: Item {
-        id: card
-
-        property string imagePath
-        property int retryCount: 0
-        property bool resettingSource: false
-
-        property real overlayOpacity: 0
-
-        property int borderWidth: 1
-        property color borderColour:
-            Qt.alpha(Colours.palette.m3outlineVariant, 0.25)
-
-        signal activated()
-
-        StyledClippingRect {
-            anchors.fill: parent
-
-            radius: Appearance.rounding.large
-
-            color: Colours.palette.m3surfaceContainer
-
-            border.width: card.borderWidth
-            border.color: card.borderColour
-
-            MaterialIcon {
-                anchors.centerIn: parent
-
-                text: "wallpaper"
-                color: Colours.palette.m3outline
-
-                font.pointSize:
-                    Appearance.font.size.extraLarge * 2.5
-            }
-
-            CachingImage {
-                id: image
-
-                anchors.fill: parent
-
-                path: card.resettingSource
-                    ? ""
-                    : card.imagePath
-
-                cache: true
-                smooth: true
-
-                onStatusChanged: {
-                    if (status === Image.Ready) {
-                        card.retryCount = 0;
-                    } else if (
-                        status === Image.Error
-                        && card.retryCount < 2
-                    ) {
-                        card.retryCount++;
-                        card.resettingSource = true;
-                        retryTimer.restart();
-                    }
+                onReadyChanged: Qt.callLater(root.revealCurrent)
+                onFailedChanged: Qt.callLater(root.revealCurrent)
+                onActivated: {
+                    root.forceActiveFocus();
+                    if (slot === 0)
+                        root.applySelected();
+                    else
+                        root.navigate(slot < 0 ? -1 : 1, false);
                 }
             }
-
-            StyledRect {
-                visible: card.overlayOpacity > 0
-
-                anchors.fill: parent
-
-                radius: Appearance.rounding.large
-
-                color: Qt.alpha(
-                    Colours.palette.m3surface,
-                    card.overlayOpacity
-                )
-            }
-
-            MouseArea {
-                anchors.fill: parent
-
-                cursorShape: Qt.PointingHandCursor
-
-                onClicked: card.activated()
-            }
-        }
-
-        Timer {
-            id: retryTimer
-
-            interval: 160
-
-            onTriggered:
-                card.resettingSource = false
         }
     }
-
 }
