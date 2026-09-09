@@ -2,10 +2,11 @@
 
 Newest entries at the top.
 
-## [2026-09-09] - Wallpaper picker refinements
+## [2026-09-09] - Wallpaper picker and launcher refinements
 
 ### Added
 
+- Launcher frame with an integrated `LAUNCHER` edge label and flat search header in `modules/launcher/Content.qml`
 - Up/Down arrow navigation in the dedicated wallpaper picker, alongside Left/Right
 
 ### Fixed

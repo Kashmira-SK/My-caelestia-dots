@@ -16,15 +16,72 @@ Item {
     required property real maxHeight
 
     readonly property int padding: Appearance.padding.large
-    readonly property int rounding: Appearance.rounding.large
+    readonly property int rounding: Appearance.rounding.normal
+    readonly property real labelInset: frameLabel.implicitHeight / 2
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 3
+    implicitHeight: searchWrapper.height + listWrapper.height + padding * 3 + labelInset
 
     StyledRect {
-      anchors.fill: parent
-      radius: Appearance.rounding.small
-      color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
+        anchors.fill: parent
+        radius: root.rounding
+        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
+    }
+
+    Canvas {
+        id: frame
+
+        anchors.fill: parent
+        anchors.margins: root.padding / 2
+        anchors.topMargin: root.padding / 2 + root.labelInset
+        antialiasing: true
+
+        property color outline: Colours.palette.m3outlineVariant
+        property real rounding: root.rounding
+        property real gapStart: frameLabel.x - x - Appearance.spacing.small
+        property real gapEnd: gapStart + frameLabel.width + Appearance.spacing.small * 2
+
+        onOutlineChanged: requestPaint()
+        onRoundingChanged: requestPaint()
+        onGapStartChanged: requestPaint()
+        onGapEndChanged: requestPaint()
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
+        onPaint: {
+            const ctx = getContext("2d");
+            ctx.clearRect(0, 0, width, height);
+            const right = width - 0.5;
+            const bottom = height - 0.5;
+            const r = Math.min(rounding, width / 2, height / 2);
+            ctx.strokeStyle = outline;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(gapEnd, 0.5);
+            ctx.lineTo(right - r, 0.5);
+            ctx.quadraticCurveTo(right, 0.5, right, r);
+            ctx.lineTo(right, bottom - r);
+            ctx.quadraticCurveTo(right, bottom, right - r, bottom);
+            ctx.lineTo(r, bottom);
+            ctx.quadraticCurveTo(0.5, bottom, 0.5, bottom - r);
+            ctx.lineTo(0.5, r);
+            ctx.quadraticCurveTo(0.5, 0.5, r, 0.5);
+            ctx.lineTo(gapStart, 0.5);
+            ctx.stroke();
+        }
+    }
+
+    StyledText {
+        id: frameLabel
+
+        x: root.padding + root.rounding
+        y: root.padding / 2
+        text: qsTr("LAUNCHER")
+        color: Colours.palette.m3outline
+        font.family: Appearance.font.family.mono
+        font.pointSize: Appearance.font.size.smaller
+        font.weight: 600
+        font.letterSpacing: 2
     }
 
     Item {
@@ -41,23 +98,29 @@ Item {
             id: list
 
             visibilities: root.visibilities
-            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 3
+            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 4 - root.labelInset
             search: search
         }
     }
 
-    StyledRect {
+    Item {
         id: searchWrapper
-
-        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Appearance.rounding.full
 
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: root.padding
+        anchors.topMargin: root.padding + root.labelInset
 
         implicitHeight: Math.max(searchIcon.implicitHeight, search.implicitHeight, clearIcon.implicitHeight)
+
+        StyledRect {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            implicitHeight: 1
+            color: Qt.alpha(Colours.palette.m3outlineVariant, 0.6)
+        }
 
         MaterialIcon {
             id: searchIcon
@@ -72,7 +135,6 @@ Item {
 
         StyledTextField {
             id: search
-            onTextChanged: console.log("[DEBUG] search.text is now:", JSON.stringify(text))
 
             anchors.left: searchIcon.right
             anchors.right: clearIcon.left
@@ -81,6 +143,7 @@ Item {
 
             topPadding: Appearance.padding.larger
             bottomPadding: Appearance.padding.larger
+            font.pointSize: Appearance.font.size.normal
 
             placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
 
