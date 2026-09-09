@@ -40,13 +40,9 @@ Item {
         ContentList {
             id: list
 
-            content: root
             visibilities: root.visibilities
-            panels: root.panels
             maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 3
             search: search
-            padding: root.padding
-            rounding: root.rounding
         }
     }
 
@@ -91,12 +87,7 @@ Item {
             onAccepted: {
                 const currentItem = list.currentList?.currentItem;
                 if (currentItem) {
-                    if (list.showWallpapers) {
-                        if (Colours.scheme === "dynamic" && currentItem.modelData.path !== Wallpapers.actualCurrent)
-                            Wallpapers.previewColourLock = true;
-                        Wallpapers.setWallpaper(currentItem.modelData.path);
-                        root.visibilities.launcher = false;
-                    } else if (text.startsWith(Config.launcher.actionPrefix)) {
+                    if (text.startsWith(Config.launcher.actionPrefix)) {
                         if (text.startsWith(`${Config.launcher.actionPrefix}calc `))
                             currentItem.onClicked();
                         else

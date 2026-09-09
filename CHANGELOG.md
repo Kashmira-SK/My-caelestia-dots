@@ -2,6 +2,18 @@
 
 Newest entries at the top.
 
+## [2026-09-09] - Remove launcher wallpaper picker
+
+### Fixed
+
+- Removed the launcher's `>wallpaper` picker entry and routing, including the entry retained in saved launcher settings
+
+### Notes
+
+- Confirmed working in the launcher; QML parsing and saved-action filtering checks passed
+
+---
+
 ## [2026-09-08] - Dashboard and lock screen refinements
 
 ### Added

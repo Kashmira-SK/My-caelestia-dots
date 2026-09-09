@@ -20,7 +20,11 @@ Searcher {
     Variants {
         id: variants
 
-        model: Config.launcher.actions.filter(a => (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false)))
+        // Saved configurations may still contain the retired wallpaper picker action.
+        model: Config.launcher.actions.filter(a =>
+            !(a.command?.[0] === "autocomplete" && a.command?.[1] === "wallpaper")
+            && (a.enabled ?? true)
+            && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false)))
 
         Action {}
     }

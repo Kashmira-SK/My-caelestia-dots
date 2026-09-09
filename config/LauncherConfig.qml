@@ -48,14 +48,6 @@ JsonObject {
             dangerous: false
         },
         {
-            name: "Wallpaper",
-            icon: "image",
-            description: "Change the current wallpaper",
-            command: ["autocomplete", "wallpaper"],
-            enabled: true,
-            dangerous: false
-        },
-        {
             name: "Variant",
             icon: "colors",
             description: "Change the current scheme variant",
