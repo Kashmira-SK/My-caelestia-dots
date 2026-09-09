@@ -7,10 +7,12 @@ Newest entries at the top.
 ### Added
 
 - Launcher frame with an integrated `LAUNCHER` edge label and flat search header in `modules/launcher/Content.qml`
+- Launcher results use a palette-tinted selection with an accent marker; app and command rows emphasize the selected name and show an Enter hint
 - Up/Down arrow navigation in the dedicated wallpaper picker, alongside Left/Right
 
 ### Fixed
 
+- Launcher app rows omit duplicate descriptions and keep long names and descriptions clear of trailing icons
 - Removed the launcher's `>wallpaper` entry and picker routing, including the entry retained in saved settings
 - Picker now opens on the current wallpaper without briefly showing another thumbnail
 - Smoother sliding carousel with preloaded neighboring images and consistent brightness as cards reach the centre

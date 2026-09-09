@@ -10,6 +10,8 @@ Item {
     required property var modelData
     required property var list
 
+    readonly property bool selected: ListView.isCurrentItem
+
     implicitHeight: Config.launcher.sizes.itemHeight
 
     anchors.left: parent?.left
@@ -41,30 +43,46 @@ Item {
         Item {
             anchors.left: icon.right
             anchors.leftMargin: Appearance.spacing.normal
+            anchors.right: enterIcon.left
+            anchors.rightMargin: Appearance.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
-            implicitWidth: parent.width - icon.width
-            implicitHeight: name.implicitHeight + desc.implicitHeight
+            implicitHeight: name.implicitHeight + (desc.visible ? desc.implicitHeight : 0)
 
             StyledText {
                 id: name
 
                 text: root.modelData?.name ?? ""
                 font.pointSize: Appearance.font.size.normal
+                font.weight: root.selected ? 600 : 400
+                width: parent.width
+                elide: Text.ElideRight
             }
 
             StyledText {
                 id: desc
 
                 text: root.modelData?.desc ?? ""
+                visible: text.length > 0
                 font.pointSize: Appearance.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Appearance.rounding.normal * 2
+                width: parent.width
 
                 anchors.top: name.bottom
             }
+        }
+
+        MaterialIcon {
+            id: enterIcon
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            text: "keyboard_return"
+            font.pointSize: Appearance.font.size.normal
+            color: Colours.palette.m3primary
+            opacity: root.selected ? 1 : 0
         }
     }
 }

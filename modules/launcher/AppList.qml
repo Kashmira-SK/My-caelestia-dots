@@ -72,17 +72,27 @@ StyledListView {
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3onSurface
-        opacity: 0.08
+        color: Qt.alpha(Colours.palette.m3primary, 0.12)
+        visible: !!root.currentItem
 
         y: root.currentItem?.y ?? 0
         implicitWidth: root.width
         implicitHeight: root.currentItem?.implicitHeight ?? 0
 
+        StyledRect {
+            anchors.left: parent.left
+            anchors.leftMargin: Appearance.spacing.small
+            anchors.verticalCenter: parent.verticalCenter
+            implicitWidth: 3
+            implicitHeight: parent.height * 0.4
+            radius: Appearance.rounding.full
+            color: Colours.palette.m3primary
+        }
+
         Behavior on y {
             Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
         }
     }

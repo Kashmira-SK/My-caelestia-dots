@@ -13,6 +13,9 @@ Item {
     required property DesktopEntry modelData
     required property PersistentProperties visibilities
 
+    readonly property bool selected: ListView.isCurrentItem
+    readonly property string description: (modelData?.comment || modelData?.genericName || "").trim()
+
     implicitHeight: Config.launcher.sizes.itemHeight
 
     anchors.left: parent?.left
@@ -45,43 +48,61 @@ Item {
         Item {
             anchors.left: icon.right
             anchors.leftMargin: Appearance.spacing.normal
+            anchors.right: indicators.left
+            anchors.rightMargin: Appearance.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
-            implicitWidth: parent.width - icon.width - favouriteIcon.width
-            implicitHeight: name.implicitHeight + comment.implicitHeight
+            implicitHeight: name.implicitHeight + (comment.visible ? comment.implicitHeight : 0)
 
             StyledText {
                 id: name
 
                 text: root.modelData?.name ?? ""
                 font.pointSize: Appearance.font.size.normal
+                font.weight: root.selected ? 600 : 400
+                width: parent.width
+                elide: Text.ElideRight
             }
 
             StyledText {
                 id: comment
 
-                text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
+                text: root.description
+                visible: text.length > 0 && text.toLowerCase() !== name.text.trim().toLowerCase()
                 font.pointSize: Appearance.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - favouriteIcon.width - Appearance.rounding.normal * 2
+                width: parent.width
 
                 anchors.top: name.bottom
             }
         }
 
-        Loader {
-            id: favouriteIcon
+        Row {
+            id: indicators
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: modelData && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
+            spacing: Appearance.spacing.small
 
-            sourceComponent: MaterialIcon {
-                text: "favorite"
-                fill: 1
+            Loader {
+                anchors.verticalCenter: parent.verticalCenter
+                active: root.modelData && Strings.testRegexList(Config.launcher.favouriteApps, root.modelData.id)
+
+                sourceComponent: MaterialIcon {
+                    text: "favorite"
+                    fill: 1
+                    color: Colours.palette.m3primary
+                }
+            }
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "keyboard_return"
+                font.pointSize: Appearance.font.size.normal
                 color: Colours.palette.m3primary
+                opacity: root.selected ? 1 : 0
             }
         }
     }
