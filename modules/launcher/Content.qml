@@ -17,80 +17,47 @@ Item {
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.normal
-    readonly property real labelInset: frameLabel.implicitHeight / 2
+    readonly property real headerHeight: frameLabel.implicitHeight + Appearance.spacing.small
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + footer.implicitHeight + padding * 4 + labelInset
+    implicitHeight: searchWrapper.height + listWrapper.height + footer.implicitHeight + padding * 4 + headerHeight
 
     StyledRect {
         anchors.fill: parent
-        anchors.topMargin: root.labelInset
         radius: root.rounding
         color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
+        border.width: 1
+        border.color: Qt.alpha(Colours.palette.m3outline, 0.65)
     }
 
-    Canvas {
-        id: frame
-
-        anchors.fill: parent
-        anchors.topMargin: root.labelInset
-        antialiasing: true
-
-        property color outline: Qt.alpha(Colours.palette.m3outlineVariant, 0.7)
-        property real rounding: root.rounding
-        property real gapStart: frameLabel.x - x
-        property real gapEnd: gapStart + frameLabel.width
-
-        onOutlineChanged: requestPaint()
-        onRoundingChanged: requestPaint()
-        onGapStartChanged: requestPaint()
-        onGapEndChanged: requestPaint()
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.clearRect(0, 0, width, height);
-            const right = width - 0.5;
-            const bottom = height - 0.5;
-            const r = Math.min(rounding, width / 2, height / 2);
-            ctx.strokeStyle = outline;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(gapEnd, 0.5);
-            ctx.lineTo(right - r, 0.5);
-            ctx.quadraticCurveTo(right, 0.5, right, r);
-            ctx.lineTo(right, bottom - r);
-            ctx.quadraticCurveTo(right, bottom, right - r, bottom);
-            ctx.lineTo(r, bottom);
-            ctx.quadraticCurveTo(0.5, bottom, 0.5, bottom - r);
-            ctx.lineTo(0.5, r);
-            ctx.quadraticCurveTo(0.5, 0.5, r, 0.5);
-            ctx.lineTo(gapStart, 0.5);
-            ctx.stroke();
-        }
-    }
-
-    StyledRect {
+    Row {
         id: frameLabel
 
-        x: root.padding + root.rounding - Appearance.spacing.small
-        y: 0
-        implicitWidth: labelText.implicitWidth + Appearance.spacing.small * 2
-        implicitHeight: labelText.implicitHeight + Appearance.padding.small
-        radius: Appearance.rounding.small / 2
-        color: Qt.alpha(Colours.palette.m3surface, 1)
+        x: root.padding
+        y: root.padding
+        spacing: Appearance.spacing.small
+
+        StyledRect {
+            anchors.verticalCenter: parent.verticalCenter
+            implicitWidth: Appearance.spacing.large
+            implicitHeight: 1
+            color: Qt.alpha(Colours.palette.m3outline, 0.65)
+        }
 
         StyledText {
-            id: labelText
-
-            anchors.centerIn: parent
             text: qsTr("LAUNCHER")
             color: Colours.palette.m3onSurfaceVariant
             font.family: Appearance.font.family.mono
             font.pointSize: Appearance.font.size.small
             font.weight: 600
             font.letterSpacing: 2
+        }
+
+        StyledRect {
+            anchors.verticalCenter: parent.verticalCenter
+            implicitWidth: Appearance.spacing.large
+            implicitHeight: 1
+            color: Qt.alpha(Colours.palette.m3outline, 0.65)
         }
     }
 
@@ -108,7 +75,7 @@ Item {
             id: list
 
             visibilities: root.visibilities
-            maxHeight: Math.max(0, root.maxHeight - searchWrapper.implicitHeight - footer.implicitHeight - root.padding * 4 - root.labelInset)
+            maxHeight: Math.max(0, root.maxHeight - searchWrapper.implicitHeight - footer.implicitHeight - root.padding * 4 - root.headerHeight)
             search: search
         }
     }
@@ -120,7 +87,7 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: root.padding
-        anchors.topMargin: root.padding + root.labelInset
+        anchors.topMargin: root.padding + root.headerHeight
 
         implicitHeight: Math.max(searchIcon.implicitHeight, search.implicitHeight, clearIcon.implicitHeight)
 
