@@ -38,8 +38,8 @@ Item {
 
         property color outline: Qt.alpha(Colours.palette.m3outlineVariant, 0.7)
         property real rounding: root.rounding
-        property real gapStart: frameLabel.x - x - Appearance.spacing.small
-        property real gapEnd: gapStart + frameLabel.width + Appearance.spacing.small * 2
+        property real gapStart: frameLabel.x - x
+        property real gapEnd: gapStart + frameLabel.width
 
         onOutlineChanged: requestPaint()
         onRoundingChanged: requestPaint()
@@ -71,17 +71,27 @@ Item {
         }
     }
 
-    StyledText {
+    StyledRect {
         id: frameLabel
 
-        x: root.padding + root.rounding
+        x: root.padding + root.rounding - Appearance.spacing.small
         y: 0
-        text: qsTr("LAUNCHER")
-        color: Colours.palette.m3onSurfaceVariant
-        font.family: Appearance.font.family.mono
-        font.pointSize: Appearance.font.size.small
-        font.weight: 600
-        font.letterSpacing: 2
+        implicitWidth: labelText.implicitWidth + Appearance.spacing.small * 2
+        implicitHeight: labelText.implicitHeight + Appearance.padding.small
+        radius: Appearance.rounding.small / 2
+        color: Qt.alpha(Colours.palette.m3surface, 1)
+
+        StyledText {
+            id: labelText
+
+            anchors.centerIn: parent
+            text: qsTr("LAUNCHER")
+            color: Colours.palette.m3onSurfaceVariant
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            font.weight: 600
+            font.letterSpacing: 2
+        }
     }
 
     Item {
