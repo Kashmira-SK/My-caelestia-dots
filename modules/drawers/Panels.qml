@@ -18,6 +18,7 @@ Item {
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property Item bar
+    required property bool dashboardKeyboardActive
 
     readonly property alias osd: osd
     readonly property alias notifications: notifications
@@ -90,6 +91,8 @@ Item {
         id: dashboard
 
         visibilities: root.visibilities
+        keyboardNavigationActive:
+            root.dashboardKeyboardActive
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top

@@ -14,6 +14,7 @@ CustomMouseArea {
     required property Item bar
 
     property point dragStart
+    property bool dashboardKeyboardActive
     property bool dashboardShortcutActive
     property bool osdShortcutActive
     property bool utilitiesShortcutActive
@@ -236,11 +237,13 @@ CustomMouseArea {
             if (root.visibilities.dashboard) {
                 // Dashboard became visible, immediately check if this should be shortcut mode
                 const inDashboardArea = root.inTopPanel(root.panels.dashboard, root.mouseX, root.mouseY);
+                root.dashboardKeyboardActive = !Config.dashboard.showOnHover || !inDashboardArea;
                 if (!inDashboardArea) {
                     root.dashboardShortcutActive = true;
                 }
             } else {
-                // Dashboard hidden, clear shortcut flag
+                // Dashboard hidden, clear shortcut and keyboard modes
+                root.dashboardKeyboardActive = false;
                 root.dashboardShortcutActive = false;
             }
         }

@@ -14,11 +14,62 @@ Item {
     required property PersistentProperties visibilities
     required property PersistentProperties state
     required property FileDialog facePicker
+    required property bool keyboardNavigationActive
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
     readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
 
+    function previousTab(): void {
+        root.state.currentTab = Math.max(
+            root.state.currentTab - 1,
+            0
+        )
+        root.restoreKeyboardFocus()
+    }
+
+    function nextTab(): void {
+        root.state.currentTab = Math.min(
+            root.state.currentTab + 1,
+            tabs.count - 1
+        )
+        root.restoreKeyboardFocus()
+    }
+
+    function restoreKeyboardFocus(): void {
+        if (!root.keyboardNavigationActive)
+            return
+
+        root.forceActiveFocus()
+        Qt.callLater(() => {
+            if (root.keyboardNavigationActive)
+                root.forceActiveFocus()
+        })
+    }
+
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
+
+    focus: keyboardNavigationActive
+
+    Keys.priority: Keys.BeforeItem
+    Keys.onPressed: event => {
+        if (event.modifiers !== Qt.NoModifier)
+            return
+
+        if (event.key === Qt.Key_Q
+                || event.key === Qt.Key_Left) {
+            root.previousTab()
+            event.accepted = true
+        } else if (event.key === Qt.Key_E
+                || event.key === Qt.Key_Right) {
+            root.nextTab()
+            event.accepted = true
+        }
+    }
+
+    onKeyboardNavigationActiveChanged: {
+        if (keyboardNavigationActive)
+            root.restoreKeyboardFocus()
+    }
 
     Tabs {
         id: tabs

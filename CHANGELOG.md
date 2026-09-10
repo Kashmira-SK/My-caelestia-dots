@@ -2,6 +2,18 @@
 
 Newest entries at the top.
 
+## [2026-09-10] - Dashboard keyboard navigation
+
+### Added
+
+- `Q` / `E` and Left / Right arrow navigation between dashboard tabs when the dashboard is opened deliberately, without stealing keyboard focus for hover-only previews
+
+### Fixed
+
+- Dashboard keyboard focus now persists across repeated tab changes so rapid inputs register immediately instead of stopping or waiting for transitions
+
+---
+
 ## [2026-09-09] - Wallpaper picker and launcher refinements
 
 ### Added

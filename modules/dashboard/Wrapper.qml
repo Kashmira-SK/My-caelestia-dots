@@ -12,6 +12,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    required property bool keyboardNavigationActive
     readonly property PersistentProperties dashState: PersistentProperties {
         property int currentTab
         property int gifIndex: 0
@@ -101,6 +102,8 @@ Item {
             visibilities: root.visibilities
             state: root.dashState
             facePicker: root.facePicker
+            keyboardNavigationActive:
+                root.keyboardNavigationActive
         }
     }
 }

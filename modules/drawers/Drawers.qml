@@ -30,6 +30,12 @@ Variants {
             id: win
 
             readonly property bool hasFullscreen: Hypr.monitorFor(screen)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+            readonly property bool dashboardKeyboardActive:
+                visibilities.dashboard
+                && !visibilities.launcher
+                && !visibilities.session
+                && !visibilities.wallpaperPicker
+                && interactions.dashboardKeyboardActive
             readonly property int dragMaskPadding: {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
@@ -59,8 +65,7 @@ Variants {
             visibilities.launcher
             || visibilities.session
             || visibilities.wallpaperPicker
-            || (!Config.dashboard.showOnHover
-                && visibilities.dashboard)
+            || dashboardKeyboardActive
                 ? WlrKeyboardFocus.OnDemand
                 : WlrKeyboardFocus.None
 
@@ -173,6 +178,8 @@ Variants {
             }
 
             Interactions {
+                id: interactions
+
                 screen: scope.modelData
                 popouts: panels.popouts
                 visibilities: visibilities
@@ -185,6 +192,8 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     bar: bar
+                    dashboardKeyboardActive:
+                        win.dashboardKeyboardActive
                 }
 
                 BarWrapper {
