@@ -18,8 +18,6 @@ Item {
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.normal
     readonly property real labelInset: frameLabel.implicitHeight / 2
-    // Local surface opacity: 0 is transparent, 1 is opaque.
-    readonly property real backgroundOpacity: 0.10
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: searchWrapper.height + listWrapper.height + footer.implicitHeight + padding * 4 + labelInset
@@ -28,7 +26,7 @@ Item {
         anchors.fill: parent
         anchors.topMargin: root.labelInset
         radius: root.rounding
-        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? root.backgroundOpacity : 1)
+        color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
     }
 
     Canvas {
