@@ -17,13 +17,14 @@ Item {
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.normal
-    readonly property real labelInset: Appearance.padding.small + frameLabel.implicitHeight / 2
+    readonly property real labelInset: frameLabel.implicitHeight / 2
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: searchWrapper.height + listWrapper.height + footer.implicitHeight + padding * 4 + labelInset
 
     StyledRect {
         anchors.fill: parent
+        anchors.topMargin: root.labelInset
         radius: root.rounding
         color: Qt.alpha(Colours.palette.m3surface, Colours.transparency.enabled ? Colours.transparency.base : 1)
     }
@@ -32,12 +33,11 @@ Item {
         id: frame
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.small
         anchors.topMargin: root.labelInset
         antialiasing: true
 
-        property color outline: Qt.alpha(Colours.palette.m3outline, 0.65)
-        property real rounding: Math.max(0, root.rounding - Appearance.padding.small)
+        property color outline: Qt.alpha(Colours.palette.m3outlineVariant, 0.7)
+        property real rounding: root.rounding
         property real gapStart: frameLabel.x - x - Appearance.spacing.small
         property real gapEnd: gapStart + frameLabel.width + Appearance.spacing.small * 2
 
@@ -75,7 +75,7 @@ Item {
         id: frameLabel
 
         x: root.padding + root.rounding
-        y: Appearance.padding.small
+        y: 0
         text: qsTr("LAUNCHER")
         color: Colours.palette.m3onSurfaceVariant
         font.family: Appearance.font.family.mono
