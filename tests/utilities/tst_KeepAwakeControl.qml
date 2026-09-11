@@ -19,6 +19,7 @@ TestCase {
     readonly property var theme: ({
         m3primary: "steelblue",
         m3outlineVariant: "gray",
+        m3outline: "silver",
         m3onSurfaceVariant: "white",
         m3surfaceContainerHighest: "darkslategray"
     })
@@ -106,5 +107,14 @@ TestCase {
         compare(inhibited, true);
         keyClick(Qt.Key_Space);
         compare(inhibited, false);
+    }
+
+    function test_timestampMatchesNotificationBodyStyle() {
+        inhibited = true;
+        const control = makeControl();
+        const timestamp = findChild(control, "awakeTimestamp");
+        compare(timestamp.font.family, appearance.font.family.sans);
+        compare(timestamp.font.pointSize, appearance.font.size.small);
+        compare(timestamp.color, Qt.color(theme.m3outline));
     }
 }

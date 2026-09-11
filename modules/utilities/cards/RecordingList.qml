@@ -35,14 +35,16 @@ ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
                 source: Qt.resolvedUrl("../../../assets/icons/lucide/list-video.svg")
                 implicitSize: 16
-                colour: Colours.palette.m3onSurface
+                colour: Colours.palette.m3onSurfaceVariant
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
                 text: qsTr("Recordings")
-                font.pointSize: Appearance.font.size.normal
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                font.weight: 500
             }
 
             UtilityIconButton {
@@ -99,7 +101,8 @@ ColumnLayout {
                     date.setMonth(date.getMonth() - 1); // Woe (months start from 0)
                     return qsTr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale()));
                 }
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
                 elide: Text.ElideRight
             }
 

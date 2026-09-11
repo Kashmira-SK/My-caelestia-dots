@@ -27,12 +27,6 @@ Controls.AbstractButton {
 
         spacing: root.appearance.spacing.normal
 
-        Rectangle {
-            implicitWidth: 2
-            Layout.fillHeight: true
-            color: root.inhibited ? root.theme.m3primary : root.theme.m3outlineVariant
-        }
-
         ColumnLayout {
             Layout.fillWidth: true
             spacing: root.appearance.spacing.small
@@ -43,6 +37,7 @@ Controls.AbstractButton {
                 color: root.theme.m3onSurfaceVariant
                 font.family: root.appearance.font.family.sans
                 font.pointSize: root.appearance.font.size.small
+                font.weight: 500
                 renderType: Text.NativeRendering
                 elide: Text.ElideRight
             }
@@ -51,9 +46,9 @@ Controls.AbstractButton {
                 objectName: "awakeTimestamp"
                 Layout.fillWidth: true
                 text: root.inhibited ? root.sinceText : qsTr("Click to keep awake")
-                color: root.theme.m3onSurfaceVariant
-                font.family: root.appearance.font.family.mono
-                font.pointSize: root.appearance.font.size.smaller
+                color: root.theme.m3outline
+                font.family: root.appearance.font.family.sans
+                font.pointSize: root.appearance.font.size.small
                 renderType: Text.NativeRendering
                 elide: Text.ElideRight
             }
@@ -61,7 +56,7 @@ Controls.AbstractButton {
 
         Text {
             text: root.inhibited ? qsTr("ON") : qsTr("OFF")
-            color: root.theme.m3onSurfaceVariant
+            color: root.theme.m3outline
             font.family: root.appearance.font.family.mono
             font.pointSize: root.appearance.font.size.small
             renderType: Text.NativeRendering
