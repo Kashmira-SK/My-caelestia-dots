@@ -10,6 +10,7 @@ Item {
 
     required property string title
     property real rounding: Appearance.rounding.normal
+    property color fillColour: Colours.tPalette.m3surfaceContainer
     readonly property real headingHeight: heading.implicitHeight
 
     anchors.fill: parent
@@ -21,10 +22,12 @@ Item {
         anchors.topMargin: root.headingHeight / 2
         antialiasing: true
         property color outline: Colours.tPalette.m3outlineVariant
+        property color fillColour: root.fillColour
         property real gapStart: heading.x - Appearance.spacing.small
         property real gapEnd: heading.x + heading.width + Appearance.spacing.small
         property real rounding: root.rounding
         onOutlineChanged: requestPaint()
+        onFillColourChanged: requestPaint()
         onGapStartChanged: requestPaint()
         onGapEndChanged: requestPaint()
         onRoundingChanged: requestPaint()
@@ -38,6 +41,7 @@ Item {
             const bottom = height - 0.5;
             const r = Math.min(rounding, width / 2, height / 2);
             ctx.strokeStyle = outline;
+            ctx.fillStyle = fillColour;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(gapEnd, 0.5);
@@ -50,6 +54,9 @@ Item {
             ctx.lineTo(0.5, r);
             ctx.quadraticCurveTo(0.5, 0.5, r, 0.5);
             ctx.lineTo(gapStart, 0.5);
+            // Canvas fills the open path as a closed shape, but leaves the
+            // heading gap open when stroking. Fill and border share one edge.
+            ctx.fill();
             ctx.stroke();
         }
     }

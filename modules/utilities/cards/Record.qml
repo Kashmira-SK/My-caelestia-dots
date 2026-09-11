@@ -8,7 +8,7 @@ import qs.config
 import QtQuick
 import QtQuick.Layouts
 
-StyledRect {
+Item {
     id: root
 
     required property var props
@@ -16,9 +16,6 @@ StyledRect {
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2 + frame.headingHeight / 2
-
-    radius: Appearance.rounding.normal
-    color: Colours.tPalette.m3surfaceContainer
 
     UtilityFrame {
         id: frame

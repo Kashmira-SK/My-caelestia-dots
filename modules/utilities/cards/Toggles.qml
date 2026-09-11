@@ -9,9 +9,10 @@ import qs.modules.controlcenter
 import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
-StyledRect {
+Item {
     id: root
 
     required property var visibilities
@@ -19,9 +20,6 @@ StyledRect {
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2 + frame.headingHeight / 2
-
-    radius: Appearance.rounding.normal
-    color: Colours.tPalette.m3surfaceContainer
 
     UtilityFrame {
         id: frame
@@ -38,11 +36,9 @@ StyledRect {
         anchors.topMargin: Appearance.padding.large + frame.headingHeight / 2
         spacing: Appearance.spacing.normal
 
-        GridLayout {
+        RowLayout {
             Layout.fillWidth: true
-            columns: 3
-            columnSpacing: Appearance.spacing.small
-            rowSpacing: Appearance.spacing.small
+            spacing: Appearance.spacing.small
 
             Toggle {
                 icon: "wifi"
@@ -124,32 +120,34 @@ StyledRect {
 
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        implicitHeight: 46
+        implicitHeight: 32
         radius: Appearance.rounding.small / 2
         inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
         toggle: true
         label.visible: false
         Accessible.name: text
 
-        ColumnLayout {
+        ColouredIcon {
             anchors.centerIn: parent
-            width: parent.width - Appearance.padding.small * 2
-            spacing: 2
+            implicitSize: 16
+            source: Qt.resolvedUrl("../../../assets/icons/lucide/" + control.glyph + ".svg")
+            colour: control.label.color
+        }
 
-            ColouredIcon {
-                Layout.alignment: Qt.AlignHCenter
-                implicitSize: 16
-                source: Qt.resolvedUrl("../../../assets/icons/lucide/" + control.glyph + ".svg")
-                colour: control.label.color
+        Controls.ToolTip {
+            visible: control.stateLayer.containsMouse
+            delay: 500
+            text: control.text
+
+            contentItem: StyledText {
+                text: control.text
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
             }
 
-            StyledText {
-                Layout.fillWidth: true
-                text: control.text
-                color: control.label.color
-                font.pointSize: Appearance.font.size.smaller
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
+            background: StyledRect {
+                color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+                radius: Appearance.rounding.small / 2
             }
         }
     }
