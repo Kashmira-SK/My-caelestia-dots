@@ -23,6 +23,7 @@ ColumnLayout {
             required property var modelData
 
             Layout.fillWidth: true
+            alignment: Text.AlignLeft
             text: modelData.text
             onClicked: {
                 if (modelData.invoke)
@@ -34,27 +35,29 @@ ColumnLayout {
     }
 
     RowLayout {
+        id: utilityActions
+
         Layout.fillWidth: true
         spacing: Appearance.spacing.small
 
         ActionButton {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            icon: "close"
+            Layout.maximumWidth: (utilityActions.width - utilityActions.spacing) / 2
             text: qsTr("Dismiss")
             onClicked: root.notif.close()
         }
 
         ActionButton {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            icon: root.copied ? "inventory" : "content_copy"
+            Layout.maximumWidth: (utilityActions.width - utilityActions.spacing) / 2
             text: root.copied ? qsTr("Copied") : qsTr("Copy")
             onClicked: {
                 Quickshell.clipboardText = root.notif.body;
                 root.copied = true;
                 copyTimer.restart();
             }
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
     }
 
@@ -69,12 +72,13 @@ ColumnLayout {
         id: action
 
         required property string text
-        property string icon
+        property int alignment: Text.AlignHCenter
 
         signal clicked
 
-        implicitHeight: actionContent.implicitHeight + Appearance.padding.small * 2
-        radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
+        implicitWidth: actionLabel.implicitWidth + Appearance.padding.normal * 2
+        implicitHeight: actionLabel.implicitHeight + Appearance.padding.small * 2
+        radius: 0
         color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
 
         StateLayer {
@@ -85,38 +89,19 @@ ColumnLayout {
             }
         }
 
-        RowLayout {
-            id: actionContent
+        StyledText {
+            id: actionLabel
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: Appearance.padding.normal
             anchors.rightMargin: Appearance.padding.normal
-            spacing: Appearance.spacing.small
-
-            MaterialIcon {
-                visible: action.icon.length > 0
-                text: action.icon
-                font.pointSize: Appearance.font.size.small
-                color: Colours.palette.m3onSurfaceVariant
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: action.text
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-                wrapMode: Text.Wrap
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
-
-        Behavior on radius {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-            }
+            text: action.text
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            wrapMode: Text.Wrap
+            horizontalAlignment: action.alignment
         }
     }
 }

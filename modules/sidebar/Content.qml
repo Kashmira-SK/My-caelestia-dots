@@ -24,7 +24,8 @@ Item {
             Layout.topMargin: frameLabel.implicitHeight / 2
 
             radius: Appearance.rounding.normal
-            color: Colours.tPalette.m3surfaceContainerLow
+            // Let the drawer surface continue through the frame without a second fill.
+            color: Qt.alpha(Colours.palette.m3surface, 0)
 
             Canvas {
                 id: frame
