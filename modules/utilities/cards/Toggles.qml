@@ -1,5 +1,8 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.modules.controlcenter
@@ -15,35 +18,44 @@ StyledRect {
     required property Item popouts
 
     Layout.fillWidth: true
-    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
+    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2 + frame.headingHeight / 2
 
     radius: Appearance.rounding.normal
     color: Colours.tPalette.m3surfaceContainer
 
+    UtilityFrame {
+        id: frame
+        title: qsTr("QUICK TOGGLES")
+    }
+
     ColumnLayout {
         id: layout
 
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: Appearance.padding.large
+        anchors.topMargin: Appearance.padding.large + frame.headingHeight / 2
         spacing: Appearance.spacing.normal
 
-        StyledText {
-            text: qsTr("Quick Toggles")
-            font.pointSize: Appearance.font.size.normal
-        }
-
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
+        GridLayout {
+            Layout.fillWidth: true
+            columns: 3
+            columnSpacing: Appearance.spacing.small
+            rowSpacing: Appearance.spacing.small
 
             Toggle {
                 icon: "wifi"
+                glyph: "wifi"
+                text: qsTr("Wi-Fi")
                 checked: Network.wifiEnabled
                 onClicked: Network.toggleWifi()
             }
 
             Toggle {
                 icon: "bluetooth"
+                glyph: "bluetooth"
+                text: qsTr("Bluetooth")
                 checked: Bluetooth.defaultAdapter?.enabled ?? false
                 onClicked: {
                     const adapter = Bluetooth.defaultAdapter;
@@ -54,6 +66,8 @@ StyledRect {
 
             Toggle {
                 icon: "mic"
+                glyph: "mic"
+                text: qsTr("Mic")
                 checked: !Audio.sourceMuted
                 onClicked: {
                     const audio = Audio.source?.audio;
@@ -64,6 +78,8 @@ StyledRect {
 
             Toggle {
                 icon: "settings"
+                glyph: "settings"
+                text: qsTr("Settings")
                 inactiveOnColour: Colours.palette.m3onSurfaceVariant
                 toggle: false
                 onClicked: {
@@ -74,18 +90,24 @@ StyledRect {
 
             Toggle {
                 icon: "gamepad"
+                glyph: "gamepad-2"
+                text: qsTr("Game mode")
                 checked: GameMode.enabled
                 onClicked: GameMode.enabled = !GameMode.enabled
             }
 
             Toggle {
                 icon: "notifications_off"
+                glyph: "bell-off"
+                text: qsTr("Do not disturb")
                 checked: Notifs.dnd
                 onClicked: Notifs.dnd = !Notifs.dnd
             }
 
             Toggle {
                 icon: "vpn_key"
+                glyph: "key-round"
+                text: qsTr("VPN")
                 checked: VPN.connected
                 enabled: !VPN.connecting
                 visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
@@ -95,18 +117,39 @@ StyledRect {
     }
 
     component Toggle: IconButton {
+        id: control
+
+        required property string glyph
+        required property string text
+
         Layout.fillWidth: true
-        Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Appearance.padding.large : internalChecked ? Appearance.padding.smaller : 0)
-        radius: stateLayer.pressed ? Appearance.rounding.small / 2 : internalChecked ? Appearance.rounding.small : Appearance.rounding.normal
+        Layout.preferredWidth: 1
+        implicitHeight: 46
+        radius: Appearance.rounding.small / 2
         inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
         toggle: true
-        radiusAnim.duration: Appearance.anim.durations.expressiveFastSpatial
-        radiusAnim.easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+        label.visible: false
+        Accessible.name: text
 
-        Behavior on Layout.preferredWidth {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: parent.width - Appearance.padding.small * 2
+            spacing: 2
+
+            ColouredIcon {
+                Layout.alignment: Qt.AlignHCenter
+                implicitSize: 16
+                source: Qt.resolvedUrl("../../../assets/icons/lucide/" + control.glyph + ".svg")
+                colour: control.label.color
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: control.text
+                color: control.label.color
+                font.pointSize: Appearance.font.size.smaller
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
             }
         }
     }

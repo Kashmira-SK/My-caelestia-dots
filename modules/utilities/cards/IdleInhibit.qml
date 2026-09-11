@@ -1,5 +1,6 @@
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.config
 import QtQuick
@@ -9,11 +10,16 @@ StyledRect {
     id: root
 
     Layout.fillWidth: true
-    implicitHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Appearance.padding.large * 2
+    implicitHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Appearance.padding.large * 2 + frame.headingHeight / 2
 
     radius: Appearance.rounding.normal
     color: Colours.tPalette.m3surfaceContainer
     clip: true
+
+    UtilityFrame {
+        id: frame
+        title: qsTr("KEEP AWAKE")
+    }
 
     RowLayout {
         id: layout
@@ -22,35 +28,29 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Appearance.padding.large
+        anchors.topMargin: Appearance.padding.large + frame.headingHeight / 2
         spacing: Appearance.spacing.normal
 
         StyledRect {
             implicitWidth: implicitHeight
-            implicitHeight: icon.implicitHeight + Appearance.padding.smaller * 2
+            implicitHeight: 28
 
-            radius: Appearance.rounding.full
+            radius: Appearance.rounding.small / 2
             color: IdleInhibitor.enabled ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
-            MaterialIcon {
+            ColouredIcon {
                 id: icon
 
                 anchors.centerIn: parent
-                text: "coffee"
-                color: IdleInhibitor.enabled ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                font.pointSize: Appearance.font.size.large
+                source: Qt.resolvedUrl("../../../assets/icons/lucide/coffee.svg")
+                colour: IdleInhibitor.enabled ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                implicitSize: 16
             }
         }
 
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 0
-
-            StyledText {
-                Layout.fillWidth: true
-                text: qsTr("Keep Awake")
-                font.pointSize: Appearance.font.size.normal
-                elide: Text.ElideRight
-            }
 
             StyledText {
                 Layout.fillWidth: true
@@ -85,7 +85,7 @@ StyledRect {
             implicitWidth: activeText.implicitWidth + Appearance.padding.normal * 2
             implicitHeight: activeText.implicitHeight + Appearance.padding.small * 2
 
-            radius: Appearance.rounding.full
+            radius: Appearance.rounding.small / 2
             color: Colours.palette.m3primary
 
             StyledText {

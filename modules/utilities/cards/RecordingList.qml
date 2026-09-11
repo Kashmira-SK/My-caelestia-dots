@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.components.containers
 import qs.services
 import qs.config
@@ -30,10 +31,11 @@ ColumnLayout {
         RowLayout {
             spacing: Appearance.spacing.smaller
 
-            MaterialIcon {
+            ColouredIcon {
                 Layout.alignment: Qt.AlignVCenter
-                text: "list"
-                font.pointSize: Appearance.font.size.large
+                source: Qt.resolvedUrl("../../../assets/icons/lucide/list-video.svg")
+                implicitSize: 16
+                colour: Colours.palette.m3onSurface
             }
 
             StyledText {
@@ -43,8 +45,10 @@ ColumnLayout {
                 font.pointSize: Appearance.font.size.normal
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: "chevron-down"
                 icon: root.props.recordingListExpanded ? "unfold_less" : "unfold_more"
+                rotation: root.props.recordingListExpanded ? 180 : 0
                 type: IconButton.Text
                 label.animate: true
                 onClicked: root.props.recordingListExpanded = !root.props.recordingListExpanded
@@ -99,7 +103,8 @@ ColumnLayout {
                 elide: Text.ElideRight
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: "play"
                 icon: "play_arrow"
                 type: IconButton.Text
                 onClicked: {
@@ -109,7 +114,8 @@ ColumnLayout {
                 }
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: "folder"
                 icon: "folder"
                 type: IconButton.Text
                 onClicked: {
@@ -119,7 +125,8 @@ ColumnLayout {
                 }
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: "trash-2"
                 icon: "delete_forever"
                 type: IconButton.Text
                 label.color: Colours.palette.m3error

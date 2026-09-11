@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.config
 import QtQuick
@@ -14,16 +15,24 @@ StyledRect {
     required property var visibilities
 
     Layout.fillWidth: true
-    implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
+    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2 + frame.headingHeight / 2
 
     radius: Appearance.rounding.normal
     color: Colours.tPalette.m3surfaceContainer
 
+    UtilityFrame {
+        id: frame
+        title: qsTr("SCREEN RECORDER")
+    }
+
     ColumnLayout {
         id: layout
 
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: Appearance.padding.large
+        anchors.topMargin: Appearance.padding.large + frame.headingHeight / 2
         spacing: Appearance.spacing.normal
 
         RowLayout {
@@ -32,36 +41,24 @@ StyledRect {
 
             StyledRect {
                 implicitWidth: implicitHeight
-                implicitHeight: {
-                    const h = icon.implicitHeight + Appearance.padding.smaller * 2;
-                    return h - (h % 2);
-                }
+                implicitHeight: 28
 
-                radius: Appearance.rounding.full
+                radius: Appearance.rounding.small / 2
                 color: Recorder.running ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
-                MaterialIcon {
+                ColouredIcon {
                     id: icon
 
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: -0.5
-                    anchors.verticalCenterOffset: 1.5
-                    text: "screen_record"
-                    color: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                    font.pointSize: Appearance.font.size.large
+                    source: Qt.resolvedUrl("../../../assets/icons/lucide/video.svg")
+                    colour: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                    implicitSize: 16
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Screen Recorder")
-                    font.pointSize: Appearance.font.size.normal
-                    elide: Text.ElideRight
-                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -252,7 +249,8 @@ StyledRect {
                 Layout.fillWidth: true
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: Recorder.paused ? "play" : "pause"
                 label.animate: true
                 icon: Recorder.paused ? "play_arrow" : "pause"
                 toggle: true
@@ -265,7 +263,8 @@ StyledRect {
                 }
             }
 
-            IconButton {
+            UtilityIconButton {
+                glyph: "square"
                 icon: "stop"
                 inactiveColour: Colours.palette.m3error
                 inactiveOnColour: Colours.palette.m3onError
