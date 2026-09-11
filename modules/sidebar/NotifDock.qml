@@ -57,8 +57,10 @@ Item {
             visible: root.notifCount > 0
             icon: "clear_all"
             padding: Appearance.padding.small
-            radius: Appearance.rounding.small / 2
-            font.pointSize: Appearance.font.size.normal
+            radius: 0
+            inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+            inactiveOnColour: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
             onClicked: clearTimer.start()
         }
     }

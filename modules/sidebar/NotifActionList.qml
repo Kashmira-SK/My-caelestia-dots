@@ -7,7 +7,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-ColumnLayout {
+Flow {
     id: root
 
     required property var notif
@@ -22,8 +22,6 @@ ColumnLayout {
         ActionButton {
             required property var modelData
 
-            Layout.fillWidth: true
-            alignment: Text.AlignLeft
             text: modelData.text
             onClicked: {
                 if (modelData.invoke)
@@ -34,30 +32,17 @@ ColumnLayout {
         }
     }
 
-    RowLayout {
-        id: utilityActions
+    ActionButton {
+        text: qsTr("Dismiss")
+        onClicked: root.notif.close()
+    }
 
-        Layout.fillWidth: true
-        spacing: Appearance.spacing.small
-
-        ActionButton {
-            Layout.maximumWidth: (utilityActions.width - utilityActions.spacing) / 2
-            text: qsTr("Dismiss")
-            onClicked: root.notif.close()
-        }
-
-        ActionButton {
-            Layout.maximumWidth: (utilityActions.width - utilityActions.spacing) / 2
-            text: root.copied ? qsTr("Copied") : qsTr("Copy")
-            onClicked: {
-                Quickshell.clipboardText = root.notif.body;
-                root.copied = true;
-                copyTimer.restart();
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
+    ActionButton {
+        text: root.copied ? qsTr("Copied") : qsTr("Copy")
+        onClicked: {
+            Quickshell.clipboardText = root.notif.body;
+            root.copied = true;
+            copyTimer.restart();
         }
     }
 
@@ -72,14 +57,21 @@ ColumnLayout {
         id: action
 
         required property string text
-        property int alignment: Text.AlignHCenter
 
         signal clicked
 
-        implicitWidth: actionLabel.implicitWidth + Appearance.padding.normal * 2
+        width: Math.min(implicitWidth, root.width)
+        implicitWidth: labelMetrics.width + Appearance.padding.small * 2
         implicitHeight: actionLabel.implicitHeight + Appearance.padding.small * 2
         radius: 0
         color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+
+        TextMetrics {
+            id: labelMetrics
+
+            font: actionLabel.font
+            text: action.text
+        }
 
         StateLayer {
             id: actionStateLayer
@@ -95,13 +87,13 @@ ColumnLayout {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: Appearance.padding.normal
-            anchors.rightMargin: Appearance.padding.normal
+            anchors.leftMargin: Appearance.padding.small
+            anchors.rightMargin: Appearance.padding.small
             text: action.text
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.small
             wrapMode: Text.Wrap
-            horizontalAlignment: action.alignment
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 }
