@@ -2,6 +2,22 @@
 
 Newest entries at the top.
 
+## [2026-09-11] - Notification panel redesign
+
+### Added
+
+- Dashboard/launcher-style notification frame with an integrated edge label, transparent outer background, and individual notification cards instead of nested app groups
+- Compact Lucide outline controls and sender-category icons, bundled with their license in `assets/icons/lucide/` and tinted by the existing dynamic palette
+- One-click Clear All, compact copy/dismiss controls, and an ellipsis toggle that reveals app-specific actions inside each card
+
+### Fixed
+
+- Collapsing notifications now shrinks the card and removes the hidden action area's height
+- Long action labels remain readable without horizontal scrolling or overlapping neighboring notifications
+- Notification actions resolve the theme palette correctly instead of falling back to black
+
+---
+
 ## [2026-09-10] - Dashboard keyboard navigation
 
 ### Added
