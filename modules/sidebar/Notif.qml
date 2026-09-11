@@ -99,32 +99,13 @@ StyledRect {
                 font.family: Appearance.font.family.mono
             }
 
-            StyledRect {
-                id: expandButton
-
+            NotifToolButton {
                 Layout.alignment: Qt.AlignVCenter
-                implicitWidth: implicitHeight
-                implicitHeight: expandIcon.implicitHeight + Appearance.padding.small
-                radius: Appearance.rounding.small / 2
-                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHigh, 3)
-
-                StateLayer {
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
-
-                    function onClicked(): void {
-                        root.requestToggleExpand();
-                    }
-                }
-
-                StyledText {
-                    id: expandIcon
-
-                    anchors.centerIn: parent
-                    text: root.expanded ? "−" : "+"
-                    font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.small
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
-                }
+                icon: "chevron-down"
+                iconRotation: root.expanded ? 180 : 0
+                text: root.expanded ? qsTr("Collapse notification") : qsTr("Expand notification")
+                foreground: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                onClicked: root.requestToggleExpand()
             }
         }
 

@@ -53,16 +53,23 @@ Item {
             font.weight: 500
         }
 
-        IconButton {
+        NotifToolButton {
             visible: root.notifCount > 0
-            icon: "clear_all"
-            padding: Appearance.padding.small
-            radius: 0
-            inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
-            inactiveOnColour: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.small
-            onClicked: clearTimer.start()
+            icon: "ellipsis"
+            text: qsTr("Notification panel actions")
+            selected: panelMenu.opened
+            onClicked: panelMenu.opened ? panelMenu.close() : panelMenu.open()
         }
+    }
+
+    NotifMenu {
+        id: panelMenu
+
+        x: root.width - width
+        y: title.y + title.height + Appearance.spacing.small
+        width: Math.min(260, root.width)
+        items: [{ text: qsTr("Clear all notifications") }]
+        onChosen: clearTimer.start()
     }
 
     ClippingRectangle {

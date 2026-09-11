@@ -1,48 +1,58 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.services
 import qs.config
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-Flow {
+RowLayout {
     id: root
 
     required property var notif
     property bool copied
 
-    Layout.fillWidth: true
     spacing: Appearance.spacing.small
 
-    Repeater {
-        model: root.notif.actions
-
-        ActionButton {
-            required property var modelData
-
-            text: modelData.text
-            onClicked: {
-                if (modelData.invoke)
-                    modelData.invoke();
-                else if (!root.notif.resident)
-                    root.notif.close();
-            }
-        }
+    NotifToolButton {
+        visible: root.notif.actions.length > 0
+        icon: "ellipsis"
+        text: qsTr("Notification actions")
+        selected: actionMenu.opened
+        onClicked: actionMenu.opened ? actionMenu.close() : actionMenu.open()
     }
 
-    ActionButton {
-        text: qsTr("Dismiss")
-        onClicked: root.notif.close()
+    Item {
+        Layout.fillWidth: true
     }
 
-    ActionButton {
-        text: root.copied ? qsTr("Copied") : qsTr("Copy")
+    NotifToolButton {
+        icon: root.copied ? "check" : "copy"
+        text: root.copied ? qsTr("Copied") : qsTr("Copy notification")
         onClicked: {
             Quickshell.clipboardText = root.notif.body;
             root.copied = true;
             copyTimer.restart();
+        }
+    }
+
+    NotifToolButton {
+        icon: "x"
+        text: qsTr("Dismiss notification")
+        onClicked: root.notif.close()
+    }
+
+    NotifMenu {
+        id: actionMenu
+
+        y: root.height + Appearance.spacing.small
+        width: root.width
+        items: root.notif.actions
+        onChosen: index => {
+            const action = root.notif.actions[index];
+            if (action.invoke)
+                action.invoke();
+            else if (!root.notif.resident)
+                root.notif.close();
         }
     }
 
@@ -51,49 +61,5 @@ Flow {
 
         interval: 3000
         onTriggered: root.copied = false
-    }
-
-    component ActionButton: StyledRect {
-        id: action
-
-        required property string text
-
-        signal clicked
-
-        width: Math.min(implicitWidth, root.width)
-        implicitWidth: labelMetrics.width + Appearance.padding.small * 2
-        implicitHeight: actionLabel.implicitHeight + Appearance.padding.small * 2
-        radius: 0
-        color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
-
-        TextMetrics {
-            id: labelMetrics
-
-            font: actionLabel.font
-            text: action.text
-        }
-
-        StateLayer {
-            id: actionStateLayer
-
-            function onClicked(): void {
-                action.clicked();
-            }
-        }
-
-        StyledText {
-            id: actionLabel
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: Appearance.padding.small
-            anchors.rightMargin: Appearance.padding.small
-            text: action.text
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.small
-            wrapMode: Text.Wrap
-            horizontalAlignment: Text.AlignHCenter
-        }
     }
 }
