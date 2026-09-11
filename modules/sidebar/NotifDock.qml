@@ -33,44 +33,33 @@ Item {
 
         spacing: Appearance.spacing.normal
 
-        ColumnLayout {
+        StyledText {
             Layout.fillWidth: true
-            spacing: 0
-
-            StyledText {
-                id: titleText
-
-                Layout.fillWidth: true
-                text: qsTr("NOTIFICATIONS")
-                color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.normal
-                font.family: Appearance.font.family.mono
-                font.weight: 600
-                font.letterSpacing: 3
-                elide: Text.ElideRight
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: root.notifCount > 0 ? qsTr("ACTIVE FEED") : qsTr("INBOX CLEAR")
-                color: Colours.palette.m3outlineVariant
-                font.pointSize: Appearance.font.size.small
-                font.family: Appearance.font.family.mono
-                font.weight: 500
-                font.letterSpacing: 1
-                elide: Text.ElideRight
-            }
+            text: root.notifCount > 0 ? qsTr("ACTIVE FEED") : qsTr("INBOX CLEAR")
+            color: Colours.palette.m3outlineVariant
+            font.pointSize: Appearance.font.size.small
+            font.family: Appearance.font.family.mono
+            font.weight: 500
+            font.letterSpacing: 1
+            elide: Text.ElideRight
         }
 
         StyledText {
-            id: count
-
             Layout.alignment: Qt.AlignVCenter
             text: root.notifCount.toString().padStart(2, "0")
             color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Appearance.font.size.normal
             font.family: Appearance.font.family.mono
-            font.weight: 300
+            font.weight: 500
+        }
+
+        IconButton {
+            visible: root.notifCount > 0
+            icon: "clear_all"
+            padding: Appearance.padding.small
+            radius: Appearance.rounding.small / 2
+            font.pointSize: Appearance.font.size.normal
+            onClicked: clearTimer.start()
         }
     }
 
@@ -176,43 +165,4 @@ Item {
         }
     }
 
-    Loader {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Appearance.padding.normal
-
-        scale: root.notifCount > 0 ? 1 : 0.5
-        opacity: root.notifCount > 0 ? 1 : 0
-        active: opacity > 0
-
-        sourceComponent: IconButton {
-            id: clearBtn
-
-            icon: "clear_all"
-            radius: Appearance.rounding.normal
-            padding: Appearance.padding.normal
-            font.pointSize: Math.round(Appearance.font.size.large * 1.2)
-            onClicked: clearTimer.start()
-
-            Elevation {
-                anchors.fill: parent
-                radius: parent.radius
-                z: -1
-                level: clearBtn.stateLayer.containsMouse ? 4 : 3
-            }
-        }
-
-        Behavior on scale {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-            }
-        }
-
-        Behavior on opacity {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-            }
-        }
-    }
 }

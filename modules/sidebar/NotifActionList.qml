@@ -1,199 +1,121 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.containers
-import qs.components.effects
 import qs.services
 import qs.config
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+ColumnLayout {
     id: root
 
-    required property Notifs.Notif notif
+    required property var notif
+    property bool copied
 
     Layout.fillWidth: true
-    implicitHeight: flickable.contentHeight
+    spacing: Appearance.spacing.small
 
-    layer.enabled: true
-    layer.smooth: true
-    layer.effect: OpacityMask {
-        maskSource: gradientMask
-    }
+    Repeater {
+        model: root.notif.actions
 
-    Item {
-        id: gradientMask
+        ActionButton {
+            required property var modelData
 
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
-
-        Rectangle {
-            anchors.fill: parent
-
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-
-                GradientStop {
-                    position: 0
-                    color: Qt.rgba(0, 0, 0, 0)
-                }
-                GradientStop {
-                    position: 0.1
-                    color: Qt.rgba(0, 0, 0, 1)
-                }
-                GradientStop {
-                    position: 0.9
-                    color: Qt.rgba(0, 0, 0, 1)
-                }
-                GradientStop {
-                    position: 1
-                    color: Qt.rgba(0, 0, 0, 0)
-                }
-            }
-        }
-
-        Rectangle {
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-
-            implicitWidth: parent.width / 2
-            opacity: flickable.contentX > 0 ? 0 : 1
-
-            Behavior on opacity {
-                Anim {}
-            }
-        }
-
-        Rectangle {
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-
-            implicitWidth: parent.width / 2
-            opacity: flickable.contentX < flickable.contentWidth - parent.width ? 0 : 1
-
-            Behavior on opacity {
-                Anim {}
+            Layout.fillWidth: true
+            text: modelData.text
+            onClicked: {
+                if (modelData.invoke)
+                    modelData.invoke();
+                else if (!root.notif.resident)
+                    root.notif.close();
             }
         }
     }
 
-    StyledFlickable {
-        id: flickable
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.small
 
-        anchors.fill: parent
-        contentWidth: Math.max(width, actionList.implicitWidth)
-        contentHeight: actionList.implicitHeight
+        ActionButton {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            icon: "close"
+            text: qsTr("Dismiss")
+            onClicked: root.notif.close()
+        }
+
+        ActionButton {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            icon: root.copied ? "inventory" : "content_copy"
+            text: root.copied ? qsTr("Copied") : qsTr("Copy")
+            onClicked: {
+                Quickshell.clipboardText = root.notif.body;
+                root.copied = true;
+                copyTimer.restart();
+            }
+        }
+    }
+
+    Timer {
+        id: copyTimer
+
+        interval: 3000
+        onTriggered: root.copied = false
+    }
+
+    component ActionButton: StyledRect {
+        id: action
+
+        required property string text
+        property string icon
+
+        signal clicked
+
+        implicitHeight: actionContent.implicitHeight + Appearance.padding.small * 2
+        radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
+        color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+
+        StateLayer {
+            id: actionStateLayer
+
+            function onClicked(): void {
+                action.clicked();
+            }
+        }
 
         RowLayout {
-            id: actionList
+            id: actionContent
 
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
             spacing: Appearance.spacing.small
 
-            Repeater {
-                model: [
-                    {
-                        isClose: true
-                    },
-                    ...root.notif.actions,
-                    {
-                        isCopy: true
-                    }
-                ]
+            MaterialIcon {
+                visible: action.icon.length > 0
+                text: action.icon
+                font.pointSize: Appearance.font.size.small
+                color: Colours.palette.m3onSurfaceVariant
+            }
 
-                StyledRect {
-                    id: action
+            StyledText {
+                Layout.fillWidth: true
+                text: action.text
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                wrapMode: Text.Wrap
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
 
-                    required property var modelData
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    implicitWidth: actionInner.implicitWidth + Appearance.padding.normal * 2
-                    implicitHeight: actionInner.implicitHeight + Appearance.padding.small * 2
-
-                    Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Appearance.padding.large : 0)
-                    radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
-                    color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
-
-                    Timer {
-                        id: copyTimer
-
-                        interval: 3000
-                        onTriggered: actionInner.item.text = "content_copy"
-                    }
-
-                    StateLayer {
-                        id: actionStateLayer
-
-                        function onClicked(): void {
-                            if (action.modelData.isClose) {
-                                root.notif.close();
-                            } else if (action.modelData.isCopy) {
-                                Quickshell.clipboardText = root.notif.body;
-                                actionInner.item.text = "inventory";
-                                copyTimer.start();
-                            } else if (action.modelData.invoke) {
-                                action.modelData.invoke();
-                            } else if (!root.notif.resident) {
-                                root.notif.close();
-                            }
-                        }
-                    }
-
-                    Loader {
-                        id: actionInner
-
-                        anchors.centerIn: parent
-                        sourceComponent: action.modelData.isClose || action.modelData.isCopy ? iconBtn : root.notif.hasActionIcons ? iconComp : textComp
-                    }
-
-                    Component {
-                        id: iconBtn
-
-                        MaterialIcon {
-                            animate: action.modelData.isCopy ?? false
-                            text: action.modelData.isCopy ? "content_copy" : "close"
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-                    }
-
-                    Component {
-                        id: iconComp
-
-                        IconImage {
-                            source: Quickshell.iconPath(action.modelData.identifier)
-                        }
-                    }
-
-                    Component {
-                        id: textComp
-
-                        StyledText {
-                            text: action.modelData.text
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-                    }
-
-                    Behavior on Layout.preferredWidth {
-                        Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                        }
-                    }
-
-                    Behavior on radius {
-                        Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                        }
-                    }
-                }
+        Behavior on radius {
+            Anim {
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
             }
         }
     }

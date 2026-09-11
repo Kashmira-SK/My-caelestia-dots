@@ -28,14 +28,7 @@ Item {
         id: repeater
 
         model: ScriptModel {
-            values: {
-                const map = new Map();
-                for (const n of Notifs.notClosed)
-                    map.set(n.appName, null);
-                for (const n of Notifs.list)
-                    map.set(n.appName, null);
-                return [...map.keys()];
-            }
+            values: [...Notifs.list]
             onValuesChanged: root.flagChanged()
         }
 
@@ -43,19 +36,19 @@ Item {
             id: notif
 
             required property int index
-            required property string modelData
+            required property Notifs.Notif modelData
 
-            readonly property bool closed: notifInner.notifCount === 0
-            readonly property alias nonAnimHeight: notifInner.nonAnimHeight
+            readonly property bool closed: modelData.closed
+            readonly property alias nonAnimHeight: notifCard.nonAnimHeight
+            property bool expanded: Config.notifs.openExpanded
             property int startY
 
             function closeAll(): void {
-                for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
-                    n.close();
+                modelData.close();
             }
 
             y: {
-                root.flag; // Force update
+                root.flag;
                 let y = 0;
                 for (let i = 0; i < index; i++) {
                     const item = repeater.itemAt(i);
@@ -69,15 +62,15 @@ Item {
                 function contains(p: point): bool {
                     if (!root.container.contains(notif.mapToItem(root.container, p)))
                         return false;
-                    return notifInner.contains(p);
+                    return notifCard.contains(p);
                 }
             }
 
             implicitWidth: root.width
-            implicitHeight: notifInner.implicitHeight
+            implicitHeight: notifCard.implicitHeight
 
             hoverEnabled: true
-            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
+            cursorShape: notifCard.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             preventStealing: true
             enabled: !closed
@@ -88,23 +81,26 @@ Item {
             onPressed: event => {
                 startY = event.y;
                 if (event.button === Qt.RightButton)
-                    notifInner.toggleExpand(!notifInner.expanded);
+                    expanded = !expanded;
                 else if (event.button === Qt.MiddleButton)
-                    closeAll();
+                    modelData.close();
             }
             onPositionChanged: event => {
                 if (pressed) {
                     const diffY = event.y - startY;
                     if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        notifInner.toggleExpand(diffY > 0);
+                        expanded = diffY > 0;
                 }
             }
-            onReleased: event => {
+            onReleased: {
                 if (Math.abs(x) < width * Config.notifs.clearThreshold)
                     x = 0;
                 else
-                    closeAll();
+                    modelData.close();
             }
+
+            Component.onCompleted: modelData.lock(this)
+            Component.onDestruction: modelData.unlock(this)
 
             ParallelAnimation {
                 running: true
@@ -118,15 +114,14 @@ Item {
                 Anim {
                     target: notif
                     property: "scale"
-                    from: 0
+                    from: 0.7
                     to: 1
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
 
             ParallelAnimation {
                 running: notif.closed
+                onFinished: notif.modelData.unlock(notif)
 
                 Anim {
                     target: notif
@@ -135,18 +130,19 @@ Item {
                 }
                 Anim {
                     target: notif
-                    property: "scale"
-                    to: 0.6
+                    property: "x"
+                    to: notif.x >= 0 ? notif.width : -notif.width
                 }
             }
 
-            NotifGroup {
-                id: notifInner
+            Notif {
+                id: notifCard
 
+                anchors.fill: parent
                 modelData: notif.modelData
-                props: root.props
-                container: root.container
+                expanded: notif.expanded
                 visibilities: root.visibilities
+                onRequestToggleExpand: notif.expanded = !notif.expanded
             }
 
             Behavior on x {
