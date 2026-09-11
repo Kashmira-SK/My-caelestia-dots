@@ -7,30 +7,30 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
-Controls.Popup {
+ColumnLayout {
     id: root
 
+    // Inline disclosure: the owning card grows, so options never overlap the feed.
     required property var items
+    required property bool expanded
 
     signal chosen(index: int)
 
-    padding: Appearance.padding.small
-    margins: Appearance.padding.normal
-    focus: true
-    closePolicy: Controls.Popup.CloseOnEscape | Controls.Popup.CloseOnPressOutside
+    visible: expanded
+    spacing: 0
 
-    background: StyledRect {
-        color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
-        radius: Appearance.rounding.small / 2
-        border.width: 1
-        border.color: Colours.palette.m3outlineVariant
+    StyledRect {
+        Layout.fillWidth: true
+        implicitHeight: 1
+        color: Colours.palette.m3outlineVariant
     }
 
-    contentItem: ColumnLayout {
+    ColumnLayout {
+        Layout.fillWidth: true
         spacing: 0
 
         Repeater {
-            model: root.items
+            model: root.expanded ? root.items : []
 
             Controls.AbstractButton {
                 id: option
@@ -44,10 +44,7 @@ Controls.Popup {
                 implicitHeight: Math.max(32, implicitContentHeight + topPadding + bottomPadding)
                 text: modelData.text
                 hoverEnabled: true
-                onClicked: {
-                    root.close();
-                    root.chosen(index);
-                }
+                onClicked: root.chosen(index)
 
                 contentItem: StyledText {
                     text: option.text

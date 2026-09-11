@@ -5,49 +5,55 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-RowLayout {
+ColumnLayout {
     id: root
 
     required property var notif
     property bool copied
+    property bool optionsExpanded
 
     spacing: Appearance.spacing.small
+    Keys.onEscapePressed: optionsExpanded = false
 
-    NotifToolButton {
-        visible: root.notif.actions.length > 0
-        icon: "ellipsis"
-        text: qsTr("Notification actions")
-        selected: actionMenu.opened
-        onClicked: actionMenu.opened ? actionMenu.close() : actionMenu.open()
-    }
-
-    Item {
+    RowLayout {
         Layout.fillWidth: true
-    }
+        spacing: Appearance.spacing.small
 
-    NotifToolButton {
-        icon: root.copied ? "check" : "copy"
-        text: root.copied ? qsTr("Copied") : qsTr("Copy notification")
-        onClicked: {
-            Quickshell.clipboardText = root.notif.body;
-            root.copied = true;
-            copyTimer.restart();
+        NotifToolButton {
+            visible: root.notif.actions.length > 0
+            icon: "ellipsis"
+            text: root.optionsExpanded ? qsTr("Hide notification actions") : qsTr("Notification actions")
+            selected: root.optionsExpanded
+            onClicked: root.optionsExpanded = !root.optionsExpanded
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        NotifToolButton {
+            icon: root.copied ? "check" : "copy"
+            text: root.copied ? qsTr("Copied") : qsTr("Copy notification")
+            onClicked: {
+                Quickshell.clipboardText = root.notif.body;
+                root.copied = true;
+                copyTimer.restart();
+            }
+        }
+
+        NotifToolButton {
+            icon: "x"
+            text: qsTr("Dismiss notification")
+            onClicked: root.notif.close()
         }
     }
 
-    NotifToolButton {
-        icon: "x"
-        text: qsTr("Dismiss notification")
-        onClicked: root.notif.close()
-    }
-
     NotifMenu {
-        id: actionMenu
-
-        y: root.height + Appearance.spacing.small
-        width: root.width
+        Layout.fillWidth: true
+        expanded: root.optionsExpanded
         items: root.notif.actions
         onChosen: index => {
+            root.optionsExpanded = false;
             const action = root.notif.actions[index];
             if (action.invoke)
                 action.invoke();

@@ -16,9 +16,20 @@ StyledRect {
     required property bool expanded
     required property var visibilities
 
-    readonly property bool hasImage: modelData.image.length > 0
-    readonly property bool hasAppIcon: modelData.appIcon.length > 0
-    readonly property int iconSize: Math.round(Config.notifs.sizes.image * 0.5)
+    // Use consistent outline categories, including notifications relayed by a
+    // browser or KDE Connect. Sender images must not override these glyphs.
+    readonly property string senderIcon: {
+        const sender = (modelData.appName + " " + modelData.appIcon + " " + modelData.summary).toLowerCase();
+        if (/whatsapp|telegram|signal|discord|message|chat/.test(sender))
+            return "message-circle";
+        if (/network|wi-fi|wifi|connection/.test(sender))
+            return "wifi";
+        if (/kde.?connect|phone/.test(sender))
+            return "smartphone";
+        if (/firefox|chromium|chrome|browser/.test(sender))
+            return "globe";
+        return "bell";
+    }
     readonly property StyledText body: bodyText
     readonly property real nonAnimHeight: content.implicitHeight + Appearance.padding.normal * 2
 
@@ -43,41 +54,11 @@ StyledRect {
             Layout.fillWidth: true
             spacing: Appearance.spacing.small
 
-            Item {
+            ColouredIcon {
                 Layout.alignment: Qt.AlignVCenter
-                visible: root.hasImage || root.hasAppIcon
-                implicitWidth: root.iconSize
-                implicitHeight: root.iconSize
-
-                Component {
-                    id: imageComp
-
-                    Image {
-                        source: Qt.resolvedUrl(root.modelData.image)
-                        fillMode: Image.PreserveAspectCrop
-                        cache: false
-                        asynchronous: true
-                        width: root.iconSize
-                        height: root.iconSize
-                    }
-                }
-
-                Component {
-                    id: appIconComp
-
-                    ColouredIcon {
-                        implicitSize: root.iconSize
-                        source: Quickshell.iconPath(root.modelData.appIcon)
-                        colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                        layer.enabled: root.modelData.appIcon.endsWith("symbolic")
-                    }
-                }
-
-                Loader {
-                    anchors.centerIn: parent
-                    active: root.hasImage || root.hasAppIcon
-                    sourceComponent: root.hasImage ? imageComp : appIconComp
-                }
+                implicitSize: 16
+                source: Qt.resolvedUrl("../../assets/icons/lucide/" + root.senderIcon + ".svg")
+                colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
             }
 
             StyledText {

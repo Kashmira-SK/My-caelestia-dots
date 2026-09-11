@@ -55,21 +55,10 @@ Item {
 
         NotifToolButton {
             visible: root.notifCount > 0
-            icon: "ellipsis"
-            text: qsTr("Notification panel actions")
-            selected: panelMenu.opened
-            onClicked: panelMenu.opened ? panelMenu.close() : panelMenu.open()
+            icon: "list-x"
+            text: qsTr("Clear all notifications")
+            onClicked: clearTimer.start()
         }
-    }
-
-    NotifMenu {
-        id: panelMenu
-
-        x: root.width - width
-        y: title.y + title.height + Appearance.spacing.small
-        width: Math.min(260, root.width)
-        items: [{ text: qsTr("Clear all notifications") }]
-        onChosen: clearTimer.start()
     }
 
     ClippingRectangle {
