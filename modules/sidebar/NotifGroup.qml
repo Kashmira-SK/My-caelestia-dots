@@ -25,7 +25,7 @@ StyledRect {
     readonly property int urgency: notifs.some(n => !n.closed && n.urgency === NotificationUrgency.Critical) ? NotificationUrgency.Critical : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? NotificationUrgency.Normal : NotificationUrgency.Low
 
     readonly property int nonAnimHeight: {
-        const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Appearance.spacing.small / 2) : 0);
+        const headerHeight = header.implicitHeight + header.Layout.bottomMargin;
         const columnHeight = headerHeight + notifList.nonAnimHeight + column.Layout.topMargin + column.Layout.bottomMargin;
         return Math.round(Math.max(Config.notifs.sizes.image, columnHeight) + Appearance.padding.normal * 2);
     }
@@ -50,7 +50,7 @@ StyledRect {
     implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
 
     clip: true
-    radius: Appearance.rounding.normal
+    radius: Appearance.rounding.small
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     RowLayout {
@@ -105,7 +105,7 @@ StyledRect {
             StyledClippingRect {
                 anchors.fill: parent
                 color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHigh, 3) : Colours.palette.m3secondaryContainer
-                radius: Appearance.rounding.full
+                radius: Appearance.rounding.small
 
                 Loader {
                     anchors.centerIn: parent
@@ -139,15 +139,15 @@ StyledRect {
         ColumnLayout {
             id: column
 
-            Layout.topMargin: -Appearance.padding.small
-            Layout.bottomMargin: -Appearance.padding.small / 2
+            Layout.topMargin: 0
+            Layout.bottomMargin: 0
             Layout.fillWidth: true
             spacing: 0
 
             RowLayout {
                 id: header
 
-                Layout.bottomMargin: root.expanded ? Math.round(Appearance.spacing.small / 2) : 0
+                Layout.bottomMargin: Appearance.spacing.small
                 Layout.fillWidth: true
                 spacing: Appearance.spacing.smaller
 
@@ -156,6 +156,10 @@ StyledRect {
                     text: root.modelData
                     color: Colours.palette.m3onSurfaceVariant
                     font.pointSize: Appearance.font.size.small
+                    font.family: Appearance.font.family.mono
+                    font.weight: 600
+                    font.capitalization: Font.AllUppercase
+                    font.letterSpacing: 1
                     elide: Text.ElideRight
                 }
 
@@ -164,6 +168,7 @@ StyledRect {
                     text: root.notifs.find(n => !n.closed)?.timeStr ?? ""
                     color: Colours.palette.m3outline
                     font.pointSize: Appearance.font.size.small
+                    font.family: Appearance.font.family.mono
                 }
 
                 StyledRect {
@@ -171,7 +176,7 @@ StyledRect {
                     implicitHeight: groupCount.implicitHeight + Appearance.padding.small
 
                     color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHigh, 3)
-                    radius: Appearance.rounding.full
+                    radius: Appearance.rounding.small
 
                     StateLayer {
                         color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface

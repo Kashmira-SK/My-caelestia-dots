@@ -23,7 +23,7 @@ Item {
 
     Component.onCompleted: Notifs.list.forEach(n => n.popup = false)
 
-    Item {
+    RowLayout {
         id: title
 
         anchors.top: parent.top
@@ -31,45 +31,46 @@ Item {
         anchors.right: parent.right
         anchors.margins: Appearance.padding.small
 
-        implicitHeight: Math.max(count.implicitHeight, titleText.implicitHeight)
+        spacing: Appearance.spacing.normal
 
-        StyledText {
-            id: count
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 0
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: root.notifCount > 0 ? 0 : -width - titleText.anchors.leftMargin
-            opacity: root.notifCount > 0 ? 1 : 0
+            StyledText {
+                id: titleText
 
-            text: root.notifCount
-            color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.normal
-            font.family: Appearance.font.family.mono
-            font.weight: 500
-
-            Behavior on anchors.leftMargin {
-                Anim {}
+                Layout.fillWidth: true
+                text: qsTr("NOTIFICATIONS")
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.normal
+                font.family: Appearance.font.family.mono
+                font.weight: 600
+                font.letterSpacing: 3
+                elide: Text.ElideRight
             }
 
-            Behavior on opacity {
-                Anim {}
+            StyledText {
+                Layout.fillWidth: true
+                text: root.notifCount > 0 ? qsTr("ACTIVE FEED") : qsTr("INBOX CLEAR")
+                color: Colours.palette.m3outlineVariant
+                font.pointSize: Appearance.font.size.small
+                font.family: Appearance.font.family.mono
+                font.weight: 500
+                font.letterSpacing: 1
+                elide: Text.ElideRight
             }
         }
 
         StyledText {
-            id: titleText
+            id: count
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: count.right
-            anchors.right: parent.right
-            anchors.leftMargin: Appearance.spacing.small
-
-            text: root.notifCount > 0 ? qsTr("notification%1").arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
+            Layout.alignment: Qt.AlignVCenter
+            text: root.notifCount.toString().padStart(2, "0")
             color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.mono
-            font.weight: 500
-            elide: Text.ElideRight
+            font.weight: 300
         }
     }
 
@@ -80,7 +81,7 @@ Item {
         anchors.right: parent.right
         anchors.top: title.bottom
         anchors.bottom: parent.bottom
-        anchors.topMargin: Appearance.spacing.smaller
+        anchors.topMargin: Appearance.spacing.normal
 
         radius: Appearance.rounding.small
         color: "transparent"
@@ -91,13 +92,13 @@ Item {
             opacity: root.notifCount > 0 ? 0 : 1
 
             sourceComponent: ColumnLayout {
-                spacing: Appearance.spacing.large
+                spacing: Appearance.spacing.normal
 
                 Image {
                     asynchronous: true
                     source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
                     fillMode: Image.PreserveAspectFit
-                    sourceSize.width: clipRect.width * 0.8
+                    sourceSize.width: clipRect.width * 0.48
 
                     layer.enabled: true
                     layer.effect: Colouriser {
@@ -108,11 +109,21 @@ Item {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("No Notifications")
+                    Layout.topMargin: Appearance.spacing.small
+                    text: qsTr("QUEUE EMPTY")
                     color: Colours.palette.m3outlineVariant
                     font.pointSize: Appearance.font.size.large
                     font.family: Appearance.font.family.mono
-                    font.weight: 500
+                    font.weight: 600
+                    font.letterSpacing: 3
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: qsTr("Nothing needs your attention")
+                    color: Colours.palette.m3outlineVariant
+                    font.pointSize: Appearance.font.size.small
+                    font.family: Appearance.font.family.mono
                 }
             }
 

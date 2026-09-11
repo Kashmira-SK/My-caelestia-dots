@@ -16,7 +16,7 @@ StyledRect {
     required property var visibilities
 
     readonly property StyledText body: expandedContent.item?.body ?? null
-    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Appearance.padding.normal * 2 : summaryHeightMetrics.height
+    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Appearance.padding.normal * 2 : summaryHeightMetrics.height + compactBody.implicitHeight + compactBody.anchors.topMargin
 
     implicitHeight: nonAnimHeight
 
@@ -32,8 +32,6 @@ StyledRect {
 
         PropertyChanges {
             summary.anchors.margins: Appearance.padding.normal
-            dummySummary.anchors.margins: Appearance.padding.normal
-            compactBody.anchors.margins: Appearance.padding.normal
             timeStr.anchors.margins: Appearance.padding.normal
             expandedContent.anchors.margins: Appearance.padding.normal
             summary.width: root.width - Appearance.padding.normal * 2 - timeStr.implicitWidth - Appearance.spacing.small
@@ -66,30 +64,22 @@ StyledRect {
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         maximumLineCount: 1
-    }
-
-    StyledText {
-        id: dummySummary
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-
-        visible: false
-        text: root.modelData.summary
+        font.weight: 600
     }
 
     WrappedLoader {
         id: compactBody
 
         shouldBeActive: !root.expanded
-        anchors.top: parent.top
-        anchors.left: dummySummary.right
+        anchors.top: summary.bottom
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: Appearance.spacing.small
+        anchors.topMargin: root.modelData.body ? Appearance.spacing.smaller : 0
 
         sourceComponent: StyledText {
             text: root.modelData.body.replace(/\n/g, " ")
             color: root.modelData.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.small
             elide: Text.ElideRight
         }
     }
