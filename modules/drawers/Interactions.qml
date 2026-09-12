@@ -3,6 +3,7 @@ import qs.config
 import qs.modules.bar.popouts as BarPopouts
 import Quickshell
 import QtQuick
+import "RightPanelGesture.js" as RightPanelGesture
 
 CustomMouseArea {
     id: root
@@ -14,6 +15,8 @@ CustomMouseArea {
     required property Item bar
 
     property point dragStart
+    property bool rightPanelDrag
+    property bool dragInSessionBand
     property bool dashboardKeyboardActive
     property bool dashboardShortcutActive
     property bool osdShortcutActive
@@ -54,11 +57,27 @@ CustomMouseArea {
     anchors.fill: parent
     hoverEnabled: true
 
-    onPressed: event => dragStart = Qt.point(event.x, event.y)
+    onPressed: event => {
+        dragStart = Qt.point(event.x, event.y);
+        rightPanelDrag = inRightPanel(panels.osd, event.x, event.y) || inRightPanel(panels.session, event.x, event.y) || inRightPanel(panels.sidebar, event.x, event.y);
+        dragInSessionBand = withinPanelHeight(panels.session, event.x, event.y);
+    }
+
+    function endRightPanelDrag(): void {
+        rightPanelDrag = false;
+        if (!osdShortcutActive) {
+            const overOsd = containsMouse && inRightPanel(panels.osd, mouseX, mouseY);
+            panels.osd.hovered = overOsd;
+            visibilities.osd = overOsd;
+        }
+    }
+
+    onReleased: endRightPanelDrag()
+    onCanceled: endRightPanelDrag()
     onContainsMouseChanged: {
         if (!containsMouse) {
             // Only hide if not activated by shortcut
-            if (!osdShortcutActive) {
+            if (!osdShortcutActive && !(pressed && rightPanelDrag)) {
                 visibilities.osd = false;
                 root.panels.osd.hovered = false;
             }
@@ -100,62 +119,23 @@ CustomMouseArea {
                 visibilities.bar = false;
         }
 
-        if (panels.sidebar.width === 0) {
-            // Show osd on hover
-            const showOsd = inRightPanel(panels.osd, x, y);
+        const holdingRightRail = pressed && rightPanelDrag;
+        const outOfSidebar = panels.sidebar.width === 0 || x < width - panels.sidebar.width;
+        const showOsd = (holdingRightRail && dragInSessionBand) || (outOfSidebar && inRightPanel(panels.osd, x, y));
+        if (!osdShortcutActive) {
+            visibilities.osd = showOsd;
+            panels.osd.hovered = showOsd;
+        } else if (showOsd) {
+            osdShortcutActive = false;
+            panels.osd.hovered = true;
+        }
 
-            // Always update visibility based on hover if not in shortcut mode
-            if (!osdShortcutActive) {
-                visibilities.osd = showOsd;
-                root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
-                // If hovering over OSD area while in shortcut mode, transition to hover control
-                osdShortcutActive = false;
-                root.panels.osd.hovered = true;
-            }
-
-            const showSidebar = pressed && dragStart.x > bar.implicitWidth + panels.sidebar.x;
-
-            // Show/hide session on drag
-            if (pressed && inRightPanel(panels.session, dragStart.x, dragStart.y) && withinPanelHeight(panels.session, x, y)) {
-                if (dragX < -Config.session.dragThreshold)
-                    visibilities.session = true;
-                else if (dragX > Config.session.dragThreshold)
-                    visibilities.session = false;
-
-                // Show sidebar on drag if in session area and session is nearly fully visible
-                if (showSidebar && panels.session.width >= panels.session.nonAnimWidth && dragX < -Config.sidebar.dragThreshold)
-                    visibilities.sidebar = true;
-            } else if (showSidebar && dragX < -Config.sidebar.dragThreshold) {
-                // Show sidebar on drag if not in session area
-                visibilities.sidebar = true;
-            }
-        } else {
-            const outOfSidebar = x < width - panels.sidebar.width;
-            // Show osd on hover
-            const showOsd = outOfSidebar && inRightPanel(panels.osd, x, y);
-
-            // Always update visibility based on hover if not in shortcut mode
-            if (!osdShortcutActive) {
-                visibilities.osd = showOsd;
-                root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
-                // If hovering over OSD area while in shortcut mode, transition to hover control
-                osdShortcutActive = false;
-                root.panels.osd.hovered = true;
-            }
-
-            // Show/hide session on drag
-            if (pressed && outOfSidebar && inRightPanel(panels.session, dragStart.x, dragStart.y) && withinPanelHeight(panels.session, x, y)) {
-                if (dragX < -Config.session.dragThreshold)
-                    visibilities.session = true;
-                else if (dragX > Config.session.dragThreshold)
-                    visibilities.session = false;
-            }
-
-            // Hide sidebar on drag
-            if (pressed && inRightPanel(panels.sidebar, dragStart.x, 0) && dragX > Config.sidebar.dragThreshold)
-                visibilities.sidebar = false;
+        if (holdingRightRail) {
+            const intent = RightPanelGesture.actions(dragX, dragInSessionBand, Config.session.dragThreshold, Config.sidebar.dragThreshold);
+            if (intent.session !== null)
+                visibilities.session = intent.session;
+            if (intent.sidebar !== null)
+                visibilities.sidebar = intent.sidebar;
         }
 
         // Show launcher on hover, or show/hide on drag if hover is disabled

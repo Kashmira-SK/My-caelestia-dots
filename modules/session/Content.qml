@@ -13,53 +13,26 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
-    readonly property real railWidth: Config.session.sizes.button * 1.25
+    readonly property real railWidth: Config.session.sizes.button
     readonly property real padding: Appearance.padding.large
 
     implicitWidth: railWidth + padding * 2
-    implicitHeight: portrait.height + actionFrame.height + padding * 2
-
-    AnimatedImage {
-        id: portrait
-
-        anchors.top: parent.top
-        anchors.topMargin: root.padding
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Config.session.sizes.button
-        height: width
-        sourceSize.width: width
-        sourceSize.height: height
-        playing: visible
-        asynchronous: true
-        speed: Appearance.anim.sessionGifSpeed
-        source: Paths.absolutePath(Config.paths.sessionGif)
-    }
+    implicitHeight: Config.session.sizes.button * 5 + padding * 2
 
     Item {
         id: actionFrame
 
-        anchors.top: portrait.bottom
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.margins: root.padding
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.railWidth
-        height: actions.implicitHeight + Appearance.padding.small * 2
 
-        // One shared frame, not four individual tiles.
-        StyledRect {
-            anchors.fill: parent
-            radius: Appearance.rounding.normal
-            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)
-            border.width: 1
-            border.color: Colours.tPalette.m3outlineVariant
-        }
-
-        GridLayout {
+        Column {
             id: actions
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.small
-            columns: 2
-            rowSpacing: Appearance.spacing.smaller
-            columnSpacing: Appearance.spacing.smaller
+            spacing: Math.max(Appearance.spacing.small, (height - logout.height - shutdown.height - hibernate.height - reboot.height) / 3)
 
             SessionButton {
                 id: logout
@@ -70,8 +43,7 @@ Item {
                 text: qsTr("Log out")
                 command: Config.session.commands.logout
 
-                KeyNavigation.right: shutdown
-                KeyNavigation.down: hibernate
+                KeyNavigation.down: shutdown
                 nextButton: shutdown
                 previousButton: reboot
 
@@ -96,8 +68,8 @@ Item {
                 text: qsTr("Power off")
                 command: Config.session.commands.shutdown
 
-                KeyNavigation.left: logout
-                KeyNavigation.down: reboot
+                KeyNavigation.up: logout
+                KeyNavigation.down: hibernate
                 nextButton: hibernate
                 previousButton: logout
             }
@@ -111,8 +83,8 @@ Item {
                 text: qsTr("Hibernate")
                 command: Config.session.commands.hibernate
 
-                KeyNavigation.up: logout
-                KeyNavigation.right: reboot
+                KeyNavigation.up: shutdown
+                KeyNavigation.down: reboot
                 nextButton: reboot
                 previousButton: shutdown
             }
@@ -126,8 +98,7 @@ Item {
                 text: qsTr("Restart")
                 command: Config.session.commands.reboot
 
-                KeyNavigation.up: shutdown
-                KeyNavigation.left: hibernate
+                KeyNavigation.up: hibernate
                 nextButton: logout
                 previousButton: hibernate
             }
@@ -145,10 +116,8 @@ Item {
         required property Item nextButton
         required property Item previousButton
 
-        Layout.fillWidth: true
-        Layout.preferredWidth: 1
-        implicitWidth: 38
-        implicitHeight: 40
+        implicitWidth: root.railWidth
+        implicitHeight: 48
 
         radius: Appearance.rounding.small
         color: button.activeFocus ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)

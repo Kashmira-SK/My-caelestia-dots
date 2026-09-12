@@ -14,7 +14,9 @@ Item {
 
     visible: width > 0
     implicitWidth: 0
-    implicitHeight: content.implicitHeight
+    // The shared silhouette must enclose the OSD's rounded joins. A shorter
+    // session rail exposes the concave ends against the wallpaper.
+    implicitHeight: Math.max(content.implicitHeight, root.panels.osd.implicitHeight + Math.max(Config.border.rounding * 2, Config.session.sizes.button * 1.5))
 
     states: State {
         name: "visible"
