@@ -13,7 +13,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
-    readonly property real railWidth: Config.session.sizes.button
+    readonly property real railWidth: Config.session.sizes.button * 0.7
     readonly property real padding: Appearance.padding.large
 
     implicitWidth: railWidth + padding * 2
@@ -31,8 +31,9 @@ Item {
         Column {
             id: actions
 
-            anchors.fill: parent
-            spacing: Math.max(Appearance.spacing.small, (height - logout.height - shutdown.height - hibernate.height - reboot.height) / 3)
+            anchors.centerIn: parent
+            width: parent.width
+            spacing: Appearance.spacing.small
 
             SessionButton {
                 id: logout
@@ -72,6 +73,23 @@ Item {
                 KeyNavigation.down: hibernate
                 nextButton: hibernate
                 previousButton: logout
+            }
+
+            Item {
+                width: root.railWidth
+                height: portrait.height + Appearance.spacing.normal * 2
+
+                Image {
+                    id: portrait
+
+                    anchors.centerIn: parent
+                    width: root.implicitWidth - Appearance.padding.small
+                    height: width * 1006 / 992
+                    sourceSize.width: Math.ceil(width * 2)
+                    source: Qt.resolvedUrl("../../assets/session-aemeath.png")
+                    fillMode: Image.PreserveAspectFit
+                    asynchronous: true
+                }
             }
 
             SessionButton {

@@ -22,6 +22,15 @@ for (const contentHeight of [0, 220, 350, 500]) {
 }
 console.log("Sidebar geometry checks passed: 48 content/slider/rounding combinations.");
 
+const session = readFileSync(new URL("../../modules/session/Content.qml", import.meta.url), "utf8");
+const railWidthExpression = session.match(/readonly property real railWidth: (.+)/)[1];
+for (const button of [64, 80, 96]) {
+    const railWidth = vm.runInNewContext(railWidthExpression, { Config: { session: { sizes: { button } } } });
+    assert.ok(railWidth >= 44, "Keep a usable click target at supported sizes");
+    assert.ok(railWidth < button, "The new rail must stay narrower than the old rail");
+}
+console.log("Compact power-rail checks passed at three configured sizes.");
+
 const gestureSource = readFileSync(new URL("../../modules/drawers/RightPanelGesture.js", import.meta.url), "utf8").replace(/^\.pragma library\s*/, "");
 const gesture = vm.runInNewContext(`${gestureSource}\nactions`);
 for (let pass = 0; pass < 20; pass++) {
