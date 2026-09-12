@@ -74,11 +74,9 @@ Item {
         color: "transparent"
 
         Loader {
-            anchors.centerIn: parent
+            anchors.fill: parent
             active: root.notifCount === 0
-            sourceComponent: BlackHole {
-                width: Math.min(300, clipRect.width * 0.86)
-                height: Math.min(width, Math.max(0, clipRect.height - Appearance.padding.normal * 2))
+            sourceComponent: SpaceScene {
                 ink: Colours.palette.m3outlineVariant
             }
         }
