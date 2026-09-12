@@ -65,23 +65,12 @@ Item {
                     dot(x, y, 0.7 + Math.sin(root.phase * 0.12 + i) * 0.12, i === 2 ? 2.2 : 1.5);
                 }
 
-                // A shaded, grainy sphere with soft particulate rings.
-                const px = width * 0.73;
-                const py = height * 0.84;
-                const radius = Math.min(20, width * 0.055);
-                for (let i = 0; i < Field.planetCount; i++) {
-                    const grain = Field.planetPoint(i, root.phase);
-                    if (grain)
-                        dot(px + grain.x * radius, py + grain.y * radius, grain.alpha, grain.size);
+                // A gently drifting shuttle gives this corner an angular silhouette.
+                const shipScale = Math.min(1, width / 360);
+                for (let i = 0; i < Field.spacecraftCount; i++) {
+                    const grain = Field.spacecraftPoint(i, root.phase);
+                    dot(width * 0.73 + grain.x * shipScale, height * 0.84 + grain.y * shipScale, grain.alpha, grain.size);
                 }
-                for (let i = 0; i < Field.ringCount; i++) {
-                    const grain = Field.ringPoint(i, root.phase);
-                    if (grain)
-                        dot(px + grain.x * radius, py + grain.y * radius, grain.alpha, grain.size);
-                }
-
-                // Keep the moving moon, without a diagram-like orbit outline.
-                dot(px + Math.cos(root.phase * 0.2) * 49, py + Math.sin(root.phase * 0.2) * 28, 0.8, 2);
             }
 
             const meteor = Field.meteor(root.phase, width, height);

@@ -45,38 +45,61 @@ function showDetails(width, height) {
     return width >= 240 && height >= 380;
 }
 
-// Project a lit sphere into a stippled surface, rather than tracing its edge.
-// The fixed sample positions avoid shimmer; only the faint cloud bands turn.
-var planetCount = 760;
-var ringCount = 460;
-
-function planetPoint(index, phase) {
-    const r = Math.sqrt((index + 0.5) / planetCount);
-    const angle = index * 2.399963;
-    const x = Math.cos(angle) * r;
-    const y = Math.sin(angle) * r;
-    const z = Math.sqrt(Math.max(0, 1 - r * r));
-    const light = Math.max(0, -x * 0.55 - y * 0.35 + z * 0.75);
-    const bands = 0.8 + Math.sin(y * 22 + Math.sin(Math.atan2(x, z) * 3 + phase * 0.07)) * 0.2;
-    if (noise(index + 8201) > light * 0.92)
-        return null;
-    return { x: x, y: y, alpha: (0.12 + light * 0.72) * bands, size: 0.9 };
+// A small delta-wing shuttle, sampled into dots rather than solid icon paths.
+function insideHull(x, y, hull) {
+    let inside = false;
+    for (let i = 0, j = hull.length - 1; i < hull.length; j = i++) {
+        const a = hull[i], b = hull[j];
+        if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0])
+            inside = !inside;
+    }
+    return inside;
 }
 
-function ringPoint(index, phase) {
-    const seed = noise(index + 9201);
-    const radius = 1.4 + seed * 0.75;
-    const angle = noise(index + 10201) * Math.PI * 2 + phase * 0.035;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius * 0.28;
-    if (y < 0 && Math.hypot(x, y) < 1.03)
-        return null;
-    const tilt = -0.34;
-    const density = Math.max(0, 1 - Math.abs(radius - 1.75) / 0.4);
+function makeSpacecraft() {
+    const hull = [[0, -22], [4, -11], [5, -3], [18, 11], [18, 15], [5, 10], [5, 17], [-5, 17], [-5, 10], [-18, 15], [-18, 11], [-5, -3], [-4, -11]];
+    const points = [];
+    for (let row = 0; row < 32; row++) {
+        for (let col = 0; col < 30; col++) {
+            const x = (col - 14.5) * 1.25;
+            const y = -22 + row * 1.25;
+            if (!insideHull(x, y, hull))
+                continue;
+            // Leave a dark cockpit; vary the stipple density on the wing panels.
+            if (Math.abs(x) < 2.8 && y > -10 && y < -5)
+                continue;
+            const wing = Math.abs(x) > 5;
+            const grain = noise(row * 30 + col + 12001);
+            if (grain < (wing ? 0.22 : 0.1))
+                continue;
+            points.push({ x: x, y: y, alpha: (wing ? 0.32 : 0.48) + grain * 0.3, size: 0.95 });
+        }
+    }
+    return points;
+}
+
+var spacecraftDots = makeSpacecraft();
+var spacecraftCount = spacecraftDots.length + 48;
+
+function spacecraftPoint(index, phase) {
+    let dot;
+    if (index < spacecraftDots.length) {
+        dot = spacecraftDots[index];
+    } else {
+        const seed = noise(index + 14001);
+        const travel = (phase * 0.8 + seed) % 1;
+        dot = {
+            x: (index % 2 === 0 ? -3 : 3) + (noise(index + 15001) - 0.5) * (1 + travel * 3),
+            y: 18 + travel * 18,
+            alpha: Math.sin(travel * Math.PI) * (1 - travel) * 0.48,
+            size: 0.8
+        };
+    }
+    const angle = 0.45 + Math.sin(phase * 0.04) * 0.035;
     return {
-        x: x * Math.cos(tilt) - y * Math.sin(tilt),
-        y: x * Math.sin(tilt) + y * Math.cos(tilt),
-        alpha: 0.1 + density * (0.25 + noise(index + 11201) * 0.25),
-        size: 0.8
+        x: dot.x * Math.cos(angle) - dot.y * Math.sin(angle) + Math.sin(phase * 0.065) * 5,
+        y: dot.x * Math.sin(angle) + dot.y * Math.cos(angle) + Math.cos(phase * 0.045) * 4,
+        alpha: dot.alpha,
+        size: dot.size
     };
 }
