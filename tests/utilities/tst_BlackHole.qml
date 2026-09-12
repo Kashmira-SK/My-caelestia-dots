@@ -6,7 +6,7 @@ TestCase {
     id: testCase
     name: "BlackHole"
     width: 340
-    height: 220
+    height: 340
     visible: true
     when: windowShown
 

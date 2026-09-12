@@ -4,10 +4,28 @@
 // Coordinates are deliberately independent of palette and output resolution.
 var count = 1400;
 var horizon = 35;
+var surroundingCount = 100;
 
 function noise(n) {
     const value = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
     return value - Math.floor(value);
+}
+
+// Distant dust occupies the empty space around the accepted central animation.
+// Keep a broad clear zone so it never fills the hole or muddies the bright disc.
+function surroundingPoint(index, phase) {
+    const seed = noise(index + 5101);
+    const x = (noise(index + 6101) - 0.5) * 280;
+    const y = (noise(index + 7101) - 0.5) * 280;
+    if (Math.hypot(x, y) < 86)
+        return null;
+    return {
+        x: x + Math.sin(phase * 0.05 + seed * 6.28) * 1.5,
+        y: y + Math.cos(phase * 0.04 + seed * 6.28) * 1.5,
+        alpha: 0.25 + seed * 0.3 + Math.sin(phase * 0.2 + index) * 0.08,
+        size: seed > 0.9 ? 1.4 : 0.9,
+        star: index % 19 === 0
+    };
 }
 
 function point(index, phase) {

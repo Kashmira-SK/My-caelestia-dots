@@ -22,3 +22,18 @@ for (const phase of [0, 0.5, 3, 10, 1000]) {
 }
 assert.ok(moving > 3000, "The field must move, not just blink");
 console.log("Black-hole checks passed: bounds, clear center, density, and movement.");
+
+const surroundings = vm.runInNewContext(`${source}\n({ count: surroundingCount, point: surroundingPoint })`);
+for (const phase of [0, 10, 1000]) {
+    let visible = 0;
+    for (let index = 0; index < surroundings.count; index++) {
+        const dot = surroundings.point(index, phase);
+        if (!dot) continue;
+        visible++;
+        assert.ok(Math.abs(dot.x) < 145 && Math.abs(dot.y) < 145);
+        assert.ok(Math.hypot(dot.x, dot.y) > 83, "Ambient dots must stay away from the central field");
+        assert.ok(dot.alpha > 0 && dot.alpha < 0.65, "Keep the surroundings quieter than the disc");
+    }
+    assert.ok(visible > 40 && visible < 85, "Keep a sparse surrounding field");
+}
+console.log("Surrounding dust checks passed: density, contrast, bounds, and clear center.");

@@ -78,7 +78,7 @@ Item {
             active: root.notifCount === 0
             sourceComponent: BlackHole {
                 width: Math.min(300, clipRect.width * 0.86)
-                height: width * 190 / 300
+                height: Math.min(width, Math.max(0, clipRect.height - Appearance.padding.normal * 2))
                 ink: Colours.palette.m3outlineVariant
             }
         }
