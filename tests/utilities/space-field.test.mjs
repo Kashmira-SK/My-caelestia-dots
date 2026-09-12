@@ -35,18 +35,33 @@ for (let phase = 0; phase < 20; phase += 0.035) {
 assert.ok(visibleFrames >= 30 && visibleFrames <= 40, "Meteors should be occasional, not continuous");
 console.log("Space-field checks passed: responsive coverage, clear center, subtle stars, and occasional meteors.");
 
-const ship = vm.runInNewContext(`${source}\n({ count: spacecraftCount, bodyCount: spacecraftDots.length, point: spacecraftPoint })`);
-assert.ok(ship.bodyCount > 150 && ship.bodyCount < 500, "Keep a readable but compact shuttle silhouette");
-let moving = 0;
+const ufo = vm.runInNewContext(`${source}\n({ count: ufoCount, point: ufoPoint, flight: ufoFlight })`);
+assert.ok(ufo.count > 150 && ufo.count < 500);
 for (const phase of [0, 1, 10, 1000]) {
-    for (let i = 0; i < ship.count; i++) {
-        const grain = ship.point(i, phase);
-        assert.ok(Number.isFinite(grain.x) && Number.isFinite(grain.y));
-        assert.ok(Math.abs(grain.x) < 42 && Math.abs(grain.y) < 42, "Craft and exhaust stay inside their corner");
-        assert.ok(grain.alpha >= 0 && grain.alpha <= 1);
-        const next = ship.point(i, phase + 0.5);
-        if (Math.hypot(next.x - grain.x, next.y - grain.y) > 0.01) moving++;
+    for (let i = 0; i < ufo.count; i++) {
+        const dot = ufo.point(i, phase);
+        assert.ok(Number.isFinite(dot.x) && Number.isFinite(dot.y));
+        assert.ok(Math.abs(dot.x) < 24 && Math.abs(dot.y) < 14);
+        assert.ok(dot.alpha > 0 && dot.alpha <= 1);
     }
 }
-assert.ok(moving > ship.count, "The spacecraft drifts and its exhaust moves");
-console.log("Spacecraft checks passed: silhouette density, bounds, drift, and exhaust.");
+assert.equal(ufo.flight(0, 360, 560), null);
+assert.equal(ufo.flight(8, 360, 560), null);
+assert.equal(ufo.flight(4.9, 200, 240), null);
+for (const [width, height] of [[240, 380], [360, 560], [430, 760]]) {
+    for (let cycle = 0; cycle < 6; cycle++) {
+        const base = cycle * 16.8;
+        const entry = ufo.flight(base + 2.8001, width, height);
+        const exit = ufo.flight(base + 6.9999, width, height);
+        assert.ok(cycle % 2 === 0 ? entry.x < -24 && exit.x > width + 24 : entry.x > width + 24 && exit.x < -24, "Enter and exit completely off-screen, alternating sides");
+        let previous = entry.x;
+        for (let time = 2.801; time < 6.999; time += 0.035) {
+            const flight = ufo.flight(base + time, width, height);
+            assert.ok(cycle % 2 === 0 ? flight.x >= previous : flight.x <= previous, "Keep crossing instead of parking or reversing");
+            assert.ok(flight.y > height * 0.75 && flight.y < height * 0.9);
+            previous = flight.x;
+        }
+        assert.equal(ufo.flight(base + 12, width, height), null, "Leave the scene empty between visits");
+    }
+}
+console.log("UFO checks passed: saucer bounds, timed absence, off-screen entry/exit, and alternating crossings.");

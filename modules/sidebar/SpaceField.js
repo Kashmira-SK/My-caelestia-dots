@@ -45,61 +45,63 @@ function showDetails(width, height) {
     return width >= 240 && height >= 380;
 }
 
-// A small delta-wing shuttle, sampled into dots rather than solid icon paths.
-function insideHull(x, y, hull) {
-    let inside = false;
-    for (let i = 0, j = hull.length - 1; i < hull.length; j = i++) {
-        const a = hull[i], b = hull[j];
-        if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0])
-            inside = !inside;
-    }
-    return inside;
-}
-
-function makeSpacecraft() {
-    const hull = [[0, -22], [4, -11], [5, -3], [18, 11], [18, 15], [5, 10], [5, 17], [-5, 17], [-5, 10], [-18, 15], [-18, 11], [-5, -3], [-4, -11]];
-    const points = [];
-    for (let row = 0; row < 32; row++) {
-        for (let col = 0; col < 30; col++) {
-            const x = (col - 14.5) * 1.25;
-            const y = -22 + row * 1.25;
-            if (!insideHull(x, y, hull))
+// A broad saucer and raised canopy: no rocket nose, wings, or exhaust.
+function makeUfo() {
+    const dots = [];
+    for (let row = 0; row < 17; row++) {
+        for (let col = 0; col < 37; col++) {
+            const x = (col - 18) * 1.2;
+            const y = -12 + row * 1.2;
+            const body = x * x / (22 * 22) + (y - 1) * (y - 1) / (5.3 * 5.3) < 1;
+            const dome = y < -2 && x * x / 100 + (y + 2) * (y + 2) / 100 < 1;
+            if (!body && !dome)
                 continue;
-            // Leave a dark cockpit; vary the stipple density on the wing panels.
-            if (Math.abs(x) < 2.8 && y > -10 && y < -5)
+            if (dome && Math.abs(x) < 5 && y > -8 && y < -4)
                 continue;
-            const wing = Math.abs(x) > 5;
-            const grain = noise(row * 30 + col + 12001);
-            if (grain < (wing ? 0.22 : 0.1))
+            const grain = noise(row * 37 + col + 16001);
+            if (grain < 0.18)
                 continue;
-            points.push({ x: x, y: y, alpha: (wing ? 0.32 : 0.48) + grain * 0.3, size: 0.95 });
+            const rim = body && Math.abs(y) < 1.5;
+            dots.push({ x: x, y: y, alpha: (rim ? 0.58 : 0.3) + grain * 0.25, size: 0.95 });
         }
     }
-    return points;
+    return dots;
 }
 
-var spacecraftDots = makeSpacecraft();
-var spacecraftCount = spacecraftDots.length + 48;
+var ufoDots = makeUfo();
+var ufoCount = ufoDots.length + 4;
 
-function spacecraftPoint(index, phase) {
-    let dot;
-    if (index < spacecraftDots.length) {
-        dot = spacecraftDots[index];
-    } else {
-        const seed = noise(index + 14001);
-        const travel = (phase * 0.8 + seed) % 1;
-        dot = {
-            x: (index % 2 === 0 ? -3 : 3) + (noise(index + 15001) - 0.5) * (1 + travel * 3),
-            y: 18 + travel * 18,
-            alpha: Math.sin(travel * Math.PI) * (1 - travel) * 0.48,
-            size: 0.8
-        };
-    }
-    const angle = 0.45 + Math.sin(phase * 0.04) * 0.035;
+function ufoPoint(index, phase) {
+    const lamp = index >= ufoDots.length;
+    const dot = lamp ? {
+        x: -12 + (index - ufoDots.length) * 8,
+        y: 5.6,
+        alpha: 0.65 + Math.sin(phase * 1.4 + index) * 0.15,
+        size: 1.6
+    } : ufoDots[index];
+    const bank = Math.sin(phase * 0.9) * 0.055;
     return {
-        x: dot.x * Math.cos(angle) - dot.y * Math.sin(angle) + Math.sin(phase * 0.065) * 5,
-        y: dot.x * Math.sin(angle) + dot.y * Math.cos(angle) + Math.cos(phase * 0.045) * 4,
+        x: dot.x * Math.cos(bank) - dot.y * Math.sin(bank),
+        y: dot.x * Math.sin(bank) + dot.y * Math.cos(bank),
         alpha: dot.alpha,
         size: dot.size
+    };
+}
+
+// At 0.7 phase units/second: first visit after four seconds, a six-second
+// crossing, then eighteen seconds absent. Subsequent visits alternate sides.
+function ufoFlight(phase, width, height) {
+    if (!showDetails(width, height))
+        return null;
+    const cycle = Math.floor(phase / 16.8);
+    const local = phase - cycle * 16.8;
+    if (local < 2.8 || local > 7)
+        return null;
+    const progress = (local - 2.8) / 4.2;
+    const reverse = cycle % 2 !== 0;
+    return {
+        x: -32 + (width + 64) * (reverse ? 1 - progress : progress),
+        y: height * (0.81 + noise(cycle + 17001) * 0.04) + Math.sin(progress * Math.PI * 2) * 5,
+        scale: Math.min(1, width / 360)
     };
 }

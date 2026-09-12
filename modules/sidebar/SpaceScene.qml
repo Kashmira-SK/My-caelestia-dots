@@ -65,11 +65,12 @@ Item {
                     dot(x, y, 0.7 + Math.sin(root.phase * 0.12 + i) * 0.12, i === 2 ? 2.2 : 1.5);
                 }
 
-                // A gently drifting shuttle gives this corner an angular silhouette.
-                const shipScale = Math.min(1, width / 360);
-                for (let i = 0; i < Field.spacecraftCount; i++) {
-                    const grain = Field.spacecraftPoint(i, root.phase);
-                    dot(width * 0.73 + grain.x * shipScale, height * 0.84 + grain.y * shipScale, grain.alpha, grain.size);
+                const flight = Field.ufoFlight(root.phase, width, height);
+                if (flight) {
+                    for (let i = 0; i < Field.ufoCount; i++) {
+                        const grain = Field.ufoPoint(i, root.phase);
+                        dot(flight.x + grain.x * flight.scale, flight.y + grain.y * flight.scale, grain.alpha, grain.size);
+                    }
                 }
             }
 

@@ -55,6 +55,15 @@ TestCase {
         }
     }
 
+    function test_ufoFlybyPreview() {
+        emptyState.item.phase = 4.9;
+        const sky = findChild(emptyState.item, "spaceSky");
+        tryCompare(sky, "available", true);
+        sky.requestPaint();
+        waitForRendering(sky);
+        grabImage(stage).save("/tmp/caelestia-ufo-preview.png");
+    }
+
     function test_notificationsDestroyAndRecreateScene() {
         for (let i = 0; i < 5; i++) {
             emptyState.item.animating = true;
