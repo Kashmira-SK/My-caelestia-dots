@@ -121,7 +121,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         implicitHeight: 32
-        radius: 0
+        radius: Appearance.rounding.small / 2
         inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
         toggle: true
         label.visible: false

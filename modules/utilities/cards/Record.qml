@@ -80,7 +80,7 @@ Item {
             spacing: Appearance.spacing.small
 
             UtilityIconButton {
-                radius: 0
+                radius: Appearance.rounding.small / 2
                 glyph: root.captureAudio ? "volume-2" : "volume-x"
                 description: root.captureAudio ? qsTr("Audio on — click to mute") : qsTr("Audio off — click to include sound")
                 implicitWidth: 26
@@ -120,7 +120,7 @@ Item {
                 }
 
                 background: StyledRect {
-                    radius: 0
+                    radius: Appearance.rounding.small / 2
                     color: Colours.palette.m3primary
                     border.width: startButton.hovered || startButton.visualFocus ? 1 : 0
                     border.color: Colours.palette.m3outline
@@ -211,7 +211,7 @@ Item {
             spacing: Appearance.spacing.normal
 
             StyledRect {
-                radius: 0
+                radius: Appearance.rounding.small / 2
                 color: Recorder.paused ? Colours.palette.m3tertiary : Colours.palette.m3error
 
                 implicitWidth: recText.implicitWidth + Appearance.padding.normal * 2
@@ -275,7 +275,7 @@ Item {
             }
 
             UtilityIconButton {
-                radius: 0
+                radius: Appearance.rounding.small / 2
                 glyph: Recorder.paused ? "play" : "pause"
                 label.animate: true
                 icon: Recorder.paused ? "play_arrow" : "pause"
@@ -290,7 +290,7 @@ Item {
             }
 
             UtilityIconButton {
-                radius: 0
+                radius: Appearance.rounding.small / 2
                 glyph: "square"
                 icon: "stop"
                 inactiveColour: Colours.palette.m3error
@@ -313,38 +313,18 @@ Item {
         rightPadding: Appearance.padding.small
         hoverEnabled: true
 
-        contentItem: RowLayout {
-            spacing: Appearance.spacing.small
-
-            StyledRect {
-                implicitWidth: 16
-                implicitHeight: 16
-                radius: 0
-                color: mode.selected ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3primary, 0)
-                border.width: mode.selected ? 0 : 1
-                border.color: Colours.palette.m3outline
-
-                ColouredIcon {
-                    anchors.centerIn: parent
-                    visible: mode.selected
-                    implicitSize: 12
-                    source: Qt.resolvedUrl("../../../assets/icons/lucide/check.svg")
-                    colour: Colours.palette.m3onPrimary
-                }
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: mode.text
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-                elide: Text.ElideRight
-            }
+        contentItem: StyledText {
+            text: mode.text
+            color: mode.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
         }
 
         background: StyledRect {
-            radius: 0
-            color: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
+            radius: Appearance.rounding.small / 2
+            color: mode.selected ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
             border.width: mode.visualFocus || mode.hovered ? 1 : 0
             border.color: Colours.palette.m3outlineVariant
         }

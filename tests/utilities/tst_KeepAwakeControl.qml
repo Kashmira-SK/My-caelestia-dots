@@ -122,13 +122,16 @@ TestCase {
     function test_indicatorChangesWithState() {
         const control = makeControl();
         const indicator = findChild(control, "awakeIndicator");
-        const check = findChild(control, "awakeCheck");
-        compare(indicator.radius, 0);
-        compare(check.visible, false);
+        const thumb = findChild(control, "awakeThumb");
+        verify(indicator.radius > 0);
+        compare(thumb.x, 4);
         compare(indicator.border.width, 1);
         mouseClick(control, control.width / 2, control.height / 2);
-        compare(check.visible, true);
+        tryCompare(thumb, "x", indicator.width - thumb.width - 4);
         compare(indicator.color, Qt.color(theme.m3primary));
         compare(indicator.border.width, 0);
+        mouseClick(control, control.width / 2, control.height / 2);
+        tryCompare(thumb, "x", 4);
+        compare(indicator.border.width, 1);
     }
 }

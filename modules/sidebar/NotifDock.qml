@@ -78,13 +78,18 @@ Item {
             active: opacity > 0
             opacity: root.notifCount > 0 ? 0 : 1
 
-            sourceComponent: StyledText {
-                text: "        z\n     z\n  /\\_/\\\n ( -.- )____\n /     ___  )\n(_____/___)/"
-                color: Colours.palette.m3outlineVariant
-                font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.large
-                renderType: Text.NativeRendering
-                Accessible.name: qsTr("No notifications — a sleeping cat")
+            sourceComponent: Image {
+                source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
+                sourceSize.width: clipRect.width * 0.48
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+                Accessible.name: qsTr("No notifications")
+
+                layer.enabled: true
+                layer.effect: Colouriser {
+                    colorizationColor: Colours.palette.m3outlineVariant
+                    brightness: 1
+                }
             }
 
             Behavior on opacity {

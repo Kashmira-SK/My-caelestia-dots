@@ -13,7 +13,7 @@ Column {
     id: root
 
     required property PersistentProperties visibilities
-    readonly property real railWidth: Math.max(Config.session.sizes.button, 112)
+    readonly property real railWidth: Config.session.sizes.button
 
     padding: Appearance.padding.large
     spacing: Appearance.spacing.small
@@ -102,9 +102,9 @@ Column {
         required property list<string> command
 
         implicitWidth: root.railWidth
-        implicitHeight: 36
+        implicitHeight: Math.round(Config.session.sizes.button * 0.65)
 
-        radius: 0
+        radius: Appearance.rounding.small
         color: button.activeFocus ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)
         Accessible.role: Accessible.Button
         Accessible.name: text
@@ -146,13 +146,12 @@ Column {
 
         RowLayout {
             anchors.centerIn: parent
-            width: parent.width - Appearance.padding.small * 2
             spacing: Appearance.spacing.small
 
             ColouredIcon {
                 Layout.alignment: Qt.AlignVCenter
                 visible: button.icon === button.defaultIcon
-                implicitSize: 16
+                implicitSize: 24
                 source: Qt.resolvedUrl("../../assets/icons/lucide/" + button.glyph + ".svg")
                 colour: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
             }
@@ -165,15 +164,6 @@ Column {
                 font.pointSize: Appearance.font.size.normal
             }
 
-            StyledText {
-                Layout.fillWidth: true
-                text: button.text
-                color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3outline
-                font.family: Appearance.font.family.sans
-                font.pointSize: Appearance.font.size.small
-                horizontalAlignment: Text.AlignLeft
-                elide: Text.ElideRight
-            }
         }
     }
 }

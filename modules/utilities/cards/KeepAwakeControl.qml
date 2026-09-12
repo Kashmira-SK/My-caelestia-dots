@@ -55,28 +55,33 @@ Controls.AbstractButton {
         }
 
         Rectangle {
+            id: indicator
             objectName: "awakeIndicator"
-            implicitWidth: 26
-            implicitHeight: 26
-            radius: 0
+            implicitWidth: 40
+            implicitHeight: 22
+            radius: root.appearance.rounding.small / 2
             color: root.inhibited ? root.theme.m3primary : Qt.alpha(root.theme.m3primary, 0)
             border.width: root.inhibited ? 0 : 1
             border.color: root.theme.m3outline
 
-            Text {
-                objectName: "awakeCheck"
-                anchors.centerIn: parent
-                visible: root.inhibited
-                text: "✓"
-                color: root.theme.m3onPrimary
-                font.family: root.appearance.font.family.mono
-                font.pointSize: root.appearance.font.size.small
-                renderType: Text.NativeRendering
+            Rectangle {
+                objectName: "awakeThumb"
+                anchors.verticalCenter: parent.verticalCenter
+                width: 14
+                height: 14
+                radius: root.appearance.rounding.small / 3
+                x: root.inhibited ? indicator.width - width - 4 : 4
+                color: root.inhibited ? root.theme.m3onPrimary : root.theme.m3onSurfaceVariant
+
+                Behavior on x {
+                    NumberAnimation { duration: 120 }
+                }
             }
         }
     }
 
     background: Rectangle {
+        radius: root.appearance.rounding.small / 2
         color: Qt.alpha(root.theme.m3onSurfaceVariant, 0)
         border.width: root.visualFocus ? 1 : 0
         border.color: root.theme.m3outlineVariant
