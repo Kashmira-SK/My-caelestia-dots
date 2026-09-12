@@ -77,19 +77,8 @@ Item {
 
             Item {
                 width: root.railWidth
-                height: portrait.height + Appearance.spacing.normal * 2
-
-                Image {
-                    id: portrait
-
-                    anchors.centerIn: parent
-                    width: root.implicitWidth - Appearance.padding.small
-                    height: width * 1006 / 992
-                    sourceSize.width: Math.ceil(width * 2)
-                    source: Qt.resolvedUrl("../../assets/session-aemeath.png")
-                    fillMode: Image.PreserveAspectFit
-                    asynchronous: true
-                }
+                // Preserve separation between the two action groups.
+                height: Config.session.sizes.button + Appearance.spacing.normal * 2
             }
 
             SessionButton {
