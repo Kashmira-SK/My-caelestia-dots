@@ -65,87 +65,44 @@ Item {
             visible: !Recorder.running
             spacing: Appearance.spacing.normal
 
-            ColumnLayout {
+            CaptureChoice {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.small
+                Layout.preferredWidth: 1
+                text: qsTr("Screen")
+                selected: !root.captureRegion
+                theme: Colours.palette
+                appearance: Appearance
+                onClicked: root.selectMode(false, root.captureAudio)
+            }
 
-                Controls.AbstractButton {
-                    id: captureArea
+            CaptureChoice {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                text: qsTr("Region")
+                selected: root.captureRegion
+                theme: Colours.palette
+                appearance: Appearance
+                onClicked: root.selectMode(true, root.captureAudio)
+            }
 
-                    Layout.fillWidth: true
-                    implicitHeight: 34
-                    hoverEnabled: true
-                    Accessible.name: root.captureRegion ? qsTr("Region capture. Switch to full screen") : qsTr("Full screen capture. Switch to region")
-                    onClicked: root.selectMode(!root.captureRegion, root.captureAudio)
-
-                    contentItem: RowLayout {
-                        spacing: Appearance.spacing.small
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: root.captureRegion ? qsTr("Region") : qsTr("Full screen")
-                            color: Colours.palette.m3onSurfaceVariant
-                            font.pointSize: Appearance.font.size.normal
-                            font.weight: 500
-                            elide: Text.ElideRight
-                        }
-
-                        ColouredIcon {
-                            implicitSize: 16
-                            source: Qt.resolvedUrl("../../../assets/icons/lucide/rotate-cw.svg")
-                            colour: Colours.palette.m3onSurfaceVariant
-                        }
-                    }
-
-                    background: StyledRect {
-                        radius: Appearance.rounding.small
-                        color: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
-                        border.width: captureArea.visualFocus || captureArea.hovered ? 1 : 0
-                        border.color: Colours.palette.m3outlineVariant
-                    }
-                }
-
-                Controls.AbstractButton {
-                    id: audioSetting
-
-                    Layout.fillWidth: true
-                    implicitHeight: 26
-                    hoverEnabled: true
-                    Accessible.name: root.captureAudio ? qsTr("System audio enabled. Click to mute") : qsTr("Silent capture. Click to include system audio")
-                    onClicked: root.selectMode(root.captureRegion, !root.captureAudio)
-
-                    contentItem: RowLayout {
-                        spacing: Appearance.spacing.small
-
-                        ColouredIcon {
-                            implicitSize: 14
-                            source: Qt.resolvedUrl("../../../assets/icons/lucide/" + (root.captureAudio ? "volume-2" : "volume-x") + ".svg")
-                            colour: Colours.palette.m3onSurfaceVariant
-                        }
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: root.captureAudio ? qsTr("System audio") : qsTr("Silent capture")
-                            color: Colours.palette.m3onSurfaceVariant
-                            font.pointSize: Appearance.font.size.small
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    background: StyledRect {
-                        radius: Appearance.rounding.small
-                        color: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
-                        border.width: audioSetting.visualFocus || audioSetting.hovered ? 1 : 0
-                        border.color: Colours.palette.m3outlineVariant
-                    }
-                }
+            UtilityIconButton {
+                implicitWidth: 32
+                implicitHeight: 32
+                radius: Appearance.rounding.small / 2
+                glyph: root.captureAudio ? "volume-2" : "volume-x"
+                description: root.captureAudio ? qsTr("System audio on — click to mute") : qsTr("System audio off — click to enable")
+                toggle: true
+                checked: root.captureAudio
+                onClicked: root.selectMode(root.captureRegion, !root.captureAudio)
             }
 
             Controls.AbstractButton {
                 id: startButton
 
-                Layout.preferredWidth: 82
-                Layout.preferredHeight: 70
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignTop
+                padding: 7
                 hoverEnabled: true
                 Accessible.name: qsTr("Start recording")
                 onClicked: {
@@ -153,36 +110,14 @@ Item {
                         Recorder.start(root.recordingModes[root.modeIndex].flags);
                 }
 
-                contentItem: ColumnLayout {
-                    spacing: Appearance.spacing.small
-
-                    Item {
-                        Layout.fillHeight: true
-                    }
-
-                    ColouredIcon {
-                        Layout.alignment: Qt.AlignHCenter
-                        implicitSize: 22
-                        source: Qt.resolvedUrl("../../../assets/icons/lucide/video.svg")
-                        colour: Colours.palette.m3onPrimary
-                    }
-
-                    StyledText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("REC")
-                        color: Colours.palette.m3onPrimary
-                        font.family: Appearance.font.family.mono
-                        font.pointSize: Appearance.font.size.small
-                        font.letterSpacing: 2
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                    }
+                contentItem: ColouredIcon {
+                    implicitSize: 18
+                    source: Qt.resolvedUrl("../../../assets/icons/lucide/video.svg")
+                    colour: Colours.palette.m3onPrimary
                 }
 
                 background: StyledRect {
-                    radius: Appearance.rounding.small
+                    radius: Appearance.rounding.small / 2
                     color: Colours.palette.m3primary
                     border.width: startButton.hovered || startButton.visualFocus ? 1 : 0
                     border.color: Colours.palette.m3outline

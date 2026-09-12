@@ -71,7 +71,7 @@ ColumnLayout {
 
         Layout.fillWidth: true
         Layout.rightMargin: -Appearance.spacing.small
-        implicitHeight: Math.max(1, Math.min(count, root.props.recordingListExpanded ? 10 : 2)) * 42
+        implicitHeight: Math.max(1, Math.min(count, root.props.recordingListExpanded ? 10 : 2)) * 28
         clip: true
 
         StyledScrollBar.vertical: StyledScrollBar {
@@ -92,32 +92,18 @@ ColumnLayout {
             anchors.right: list.contentItem.right
             anchors.rightMargin: Appearance.spacing.small
             spacing: Appearance.spacing.small / 2
-            height: 42
+            height: 28
 
             Component.onCompleted: baseName = modelData.baseName
 
-            ColumnLayout {
+            StyledText {
                 Layout.fillWidth: true
                 Layout.rightMargin: Appearance.spacing.small / 2
-                spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: recording.recordedAt ? Qt.formatDateTime(recording.recordedAt, Config.services.useTwelveHourClock ? "hh:mm ap" : "HH:mm") : recording.baseName
-                    color: Colours.palette.m3outline
-                    font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.small
-                    elide: Text.ElideRight
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    visible: recording.recordedAt !== null
-                    text: recording.recordedAt ? Qt.formatDateTime(recording.recordedAt, "ddd, d MMM") : ""
-                    color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.smaller
-                    elide: Text.ElideRight
-                }
+                text: recording.recordedAt ? Qt.formatDateTime(recording.recordedAt, Config.services.useTwelveHourClock ? "d MMM yy · hh:mm ap" : "d MMM yy · HH:mm") : recording.baseName
+                color: Colours.palette.m3outline
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.small
+                elide: Text.ElideRight
             }
 
             UtilityIconButton {
