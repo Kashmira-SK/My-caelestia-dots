@@ -81,36 +81,30 @@ Item {
             sourceComponent: ColumnLayout {
                 spacing: Appearance.spacing.normal
 
-                Image {
-                    asynchronous: true
-                    source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
-                    fillMode: Image.PreserveAspectFit
-                    sourceSize.width: clipRect.width * 0.48
-
-                    layer.enabled: true
-                    layer.effect: Colouriser {
-                        colorizationColor: Colours.palette.m3outlineVariant
-                        brightness: 1
-                    }
+                ColouredIcon {
+                    Layout.alignment: Qt.AlignHCenter
+                    source: Qt.resolvedUrl("../../assets/icons/lucide/inbox.svg")
+                    implicitSize: 48
+                    colour: Colours.palette.m3outlineVariant
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.topMargin: Appearance.spacing.small
-                    text: qsTr("QUEUE EMPTY")
+                    text: qsTr("ALL CAUGHT UP")
                     color: Colours.palette.m3outlineVariant
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Appearance.font.size.small
                     font.family: Appearance.font.family.mono
                     font.weight: 600
-                    font.letterSpacing: 3
+                    font.letterSpacing: 2
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("Nothing needs your attention")
+                    text: qsTr("New notifications will appear here")
                     color: Colours.palette.m3outlineVariant
                     font.pointSize: Appearance.font.size.small
-                    font.family: Appearance.font.family.mono
+                    font.family: Appearance.font.family.sans
                 }
             }
 

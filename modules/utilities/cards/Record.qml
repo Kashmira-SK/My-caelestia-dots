@@ -6,6 +6,7 @@ import qs.components.effects
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
 Item {
@@ -13,6 +14,21 @@ Item {
 
     required property var props
     required property var visibilities
+
+    // Keep the existing persisted icon+label keys and recorder flags.
+    readonly property var recordingModes: [
+        { key: "fullscreen" + qsTr("Record fullscreen"), flags: [] },
+        { key: "screenshot_region" + qsTr("Record region"), flags: ["-r"] },
+        { key: "select_to_speak" + qsTr("Record fullscreen with sound"), flags: ["-s"] },
+        { key: "volume_up" + qsTr("Record region with sound"), flags: ["-sr"] }
+    ]
+    readonly property int modeIndex: Math.max(0, recordingModes.findIndex(mode => mode.key === root.props.recordingMode))
+    readonly property bool captureRegion: modeIndex % 2 === 1
+    readonly property bool captureAudio: modeIndex >= 2
+
+    function selectMode(region: bool, audio: bool): void {
+        root.props.recordingMode = recordingModes[(audio ? 2 : 0) + (region ? 1 : 0)].key;
+    }
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2 + frame.headingHeight / 2
@@ -32,71 +48,51 @@ Item {
         anchors.topMargin: Appearance.padding.large + frame.headingHeight / 2
         spacing: Appearance.spacing.normal
 
+        StyledText {
+            Layout.fillWidth: true
+            text: Recorder.paused ? qsTr("Recording paused") : Recorder.running ? qsTr("Recording running") : qsTr("Ready to capture")
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+        }
+
         RowLayout {
-            spacing: Appearance.spacing.normal
-            z: 1
+            Layout.fillWidth: true
+            visible: !Recorder.running
+            spacing: Appearance.spacing.small
 
-            StyledRect {
-                implicitWidth: implicitHeight
-                implicitHeight: 28
-
-                radius: Appearance.rounding.small / 2
-                color: Recorder.running ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
-
-                ColouredIcon {
-                    id: icon
-
-                    anchors.centerIn: parent
-                    source: Qt.resolvedUrl("../../../assets/icons/lucide/video.svg")
-                    colour: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                    implicitSize: 16
-                }
+            CaptureMode {
+                text: qsTr("Screen")
+                glyph: "monitor"
+                selected: !root.captureRegion
+                onClicked: root.selectMode(false, root.captureAudio)
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Recorder.paused ? qsTr("Recording paused") : Recorder.running ? qsTr("Recording running") : qsTr("Recording off")
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
-                    elide: Text.ElideRight
-                }
+            CaptureMode {
+                text: qsTr("Region")
+                glyph: "scan"
+                selected: root.captureRegion
+                onClicked: root.selectMode(true, root.captureAudio)
             }
 
-            SplitButton {
-                disabled: Recorder.running
-                active: menuItems.find(m => root.props.recordingMode === m.icon + m.text) ?? menuItems[0]
-                menu.onItemSelected: item => root.props.recordingMode = item.icon + item.text
+            UtilityIconButton {
+                glyph: root.captureAudio ? "volume-2" : "volume-x"
+                description: root.captureAudio ? qsTr("Audio on — click to mute") : qsTr("Audio off — click to include sound")
+                implicitWidth: 32
+                implicitHeight: 32
+                toggle: true
+                checked: root.captureAudio
+                onClicked: root.selectMode(root.captureRegion, !root.captureAudio)
+            }
 
-                menuItems: [
-                    MenuItem {
-                        icon: "fullscreen"
-                        text: qsTr("Record fullscreen")
-                        activeText: qsTr("Fullscreen")
-                        onClicked: Recorder.start()
-                    },
-                    MenuItem {
-                        icon: "screenshot_region"
-                        text: qsTr("Record region")
-                        activeText: qsTr("Region")
-                        onClicked: Recorder.start(["-r"])
-                    },
-                    MenuItem {
-                        icon: "select_to_speak"
-                        text: qsTr("Record fullscreen with sound")
-                        activeText: qsTr("Fullscreen")
-                        onClicked: Recorder.start(["-s"])
-                    },
-                    MenuItem {
-                        icon: "volume_up"
-                        text: qsTr("Record region with sound")
-                        activeText: qsTr("Region")
-                        onClicked: Recorder.start(["-sr"])
-                    }
-                ]
+            UtilityIconButton {
+                glyph: "video"
+                description: qsTr("Start recording")
+                implicitWidth: 32
+                implicitHeight: 32
+                onClicked: {
+                    if (!Recorder.running)
+                        Recorder.start(root.recordingModes[root.modeIndex].flags);
+                }
             }
         }
 
@@ -268,6 +264,45 @@ Item {
                 font.pointSize: Appearance.font.size.large
                 onClicked: Recorder.stop()
             }
+        }
+    }
+
+    component CaptureMode: Controls.AbstractButton {
+        id: mode
+
+        required property string glyph
+        required property bool selected
+
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: 32
+        leftPadding: Appearance.padding.small
+        rightPadding: Appearance.padding.small
+        hoverEnabled: true
+
+        contentItem: RowLayout {
+            spacing: Appearance.spacing.small
+
+            ColouredIcon {
+                implicitSize: 16
+                source: Qt.resolvedUrl("../../../assets/icons/lucide/" + mode.glyph + ".svg")
+                colour: mode.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: mode.text
+                color: mode.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                elide: Text.ElideRight
+            }
+        }
+
+        background: StyledRect {
+            radius: Appearance.rounding.small / 2
+            color: mode.selected ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
+            border.width: mode.visualFocus || mode.hovered ? 1 : 0
+            border.color: Colours.palette.m3outlineVariant
         }
     }
 }

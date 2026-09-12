@@ -1,11 +1,13 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 
 Column {
     id: root
@@ -13,12 +15,15 @@ Column {
     required property PersistentProperties visibilities
 
     padding: Appearance.padding.large
-    spacing: Appearance.spacing.large
+    spacing: Appearance.spacing.small
 
     SessionButton {
         id: logout
 
         icon: Config.session.icons.logout
+        defaultIcon: "logout"
+        glyph: "log-out"
+        text: qsTr("LOG OUT")
         command: Config.session.commands.logout
 
         KeyNavigation.down: shutdown
@@ -39,6 +44,9 @@ Column {
         id: shutdown
 
         icon: Config.session.icons.shutdown
+        defaultIcon: "power_settings_new"
+        glyph: "power"
+        text: qsTr("POWER OFF")
         command: Config.session.commands.shutdown
 
         KeyNavigation.up: logout
@@ -61,6 +69,9 @@ Column {
         id: hibernate
 
         icon: Config.session.icons.hibernate
+        defaultIcon: "downloading"
+        glyph: "moon"
+        text: qsTr("HIBERNATE")
         command: Config.session.commands.hibernate
 
         KeyNavigation.up: shutdown
@@ -71,6 +82,9 @@ Column {
         id: reboot
 
         icon: Config.session.icons.reboot
+        defaultIcon: "cached"
+        glyph: "rotate-cw"
+        text: qsTr("RESTART")
         command: Config.session.commands.reboot
 
         KeyNavigation.up: hibernate
@@ -80,13 +94,20 @@ Column {
         id: button
 
         required property string icon
+        required property string defaultIcon
+        required property string glyph
+        required property string text
         required property list<string> command
 
         implicitWidth: Config.session.sizes.button
-        implicitHeight: Config.session.sizes.button
+        implicitHeight: Math.round(Config.session.sizes.button * 0.75)
 
-        radius: Appearance.rounding.large
-        color: button.activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.small
+        color: button.activeFocus ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)
+        border.width: 1
+        border.color: Colours.tPalette.m3outlineVariant
+        Accessible.role: Accessible.Button
+        Accessible.name: text
 
         Keys.onEnterPressed: Quickshell.execDetached(button.command)
         Keys.onReturnPressed: Quickshell.execDetached(button.command)
@@ -123,13 +144,36 @@ Column {
             }
         }
 
-        MaterialIcon {
+        ColumnLayout {
             anchors.centerIn: parent
+            width: parent.width - Appearance.padding.small * 2
+            spacing: Appearance.spacing.small
 
-            text: button.icon
-            color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.extraLarge
-            font.weight: 500
+            ColouredIcon {
+                Layout.alignment: Qt.AlignHCenter
+                visible: button.icon === button.defaultIcon
+                implicitSize: 20
+                source: Qt.resolvedUrl("../../assets/icons/lucide/" + button.glyph + ".svg")
+                colour: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+            }
+
+            MaterialIcon {
+                Layout.alignment: Qt.AlignHCenter
+                visible: button.icon !== button.defaultIcon
+                text: button.icon
+                color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                font.pointSize: Appearance.font.size.normal
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: button.text
+                color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3outline
+                font.family: Appearance.font.family.mono
+                font.pointSize: Math.round(Appearance.font.size.small * 0.85)
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+            }
         }
     }
 }
