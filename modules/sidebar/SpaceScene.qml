@@ -65,34 +65,22 @@ Item {
                     dot(x, y, 0.7 + Math.sin(root.phase * 0.12 + i) * 0.12, i === 2 ? 2.2 : 1.5);
                 }
 
-                // Dotted planet and tilted rings in the lower-right corner.
+                // A shaded, grainy sphere with soft particulate rings.
                 const px = width * 0.73;
                 const py = height * 0.84;
-                const radius = Math.min(16, width * 0.045);
-                const tilt = -0.34;
-                for (let i = 0; i < 90; i++) {
-                    const angle = i / 90 * Math.PI * 2;
-                    dot(px + Math.cos(angle) * radius, py + Math.sin(angle) * radius, 0.65, 1);
+                const radius = Math.min(20, width * 0.055);
+                for (let i = 0; i < Field.planetCount; i++) {
+                    const grain = Field.planetPoint(i, root.phase);
+                    if (grain)
+                        dot(px + grain.x * radius, py + grain.y * radius, grain.alpha, grain.size);
                 }
-                for (let i = 0; i < 75; i++) {
-                    const angle = i * 2.399963 + root.phase * 0.06;
-                    const r = Math.sqrt(i / 75) * radius * 0.92;
-                    dot(px + Math.cos(angle) * r, py + Math.sin(angle) * r, 0.18 + (Math.cos(angle) + 1) * 0.12, 0.85);
-                }
-                for (let i = 0; i < 120; i++) {
-                    const angle = i / 120 * Math.PI * 2;
-                    const x = Math.cos(angle) * radius * 2;
-                    const y = Math.sin(angle) * radius * 0.48;
-                    if (y < 0 && Math.hypot(x, y) < radius + 1)
-                        continue;
-                    dot(px + x * Math.cos(tilt) - y * Math.sin(tilt), py + x * Math.sin(tilt) + y * Math.cos(tilt), 0.55, 0.95);
+                for (let i = 0; i < Field.ringCount; i++) {
+                    const grain = Field.ringPoint(i, root.phase);
+                    if (grain)
+                        dot(px + grain.x * radius, py + grain.y * radius, grain.alpha, grain.size);
                 }
 
-                // A faint dotted orbital track and one slow-moving moon.
-                for (let i = 0; i < 58; i++) {
-                    const angle = i / 58 * Math.PI * 2;
-                    dot(px + Math.cos(angle) * 49, py + Math.sin(angle) * 28, 0.18, 0.75);
-                }
+                // Keep the moving moon, without a diagram-like orbit outline.
                 dot(px + Math.cos(root.phase * 0.2) * 49, py + Math.sin(root.phase * 0.2) * 28, 0.8, 2);
             }
 

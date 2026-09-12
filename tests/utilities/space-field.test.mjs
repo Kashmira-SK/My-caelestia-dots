@@ -34,3 +34,26 @@ for (let phase = 0; phase < 20; phase += 0.035) {
 }
 assert.ok(visibleFrames >= 30 && visibleFrames <= 40, "Meteors should be occasional, not continuous");
 console.log("Space-field checks passed: responsive coverage, clear center, subtle stars, and occasional meteors.");
+
+const planet = vm.runInNewContext(`${source}\n({ count: planetCount, point: planetPoint, ringCount, ringPoint })`);
+for (const phase of [0, 1, 10, 1000]) {
+    let litSide = 0, darkSide = 0, visible = 0;
+    for (let i = 0; i < planet.count; i++) {
+        const grain = planet.point(i, phase);
+        if (!grain) continue;
+        visible++;
+        assert.ok(Math.hypot(grain.x, grain.y) <= 1);
+        assert.ok(grain.alpha > 0 && grain.alpha <= 1);
+        if (grain.x < 0) litSide += grain.alpha;
+        else darkSide += grain.alpha;
+    }
+    assert.ok(visible > 250 && visible < 650);
+    assert.ok(litSide > darkSide * 1.5, "The planet should have a readable light and shadow side");
+    for (let i = 0; i < planet.ringCount; i++) {
+        const grain = planet.ringPoint(i, phase);
+        if (!grain) continue;
+        assert.ok(Math.hypot(grain.x, grain.y) <= 2.15);
+        assert.ok(grain.alpha >= 0.1 && grain.alpha <= 0.6);
+    }
+}
+console.log("Planet checks passed: shaded hemisphere, stipple density, and soft ring bounds.");
