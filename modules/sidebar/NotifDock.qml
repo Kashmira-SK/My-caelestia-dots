@@ -75,32 +75,11 @@ Item {
 
         Loader {
             anchors.centerIn: parent
-            active: opacity > 0
-            opacity: root.notifCount > 0 ? 0 : 1
-
-            sourceComponent: AnimatedImage {
-                source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/bongocat1.gif`)
-                sourceSize.width: Math.min(180, clipRect.width * 0.48)
-                width: sourceSize.width
-                height: width * 155 / 200
-                fillMode: Image.PreserveAspectFit
-                asynchronous: true
-                playing: visible
-                speed: 0.65
-                Accessible.name: qsTr("No notifications")
-
-                layer.enabled: true
-                layer.effect: Colouriser {
-                    colorizationColor: Colours.palette.m3outlineVariant
-                    // Retain the character's ink detail, not a flat silhouette.
-                    brightness: 0
-                }
-            }
-
-            Behavior on opacity {
-                Anim {
-                    duration: Appearance.anim.durations.extraLarge
-                }
+            active: root.notifCount === 0
+            sourceComponent: BlackHole {
+                width: Math.min(300, clipRect.width * 0.86)
+                height: width * 190 / 300
+                ink: Colours.palette.m3outlineVariant
             }
         }
 
