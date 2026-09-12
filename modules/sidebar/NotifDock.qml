@@ -78,17 +78,22 @@ Item {
             active: opacity > 0
             opacity: root.notifCount > 0 ? 0 : 1
 
-            sourceComponent: Image {
-                source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
-                sourceSize.width: clipRect.width * 0.48
+            sourceComponent: AnimatedImage {
+                source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/bongocat1.gif`)
+                sourceSize.width: Math.min(180, clipRect.width * 0.48)
+                width: sourceSize.width
+                height: width * 155 / 200
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
+                playing: visible
+                speed: 0.65
                 Accessible.name: qsTr("No notifications")
 
                 layer.enabled: true
                 layer.effect: Colouriser {
                     colorizationColor: Colours.palette.m3outlineVariant
-                    brightness: 1
+                    // Retain the character's ink detail, not a flat silhouette.
+                    brightness: 0
                 }
             }
 
@@ -140,5 +145,4 @@ Item {
                 stop();
         }
     }
-
 }

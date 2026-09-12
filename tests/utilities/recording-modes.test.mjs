@@ -31,3 +31,31 @@ for (const key of ["", "obsolete-mode"]) {
     assert.equal(vm.runInContext(modeIndexSource, context), 0, "Unknown saved modes default to fullscreen without sound");
 }
 console.log("Recorder mode checks passed: four saved modes, flags, and fallback.");
+
+// Exercise the two independent setup controls repeatedly. Changing the capture
+// area must retain audio, and changing audio must retain the capture area.
+context.region = false;
+context.audio = false;
+for (let pass = 0; pass < 20; pass++) {
+    context.region = !context.region;
+    vm.runInContext(selectSource, context);
+    assert.equal(vm.runInContext(modeIndexSource, context), (context.audio ? 2 : 0) + (context.region ? 1 : 0));
+    context.audio = !context.audio;
+    vm.runInContext(selectSource, context);
+    assert.equal(vm.runInContext(modeIndexSource, context), (context.audio ? 2 : 0) + (context.region ? 1 : 0));
+}
+
+const librarySource = readFileSync(new URL("../../modules/utilities/cards/RecordingList.qml", import.meta.url), "utf8");
+const dateBody = librarySource.match(/readonly property var recordedAt: \{([\s\S]*?)\n            \}/)[1];
+for (const [baseName, expected] of [
+    ["recording_20260912_14-30-05", [2026, 8, 12, 14, 30, 5]],
+    ["recording_20240229_00-00-00", [2024, 1, 29, 0, 0, 0]],
+    ["renamed-recording", null]
+]) {
+    const recordedAt = vm.runInNewContext(`(() => { ${dateBody} })()`, { baseName });
+    if (expected === null)
+        assert.equal(recordedAt, null);
+    else
+        assert.deepEqual([recordedAt.getFullYear(), recordedAt.getMonth(), recordedAt.getDate(), recordedAt.getHours(), recordedAt.getMinutes(), recordedAt.getSeconds()], expected);
+}
+console.log("Recorder interaction and library checks passed: repeated area/audio changes and filename dates.");

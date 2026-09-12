@@ -41,9 +41,11 @@ ColumnLayout {
             StyledText {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
-                text: qsTr("Recordings")
+                text: qsTr("LIBRARY")
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
+                font.family: Appearance.font.family.mono
+                font.letterSpacing: 1
                 font.weight: 500
             }
 
@@ -69,7 +71,7 @@ ColumnLayout {
 
         Layout.fillWidth: true
         Layout.rightMargin: -Appearance.spacing.small
-        implicitHeight: (Appearance.font.size.larger + Appearance.padding.small) * (root.props.recordingListExpanded ? 10 : 3)
+        implicitHeight: Math.max(1, Math.min(count, root.props.recordingListExpanded ? 10 : 2)) * 42
         clip: true
 
         StyledScrollBar.vertical: StyledScrollBar {
@@ -81,29 +83,41 @@ ColumnLayout {
 
             required property FileSystemEntry modelData
             property string baseName
+            readonly property var recordedAt: {
+                const parts = baseName.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
+                return parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), Number(parts[4]), Number(parts[5]), Number(parts[6])) : null;
+            }
 
             anchors.left: list.contentItem.left
             anchors.right: list.contentItem.right
             anchors.rightMargin: Appearance.spacing.small
             spacing: Appearance.spacing.small / 2
+            height: 42
 
             Component.onCompleted: baseName = modelData.baseName
 
-            StyledText {
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.rightMargin: Appearance.spacing.small / 2
-                text: {
-                    const time = recording.baseName;
-                    const matches = time.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
-                    if (!matches)
-                        return time;
-                    const date = new Date(...matches.slice(1));
-                    date.setMonth(date.getMonth() - 1); // Woe (months start from 0)
-                    return qsTr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale()));
+                spacing: 0
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: recording.recordedAt ? Qt.formatDateTime(recording.recordedAt, Config.services.useTwelveHourClock ? "hh:mm ap" : "HH:mm") : recording.baseName
+                    color: Colours.palette.m3outline
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.small
+                    elide: Text.ElideRight
                 }
-                color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
-                elide: Text.ElideRight
+
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: recording.recordedAt !== null
+                    text: recording.recordedAt ? Qt.formatDateTime(recording.recordedAt, "ddd, d MMM") : ""
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.smaller
+                    elide: Text.ElideRight
+                }
             }
 
             UtilityIconButton {
@@ -178,62 +192,10 @@ ColumnLayout {
             opacity: list.count === 0 ? 1 : 0
             active: opacity > 0
 
-            sourceComponent: ColumnLayout {
-                spacing: Appearance.spacing.small
-
-                MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: "scan_delete"
-                    color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.extraLarge
-
-                    opacity: root.props.recordingListExpanded ? 1 : 0
-                    scale: root.props.recordingListExpanded ? 1 : 0
-                    Layout.preferredHeight: root.props.recordingListExpanded ? implicitHeight : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
-
-                    Behavior on scale {
-                        Anim {}
-                    }
-
-                    Behavior on Layout.preferredHeight {
-                        Anim {}
-                    }
-                }
-
-                RowLayout {
-                    spacing: Appearance.spacing.smaller
-
-                    MaterialIcon {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: "scan_delete"
-                        color: Colours.palette.m3outline
-
-                        opacity: !root.props.recordingListExpanded ? 1 : 0
-                        scale: !root.props.recordingListExpanded ? 1 : 0
-                        Layout.preferredWidth: !root.props.recordingListExpanded ? implicitWidth : 0
-
-                        Behavior on opacity {
-                            Anim {}
-                        }
-
-                        Behavior on scale {
-                            Anim {}
-                        }
-
-                        Behavior on Layout.preferredWidth {
-                            Anim {}
-                        }
-                    }
-
-                    StyledText {
-                        text: qsTr("No recordings found")
-                        color: Colours.palette.m3outline
-                    }
-                }
+            sourceComponent: StyledText {
+                text: qsTr("No recordings yet")
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
             }
 
             Behavior on opacity {
