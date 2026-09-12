@@ -50,6 +50,7 @@ Item {
 
         StyledText {
             Layout.fillWidth: true
+            visible: Recorder.running
             text: Recorder.paused ? qsTr("Recording paused") : Recorder.running ? qsTr("Recording running") : qsTr("Ready to capture")
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.small
@@ -61,37 +62,68 @@ Item {
             spacing: Appearance.spacing.small
 
             CaptureMode {
-                text: qsTr("Screen")
-                glyph: "monitor"
+                text: qsTr("Full screen")
                 selected: !root.captureRegion
                 onClicked: root.selectMode(false, root.captureAudio)
             }
 
             CaptureMode {
                 text: qsTr("Region")
-                glyph: "scan"
                 selected: root.captureRegion
                 onClicked: root.selectMode(true, root.captureAudio)
             }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            visible: !Recorder.running
+            spacing: Appearance.spacing.small
 
             UtilityIconButton {
+                radius: 0
                 glyph: root.captureAudio ? "volume-2" : "volume-x"
                 description: root.captureAudio ? qsTr("Audio on — click to mute") : qsTr("Audio off — click to include sound")
-                implicitWidth: 32
-                implicitHeight: 32
+                implicitWidth: 26
+                implicitHeight: 26
                 toggle: true
                 checked: root.captureAudio
                 onClicked: root.selectMode(root.captureRegion, !root.captureAudio)
             }
 
-            UtilityIconButton {
-                glyph: "video"
-                description: qsTr("Start recording")
-                implicitWidth: 32
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("Include audio")
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+            }
+
+            Controls.AbstractButton {
+                id: startButton
+
+                text: qsTr("RECORD")
+                implicitWidth: startLabel.implicitWidth + Appearance.padding.normal * 2
                 implicitHeight: 32
+                hoverEnabled: true
                 onClicked: {
                     if (!Recorder.running)
                         Recorder.start(root.recordingModes[root.modeIndex].flags);
+                }
+
+                contentItem: StyledText {
+                    id: startLabel
+                    text: startButton.text
+                    color: Colours.palette.m3onPrimary
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.small
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                background: StyledRect {
+                    radius: 0
+                    color: Colours.palette.m3primary
+                    border.width: startButton.hovered || startButton.visualFocus ? 1 : 0
+                    border.color: Colours.palette.m3outline
                 }
             }
         }
@@ -179,7 +211,7 @@ Item {
             spacing: Appearance.spacing.normal
 
             StyledRect {
-                radius: Appearance.rounding.full
+                radius: 0
                 color: Recorder.paused ? Colours.palette.m3tertiary : Colours.palette.m3error
 
                 implicitWidth: recText.implicitWidth + Appearance.padding.normal * 2
@@ -243,6 +275,7 @@ Item {
             }
 
             UtilityIconButton {
+                radius: 0
                 glyph: Recorder.paused ? "play" : "pause"
                 label.animate: true
                 icon: Recorder.paused ? "play_arrow" : "pause"
@@ -257,6 +290,7 @@ Item {
             }
 
             UtilityIconButton {
+                radius: 0
                 glyph: "square"
                 icon: "stop"
                 inactiveColour: Colours.palette.m3error
@@ -270,7 +304,6 @@ Item {
     component CaptureMode: Controls.AbstractButton {
         id: mode
 
-        required property string glyph
         required property bool selected
 
         Layout.fillWidth: true
@@ -283,24 +316,35 @@ Item {
         contentItem: RowLayout {
             spacing: Appearance.spacing.small
 
-            ColouredIcon {
-                implicitSize: 16
-                source: Qt.resolvedUrl("../../../assets/icons/lucide/" + mode.glyph + ".svg")
-                colour: mode.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+            StyledRect {
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 0
+                color: mode.selected ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3primary, 0)
+                border.width: mode.selected ? 0 : 1
+                border.color: Colours.palette.m3outline
+
+                ColouredIcon {
+                    anchors.centerIn: parent
+                    visible: mode.selected
+                    implicitSize: 12
+                    source: Qt.resolvedUrl("../../../assets/icons/lucide/check.svg")
+                    colour: Colours.palette.m3onPrimary
+                }
             }
 
             StyledText {
                 Layout.fillWidth: true
                 text: mode.text
-                color: mode.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
                 elide: Text.ElideRight
             }
         }
 
         background: StyledRect {
-            radius: Appearance.rounding.small / 2
-            color: mode.selected ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
+            radius: 0
+            color: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0)
             border.width: mode.visualFocus || mode.hovered ? 1 : 0
             border.color: Colours.palette.m3outlineVariant
         }

@@ -78,34 +78,13 @@ Item {
             active: opacity > 0
             opacity: root.notifCount > 0 ? 0 : 1
 
-            sourceComponent: ColumnLayout {
-                spacing: Appearance.spacing.normal
-
-                ColouredIcon {
-                    Layout.alignment: Qt.AlignHCenter
-                    source: Qt.resolvedUrl("../../assets/icons/lucide/inbox.svg")
-                    implicitSize: 48
-                    colour: Colours.palette.m3outlineVariant
-                }
-
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: Appearance.spacing.small
-                    text: qsTr("ALL CAUGHT UP")
-                    color: Colours.palette.m3outlineVariant
-                    font.pointSize: Appearance.font.size.small
-                    font.family: Appearance.font.family.mono
-                    font.weight: 600
-                    font.letterSpacing: 2
-                }
-
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("New notifications will appear here")
-                    color: Colours.palette.m3outlineVariant
-                    font.pointSize: Appearance.font.size.small
-                    font.family: Appearance.font.family.sans
-                }
+            sourceComponent: StyledText {
+                text: "        z\n     z\n  /\\_/\\\n ( -.- )____\n /     ___  )\n(_____/___)/"
+                color: Colours.palette.m3outlineVariant
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.large
+                renderType: Text.NativeRendering
+                Accessible.name: qsTr("No notifications — a sleeping cat")
             }
 
             Behavior on opacity {

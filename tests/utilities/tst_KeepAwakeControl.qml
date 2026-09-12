@@ -18,6 +18,7 @@ TestCase {
     property string sinceText: "Since 08:39 pm"
     readonly property var theme: ({
         m3primary: "steelblue",
+        m3onPrimary: "white",
         m3outlineVariant: "gray",
         m3outline: "silver",
         m3onSurfaceVariant: "white",
@@ -116,5 +117,18 @@ TestCase {
         compare(timestamp.font.family, appearance.font.family.sans);
         compare(timestamp.font.pointSize, appearance.font.size.small);
         compare(timestamp.color, Qt.color(theme.m3outline));
+    }
+
+    function test_indicatorChangesWithState() {
+        const control = makeControl();
+        const indicator = findChild(control, "awakeIndicator");
+        const check = findChild(control, "awakeCheck");
+        compare(indicator.radius, 0);
+        compare(check.visible, false);
+        compare(indicator.border.width, 1);
+        mouseClick(control, control.width / 2, control.height / 2);
+        compare(check.visible, true);
+        compare(indicator.color, Qt.color(theme.m3primary));
+        compare(indicator.border.width, 0);
     }
 }

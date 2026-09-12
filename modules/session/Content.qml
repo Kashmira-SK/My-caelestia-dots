@@ -13,6 +13,7 @@ Column {
     id: root
 
     required property PersistentProperties visibilities
+    readonly property real railWidth: Math.max(Config.session.sizes.button, 112)
 
     padding: Appearance.padding.large
     spacing: Appearance.spacing.small
@@ -23,7 +24,7 @@ Column {
         icon: Config.session.icons.logout
         defaultIcon: "logout"
         glyph: "log-out"
-        text: qsTr("LOG OUT")
+        text: qsTr("Log out")
         command: Config.session.commands.logout
 
         KeyNavigation.down: shutdown
@@ -46,7 +47,7 @@ Column {
         icon: Config.session.icons.shutdown
         defaultIcon: "power_settings_new"
         glyph: "power"
-        text: qsTr("POWER OFF")
+        text: qsTr("Power off")
         command: Config.session.commands.shutdown
 
         KeyNavigation.up: logout
@@ -54,6 +55,7 @@ Column {
     }
 
     AnimatedImage {
+        x: root.padding + (root.railWidth - width) / 2
         width: Config.session.sizes.button
         height: Config.session.sizes.button
         sourceSize.width: width
@@ -71,7 +73,7 @@ Column {
         icon: Config.session.icons.hibernate
         defaultIcon: "downloading"
         glyph: "moon"
-        text: qsTr("HIBERNATE")
+        text: qsTr("Hibernate")
         command: Config.session.commands.hibernate
 
         KeyNavigation.up: shutdown
@@ -84,7 +86,7 @@ Column {
         icon: Config.session.icons.reboot
         defaultIcon: "cached"
         glyph: "rotate-cw"
-        text: qsTr("RESTART")
+        text: qsTr("Restart")
         command: Config.session.commands.reboot
 
         KeyNavigation.up: hibernate
@@ -99,13 +101,11 @@ Column {
         required property string text
         required property list<string> command
 
-        implicitWidth: Config.session.sizes.button
-        implicitHeight: Math.round(Config.session.sizes.button * 0.75)
+        implicitWidth: root.railWidth
+        implicitHeight: 36
 
-        radius: Appearance.rounding.small
+        radius: 0
         color: button.activeFocus ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)
-        border.width: 1
-        border.color: Colours.tPalette.m3outlineVariant
         Accessible.role: Accessible.Button
         Accessible.name: text
 
@@ -144,21 +144,21 @@ Column {
             }
         }
 
-        ColumnLayout {
+        RowLayout {
             anchors.centerIn: parent
             width: parent.width - Appearance.padding.small * 2
             spacing: Appearance.spacing.small
 
             ColouredIcon {
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignVCenter
                 visible: button.icon === button.defaultIcon
-                implicitSize: 20
+                implicitSize: 16
                 source: Qt.resolvedUrl("../../assets/icons/lucide/" + button.glyph + ".svg")
                 colour: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
             }
 
             MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignVCenter
                 visible: button.icon !== button.defaultIcon
                 text: button.icon
                 color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
@@ -169,9 +169,9 @@ Column {
                 Layout.fillWidth: true
                 text: button.text
                 color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3outline
-                font.family: Appearance.font.family.mono
-                font.pointSize: Math.round(Appearance.font.size.small * 0.85)
-                horizontalAlignment: Text.AlignHCenter
+                font.family: Appearance.font.family.sans
+                font.pointSize: Appearance.font.size.small
+                horizontalAlignment: Text.AlignLeft
                 elide: Text.ElideRight
             }
         }
