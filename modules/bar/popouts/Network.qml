@@ -62,7 +62,7 @@ Item {
                 }
             }
 
-            StyledSwitch {
+            CompactSwitch {
                 checked: Nmcli.wifiEnabled
                 onToggled: Nmcli.enableWifi(checked)
                 Accessible.name: qsTr("Enable Wi-Fi")
