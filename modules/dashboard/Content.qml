@@ -92,6 +92,9 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Appearance.padding.large
+        // Include the existing bottom padding in the clipping area so edge
+        // labels can extend below their cards without being cut in half.
+        anchors.bottomMargin: 0
 
         radius: Appearance.rounding.panel
         color: "transparent"
@@ -103,6 +106,7 @@ Item {
             readonly property Item currentItem: row.children[currentIndex]
 
             anchors.fill: parent
+            anchors.bottomMargin: Appearance.padding.large
 
             flickableDirection: Flickable.HorizontalFlick
 
