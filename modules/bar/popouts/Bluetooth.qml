@@ -49,34 +49,13 @@ Item {
         anchors.topMargin: frame.headingHeight + Appearance.padding.normal
         spacing: Appearance.spacing.small
 
-        RowLayout {
-            Layout.fillWidth: true
+        ConnectionPopoutHeader {
             Layout.bottomMargin: Appearance.spacing.small
-            spacing: Appearance.spacing.normal
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 2
-
-                StyledText {
-                    text: !Bluetooth.defaultAdapter ? qsTr("No adapter") : Bluetooth.defaultAdapter.enabled ? qsTr("Bluetooth enabled") : qsTr("Bluetooth disabled")
-                    font.weight: 500
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: {
-                        const devices = Bluetooth.devices.values;
-                        let available = qsTr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
-                        const connected = devices.filter(d => d.connected).length;
-                        if (connected > 0)
-                            available += qsTr(" (%1 connected)").arg(connected);
-                        return available;
-                    }
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
-                }
+            title: !Bluetooth.defaultAdapter ? qsTr("No adapter") : Bluetooth.defaultAdapter.enabled ? qsTr("Bluetooth enabled") : qsTr("Bluetooth disabled")
+            detail: {
+                const devices = Bluetooth.devices.values;
+                const connected = devices.filter(d => d.connected).length;
+                return connected > 0 ? qsTr("%1 available · %2 connected").arg(devices.length).arg(connected) : qsTr("%1 devices available").arg(devices.length);
             }
 
             CompactSwitch {
@@ -90,27 +69,10 @@ Item {
                 }
             }
 
-            StyledRect {
-                implicitWidth: 30
-                implicitHeight: 30
-                radius: Appearance.rounding.panel
-                color: Colours.palette.m3primaryContainer
-                Accessible.role: Accessible.Button
-                Accessible.name: qsTr("Open Bluetooth settings")
-
-                StateLayer {
-                    color: Colours.palette.m3onPrimaryContainer
-                    function onClicked(): void {
-                        root.wrapper.detach("bluetooth");
-                    }
-                }
-
-                ColouredIcon {
-                    anchors.centerIn: parent
-                    implicitSize: 16
-                    source: Qt.resolvedUrl("../../../assets/icons/lucide/settings.svg")
-                    colour: Colours.palette.m3onPrimaryContainer
-                }
+            ConnectionAction {
+                glyph: "settings"
+                text: qsTr("Open Bluetooth settings")
+                onClicked: root.wrapper.detach("bluetooth")
             }
         }
 
@@ -121,6 +83,9 @@ Item {
             StyledText {
                 Layout.fillWidth: true
                 text: qsTr("Discovering")
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                font.weight: 500
             }
 
             CompactSwitch {
@@ -172,7 +137,7 @@ Item {
                 ColouredIcon {
                     implicitSize: 16
                     source: Qt.resolvedUrl("../../../assets/icons/lucide/" + root.deviceIcon(device.modelData.icon) + ".svg")
-                    colour: Colours.palette.m3onSurface
+                    colour: Colours.palette.m3onSurfaceVariant
                 }
 
                 ColumnLayout {
@@ -190,7 +155,7 @@ Item {
                     StyledText {
                         Layout.fillWidth: true
                         text: device.modelData.state === BluetoothDeviceState.Connecting ? qsTr("Connecting…") : device.modelData.state === BluetoothDeviceState.Disconnecting ? qsTr("Disconnecting…") : device.modelData.connected ? qsTr("Connected") : device.modelData.paired ? qsTr("Paired") : qsTr("Available")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.m3outline
                         font.pointSize: Appearance.font.size.small
                         elide: Text.ElideRight
                     }

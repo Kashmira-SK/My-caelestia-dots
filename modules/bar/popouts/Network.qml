@@ -40,27 +40,11 @@ Item {
         anchors.topMargin: frame.headingHeight + Appearance.padding.normal
         spacing: Appearance.spacing.small
 
-        RowLayout {
+        ConnectionPopoutHeader {
             visible: root.view === "wireless"
-            Layout.fillWidth: true
             Layout.bottomMargin: Appearance.spacing.small
-            spacing: Appearance.spacing.normal
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 2
-
-                StyledText {
-                    text: Nmcli.wifiEnabled ? qsTr("Wireless enabled") : qsTr("Wireless disabled")
-                    font.weight: 500
-                }
-
-                StyledText {
-                    text: qsTr("%1 networks available").arg(Nmcli.networks.length)
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
-                }
-            }
+            title: Nmcli.wifiEnabled ? qsTr("Wireless enabled") : qsTr("Wireless disabled")
+            detail: qsTr("%1 networks available").arg(Nmcli.networks.length)
 
             CompactSwitch {
                 checked: Nmcli.wifiEnabled
@@ -68,39 +52,13 @@ Item {
                 Accessible.name: qsTr("Enable Wi-Fi")
             }
 
-            StyledRect {
-                implicitWidth: 30
-                implicitHeight: 30
-                radius: Appearance.rounding.panel
-                color: Colours.palette.m3primaryContainer
-                Accessible.role: Accessible.Button
-                Accessible.name: qsTr("Rescan networks")
-
-                StateLayer {
-                    id: scanInteraction
-                    color: Colours.palette.m3onPrimaryContainer
-                    disabled: Nmcli.scanning || !Nmcli.wifiEnabled
-                    function onClicked(): void {
-                        Nmcli.rescanWifi();
-                    }
-                }
-
-                ColouredIcon {
-                    id: scanIcon
-                    anchors.centerIn: parent
-                    implicitSize: 16
-                    source: Qt.resolvedUrl("../../../assets/icons/lucide/rotate-cw.svg")
-                    colour: Colours.palette.m3onPrimaryContainer
-                    opacity: Nmcli.scanning ? 0 : 1
-                }
-
-                CircularIndicator {
-                    anchors.centerIn: parent
-                    strokeWidth: Appearance.padding.small / 2
-                    bgColour: "transparent"
-                    implicitSize: 18
-                    running: Nmcli.scanning
-                }
+            ConnectionAction {
+                id: scanIcon
+                glyph: "rotate-cw"
+                text: qsTr("Rescan networks")
+                busy: Nmcli.scanning
+                enabled: !Nmcli.scanning && Nmcli.wifiEnabled
+                onClicked: Nmcli.rescanWifi()
             }
         }
 
@@ -149,7 +107,7 @@ Item {
                 ColouredIcon {
                     implicitSize: 16
                     source: Qt.resolvedUrl("../../../assets/icons/lucide/wifi.svg")
-                    colour: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                    colour: Colours.palette.m3onSurfaceVariant
                 }
 
                 ColumnLayout {
@@ -162,15 +120,16 @@ Item {
                         Layout.fillWidth: true
                         text: networkItem.modelData.ssid
                         elide: Text.ElideRight
-                        font.weight: networkItem.modelData.active ? 500 : 400
-                        color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                        font.weight: 500
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
                     }
 
                     StyledText {
                         Layout.fillWidth: true
                         text: (networkItem.modelData.active ? qsTr("Connected") : networkItem.modelData.isSecure ? qsTr("Secured") : qsTr("Open")) + " · " + qsTr("%1% signal").arg(networkItem.modelData.strength)
                         elide: Text.ElideRight
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.m3outline
                         font.pointSize: Appearance.font.size.small
                     }
                 }
