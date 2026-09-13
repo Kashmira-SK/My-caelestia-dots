@@ -280,7 +280,7 @@ Item {
             PerfFrame {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 188
-                Layout.alignment: Qt.AlignTop
+                Layout.fillHeight: true
 
                 visible:
                     root.showResources
@@ -449,7 +449,7 @@ Item {
             PerfFrame {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 188
-                Layout.alignment: Qt.AlignTop
+                Layout.fillHeight: true
 
                 visible:
                     Config.dashboard.performance.showNetwork
@@ -885,6 +885,7 @@ Item {
             frameContent.data
 
         Layout.fillWidth: true
+        Layout.minimumHeight: implicitHeight
 
         implicitHeight:
             frameContent.implicitHeight

@@ -235,7 +235,6 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.bottomMargin: 8
 
             ColumnLayout {
                 anchors.fill: parent
