@@ -19,22 +19,16 @@ Item {
     implicitWidth: railWidth + padding * 2
     implicitHeight: Config.session.sizes.button * 5 + padding * 2
 
-    Item {
-        id: actionFrame
-
+    PowerRailLayout {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.margins: root.padding
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.railWidth
+        pairSpacing: Appearance.spacing.normal * 2
+        centerMargin: Appearance.spacing.large
 
-        Column {
-            id: actions
-
-            anchors.centerIn: parent
-            width: parent.width
-            spacing: Appearance.spacing.small
-
+        upperContent: [
             SessionButton {
                 id: logout
 
@@ -58,8 +52,7 @@ Item {
                             logout.forceActiveFocus();
                     }
                 }
-            }
-
+            },
             SessionButton {
                 id: shutdown
 
@@ -74,13 +67,9 @@ Item {
                 nextButton: hibernate
                 previousButton: logout
             }
+        ]
 
-            Item {
-                width: root.railWidth
-                // Preserve separation between the two action groups.
-                height: Config.session.sizes.button + Appearance.spacing.normal * 2
-            }
-
+        lowerContent: [
             SessionButton {
                 id: hibernate
 
@@ -94,8 +83,7 @@ Item {
                 KeyNavigation.down: reboot
                 nextButton: reboot
                 previousButton: shutdown
-            }
-
+            },
             SessionButton {
                 id: reboot
 
@@ -109,7 +97,17 @@ Item {
                 nextButton: logout
                 previousButton: hibernate
             }
-        }
+        ]
+
+        centerContent: [
+            DotTrail {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Math.min(28, root.railWidth * 0.5)
+                ink: Colours.palette.m3outlineVariant
+            }
+        ]
     }
 
     component SessionButton: StyledRect {
