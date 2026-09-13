@@ -461,11 +461,13 @@ Item {
                     Layout.fillWidth: true
 
                     spacing:
-                        Appearance.spacing.small
+                        Appearance.padding.small
 
                     Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 88
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: 24
+                        Layout.preferredHeight: 56
 
                         Canvas {
                             id: sparklineCanvas
@@ -885,7 +887,10 @@ Item {
             frameContent.data
 
         Layout.fillWidth: true
-        Layout.minimumHeight: implicitHeight
+        // Let flexible graphs shrink before making the entire tab taller.
+        // Text still contributes its real minimum height and stays readable.
+        Layout.minimumHeight: frameContent.Layout.minimumHeight
+            + frameContent.anchors.topMargin + frameContent.anchors.bottomMargin
 
         implicitHeight:
             frameContent.implicitHeight
