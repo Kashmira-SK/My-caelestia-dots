@@ -164,31 +164,6 @@ Item {
                     }
                 }
 
-                Loader {
-                    Layout.preferredWidth: 30
-                    Layout.preferredHeight: 30
-                    active: device.modelData.bonded
-                    sourceComponent: Item {
-                        implicitWidth: connectBtn.implicitWidth
-                        implicitHeight: connectBtn.implicitHeight
-
-                        StateLayer {
-                            radius: Appearance.rounding.panel
-
-                            function onClicked(): void {
-                                device.modelData.forget();
-                            }
-                        }
-
-                        ColouredIcon {
-                            anchors.centerIn: parent
-                            implicitSize: 16
-                            source: Qt.resolvedUrl("../../../assets/icons/lucide/trash-2.svg")
-                            colour: Colours.palette.m3onSurface
-                        }
-                    }
-                }
-
                 StyledRect {
                     id: connectBtn
 

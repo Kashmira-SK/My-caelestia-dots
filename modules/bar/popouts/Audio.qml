@@ -67,7 +67,7 @@ Item {
                     Audio.decrementVolume();
             }
 
-            StyledSlider {
+            PopoutParts.PopupVolumeSlider {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 implicitHeight: parent.implicitHeight

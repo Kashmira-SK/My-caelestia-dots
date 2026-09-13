@@ -2,6 +2,24 @@
 
 Newest entries at the top.
 
+## [2026-09-13] - Right-side utilities and power panel
+
+### Added
+
+- Framed, transparent Keep Awake, Screen Recorder, and Quick Toggles modules with matching muted typography, compact outline controls, and subtle panel corners
+- Keep Awake's compact sliding indicator and persistent active-since display
+- Recorder screen/region and audio selection controls, compact capture actions, and a single-line date/time recording library
+- Palette-driven animated black hole, star field, meteors, and occasional UFO flybys for the empty notification panel
+- Narrow power rail with upper/lower action pairs and a subtle animated dot trail, sized to complement the volume sliders
+
+### Fixed
+
+- Keep Awake status and timestamps remain visible after closing and reopening the panel
+- Right-edge drag expansion stays captured while the power and notification panels animate, including rapid reversals
+- Utility backgrounds follow their frame boundaries; redundant dividers and overlapping control shapes removed
+
+---
+
 ## [2026-09-11] - Notification panel redesign
 
 ### Added
