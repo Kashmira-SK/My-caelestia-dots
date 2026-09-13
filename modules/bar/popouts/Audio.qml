@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
+import qs.modules.utilities.cards
 import qs.services
 import qs.config
 import Quickshell
@@ -9,15 +10,21 @@ import Quickshell.Services.Pipewire
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import "../../controlcenter/network"
+import "." as PopoutParts
 
 Item {
     id: root
 
     required property var wrapper
 
-    implicitWidth: layout.implicitWidth + Appearance.padding.normal * 2
-    implicitHeight: layout.implicitHeight + Appearance.padding.normal * 2
+    implicitWidth: Config.bar.sizes.networkWidth
+    width: implicitWidth
+    implicitHeight: layout.implicitHeight + Appearance.padding.normal * 2 + frame.headingHeight
+
+    UtilityFrame {
+        id: frame
+        title: qsTr("AUDIO")
+    }
 
     ButtonGroup {
         id: sinks
@@ -31,53 +38,22 @@ Item {
         id: layout
 
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: Appearance.spacing.normal
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        anchors.topMargin: frame.headingHeight + Appearance.padding.normal
+        spacing: Appearance.spacing.small
 
-        StyledText {
-            text: qsTr("Output device")
-            font.weight: 500
-        }
+        ConnectionPopoutHeader {
+            title: qsTr("Output volume")
+            detail: Audio.muted ? qsTr("Muted") : `${Math.round(Audio.volume * 100)}%`
 
-        Repeater {
-            model: Audio.sinks
-
-            StyledRadioButton {
-                id: control
-
-                required property PwNode modelData
-
-                ButtonGroup.group: sinks
-                checked: Audio.sink?.id === modelData.id
-                onClicked: Audio.setAudioSink(modelData)
-                text: modelData.description
+            ConnectionAction {
+                glyph: "settings"
+                text: qsTr("Open audio settings")
+                onClicked: root.wrapper.detach("audio")
             }
-        }
-
-        StyledText {
-            Layout.topMargin: Appearance.spacing.smaller
-            text: qsTr("Input device")
-            font.weight: 500
-        }
-
-        Repeater {
-            model: Audio.sources
-
-            StyledRadioButton {
-                required property PwNode modelData
-
-                ButtonGroup.group: sources
-                checked: Audio.source?.id === modelData.id
-                onClicked: Audio.setAudioSource(modelData)
-                text: modelData.description
-            }
-        }
-
-        StyledText {
-            Layout.topMargin: Appearance.spacing.smaller
-            Layout.bottomMargin: -Appearance.spacing.small / 2
-            text: qsTr("Volume (%1)").arg(Audio.muted ? qsTr("Muted") : `${Math.round(Audio.volume * 100)}%`)
-            font.weight: 500
         }
 
         CustomMouseArea {
@@ -105,16 +81,52 @@ Item {
             }
         }
 
-        IconTextButton {
-            Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.normal
-            inactiveColour: Colours.palette.m3primaryContainer
-            inactiveOnColour: Colours.palette.m3onPrimaryContainer
-            verticalPadding: Appearance.padding.small
-            text: qsTr("Open settings")
-            icon: "settings"
+        StyledText {
+            Layout.topMargin: Appearance.spacing.small
+            text: qsTr("OUTPUT")
+            color: Colours.palette.m3outline
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            font.letterSpacing: 1
+        }
 
-            onClicked: root.wrapper.detach("audio")
+        Repeater {
+            model: Audio.sinks
+
+            PopoutParts.AudioDeviceChoice {
+                id: control
+
+                required property PwNode modelData
+                glyph: "volume-2"
+
+                ButtonGroup.group: sinks
+                checked: Audio.sink?.id === modelData.id
+                onClicked: Audio.setAudioSink(modelData)
+                text: modelData.description
+            }
+        }
+
+        StyledText {
+            Layout.topMargin: Appearance.spacing.smaller
+            text: qsTr("INPUT")
+            color: Colours.palette.m3outline
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.small
+            font.letterSpacing: 1
+        }
+
+        Repeater {
+            model: Audio.sources
+
+            PopoutParts.AudioDeviceChoice {
+                required property PwNode modelData
+                glyph: "mic"
+
+                ButtonGroup.group: sources
+                checked: Audio.source?.id === modelData.id
+                onClicked: Audio.setAudioSource(modelData)
+                text: modelData.description
+            }
         }
     }
 }

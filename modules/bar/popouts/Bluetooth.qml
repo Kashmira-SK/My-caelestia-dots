@@ -149,6 +149,9 @@ Item {
                     StyledText {
                         Layout.fillWidth: true
                         text: device.modelData.name
+                        font.pointSize: Appearance.font.size.small
+                        font.weight: 500
+                        color: Colours.palette.m3onSurfaceVariant
                         elide: Text.ElideRight
                     }
 
@@ -158,6 +161,31 @@ Item {
                         color: Colours.palette.m3outline
                         font.pointSize: Appearance.font.size.small
                         elide: Text.ElideRight
+                    }
+                }
+
+                Loader {
+                    Layout.preferredWidth: 30
+                    Layout.preferredHeight: 30
+                    active: device.modelData.bonded
+                    sourceComponent: Item {
+                        implicitWidth: connectBtn.implicitWidth
+                        implicitHeight: connectBtn.implicitHeight
+
+                        StateLayer {
+                            radius: Appearance.rounding.panel
+
+                            function onClicked(): void {
+                                device.modelData.forget();
+                            }
+                        }
+
+                        ColouredIcon {
+                            anchors.centerIn: parent
+                            implicitSize: 16
+                            source: Qt.resolvedUrl("../../../assets/icons/lucide/trash-2.svg")
+                            colour: Colours.palette.m3onSurface
+                        }
                     }
                 }
 
@@ -197,31 +225,6 @@ Item {
 
                         Behavior on opacity {
                             Anim {}
-                        }
-                    }
-                }
-
-                Loader {
-                    Layout.preferredWidth: 30
-                    Layout.preferredHeight: 30
-                    active: device.modelData.bonded
-                    sourceComponent: Item {
-                        implicitWidth: connectBtn.implicitWidth
-                        implicitHeight: connectBtn.implicitHeight
-
-                        StateLayer {
-                            radius: Appearance.rounding.panel
-
-                            function onClicked(): void {
-                                device.modelData.forget();
-                            }
-                        }
-
-                        ColouredIcon {
-                            anchors.centerIn: parent
-                            implicitSize: 16
-                            source: Qt.resolvedUrl("../../../assets/icons/lucide/trash-2.svg")
-                            colour: Colours.palette.m3onSurface
                         }
                     }
                 }
