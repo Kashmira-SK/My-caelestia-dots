@@ -50,7 +50,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 84
             Layout.preferredHeight: 84
-            radius: Appearance.rounding.normal
+                radius: Appearance.rounding.panel
             color: Colours.palette.m3surfaceContainerHigh
 
             Image {

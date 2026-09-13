@@ -26,7 +26,7 @@ Item {
     implicitHeight: image.height + label.height + Appearance.spacing.small / 2 + Appearance.padding.large + Appearance.padding.normal
 
     StateLayer {
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
 
         function onClicked(): void {
             Wallpapers.setWallpaper(root.modelData.path);
@@ -51,7 +51,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         y: Appearance.padding.large
         color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
 
         implicitWidth: Config.launcher.sizes.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9

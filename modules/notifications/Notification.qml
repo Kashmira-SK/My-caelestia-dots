@@ -21,7 +21,7 @@ StyledRect {
     property bool expanded: Config.notifs.openExpanded
 
     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
-    radius: Appearance.rounding.normal
+    radius: Appearance.rounding.panel
     implicitWidth: Config.notifs.sizes.width
     implicitHeight: inner.implicitHeight
 

@@ -16,7 +16,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
 
         function onClicked(): void {
             root.modelData?.onClicked(root.list);

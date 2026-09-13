@@ -73,8 +73,10 @@ Item {
 
                     property color borderColour:
                         Colours.palette.m3outlineVariant
+                    property real rounding: systemCard.radius
 
                     onBorderColourChanged: requestPaint()
+                    onRoundingChanged: requestPaint()
 
                     onPaint: {
                         const ctx = getContext("2d")
@@ -85,7 +87,7 @@ Item {
                         const h = height
 
                         const r = Math.min(
-                            Appearance.rounding.large,
+                            rounding,
                             Math.min(w, h) / 2
                         )
 
@@ -277,7 +279,7 @@ Item {
 
         default property alias contentData: contentHost.data
 
-        radius: Appearance.rounding.large
+        radius: Appearance.rounding.panel
 
         color: Colours.layer(
             Colours.palette.m3surfaceContainer,
@@ -305,8 +307,10 @@ Item {
 
             property color borderColour:
                 Colours.palette.m3outlineVariant
+            property real rounding: edgeCard.radius
 
             onBorderColourChanged: requestPaint()
+            onRoundingChanged: requestPaint()
 
             onPaint: {
                 const ctx = getContext("2d")
@@ -325,7 +329,7 @@ Item {
                 const r = Math.max(
                     0,
                     Math.min(
-                        Appearance.rounding.large - inset,
+                        rounding - inset,
                         Math.min(w, h) / 2 - inset
                     )
                 )
@@ -608,7 +612,7 @@ Item {
     }
 
     component Card: StyledRect {
-        radius: Appearance.rounding.large
+        radius: Appearance.rounding.panel
 
         color: Colours.layer(
             Colours.palette.m3surfaceContainer,

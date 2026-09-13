@@ -16,7 +16,7 @@ Item {
     required property real maxHeight
 
     readonly property int padding: Appearance.padding.large
-    readonly property int rounding: Appearance.rounding.normal
+    readonly property int rounding: Appearance.rounding.panel
     readonly property real labelInset: frameLabel.implicitHeight / 2
 
     implicitWidth: listWrapper.width + padding * 2
@@ -74,7 +74,7 @@ Item {
     StyledText {
         id: frameLabel
 
-        x: root.padding + root.rounding
+        x: root.padding + Appearance.rounding.normal
         y: 0
         text: qsTr("LAUNCHER")
         color: Colours.palette.m3onSurfaceVariant

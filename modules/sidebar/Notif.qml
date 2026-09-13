@@ -38,7 +38,7 @@ StyledRect {
     implicitHeight: nonAnimHeight
 
     clip: true
-    radius: Appearance.rounding.small
+    radius: Appearance.rounding.panel
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     ColumnLayout {

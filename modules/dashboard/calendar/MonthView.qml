@@ -251,7 +251,7 @@ Item {
                         )
 
                         radius:
-                            Appearance.rounding.small
+                            Appearance.rounding.panel
 
                         color:
                             dayCell.selected

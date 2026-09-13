@@ -124,7 +124,7 @@ Item {
         implicitWidth: root.railWidth
         implicitHeight: 48
 
-        radius: Appearance.rounding.small
+        radius: Appearance.rounding.panel
         color: button.activeFocus ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.tPalette.m3surfaceContainer, 0)
         Accessible.role: Accessible.Button
         Accessible.name: text

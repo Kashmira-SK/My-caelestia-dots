@@ -22,7 +22,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.small
+        radius: Appearance.rounding.panel
 
         function onClicked(): void {
             Apps.launch(root.modelData);

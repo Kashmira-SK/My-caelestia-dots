@@ -9,7 +9,7 @@ Item {
     id: root
 
     required property string title
-    property real rounding: Appearance.rounding.normal
+    property real rounding: Appearance.rounding.panel
     property color fillColour: Qt.alpha(Colours.palette.m3surface, 0)
     readonly property real headingHeight: heading.implicitHeight
 
@@ -64,7 +64,7 @@ Item {
     StyledText {
         id: heading
 
-        x: root.rounding + Appearance.padding.normal
+        x: Appearance.rounding.normal + Appearance.padding.normal
         text: root.title
         color: Colours.palette.m3outline
         font.family: Appearance.font.family.mono

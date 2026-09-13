@@ -85,7 +85,7 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: root.yearGutter - 7
 
-        radius: Appearance.rounding.large
+        radius: Appearance.rounding.panel
 
         color: Colours.layer(
             Colours.palette.m3surfaceContainer,
@@ -156,6 +156,9 @@ Item {
 
         property color lineColor:
             Colours.palette.m3outlineVariant
+        property real rounding: panel.radius
+
+        onRoundingChanged: requestPaint()
 
         onLineColorChanged:
             requestPaint()
@@ -170,7 +173,7 @@ Item {
             const w = width
             const h = height
             const r = Math.min(
-                Appearance.rounding.large,
+                rounding,
                 w / 2,
                 h / 2
             )

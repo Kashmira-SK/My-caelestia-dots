@@ -23,7 +23,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
 
         function onClicked(): void {
             root.onClicked();
@@ -64,7 +64,7 @@ Item {
 
         StyledRect {
             color: Colours.palette.m3tertiary
-            radius: Appearance.rounding.normal
+            radius: Appearance.rounding.panel
             clip: true
 
             implicitWidth: (stateLayer.containsMouse ? label.implicitWidth + label.anchors.rightMargin : 0) + icon.implicitWidth + Appearance.padding.normal * 2

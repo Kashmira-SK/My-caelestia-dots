@@ -270,7 +270,7 @@ Item {
                             todoCardColumn.implicitHeight + 2
 
                         radius:
-                            Appearance.rounding.small
+                            Appearance.rounding.panel
 
                         color: Qt.alpha(
                             Colours.palette.m3primary,

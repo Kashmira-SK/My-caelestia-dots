@@ -23,7 +23,7 @@ Item {
             Layout.fillHeight: true
             Layout.topMargin: frameLabel.implicitHeight / 2
 
-            radius: Appearance.rounding.normal
+            radius: Appearance.rounding.panel
             // Let the drawer surface continue through the frame without a second fill.
             color: Qt.alpha(Colours.palette.m3surface, 0)
 
@@ -71,7 +71,7 @@ Item {
             StyledText {
                 id: frameLabel
 
-                x: panel.radius + Appearance.padding.normal
+                x: Appearance.rounding.normal + Appearance.padding.normal
                 y: -implicitHeight / 2
                 text: qsTr("NOTIFICATIONS")
                 color: Colours.palette.m3outline

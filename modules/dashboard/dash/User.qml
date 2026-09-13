@@ -47,7 +47,7 @@ Item {
                 Layout.preferredWidth: 88
                 Layout.preferredHeight: 88
 
-                radius: Appearance.rounding.large
+                radius: Appearance.rounding.panel
                 color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
                 MaterialIcon {

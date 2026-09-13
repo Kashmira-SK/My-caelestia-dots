@@ -943,6 +943,9 @@ Item {
             id: frameBorder
 
             anchors.fill: parent
+            property real rounding: Appearance.rounding.panel
+
+            onRoundingChanged: requestPaint()
 
             onWidthChanged:
                 requestPaint()
@@ -961,7 +964,7 @@ Item {
 
                 const r =
                     Math.min(
-                        Appearance.rounding.normal,
+                        rounding,
                         14
                     );
 

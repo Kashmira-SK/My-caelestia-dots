@@ -71,7 +71,7 @@ StyledListView {
 
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
-        radius: Appearance.rounding.small
+        radius: Appearance.rounding.panel
         color: Qt.alpha(Colours.palette.m3primary, 0.1)
         visible: !!root.currentItem
 

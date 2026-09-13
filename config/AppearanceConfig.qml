@@ -10,6 +10,7 @@ JsonObject {
 
     component Rounding: JsonObject {
         property real scale: 1
+        property int panel: 6 * scale
         property int small: 12 * scale
         property int normal: 17 * scale
         property int large: 25 * scale

@@ -70,7 +70,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.topMargin: Appearance.spacing.normal
 
-        radius: Appearance.rounding.small
+        radius: Appearance.rounding.panel
         color: "transparent"
 
         Loader {

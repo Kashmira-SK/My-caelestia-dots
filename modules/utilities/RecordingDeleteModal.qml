@@ -129,7 +129,7 @@ Loader {
 
         StyledRect {
             anchors.centerIn: parent
-            radius: Appearance.rounding.large
+            radius: Appearance.rounding.panel
             color: Colours.palette.m3surfaceContainerHigh
 
             scale: 0

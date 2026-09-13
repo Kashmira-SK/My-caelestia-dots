@@ -93,7 +93,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.margins: Appearance.padding.large
 
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
         color: "transparent"
 
         Flickable {

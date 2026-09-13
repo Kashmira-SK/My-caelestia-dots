@@ -104,7 +104,7 @@ Item {
                 Layout.preferredWidth: 138
                 Layout.preferredHeight: 138
 
-                radius: 34
+                radius: Appearance.rounding.panel
 
                 color:
                     Colours.tPalette.m3surfaceContainerHigh
