@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.modules.utilities.cards
@@ -12,7 +13,7 @@ import QtQuick.Controls as Controls
 Item {
     id: root
 
-    implicitWidth: Math.max(Config.bar.sizes.batteryWidth, Config.bar.sizes.networkWidth)
+    implicitWidth: Config.bar.sizes.batteryWidth
     width: implicitWidth
     implicitHeight: body.implicitHeight + Appearance.padding.normal * 2 + frame.headingHeight
 
@@ -45,23 +46,81 @@ Item {
         anchors.topMargin: frame.headingHeight + Appearance.padding.normal
         spacing: Appearance.spacing.normal
 
-        ConnectionPopoutHeader {
-            title: UPower.displayDevice.isLaptopBattery ? qsTr("%1% remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
-            detail: UPower.displayDevice.isLaptopBattery ? UPower.onBattery ? qsTr("Time remaining: %1").arg(root.formatSeconds(UPower.displayDevice.timeToEmpty, qsTr("Calculating…"))) : qsTr("Until charged: %1").arg(root.formatSeconds(UPower.displayDevice.timeToFull, qsTr("Fully charged"))) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
-        }
-
-        StyledRect {
-            visible: UPower.displayDevice.isLaptopBattery
+        RowLayout {
             Layout.fillWidth: true
-            implicitHeight: 4
-            radius: 2
-            color: Colours.tPalette.m3surfaceContainer
+            spacing: Appearance.spacing.normal
 
-            StyledRect {
-                width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage))
-                height: parent.height
-                radius: parent.radius
-                color: Colours.palette.m3primary
+            Item {
+                visible: UPower.displayDevice.isLaptopBattery
+                implicitWidth: 52
+                implicitHeight: 26
+
+                StyledRect {
+                    width: 48
+                    height: 26
+                    radius: 5
+                    border.width: 1
+                    border.color: Colours.palette.m3outline
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 2
+                        Repeater {
+                            model: 5
+                            StyledRect {
+                                required property int index
+                                width: 6
+                                height: 16
+                                radius: 1
+                                color: Colours.tPalette.m3surfaceContainer
+                                StyledRect {
+                                    width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage * 5 - parent.index))
+                                    height: parent.height
+                                    radius: parent.radius
+                                    color: Colours.palette.m3primary
+                                }
+                            }
+                        }
+                    }
+                }
+                StyledRect {
+                    x: 49
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 3
+                    height: 8
+                    radius: 1
+                    color: Colours.palette.m3outline
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+                StyledText {
+                    Layout.fillWidth: true
+                    text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("No battery")
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.large
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: {
+                        const battery = UPower.displayDevice;
+                        if (!battery.isLaptopBattery)
+                            return qsTr("Plugged in");
+                        if (battery.state === UPowerDeviceState.FullyCharged)
+                            return qsTr("Fully charged");
+                        if (UPower.onBattery)
+                            return battery.timeToEmpty > 0 ? qsTr("%1 left").arg(root.formatSeconds(battery.timeToEmpty, "")) : qsTr("On battery");
+                        if (battery.state === UPowerDeviceState.Charging)
+                            return battery.timeToFull > 0 ? qsTr("%1 until full").arg(root.formatSeconds(battery.timeToFull, "")) : qsTr("Charging");
+                        return qsTr("Plugged in");
+                    }
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.small
+                    wrapMode: Text.Wrap
+                }
             }
         }
 
@@ -99,28 +158,23 @@ Item {
             }
         }
 
-        StyledText {
-            text: qsTr("POWER PROFILE")
-            color: Colours.palette.m3outline
-            font.family: Appearance.font.family.mono
-            font.pointSize: Appearance.font.size.small
-            font.letterSpacing: 1
-        }
-
         RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.small
+            Layout.alignment: Qt.AlignHCenter
+            spacing: Appearance.spacing.normal
 
             Profile {
                 text: qsTr("Saver")
+                glyph: "leaf"
                 profile: PowerProfile.PowerSaver
             }
             Profile {
                 text: qsTr("Balanced")
+                glyph: "scale"
                 profile: PowerProfile.Balanced
             }
             Profile {
                 text: qsTr("Performance")
+                glyph: "gauge"
                 profile: PowerProfile.Performance
             }
         }
@@ -129,11 +183,11 @@ Item {
     component Profile: Controls.AbstractButton {
         id: button
         required property int profile
+        required property string glyph
         readonly property bool selected: PowerProfiles.profile === profile
 
-        Layout.fillWidth: true
-        Layout.preferredWidth: 1
-        implicitHeight: Math.max(30, label.implicitHeight + Appearance.padding.small * 2)
+        implicitWidth: 36
+        implicitHeight: 30
         padding: Appearance.padding.small
         hoverEnabled: true
         activeFocusOnTab: true
@@ -141,14 +195,28 @@ Item {
         Accessible.description: selected ? qsTr("Selected power profile") : qsTr("Select power profile")
         onClicked: PowerProfiles.profile = profile
 
-        contentItem: StyledText {
-            id: label
+        contentItem: Item {
+            ColouredIcon {
+                anchors.centerIn: parent
+                implicitSize: 16
+                source: Qt.resolvedUrl("../../../assets/icons/lucide/" + button.glyph + ".svg")
+                colour: button.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            }
+        }
+
+        Controls.ToolTip {
+            visible: button.hovered || button.visualFocus
+            delay: 500
             text: button.text
-            font.pointSize: Appearance.font.size.small
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            wrapMode: Text.Wrap
-            color: button.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            contentItem: StyledText {
+                text: button.text
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+            }
+            background: StyledRect {
+                radius: Appearance.rounding.panel
+                color: Colours.palette.m3surfaceContainerHighest
+            }
         }
 
         background: StyledRect {

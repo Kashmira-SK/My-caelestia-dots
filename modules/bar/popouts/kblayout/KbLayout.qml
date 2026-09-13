@@ -3,208 +3,145 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Templates as T
 import qs.components
-import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.config
-import qs.utils
-
+import qs.modules.utilities.cards
 import "."
 
-ColumnLayout {
+Item {
     id: root
-
     required property Item wrapper
 
-    spacing: Appearance.spacing.small
-    width: Config.bar.sizes.kbLayoutWidth
+    implicitWidth: Config.bar.sizes.kbLayoutWidth
+    width: implicitWidth
+    implicitHeight: body.implicitHeight + Appearance.padding.normal * 2 + frame.headingHeight
 
     KbLayoutModel {
         id: kb
     }
-
     function refresh() {
         kb.refresh();
     }
     Component.onCompleted: kb.start()
 
-    StyledText {
-        Layout.topMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.small
-        text: qsTr("Keyboard Layouts")
-        font.weight: 500
+    UtilityFrame {
+        id: frame
+        title: qsTr("KEYBOARD")
     }
 
-    ListView {
-        id: list
-        model: kb.visibleModel
-
-        Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
-
-        clip: true
-        interactive: true
-        implicitHeight: Math.min(contentHeight, 320)
-        visible: kb.visibleModel.count > 0
+    ColumnLayout {
+        id: body
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        anchors.topMargin: frame.headingHeight + Appearance.padding.normal
         spacing: Appearance.spacing.small
 
-        add: Transition {
-            NumberAnimation {
-                properties: "opacity"
-                from: 0
-                to: 1
-                duration: 140
-            }
-            NumberAnimation {
-                properties: "y"
-                duration: 180
-                easing.type: Easing.OutCubic
-            }
-        }
-        remove: Transition {
-            NumberAnimation {
-                properties: "opacity"
-                to: 0
-                duration: 100
-            }
-        }
-        move: Transition {
-            NumberAnimation {
-                properties: "y"
-                duration: 180
-                easing.type: Easing.OutCubic
-            }
-        }
-        displaced: Transition {
-            NumberAnimation {
-                properties: "y"
-                duration: 180
-                easing.type: Easing.OutCubic
-            }
+        LayoutChoice {
+            Layout.fillWidth: true
+            visible: kb.activeLabel.length > 0
+            text: kb.activeLabel
+            selected: true
+            enabled: false
         }
 
-        delegate: Item {
-            required property int layoutIndex
-            required property string label
+        ListView {
+            id: list
+            Layout.fillWidth: true
+            implicitHeight: Math.min(contentHeight, 320)
+            visible: kb.visibleModel.count > 0
+            model: kb.visibleModel
+            clip: true
+            interactive: true
+            spacing: Appearance.spacing.small
 
-            width: list.width
-            height: Math.max(36, rowText.implicitHeight + Appearance.padding.small * 2)
-
-            readonly property bool isDisabled: layoutIndex > 3
-
-            StateLayer {
-                id: layer
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: parent.height - 4
-
-                radius: Appearance.rounding.full
-                enabled: !isDisabled
-
-                function onClicked(): void {
-                    if (!isDisabled)
+            delegate: LayoutChoice {
+                required property int layoutIndex
+                required property string label
+                width: list.width
+                text: label
+                enabled: layoutIndex <= 3
+                onClicked: {
+                    if (layoutIndex <= 3)
                         kb.switchTo(layoutIndex);
+                }
+            }
+        }
+    }
+
+    component LayoutChoice: T.AbstractButton {
+        id: choice
+        property bool selected: false
+        readonly property string keyCode: text.split(" - ")[0].slice(0, 5)
+        readonly property string language: text.includes(" - ") ? text.slice(text.indexOf(" - ") + 3) : text
+
+        implicitHeight: Math.max(36, languageText.implicitHeight + Appearance.padding.small * 2)
+        padding: Appearance.padding.small
+        hoverEnabled: true
+        activeFocusOnTab: !selected
+        Accessible.name: text
+        opacity: enabled || selected ? 1 : 0.4
+
+        contentItem: RowLayout {
+            spacing: Appearance.spacing.normal
+
+            StyledRect {
+                implicitWidth: 42
+                implicitHeight: 26
+                radius: 4
+                border.width: 1
+                border.color: choice.selected ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
+
+                StyledText {
+                    anchors.centerIn: parent
+                    text: choice.keyCode
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.small
+                    color: choice.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 }
             }
 
             StyledText {
-                id: rowText
-                anchors.verticalCenter: layer.verticalCenter
-                anchors.left: layer.left
-                anchors.right: layer.right
-                anchors.leftMargin: Appearance.padding.small
-                anchors.rightMargin: Appearance.padding.small
-                text: label
-                elide: Text.ElideRight
-                opacity: isDisabled ? 0.4 : 1.0
+                id: languageText
+                Layout.fillWidth: true
+                text: choice.language
+                wrapMode: Text.Wrap
+                font.pointSize: Appearance.font.size.small
+                font.weight: 500
+                color: choice.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
             }
 
-            ToolTip.visible: isDisabled && layer.containsMouse
-            ToolTip.text: "XKB limitation: maximum 4 layouts allowed"
-        }
-    }
-
-    Rectangle {
-        visible: kb.activeLabel.length > 0
-        Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
-
-        height: 1
-        color: Colours.palette.m3onSurfaceVariant
-        opacity: 0.35
-    }
-
-    RowLayout {
-        id: activeRow
-
-        visible: kb.activeLabel.length > 0
-        Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
-        spacing: Appearance.spacing.small
-
-        opacity: 1
-        scale: 1
-
-        MaterialIcon {
-            text: "keyboard"
-            color: Colours.palette.m3primary
-        }
-
-        StyledText {
-            Layout.fillWidth: true
-            text: kb.activeLabel
-            elide: Text.ElideRight
-            font.weight: 500
-            color: Colours.palette.m3primary
-        }
-
-        Connections {
-            target: kb
-            function onActiveLabelChanged() {
-                if (!activeRow.visible)
-                    return;
-                popIn.restart();
+            ColouredIcon {
+                implicitSize: 16
+                source: Qt.resolvedUrl("../../../../assets/icons/lucide/" + (choice.selected ? "keyboard" : "chevron-down") + ".svg")
+                rotation: choice.selected ? 0 : -90
+                colour: choice.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
             }
         }
 
-        SequentialAnimation {
-            id: popIn
-            running: false
+        background: StyledRect {
+            radius: Appearance.rounding.panel
+            color: Qt.alpha(Colours.palette.m3onSurface, choice.down ? 0.12 : choice.hovered ? 0.08 : 0)
+            border.width: choice.visualFocus ? 1 : 0
+            border.color: Colours.palette.m3outlineVariant
+        }
 
-            ParallelAnimation {
-                NumberAnimation {
-                    target: activeRow
-                    property: "opacity"
-                    to: 0.0
-                    duration: 70
-                }
-                NumberAnimation {
-                    target: activeRow
-                    property: "scale"
-                    to: 0.92
-                    duration: 70
-                }
+        ToolTip {
+            visible: !choice.enabled && !choice.selected && choice.hovered
+            text: qsTr("XKB supports at most four layouts")
+            contentItem: StyledText {
+                text: qsTr("XKB supports at most four layouts")
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
             }
-
-            ParallelAnimation {
-                NumberAnimation {
-                    target: activeRow
-                    property: "opacity"
-                    to: 1.0
-                    duration: 160
-                    easing.type: Easing.OutCubic
-                }
-                NumberAnimation {
-                    target: activeRow
-                    property: "scale"
-                    to: 1.0
-                    duration: 220
-                    easing.type: Easing.OutBack
-                }
+            background: StyledRect {
+                radius: Appearance.rounding.panel
+                color: Colours.palette.m3surfaceContainerHighest
             }
         }
     }
