@@ -69,7 +69,7 @@ Item {
             implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            radius: Appearance.rounding.full
+            radius: Appearance.rounding.panel
 
             scale: 0
             Component.onCompleted: scale = 1

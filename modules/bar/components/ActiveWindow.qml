@@ -47,10 +47,10 @@ Item {
         id: metrics
 
         text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
-        font.pointSize: Appearance.font.size.smaller
+        font.pointSize: Appearance.font.size.small
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight
-        elideWidth: root.maxHeight - icon.height
+        elideWidth: Math.max(0, Math.min(root.maxHeight - icon.height, bar.height * 0.3))
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;
@@ -100,7 +100,7 @@ Item {
     
     StateLayer {
         anchors.fill: parent
-        radius: Appearance.rounding.normal
+        radius: Appearance.rounding.panel
         function onClicked(): void {
             bar.triggerActiveWindowPopout();
         }

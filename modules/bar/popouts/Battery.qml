@@ -52,6 +52,7 @@ Item {
 
             Item {
                 visible: UPower.displayDevice.isLaptopBattery
+                Layout.alignment: Qt.AlignTop
                 implicitWidth: 52
                 implicitHeight: 26
 
@@ -159,7 +160,7 @@ Item {
         }
 
         RowLayout {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignLeft
             spacing: Appearance.spacing.normal
 
             Profile {
@@ -169,7 +170,7 @@ Item {
             }
             Profile {
                 text: qsTr("Balanced")
-                glyph: "scale"
+                glyph: "orbit"
                 profile: PowerProfile.Balanced
             }
             Profile {

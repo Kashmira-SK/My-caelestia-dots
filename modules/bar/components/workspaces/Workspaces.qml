@@ -28,7 +28,9 @@ StyledClippingRect {
     implicitHeight: layout.implicitHeight + Appearance.padding.small * 2
 
     color: Colours.tPalette.m3surfaceContainer
-    radius: Appearance.rounding.full
+    radius: Appearance.rounding.panel
+    border.width: 1
+    border.color: Colours.palette.m3outlineVariant
 
     Item {
         anchors.fill: parent

@@ -7,6 +7,7 @@ mic, settings, gamepad-2, bell-off, key-round, list-video, folder, and trash-2.
 The empty state, capture controls, and power actions also use inbox, monitor,
 scan, volume-2, volume-x, log-out, power, moon, and rotate-cw.
 Battery and keyboard popups use leaf, scale, gauge, and keyboard.
+The compact battery profile selector also uses orbit.
 See LICENSE for Lucide and Feather notices.
 
 Used by the notification sidebar, utilities, and power controls. SVG stroke geometry uses

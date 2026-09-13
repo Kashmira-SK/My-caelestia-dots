@@ -44,7 +44,7 @@ StyledRect {
     y: offset + mask.y
     implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
     implicitHeight: size
-    radius: Appearance.rounding.full
+    radius: Appearance.rounding.panel
     color: Colours.palette.m3primary
 
     Colouriser {

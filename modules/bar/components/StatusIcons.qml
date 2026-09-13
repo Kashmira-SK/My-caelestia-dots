@@ -17,7 +17,9 @@ StyledRect {
     readonly property alias items: iconColumn
 
     color: Colours.tPalette.m3surfaceContainer
-    radius: Appearance.rounding.full
+    radius: Appearance.rounding.panel
+    border.width: 1
+    border.color: Colours.palette.m3outlineVariant
 
     clip: true
     implicitWidth: Config.bar.sizes.innerWidth
@@ -108,10 +110,9 @@ StyledRect {
             name: "audio"
             active: Config.bar.status.showAudio
 
-            sourceComponent: MaterialIcon {
-                animate: true
-                text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-                color: root.colour
+            sourceComponent: BarGlyph {
+                glyph: Audio.muted || Audio.volume === 0 ? "volume-x" : "volume-2"
+                colour: root.colour
             }
         }
 
@@ -120,10 +121,10 @@ StyledRect {
             name: "audio"
             active: Config.bar.status.showMicrophone
 
-            sourceComponent: MaterialIcon {
-                animate: true
-                text: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
-                color: root.colour
+            sourceComponent: BarGlyph {
+                glyph: "mic"
+                off: Audio.sourceMuted || Audio.sourceVolume === 0
+                colour: root.colour
             }
         }
 
@@ -145,10 +146,10 @@ StyledRect {
             name: "network"
             active: Config.bar.status.showNetwork && (!Nmcli.activeEthernet || Config.bar.status.showWifi)
 
-            sourceComponent: MaterialIcon {
-                animate: true
-                text: Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
-                color: root.colour
+            sourceComponent: BarGlyph {
+                glyph: "wifi"
+                off: !Nmcli.active
+                colour: root.colour
             }
         }
 
@@ -175,16 +176,11 @@ StyledRect {
                 spacing: Appearance.spacing.smaller / 2
 
                 // Bluetooth icon
-                MaterialIcon {
-                    animate: true
-                    text: {
-                        if (!Bluetooth.defaultAdapter?.enabled)
-                            return "bluetooth_disabled";
-                        if (Bluetooth.devices.values.some(d => d.connected))
-                            return "bluetooth_connected";
-                        return "bluetooth";
-                    }
-                    color: root.colour
+                BarGlyph {
+                    glyph: "bluetooth"
+                    off: !Bluetooth.defaultAdapter?.enabled
+                    connected: Bluetooth.devices.values.some(d => d.connected)
+                    colour: root.colour
                 }
 
                 // Connected bluetooth devices
@@ -193,15 +189,21 @@ StyledRect {
                         values: Bluetooth.devices.values.filter(d => d.state !== BluetoothDeviceState.Disconnected)
                     }
 
-                    MaterialIcon {
+                    BarGlyph {
                         id: device
 
                         required property BluetoothDevice modelData
 
-                        animate: true
-                        text: Icons.getBluetoothIcon(modelData?.icon)
-                        color: root.colour
-                        fill: 1
+                        glyph: {
+                            const name = (modelData?.icon || "").toLowerCase();
+                            if (name.includes("keyboard")) return "keyboard";
+                            if (name.includes("phone")) return "smartphone";
+                            if (name.includes("computer")) return "monitor";
+                            if (name.includes("audio") || name.includes("headset")) return "volume-2";
+                            if (name.includes("game")) return "gamepad-2";
+                            return "bluetooth";
+                        }
+                        colour: root.colour
 
                         SequentialAnimation on opacity {
                             running: device.modelData?.state !== BluetoothDeviceState.Connected
