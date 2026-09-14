@@ -16,7 +16,7 @@ function star(index, phase, width, height) {
     const layer = index % 3;
     const margin = 12;
     const span = width - margin * 2;
-    const drift = phase * (0.08 + layer * 0.045);
+    const drift = phase * (0.24 + layer * 0.11);
     const baseX = noise(index + 301) * span;
     const x = margin + ((baseX + drift) % span + span) % span;
     const y = margin + noise(index + 1301) * (height - margin * 2);
@@ -31,8 +31,8 @@ function star(index, phase, width, height) {
     };
 }
 
-function terrainPoint(index, centreX, centreY, radius) {
-    const angle = noise(index + 4101) * Math.PI * 2;
+function terrainPoint(index, phase, centreX, centreY, radius) {
+    const angle = noise(index + 4101) * Math.PI * 2 + phase * 0.0025;
     const distance = Math.sqrt(noise(index + 5101)) * radius * 0.94;
     return {
         x: centreX + Math.cos(angle) * distance,
@@ -42,8 +42,17 @@ function terrainPoint(index, centreX, centreY, radius) {
     };
 }
 
+function orbitPoint(angle, centreX, centreY, radiusX, radiusY, rotation) {
+    const x = Math.cos(angle) * radiusX;
+    const y = Math.sin(angle) * radiusY;
+    return {
+        x: centreX + x * Math.cos(rotation) - y * Math.sin(rotation),
+        y: centreY + x * Math.sin(rotation) + y * Math.cos(rotation)
+    };
+}
+
 function craft(phase, centreX, centreY, radiusX, radiusY) {
-    const angle = phase * 0.045 + Math.PI * 1.13;
+    const angle = phase * 0.14 + Math.PI * 1.13;
     return {
         x: centreX + Math.cos(angle) * radiusX,
         y: centreY + Math.sin(angle) * radiusY,
@@ -51,11 +60,18 @@ function craft(phase, centreX, centreY, radiusX, radiusY) {
     };
 }
 
+function dayMarker(progress, centreX, centreY, radiusX, radiusY, rotation) {
+    const bounded = Math.max(0, Math.min(1, progress));
+    const start = Math.PI * 1.04;
+    const end = Math.PI * 1.96;
+    return orbitPoint(start + (end - start) * bounded, centreX, centreY, radiusX, radiusY, rotation);
+}
+
 function meteor(phase, width, height) {
-    const cycleLength = 48;
+    const cycleLength = 28;
     const local = phase % cycleLength;
-    const start = 9;
-    const duration = 1.25;
+    const start = 7;
+    const duration = 1.5;
     if (local < start || local > start + duration)
         return null;
 

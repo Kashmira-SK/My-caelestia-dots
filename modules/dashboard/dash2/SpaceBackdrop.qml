@@ -53,8 +53,8 @@ Item {
                     dot(star.x, star.y + 2.5, star.alpha * 0.45, 0.8, root.starColour);
                 }
             }
-            const moonX = width * 0.72;
-            const moonY = height * 0.18;
+            const moonX = width * 0.72 + Math.sin(root.phase * 0.035) * 5;
+            const moonY = height * 0.18 + Math.cos(root.phase * 0.028) * 3;
             const moonRadius = Math.min(width, height) * 0.052;
             ctx.globalAlpha = 0.72;
             ctx.fillStyle = root.terrainColour;
@@ -69,11 +69,16 @@ Item {
             const centreX = width * 0.76;
             const centreY = height * 1.07;
             const radius = height * 0.67;
+            const orbitRadiusX = radius * 1.22;
+            const orbitRadiusY = radius * 0.68;
+            const orbitRotation = -0.11;
+            const orbitStart = Math.PI * 1.04;
+            const orbitEnd = Math.PI * 1.96;
             ctx.globalAlpha = 0.22;
             ctx.strokeStyle = root.orbitColour;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.ellipse(centreX, centreY, radius * 1.22, radius * 0.68, -0.11, Math.PI * 1.04, Math.PI * 1.96);
+            ctx.ellipse(centreX, centreY, orbitRadiusX, orbitRadiusY, orbitRotation, orbitStart, orbitEnd);
             ctx.stroke();
             ctx.globalAlpha = 1;
             ctx.fillStyle = root.planetColour;
@@ -85,7 +90,7 @@ Item {
             ctx.arc(centreX, centreY, radius, 0, Math.PI * 2);
             ctx.clip();
             for (let i = 0; i < 260; i++) {
-                const grain = Field.terrainPoint(i, centreX, centreY, radius);
+                const grain = Field.terrainPoint(i, root.phase, centreX, centreY, radius);
                 dot(grain.x, grain.y, grain.alpha, grain.size, root.terrainColour);
             }
             const shadowOffset = Math.cos(root.dayProgress * Math.PI * 2) * radius * 0.32;
@@ -96,14 +101,30 @@ Item {
             ctx.fill();
             ctx.restore();
             for (let ring = 0; ring < 3; ring++) {
-                ctx.globalAlpha = 0.24 - ring * 0.065;
+                ctx.globalAlpha = 0.21 - ring * 0.055 + Math.sin(root.phase * 0.9 + ring) * 0.025;
                 ctx.strokeStyle = root.accentColour;
                 ctx.lineWidth = 1.4;
                 ctx.beginPath();
                 ctx.arc(centreX, centreY, radius + 2 + ring * 4, Math.PI * 1.04, Math.PI * 1.96);
                 ctx.stroke();
             }
-            const ship = Field.craft(root.phase, centreX, centreY, radius * 1.22, radius * 0.68);
+            ctx.globalAlpha = 0.72;
+            ctx.strokeStyle = root.accentColour;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.ellipse(centreX, centreY, orbitRadiusX, orbitRadiusY, orbitRotation, orbitStart, orbitStart + (orbitEnd - orbitStart) * root.dayProgress);
+            ctx.stroke();
+            const dayMarker = Field.dayMarker(root.dayProgress, centreX, centreY, orbitRadiusX, orbitRadiusY, orbitRotation);
+            ctx.globalAlpha = 0.95;
+            ctx.fillStyle = root.accentColour;
+            ctx.beginPath();
+            ctx.arc(dayMarker.x, dayMarker.y, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 0.24 + Math.sin(root.phase * 1.6) * 0.06;
+            ctx.beginPath();
+            ctx.arc(dayMarker.x, dayMarker.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            const ship = Field.craft(root.phase, centreX, centreY, orbitRadiusX, orbitRadiusY);
             ctx.save();
             ctx.translate(ship.x, ship.y);
             ctx.rotate(ship.rotation);
@@ -131,7 +152,7 @@ Item {
         interval: 50
         repeat: true
         running: root.visible && root.animating
-        onTriggered: root.phase += 0.025
+        onTriggered: root.phase += 0.05
     }
 
 }
