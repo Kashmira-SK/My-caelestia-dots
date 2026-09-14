@@ -53,7 +53,7 @@ Item {
                     dot(star.x, star.y + 2.5, star.alpha * 0.45, 0.8, root.starColour);
                 }
             }
-            const moonX = width * 0.72 + Math.sin(root.phase * 0.035) * 5;
+            const moonX = width * 0.56 + Math.sin(root.phase * 0.035) * 5;
             const moonY = height * 0.18 + Math.cos(root.phase * 0.028) * 3;
             const moonRadius = Math.min(width, height) * 0.052;
             ctx.globalAlpha = 0.72;
@@ -137,12 +137,14 @@ Item {
             ctx.lineTo(-5, 3.5);
             ctx.closePath();
             ctx.fill();
-            for (let trail = 0; trail < 4; trail++) dot(-8 - trail * 4.5, 0, 0.42 - trail * 0.085, 1.2, root.starColour)
+            for (let trail = 0; trail < 4; trail++)
+                dot(-8 - trail * 4.5, 0, 0.42 - trail * 0.085, 1.2, root.starColour);
             ctx.restore();
             const meteor = Field.meteor(root.phase, width, height);
             if (meteor) {
                 const length = Math.hypot(meteor.dx, meteor.dy);
-                for (let i = 15; i >= 0; i--) dot(meteor.x + meteor.dx / length * i * 2, meteor.y + meteor.dy / length * i * 2, meteor.alpha * (1 - i / 16), i === 0 ? 1.8 : 0.9, root.starColour)
+                for (let i = 15; i >= 0; i--)
+                    dot(meteor.x + meteor.dx / length * i * 2, meteor.y + meteor.dy / length * i * 2, meteor.alpha * (1 - i / 16), i === 0 ? 1.8 : 0.9, root.starColour);
             }
             ctx.globalAlpha = 1;
         }
@@ -154,5 +156,4 @@ Item {
         running: root.visible && root.animating
         onTriggered: root.phase += 0.05
     }
-
 }

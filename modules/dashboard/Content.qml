@@ -152,7 +152,9 @@ Item {
 
                 Pane {
                     index: 1
-                    sourceComponent: DashTwo {}
+                    sourceComponent: DashTwo {
+                        state: root.state
+                    }
                 }
 
                 Pane {

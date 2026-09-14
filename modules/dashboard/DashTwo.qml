@@ -4,11 +4,22 @@ import qs.components
 import qs.config
 import qs.services
 import qs.utils
+import Quickshell
 
 Item {
     id: root
 
+    required property PersistentProperties state
+
     readonly property real dayProgress: (Time.hours * 3600 + Time.minutes * 60 + Time.seconds) / 86400
+    readonly property bool hasTimeline: {
+        const active = Players.active;
+        return !!active && active.positionSupported && active.lengthSupported && Number.isFinite(active.position) && Number.isFinite(active.length) && active.length > 0;
+    }
+    readonly property real playerProgress: {
+        const active = Players.active;
+        return root.hasTimeline ? Math.max(0, Math.min(1, active.position / active.length)) : 0;
+    }
     readonly property string greeting: {
         if (Time.hours < 5)
             return qsTr("Still up");
@@ -28,6 +39,14 @@ Item {
     implicitWidth: 840
     implicitHeight: 520
 
+    Timer {
+        running: root.visible && (Players.active?.isPlaying ?? false) && (Players.active?.positionSupported ?? false)
+        interval: Config.dashboard.mediaUpdateInterval
+        triggeredOnStart: true
+        repeat: true
+        onTriggered: Players.active?.positionChanged()
+    }
+
     StyledClippingRect {
         anchors.fill: parent
         radius: Appearance.rounding.panel
@@ -42,6 +61,14 @@ Item {
             accentColour: Colours.palette.m3primary
             orbitColour: Colours.palette.m3outlineVariant
             dayProgress: root.dayProgress
+        }
+
+        SignalVisualiser {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenterOffset: -42
+            anchors.verticalCenterOffset: -16
+            playing: Players.active?.isPlaying ?? false
         }
 
         Column {
@@ -85,9 +112,7 @@ Item {
                     keyText: qsTr("UP")
                     valueText: SysInfo.uptime
                 }
-
             }
-
         }
 
         Column {
@@ -126,7 +151,6 @@ Item {
                 font.pointSize: Appearance.font.size.smaller
                 horizontalAlignment: Text.AlignRight
             }
-
         }
 
         Column {
@@ -154,7 +178,6 @@ Item {
                     font.pointSize: Appearance.font.size.smaller
                     font.weight: 600
                 }
-
             }
 
             StyledText {
@@ -163,9 +186,78 @@ Item {
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 600
             }
-
         }
 
+        Column {
+            id: mediaStatus
+
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: Appearance.padding.large * 1.5
+            width: 300
+            spacing: Appearance.spacing.small
+
+            StyledText {
+                width: parent.width
+                text: Players.active ? qsTr("SIGNAL ACQUIRED") : qsTr("COMMS IDLE")
+                color: Players.active ? Colours.palette.m3primary : Colours.palette.m3outline
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.smaller
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 2
+                horizontalAlignment: Text.AlignRight
+            }
+
+            StyledText {
+                width: parent.width
+                text: Players.active?.trackTitle || qsTr("No active transmission")
+                color: Colours.palette.m3onSurface
+                font.pointSize: Appearance.font.size.normal
+                font.weight: 600
+                maximumLineCount: 1
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignRight
+            }
+
+            StyledText {
+                width: parent.width
+                visible: !!Players.active
+                text: Players.active?.trackArtist || qsTr("Unknown artist")
+                color: Colours.palette.m3secondary
+                font.pointSize: Appearance.font.size.smaller
+                maximumLineCount: 1
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignRight
+            }
+
+            Row {
+                anchors.right: parent.right
+                spacing: 4
+
+                Repeater {
+                    model: 18
+
+                    StyledRect {
+                        required property int index
+
+                        implicitWidth: 5
+                        implicitHeight: 2
+                        radius: 1
+                        color: index / 17 <= root.playerProgress ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                    }
+                }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: mediaStatus
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.state.currentTab = 2
+        }
     }
 
     component TelemetryLine: Row {
@@ -199,7 +291,5 @@ Item {
             font.pointSize: Appearance.font.size.small
             elide: Text.ElideRight
         }
-
     }
-
 }
