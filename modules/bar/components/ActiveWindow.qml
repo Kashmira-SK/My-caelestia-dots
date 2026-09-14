@@ -4,6 +4,7 @@ import qs.components
 import qs.services
 import qs.utils
 import qs.config
+import Quickshell
 import QtQuick
 
 Item {
@@ -12,6 +13,13 @@ Item {
     required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
+    readonly property string appClass: Hypr.activeToplevel?.lastIpcObject.class ?? ""
+    readonly property string appName: {
+        if (!Hypr.activeToplevel)
+            return qsTr("Desktop");
+        const entry = DesktopEntries.heuristicLookup(appClass);
+        return entry?.name || appClass.split(".").pop() || qsTr("Window");
+    }
 
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
@@ -22,7 +30,7 @@ Item {
     property Title current: text1
 
     clip: true
-    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
+    implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
 
     MaterialIcon {
@@ -46,11 +54,13 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        text: root.appName
         font.pointSize: Appearance.font.size.small
-        font.family: Appearance.font.family.mono
+        font.family: Appearance.font.family.sans
+        font.weight: 500
+        font.letterSpacing: 0.3
         elide: Qt.ElideRight
-        elideWidth: Math.max(0, Math.min(root.maxHeight - icon.height, bar.height * 0.3))
+        elideWidth: Math.max(0, Math.min(root.maxHeight - icon.height - Appearance.spacing.small, 160))
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;
@@ -61,10 +71,7 @@ Item {
     }
 
     Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
     }
 
     component Title: StyledText {
@@ -76,6 +83,8 @@ Item {
 
         font.pointSize: metrics.font.pointSize
         font.family: metrics.font.family
+        font.weight: metrics.font.weight
+        font.letterSpacing: metrics.font.letterSpacing
         color: root.colour
         opacity: root.current === this ? 1 : 0
 

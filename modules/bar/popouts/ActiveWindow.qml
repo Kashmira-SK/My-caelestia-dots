@@ -12,13 +12,14 @@ Item {
 
     required property Item wrapper
 
-    implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
+    implicitWidth: Hypr.activeToplevel ? Config.bar.sizes.windowPreviewSize : -Appearance.padding.large * 2
     implicitHeight: child.implicitHeight
 
     Column {
         id: child
 
         anchors.centerIn: parent
+        width: Math.max(0, root.implicitWidth)
         spacing: Appearance.spacing.normal
 
         RowLayout {
@@ -32,7 +33,7 @@ Item {
                 id: icon
 
                 Layout.alignment: Qt.AlignVCenter
-                implicitSize: details.implicitHeight
+                implicitSize: 24
                 source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
             }
 
@@ -45,48 +46,34 @@ Item {
                 StyledText {
                     Layout.fillWidth: true
                     text: Hypr.activeToplevel?.title ?? ""
-                    font.pointSize: Appearance.font.size.normal
-                    elide: Text.ElideRight
+                    font.pointSize: Appearance.font.size.small
+                    font.family: Appearance.font.family.sans
+                    font.weight: 500
+                    wrapMode: Text.Wrap
                 }
 
                 StyledText {
                     Layout.fillWidth: true
                     text: Hypr.activeToplevel?.lastIpcObject.class ?? ""
                     color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Appearance.font.size.small
+                    font.family: Appearance.font.family.sans
                     elide: Text.ElideRight
                 }
             }
 
-            Item {
-                implicitWidth: expandIcon.implicitHeight + Appearance.padding.small * 2
-                implicitHeight: expandIcon.implicitHeight + Appearance.padding.small * 2
-
+            ConnectionAction {
                 Layout.alignment: Qt.AlignVCenter
-
-                StateLayer {
-                    radius: Appearance.rounding.normal
-
-                    function onClicked(): void {
-                        root.wrapper.detach("winfo");
-                    }
-                }
-
-                MaterialIcon {
-                    id: expandIcon
-
-                    anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: font.pointSize * 0.05
-
-                    text: "chevron_right"
-
-                    font.pointSize: Appearance.font.size.large
-                }
+                glyph: "scan"
+                text: qsTr("Open window controls")
+                onClicked: root.wrapper.detach("winfo")
             }
         }
 
         ClippingWrapperRectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
             color: "transparent"
-            radius: Appearance.rounding.small
+            radius: Appearance.rounding.panel
 
             ScreencopyView {
                 id: preview

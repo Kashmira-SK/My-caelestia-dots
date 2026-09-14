@@ -3,38 +3,38 @@ import qs.services
 import qs.config
 import Quickshell
 import QtQuick
+import QtQuick.Controls as Controls
 
-Item {
+Controls.AbstractButton {
     id: root
-
     required property PersistentProperties visibilities
 
-    implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
-    implicitHeight: icon.implicitHeight
+    implicitWidth: 32
+    implicitHeight: 30
+    hoverEnabled: true
+    activeFocusOnTab: true
+    Accessible.name: qsTr("Power menu")
+    onClicked: visibilities.session = !visibilities.session
 
-    StateLayer {
-        // Cursed workaround to make the height larger than the parent
-        anchors.fill: undefined
-        anchors.centerIn: parent
-        implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-
-        radius: Appearance.rounding.full
-
-        function onClicked(): void {
-            root.visibilities.session = !root.visibilities.session;
+    contentItem: Item {
+        BarGlyph {
+            anchors.centerIn: parent
+            glyph: "power"
+            colour: Colours.palette.m3error
         }
     }
 
-    MaterialIcon {
-        id: icon
+    background: StyledRect {
+        radius: Appearance.rounding.panel
+        color: Colours.tPalette.m3surfaceContainer
+        border.width: root.visibilities.session || root.visualFocus ? 1 : 0
+        border.color: Colours.palette.m3error
 
-        anchors.centerIn: parent
-        anchors.horizontalCenterOffset: -1
-
-        text: "power_settings_new"
-        color: Colours.palette.m3error
-        font.bold: true
-        font.pointSize: Appearance.font.size.normal
+        StyledRect {
+            anchors.fill: parent
+            radius: parent.radius
+            color: Colours.palette.m3error
+            opacity: root.down ? 0.12 : root.hovered ? 0.08 : 0
+        }
     }
 }
