@@ -152,7 +152,7 @@ Item {
 
                 Pane {
                     index: 1
-                    sourceComponent: Dash2 {}
+                    sourceComponent: DashTwo {}
                 }
 
                 Pane {
