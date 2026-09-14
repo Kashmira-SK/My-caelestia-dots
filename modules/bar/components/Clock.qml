@@ -27,7 +27,8 @@ Column {
         text: Time.format(Config.services.useTwelveHourClock ? "hh AP" : "HH").split(" ")[0]
         font.family: Appearance.font.family.sans
         font.pointSize: Appearance.font.size.smaller
-        font.weight: 500
+        font.weight: 400
+        renderType: Text.QtRendering
         font.features: ({ "tnum": 1 })
         color: root.colour
     }
@@ -37,7 +38,8 @@ Column {
         text: Time.format("mm")
         font.family: Appearance.font.family.sans
         font.pointSize: Appearance.font.size.smaller
-        font.weight: 500
+        font.weight: 400
+        renderType: Text.QtRendering
         font.features: ({ "tnum": 1 })
         color: root.colour
     }
@@ -48,8 +50,8 @@ Column {
         text: Time.format("AP")
         font.family: Appearance.font.family.sans
         font.pointSize: Appearance.font.size.small * 0.8
-        font.weight: 500
-        font.letterSpacing: 1
+        font.weight: 400
+        renderType: Text.QtRendering
         color: root.colour
     }
 }

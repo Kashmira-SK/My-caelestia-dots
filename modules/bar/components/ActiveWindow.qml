@@ -29,7 +29,7 @@ Item {
     }
 
     implicitWidth: Config.bar.sizes.innerWidth
-    implicitHeight: icon.implicitHeight + Appearance.spacing.small + titleSlot.implicitHeight
+    implicitHeight: titleSlot.y + titleSlot.implicitHeight
 
     MaterialIcon {
         id: icon
@@ -41,26 +41,24 @@ Item {
 
     Item {
         id: titleSlot
-        anchors.top: icon.bottom
-        anchors.topMargin: Appearance.spacing.small
+        y: Math.ceil(icon.y + icon.height + Appearance.spacing.small)
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        implicitHeight: Math.min(title.implicitWidth, root.titleLimit)
+        implicitHeight: Math.min(Math.ceil(title.implicitWidth / 2) * 2, Math.floor(root.titleLimit / 2) * 2)
 
         StyledText {
             id: title
             anchors.centerIn: parent
             width: titleSlot.height
+            height: Math.ceil(implicitHeight / 2) * 2
             rotation: Config.bar.activeWindow.inverted ? 270 : 90
             text: root.appName
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
-            renderType: Text.CurveRendering
+            renderType: Text.QtRendering
             font.family: Appearance.font.family.sans
             font.pointSize: Appearance.font.size.small
-            font.weight: 600
-            font.capitalization: Font.AllUppercase
-            font.letterSpacing: 3
+            font.weight: 400
             color: root.colour
         }
     }
