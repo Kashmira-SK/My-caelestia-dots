@@ -28,43 +28,33 @@ ColumnLayout {
 
     spacing: 0
 
-    StyledText {
+    Item {
         id: indicator
-
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+        Layout.preferredWidth: Config.bar.sizes.innerWidth
         Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
 
-        animate: false
-        font.family: Appearance.font.family.mono
-        font.pointSize: Appearance.font.size.small
-        text: {
-            const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
-            const wsName = !ws || ws.name == root.ws ? String(root.ws).padStart(2, "0") : ws.name[0];
-            let displayName = wsName.toString();
-            if (Config.bar.workspaces.capitalisation.toLowerCase() === "upper") {
-                displayName = displayName.toUpperCase();
-            } else if (Config.bar.workspaces.capitalisation.toLowerCase() === "lower") {
-                displayName = displayName.toLowerCase();
-            }
-            // Retire the stock dot/Pacman labels; retain explicitly customized labels.
-            const configured = Config.bar.workspaces;
-            const label = configured.label.trim() === "" ? displayName : configured.label || displayName;
-            const occupiedLabel = configured.occupiedLabel === "󰮯" ? label : configured.occupiedLabel || label;
-            const activeLabel = configured.activeLabel === "󰮯" ? label : configured.activeLabel || (root.isOccupied ? occupiedLabel : label);
-            return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
-        }
-        color: root.activeWsId === root.ws ? Colours.palette.m3primary : root.isOccupied ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
-        verticalAlignment: Qt.AlignVCenter
+        readonly property bool selected: root.activeWsId === root.ws
+        readonly property color ink: selected ? Colours.palette.m3primary : root.isOccupied ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
 
+        // Hollow idle point, solid occupied point, orbit around the active point.
         Rectangle {
-            anchors.left: parent.right
-            anchors.leftMargin: 4
-            anchors.verticalCenter: parent.verticalCenter
-            visible: root.isOccupied
-            width: 3
-            height: 3
-            radius: 1.5
-            color: indicator.color
+            anchors.centerIn: parent
+            width: indicator.selected ? 16 : 8
+            height: width
+            radius: width / 2
+            color: "transparent"
+            border.width: 1
+            border.color: indicator.ink
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: indicator.selected ? 6 : 4
+                height: width
+                radius: width / 2
+                visible: root.isOccupied || indicator.selected
+                color: indicator.ink
+            }
         }
     }
 

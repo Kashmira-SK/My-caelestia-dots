@@ -12,82 +12,17 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    clip: true
 
     required property ShellScreen screen
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property string activeSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name ?? ""
 
-    layer.enabled: true
-    layer.effect: OpacityMask {
-        maskSource: mask
-    }
-
-    Item {
-        id: mask
-
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
-
-        Rectangle {
-            anchors.fill: parent
-            radius: Appearance.rounding.full
-
-            gradient: Gradient {
-                orientation: Gradient.Vertical
-
-                GradientStop {
-                    position: 0
-                    color: Qt.rgba(0, 0, 0, 0)
-                }
-                GradientStop {
-                    position: 0.3
-                    color: Qt.rgba(0, 0, 0, 1)
-                }
-                GradientStop {
-                    position: 0.7
-                    color: Qt.rgba(0, 0, 0, 1)
-                }
-                GradientStop {
-                    position: 1
-                    color: Qt.rgba(0, 0, 0, 0)
-                }
-            }
-        }
-
-        Rectangle {
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            radius: Appearance.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.contentY > 0 ? 0 : 1
-
-            Behavior on opacity {
-                Anim {}
-            }
-        }
-
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            radius: Appearance.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.contentY < view.contentHeight - parent.height + Appearance.padding.small ? 0 : 1
-
-            Behavior on opacity {
-                Anim {}
-            }
-        }
-    }
-
     ListView {
         id: view
 
         anchors.fill: parent
+        clip: true
         spacing: Appearance.spacing.normal
         interactive: false
 
@@ -118,7 +53,6 @@ Item {
             required property HyprlandWorkspace modelData
             readonly property int size: label.Layout.preferredHeight + (hasWindows ? windows.implicitHeight + Appearance.padding.small : 0)
             property int wsId
-            property string icon
             property bool hasWindows
 
             anchors.left: view.contentItem.left
@@ -128,7 +62,6 @@ Item {
 
             Component.onCompleted: {
                 wsId = modelData.id;
-                icon = Icons.getSpecialWsIcon(modelData.name);
                 hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && modelData.lastIpcObject.windows > 0;
             }
 
@@ -139,11 +72,6 @@ Item {
                 function onIdChanged(): void {
                     if (ws.modelData)
                         ws.wsId = ws.modelData.id;
-                }
-
-                function onNameChanged(): void {
-                    if (ws.modelData)
-                        ws.icon = Icons.getSpecialWsIcon(ws.modelData.name);
                 }
 
                 function onLastIpcObjectChanged(): void {
@@ -161,31 +89,36 @@ Item {
                 }
             }
 
-            Loader {
+            Item {
                 id: label
-
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
-
-                sourceComponent: ws.icon.length === 1 ? letterComp : iconComp
-
-                Component {
-                    id: iconComp
-
-                    MaterialIcon {
-                        fill: 1
-                        text: ws.icon
-                        verticalAlignment: Qt.AlignVCenter
-                    }
+                Layout.preferredWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+                Layout.preferredHeight: Layout.preferredWidth
+                readonly property bool selected: ws.modelData?.name === root.activeSpecial
+                readonly property string glyph: {
+                    const name = ws.modelData?.name ?? "";
+                    if (name === "special:term") return "monitor";
+                    if (name === "special:magic") return "orbit";
+                    if (name === "special:scratch1") return "moon";
+                    if (name === "special:scratch2") return "globe";
+                    return "orbit";
                 }
 
-                Component {
-                    id: letterComp
+                StyledRect {
+                    anchors.centerIn: parent
+                    width: 22
+                    height: 22
+                    radius: 4
+                    rotation: 45
+                    border.width: label.selected ? 1 : 0
+                    border.color: Colours.palette.m3tertiary
+                }
 
-                    StyledText {
-                        text: ws.icon
-                        verticalAlignment: Qt.AlignVCenter
-                    }
+                ColouredIcon {
+                    anchors.centerIn: parent
+                    implicitSize: 14
+                    source: Qt.resolvedUrl("../../../../assets/icons/lucide/" + label.glyph + ".svg")
+                    colour: label.selected ? Colours.palette.m3tertiary : Colours.palette.m3onSurfaceVariant
                 }
             }
 
@@ -288,48 +221,16 @@ Item {
         }
     }
 
-    Loader {
-        active: Config.bar.workspaces.activeIndicator
-        anchors.fill: parent
-
-        sourceComponent: Item {
-            StyledClippingRect {
-                id: indicator
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                y: (view.currentItem?.y ?? 0) - view.contentY
-                implicitHeight: view.currentItem?.size ?? 0
-
-                color: Colours.palette.m3tertiary
-                radius: Appearance.rounding.full
-
-                Colouriser {
-                    source: view
-                    sourceColor: Colours.palette.m3onSurface
-                    colorizationColor: Colours.palette.m3onTertiary
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    x: 0
-                    y: -indicator.y
-                    implicitWidth: view.width
-                    implicitHeight: view.height
-                }
-
-                Behavior on y {
-                    Anim {
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                    }
-                }
-
-                Behavior on implicitHeight {
-                    Anim {
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                    }
-                }
-            }
+    StyledRect {
+        visible: Config.bar.workspaces.activeIndicator && view.currentItem !== null
+        width: 2
+        height: 16
+        radius: 1
+        x: 0
+        y: (view.currentItem?.y ?? 0) - view.contentY + (Config.bar.sizes.innerWidth - Appearance.padding.small * 2 - height) / 2
+        color: Colours.palette.m3tertiary
+        Behavior on y {
+            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
         }
     }
 
@@ -349,11 +250,10 @@ Item {
             if (Math.abs(event.y - startY) > drag.threshold)
                 return;
 
-            const ws = view.itemAt(event.x, event.y);
+            const ws = view.itemAt(event.x + view.contentX, event.y + view.contentY);
             if (ws?.modelData)
                 Hypr.dispatch(`togglespecialworkspace ${ws.modelData.name.slice(8)}`);
-            else
-                Hypr.dispatch("togglespecialworkspace special");
+
         }
     }
 }

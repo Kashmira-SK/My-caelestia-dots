@@ -50,11 +50,43 @@ Item {
             Layout.fillWidth: true
             spacing: Appearance.spacing.normal
 
-            StyledText {
-                text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("AC")
-                color: Colours.palette.m3onSurfaceVariant
-                font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.large
+            Item {
+                implicitWidth: 48
+                implicitHeight: 48
+
+                Canvas {
+                    anchors.fill: parent
+                    visible: UPower.displayDevice.isLaptopBattery
+                    property real charge: Math.max(0, Math.min(1, UPower.displayDevice.percentage))
+                    property color ink: Colours.palette.m3primary
+                    property color track: Colours.tPalette.m3surfaceContainer
+                    onChargeChanged: requestPaint()
+                    onInkChanged: requestPaint()
+                    onTrackChanged: requestPaint()
+
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.clearRect(0, 0, width, height);
+                        ctx.lineWidth = 2;
+                        ctx.lineCap = "round";
+                        for (let i = 0; i < 24; i++) {
+                            const a = -Math.PI / 2 + i * Math.PI / 12;
+                            ctx.strokeStyle = i < Math.round(charge * 24) ? ink : track;
+                            ctx.beginPath();
+                            ctx.moveTo(width / 2 + 19 * Math.cos(a), height / 2 + 19 * Math.sin(a));
+                            ctx.lineTo(width / 2 + 22 * Math.cos(a), height / 2 + 22 * Math.sin(a));
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("AC")
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.family: Appearance.font.family.mono
+                    font.pointSize: Appearance.font.size.small
+                }
             }
 
             StyledText {
@@ -75,21 +107,6 @@ Item {
                 color: Colours.palette.m3outline
                 font.pointSize: Appearance.font.size.small
                 wrapMode: Text.Wrap
-            }
-        }
-
-        StyledRect {
-            Layout.fillWidth: true
-            visible: UPower.displayDevice.isLaptopBattery
-            implicitHeight: 4
-            radius: 2
-            color: Colours.tPalette.m3surfaceContainer
-
-            StyledRect {
-                width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage))
-                height: parent.height
-                radius: parent.radius
-                color: Colours.palette.m3primary
             }
         }
 

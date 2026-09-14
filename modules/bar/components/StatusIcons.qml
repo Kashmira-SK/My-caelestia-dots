@@ -16,7 +16,7 @@ StyledRect {
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 
-    color: "transparent"
+    color: Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.panel
 
     clip: true
@@ -31,7 +31,7 @@ StyledRect {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Appearance.padding.normal
 
-        spacing: Appearance.spacing.small
+        spacing: Appearance.spacing.small + 2
 
         // Lock keys status
         WrappedLoader {
