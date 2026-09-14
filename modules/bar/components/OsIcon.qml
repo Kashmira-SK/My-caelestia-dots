@@ -16,13 +16,25 @@ Item {
         }
     }
 
-    ColouredIcon {
+    Loader {
         anchors.centerIn: parent
-        source: SysInfo.osLogo
-        implicitSize: Appearance.font.size.large * 1.2
-        colour: Colours.palette.m3tertiary
+        sourceComponent: SysInfo.osId === "arch" && !Config.general.logo ? arch : custom
     }
 
-    implicitWidth: Appearance.font.size.large * 1.2
+    Component {
+        id: arch
+        ArchMark { colour: Colours.palette.m3tertiary }
+    }
+
+    Component {
+        id: custom
+        ColouredIcon {
+            source: SysInfo.osLogo
+            implicitSize: 24
+            colour: Colours.palette.m3tertiary
+        }
+    }
+
+    implicitWidth: 24
     implicitHeight: implicitWidth
 }

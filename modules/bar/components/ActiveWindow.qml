@@ -21,92 +21,34 @@ Item {
         return entry?.name || appClass.split(".").pop() || qsTr("Window");
     }
 
-    readonly property int maxHeight: {
-        const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
-        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
-        // Length - 2 cause repeater counts as a child
-        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
-    }
-    property Title current: text1
+    readonly property alias current: title
 
-    clip: true
     implicitWidth: Config.bar.sizes.innerWidth
-    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+    implicitHeight: icon.implicitHeight + Appearance.spacing.small + title.implicitHeight
 
     MaterialIcon {
         id: icon
-
         anchors.horizontalCenter: parent.horizontalCenter
-
-        animate: true
-        text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
+        text: Icons.getAppCategoryIcon(root.appClass, "desktop_windows")
+        font.pointSize: Appearance.font.size.small
         color: root.colour
     }
 
-    Title {
-        id: text1
-    }
-
-    Title {
-        id: text2
-    }
-
-    TextMetrics {
-        id: metrics
-
-        text: root.appName.toUpperCase()
-        font.pointSize: Appearance.font.size.small
-        font.family: Appearance.font.family.mono
-        font.weight: 600
-        font.letterSpacing: 1
-        elide: Qt.ElideRight
-        elideWidth: Math.max(0, Math.min(root.maxHeight - icon.height - Appearance.spacing.small, 160))
-
-        onTextChanged: {
-            const next = root.current === text1 ? text2 : text1;
-            next.text = elidedText;
-            root.current = next;
-        }
-        onElideWidthChanged: root.current.text = elidedText
-    }
-
-    Behavior on implicitHeight {
-        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
-    }
-
-    component Title: StyledText {
-        id: text
-
-        anchors.horizontalCenter: icon.horizontalCenter
+    StyledText {
+        id: title
         anchors.top: icon.bottom
         anchors.topMargin: Appearance.spacing.small
-
-        font.pointSize: metrics.font.pointSize
-        font.family: metrics.font.family
-        font.weight: metrics.font.weight
-        font.letterSpacing: metrics.font.letterSpacing
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width
+        text: root.appName
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
+        font.family: Appearance.font.family.sans
+        font.pointSize: Appearance.font.size.small * 0.85
+        font.weight: 400
         color: root.colour
-        opacity: root.current === this ? 1 : 0
+    }
 
-        transform: [
-            Translate {
-                x: Config.bar.activeWindow.inverted ? -implicitWidth + text.implicitHeight : 0
-            },
-            Rotation {
-                angle: Config.bar.activeWindow.inverted ? 270 : 90
-                origin.x: text.implicitHeight / 2
-                origin.y: text.implicitHeight / 2
-            }
-        ]
-
-        width: implicitHeight
-        height: implicitWidth
-
-        Behavior on opacity {
-            Anim {}
-        }
-    } 
-    
     StateLayer {
         anchors.fill: parent
         radius: Appearance.rounding.panel
@@ -114,5 +56,4 @@ Item {
             bar.triggerActiveWindowPopout();
         }
     }
-
 }
