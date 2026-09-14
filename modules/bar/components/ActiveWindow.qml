@@ -56,9 +56,11 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             renderType: Text.CurveRendering
-            font.family: Appearance.font.family.mono
-            font.pointSize: Appearance.font.size.smaller
-            font.weight: 400
+            font.family: Appearance.font.family.sans
+            font.pointSize: Appearance.font.size.small
+            font.weight: 600
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 3
             color: root.colour
         }
     }
