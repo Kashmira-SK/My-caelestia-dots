@@ -9,7 +9,7 @@ Column {
     id: root
     property color colour: Colours.palette.m3tertiary
     width: Config.bar.sizes.innerWidth
-    spacing: 2
+    spacing: 0
 
     Loader {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -25,26 +25,28 @@ Column {
     StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
         text: Time.format(Config.services.useTwelveHourClock ? "hh AP" : "HH").split(" ")[0]
-        font.family: Appearance.font.family.clock
-        font.pointSize: Appearance.font.size.larger
+        font.family: Appearance.font.family.mono
+        font.pointSize: Appearance.font.size.smaller
         font.weight: 500
+        font.letterSpacing: 1
         color: root.colour
     }
 
     StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
         text: Time.format("mm")
-        font.family: Appearance.font.family.clock
-        font.pointSize: Appearance.font.size.larger
-        font.weight: 400
+        font.family: Appearance.font.family.mono
+        font.pointSize: Appearance.font.size.smaller
+        font.weight: 500
+        font.letterSpacing: 1
         color: root.colour
     }
 
     StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
         visible: Config.services.useTwelveHourClock
-        text: Time.format("AP").toLowerCase()
-        font.family: Appearance.font.family.sans
+        text: Time.format("AP")
+        font.family: Appearance.font.family.mono
         font.pointSize: Appearance.font.size.small * 0.8
         font.letterSpacing: 1
         color: root.colour

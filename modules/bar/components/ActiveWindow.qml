@@ -54,11 +54,11 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: root.appName
+        text: root.appName.toUpperCase()
         font.pointSize: Appearance.font.size.small
-        font.family: Appearance.font.family.sans
-        font.weight: 500
-        font.letterSpacing: 0.3
+        font.family: Appearance.font.family.mono
+        font.weight: 600
+        font.letterSpacing: 1
         elide: Qt.ElideRight
         elideWidth: Math.max(0, Math.min(root.maxHeight - icon.height - Appearance.spacing.small, 160))
 

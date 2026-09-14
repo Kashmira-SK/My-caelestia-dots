@@ -9,7 +9,7 @@ Controls.AbstractButton {
     id: root
     required property PersistentProperties visibilities
 
-    implicitWidth: 32
+    implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: 30
     hoverEnabled: true
     activeFocusOnTab: true
@@ -17,10 +17,33 @@ Controls.AbstractButton {
     onClicked: visibilities.session = !visibilities.session
 
     contentItem: Item {
-        BarGlyph {
+        Canvas {
             anchors.centerIn: parent
-            glyph: "power"
-            colour: Colours.palette.m3error
+            implicitWidth: 20
+            implicitHeight: 20
+            property color ink: Colours.palette.m3error
+            onInkChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+                ctx.strokeStyle = ink;
+                ctx.lineWidth = 1.5;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                // An open, softly squared power socket rather than a circular glyph.
+                ctx.beginPath();
+                ctx.moveTo(6, 5);
+                ctx.lineTo(4, 5);
+                ctx.lineTo(4, 13);
+                ctx.quadraticCurveTo(4, 16, 7, 16);
+                ctx.lineTo(13, 16);
+                ctx.quadraticCurveTo(16, 16, 16, 13);
+                ctx.lineTo(16, 5);
+                ctx.lineTo(14, 5);
+                ctx.moveTo(10, 2);
+                ctx.lineTo(10, 10);
+                ctx.stroke();
+            }
         }
     }
 
