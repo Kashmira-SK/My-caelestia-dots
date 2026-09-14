@@ -98,19 +98,19 @@ Item {
                 readonly property string glyph: {
                     const name = ws.modelData?.name ?? "";
                     if (name === "special:term") return "monitor";
-                    if (name === "special:magic") return "orbit";
-                    if (name === "special:scratch1") return "moon";
-                    if (name === "special:scratch2") return "globe";
-                    return "orbit";
+                    if (name === "special:magic") return "scan";
+                    if (name === "special:scratch1") return "copy";
+                    if (name === "special:scratch2") return "folder";
+                    return "square";
                 }
 
                 StyledRect {
+                    objectName: "specialHighlight"
                     anchors.centerIn: parent
-                    width: 22
-                    height: 22
-                    radius: 4
-                    rotation: 45
-                    border.width: label.selected ? 1 : 0
+                    width: Math.min(28, parent.width - 2)
+                    height: Math.min(28, parent.height - 2)
+                    radius: Appearance.rounding.panel
+                    border.width: label.selected && Config.bar.workspaces.activeIndicator ? 1 : 0
                     border.color: Colours.palette.m3tertiary
                 }
 
@@ -218,19 +218,6 @@ Item {
             Anim {
                 properties: "x,y"
             }
-        }
-    }
-
-    StyledRect {
-        visible: Config.bar.workspaces.activeIndicator && view.currentItem !== null
-        width: 2
-        height: 16
-        radius: 1
-        x: 0
-        y: (view.currentItem?.y ?? 0) - view.contentY + (Config.bar.sizes.innerWidth - Appearance.padding.small * 2 - height) / 2
-        color: Colours.palette.m3tertiary
-        Behavior on y {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
         }
     }
 

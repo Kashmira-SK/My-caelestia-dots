@@ -28,50 +28,52 @@ StyledSlider {
     }
 
     handle: Canvas {
-        id: planet
+        id: craft
         x: root.leftPadding + root.visualPosition * (root.availableWidth - width)
         y: root.topPadding + (root.availableHeight - height) / 2
         implicitWidth: 28
         implicitHeight: 28
         property color ink: Colours.palette.m3primary
         property color shade: Colours.palette.m3onPrimary
-        property real phase: root.position * Math.PI * 2
+        property bool thrust: root.pressed
         onInkChanged: requestPaint()
         onShadeChanged: requestPaint()
-        onPhaseChanged: requestPaint()
+        onThrustChanged: requestPaint()
 
         onPaint: {
             const ctx = getContext("2d");
             ctx.clearRect(0, 0, width, height);
             ctx.save();
             ctx.translate(width / 2, height / 2);
-            ctx.rotate(-Math.PI / 6);
-            // Ring behind the planet, solid body, then the near half of the ring.
-            ctx.strokeStyle = ink;
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.ellipse(-12, -4, 24, 8);
-            ctx.stroke();
+            // Compact shuttle silhouette: gently softened wings, no planet or orbit.
             ctx.fillStyle = ink;
             ctx.beginPath();
-            ctx.arc(0, 0, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = Qt.alpha(shade, 0.25);
-            ctx.beginPath();
-            ctx.arc(0, 0, 7, -Math.PI / 2, Math.PI / 2);
+            ctx.moveTo(-1, -9);
+            ctx.quadraticCurveTo(0, -11, 1, -9);
+            ctx.lineTo(10, 6);
+            ctx.quadraticCurveTo(11, 8, 9, 7);
+            ctx.lineTo(3, 5);
+            ctx.lineTo(2, 8);
+            ctx.lineTo(-2, 8);
+            ctx.lineTo(-3, 5);
+            ctx.lineTo(-9, 7);
+            ctx.quadraticCurveTo(-11, 8, -10, 6);
+            ctx.closePath();
             ctx.fill();
             ctx.strokeStyle = shade;
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = "round";
             ctx.beginPath();
-            for (let i = 0; i <= 32; i++) {
-                const a = i * Math.PI / 32;
-                const x = 12 * Math.cos(a), y = 4 * Math.sin(a);
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
+            ctx.moveTo(0, -4);
+            ctx.lineTo(0, 1);
             ctx.stroke();
-            ctx.fillStyle = ink;
-            ctx.beginPath();
-            ctx.arc(11 * Math.cos(phase), 9 * Math.sin(phase), 1.3, 0, Math.PI * 2);
-            ctx.fill();
+            if (thrust) {
+                ctx.strokeStyle = ink;
+                ctx.beginPath();
+                ctx.moveTo(-2, 10); ctx.lineTo(-2, 12);
+                ctx.moveTo(2, 10); ctx.lineTo(2, 12);
+                ctx.stroke();
+            }
             ctx.restore();
         }
     }

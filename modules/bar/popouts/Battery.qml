@@ -50,38 +50,37 @@ Item {
             Layout.fillWidth: true
             spacing: Appearance.spacing.normal
 
-            Item {
-                implicitWidth: 48
-                implicitHeight: 48
+            RowLayout {
+                spacing: Appearance.spacing.small
+                Layout.alignment: Qt.AlignVCenter
 
-                Canvas {
-                    anchors.fill: parent
+                Grid {
+                    Layout.alignment: Qt.AlignVCenter
                     visible: UPower.displayDevice.isLaptopBattery
-                    property real charge: Math.max(0, Math.min(1, UPower.displayDevice.percentage))
-                    property color ink: Colours.palette.m3primary
-                    property color track: Colours.tPalette.m3surfaceContainer
-                    onChargeChanged: requestPaint()
-                    onInkChanged: requestPaint()
-                    onTrackChanged: requestPaint()
+                    columns: 3
+                    spacing: 2
 
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.clearRect(0, 0, width, height);
-                        ctx.lineWidth = 2;
-                        ctx.lineCap = "round";
-                        for (let i = 0; i < 24; i++) {
-                            const a = -Math.PI / 2 + i * Math.PI / 12;
-                            ctx.strokeStyle = i < Math.round(charge * 24) ? ink : track;
-                            ctx.beginPath();
-                            ctx.moveTo(width / 2 + 19 * Math.cos(a), height / 2 + 19 * Math.sin(a));
-                            ctx.lineTo(width / 2 + 22 * Math.cos(a), height / 2 + 22 * Math.sin(a));
-                            ctx.stroke();
+                    Repeater {
+                        model: 12
+                        StyledRect {
+                            required property int index
+                            width: 4
+                            height: 4
+                            radius: 1
+                            color: Colours.tPalette.m3surfaceContainer
+
+                            StyledRect {
+                                width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage * 12 - parent.index))
+                                height: parent.height
+                                radius: 1
+                                color: Colours.palette.m3primary
+                            }
                         }
                     }
                 }
 
                 StyledText {
-                    anchors.centerIn: parent
+                    Layout.alignment: Qt.AlignVCenter
                     text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("AC")
                     color: Colours.palette.m3onSurfaceVariant
                     font.family: Appearance.font.family.mono
