@@ -2,6 +2,24 @@
 
 Newest entries at the top.
 
+## [2026-09-14] - Left-side bar and popups
+
+### Added
+
+- Framed Wi-Fi, Bluetooth, audio, battery, and keyboard-layout popups with compact controls and existing dynamic theme colors
+- Workspace indicators and distinct icons for the four special workspaces, plus a shared background and adjusted spacing for status icons
+- Shuttle-shaped volume handle with a dotted trail, compact audio device selection, and battery charge cells with evenly sized power-profile controls
+- Updated power-menu button, regular-weight vertical app label and stacked clock, and a cached palette-tinted Arch logo
+
+### Fixed
+
+- Wi-Fi and Bluetooth header controls align on the right, with matching visual sizes and wrapping for longer status and device text
+- Removed Forget from the quick Bluetooth popup; device removal remains available in settings
+- Volume dragging no longer jumps with delayed backend updates; queued volume writes are serialized and coalesced
+- Special-workspace clicks account for scrolling, and window-preview titles wrap within the popup
+
+---
+
 ## [2026-09-13] - Right-side utilities and power panel
 
 ### Added
