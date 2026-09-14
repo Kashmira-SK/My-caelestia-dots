@@ -75,9 +75,7 @@ Item {
                 value: Audio.volume
                 onMoved: Audio.setVolume(value)
 
-                Behavior on value {
-                    Anim {}
-                }
+                // Keep the displayed level synchronous with input and PipeWire updates.
             }
         }
 

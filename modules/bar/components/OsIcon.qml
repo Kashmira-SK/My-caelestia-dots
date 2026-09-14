@@ -7,11 +7,6 @@ import QtQuick
 Item {
     id: root
 
-    OrbitAccent {
-        anchors.fill: parent
-        ink: Colours.palette.m3tertiary
-    }
-
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
@@ -24,10 +19,10 @@ Item {
     ColouredIcon {
         anchors.centerIn: parent
         source: SysInfo.osLogo
-        implicitSize: Appearance.font.size.large
+        implicitSize: Appearance.font.size.large * 1.2
         colour: Colours.palette.m3tertiary
     }
 
-    implicitWidth: Config.bar.sizes.innerWidth
+    implicitWidth: Appearance.font.size.large * 1.2
     implicitHeight: implicitWidth
 }

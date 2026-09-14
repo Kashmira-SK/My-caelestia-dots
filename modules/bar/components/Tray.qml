@@ -32,8 +32,6 @@ StyledRect {
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)
     radius: Appearance.rounding.panel
-    border.width: Config.bar.tray.background && items.count > 0 ? 1 : 0
-    border.color: Colours.palette.m3outlineVariant
 
     Column {
         id: layout

@@ -23,12 +23,12 @@ Item {
         const min = Math.floor(s / 60) % 60;
         let comps = [];
         if (day > 0)
-            comps.push(qsTr("%1 days").arg(day));
+            comps.push(qsTr("%1d").arg(day));
         if (hr > 0)
-            comps.push(qsTr("%1 hours").arg(hr));
+            comps.push(qsTr("%1h").arg(hr));
         if (min > 0)
-            comps.push(qsTr("%1 mins").arg(min));
-        return comps.join(", ") || fallback;
+            comps.push(qsTr("%1m").arg(min));
+        return comps.join(" ") || fallback;
     }
 
     UtilityFrame {
@@ -50,78 +50,46 @@ Item {
             Layout.fillWidth: true
             spacing: Appearance.spacing.normal
 
-            Item {
-                visible: UPower.displayDevice.isLaptopBattery
-                Layout.alignment: Qt.AlignTop
-                implicitWidth: 52
-                implicitHeight: 26
-
-                StyledRect {
-                    width: 48
-                    height: 26
-                    radius: 5
-                    border.width: 1
-                    border.color: Colours.palette.m3outline
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: 2
-                        Repeater {
-                            model: 5
-                            StyledRect {
-                                required property int index
-                                width: 6
-                                height: 16
-                                radius: 1
-                                color: Colours.tPalette.m3surfaceContainer
-                                StyledRect {
-                                    width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage * 5 - parent.index))
-                                    height: parent.height
-                                    radius: parent.radius
-                                    color: Colours.palette.m3primary
-                                }
-                            }
-                        }
-                    }
-                }
-                StyledRect {
-                    x: 49
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 3
-                    height: 8
-                    radius: 1
-                    color: Colours.palette.m3outline
-                }
+            StyledText {
+                text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("AC")
+                color: Colours.palette.m3onSurfaceVariant
+                font.family: Appearance.font.family.mono
+                font.pointSize: Appearance.font.size.large
             }
 
-            ColumnLayout {
+            StyledText {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.small
-                StyledText {
-                    Layout.fillWidth: true
-                    text: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : qsTr("No battery")
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.large
-                }
-                StyledText {
-                    Layout.fillWidth: true
-                    text: {
-                        const battery = UPower.displayDevice;
-                        if (!battery.isLaptopBattery)
-                            return qsTr("Plugged in");
-                        if (battery.state === UPowerDeviceState.FullyCharged)
-                            return qsTr("Fully charged");
-                        if (UPower.onBattery)
-                            return battery.timeToEmpty > 0 ? qsTr("%1 left").arg(root.formatSeconds(battery.timeToEmpty, "")) : qsTr("On battery");
-                        if (battery.state === UPowerDeviceState.Charging)
-                            return battery.timeToFull > 0 ? qsTr("%1 until full").arg(root.formatSeconds(battery.timeToFull, "")) : qsTr("Charging");
+                horizontalAlignment: Text.AlignRight
+                text: {
+                    const battery = UPower.displayDevice;
+                    if (!battery.isLaptopBattery)
                         return qsTr("Plugged in");
-                    }
-                    color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.small
-                    wrapMode: Text.Wrap
+                    if (battery.state === UPowerDeviceState.FullyCharged)
+                        return qsTr("Fully charged");
+                    if (UPower.onBattery)
+                        return battery.timeToEmpty > 0 ? qsTr("%1 left").arg(root.formatSeconds(battery.timeToEmpty, "")) : qsTr("On battery");
+                    if (battery.state === UPowerDeviceState.Charging)
+                        return battery.timeToFull > 0 ? qsTr("%1 until full").arg(root.formatSeconds(battery.timeToFull, "")) : qsTr("Charging");
+                    return qsTr("Plugged in");
                 }
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+                wrapMode: Text.Wrap
+            }
+        }
+
+        StyledRect {
+            Layout.fillWidth: true
+            visible: UPower.displayDevice.isLaptopBattery
+            implicitHeight: 4
+            radius: 2
+            color: Colours.tPalette.m3surfaceContainer
+
+            StyledRect {
+                width: parent.width * Math.max(0, Math.min(1, UPower.displayDevice.percentage))
+                height: parent.height
+                radius: parent.radius
+                color: Colours.palette.m3primary
             }
         }
 
@@ -160,8 +128,8 @@ Item {
         }
 
         RowLayout {
-            Layout.alignment: Qt.AlignLeft
-            spacing: Appearance.spacing.normal
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.small
 
             Profile {
                 text: qsTr("Saver")
@@ -187,6 +155,8 @@ Item {
         required property string glyph
         readonly property bool selected: PowerProfiles.profile === profile
 
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
         implicitWidth: 36
         implicitHeight: 30
         padding: Appearance.padding.small

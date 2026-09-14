@@ -23,6 +23,7 @@ ColumnLayout {
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
 
     Layout.alignment: Qt.AlignHCenter
+    Layout.preferredWidth: Config.bar.sizes.innerWidth
     Layout.preferredHeight: size
 
     spacing: 0
@@ -33,23 +34,38 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
 
-        animate: true
+        animate: false
+        font.family: Appearance.font.family.mono
+        font.pointSize: Appearance.font.size.small
         text: {
             const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
-            const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
+            const wsName = !ws || ws.name == root.ws ? String(root.ws).padStart(2, "0") : ws.name[0];
             let displayName = wsName.toString();
             if (Config.bar.workspaces.capitalisation.toLowerCase() === "upper") {
                 displayName = displayName.toUpperCase();
             } else if (Config.bar.workspaces.capitalisation.toLowerCase() === "lower") {
                 displayName = displayName.toLowerCase();
             }
-            const label = Config.bar.workspaces.label || displayName;
-            const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
-            const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
+            // Retire the stock dot/Pacman labels; retain explicitly customized labels.
+            const configured = Config.bar.workspaces;
+            const label = configured.label.trim() === "" ? displayName : configured.label || displayName;
+            const occupiedLabel = configured.occupiedLabel === "󰮯" ? label : configured.occupiedLabel || label;
+            const activeLabel = configured.activeLabel === "󰮯" ? label : configured.activeLabel || (root.isOccupied ? occupiedLabel : label);
             return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
         }
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+        color: root.activeWsId === root.ws ? Colours.palette.m3primary : root.isOccupied ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
         verticalAlignment: Qt.AlignVCenter
+
+        Rectangle {
+            anchors.left: parent.right
+            anchors.leftMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.isOccupied
+            width: 3
+            height: 3
+            radius: 1.5
+            color: indicator.color
+        }
     }
 
     Loader {

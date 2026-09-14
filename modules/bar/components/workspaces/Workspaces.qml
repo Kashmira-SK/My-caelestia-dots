@@ -27,10 +27,8 @@ StyledClippingRect {
     implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: layout.implicitHeight + Appearance.padding.small * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: "transparent"
     radius: Appearance.rounding.panel
-    border.width: 1
-    border.color: Colours.palette.m3outlineVariant
 
     Item {
         anchors.fill: parent
@@ -44,19 +42,6 @@ StyledClippingRect {
             blurMax: 32
         }
 
-        Loader {
-            active: Config.bar.workspaces.occupiedBg
-
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.small
-
-            sourceComponent: OccupiedBg {
-                workspaces: workspaces
-                occupied: root.occupied
-                groupOffset: root.groupOffset
-            }
-        }
-
         ColumnLayout {
             id: layout
 
@@ -64,7 +49,7 @@ StyledClippingRect {
             spacing: Math.floor(Appearance.spacing.small / 2)
 
             Repeater {
-                id: workspaces
+                id: workspaceItems
 
                 model: Config.bar.workspaces.shown
 
@@ -77,12 +62,13 @@ StyledClippingRect {
         }
 
         Loader {
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 2
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
                 activeWsId: root.activeWsId
-                workspaces: workspaces
+                workspaces: workspaceItems
                 mask: layout
             }
         }
@@ -90,7 +76,10 @@ StyledClippingRect {
         MouseArea {
             anchors.fill: layout
             onClicked: event => {
-                const ws = layout.childAt(event.x, event.y).ws;
+                const item = layout.childAt(event.x, event.y);
+                if (!item || !item.isWorkspace)
+                    return;
+                const ws = item.ws;
                 if (Hypr.activeWsId !== ws)
                     Hypr.dispatch(`workspace ${ws}`);
                 else
