@@ -152,18 +152,23 @@ Item {
 
                 Pane {
                     index: 1
+                    sourceComponent: Dash2 {}
+                }
+
+                Pane {
+                    index: 2
                     sourceComponent: Media {
                       state: root.state
                     }
                 }
 
                 Pane {
-                    index: 2
+                    index: 3
                     sourceComponent: Performance {}
                 }
 
                 Pane {
-                    index: 3
+                    index: 4
 
                     sourceComponent: CalendarPage {
                         state: root.state
