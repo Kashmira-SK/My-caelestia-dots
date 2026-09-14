@@ -47,7 +47,7 @@ Item {
 
         ConnectionPopoutHeader {
             title: qsTr("Output volume")
-            detail: Audio.muted ? qsTr("Muted") : `${Math.round(Audio.volume * 100)}%`
+            detail: Audio.muted && !volumeSync.waiting ? qsTr("Muted") : `${Math.round((volumeSlider.pressed || volumeSync.waiting ? volumeSlider.value : Audio.volume) * 100)}%`
 
             ConnectionAction {
                 glyph: "settings"
@@ -68,14 +68,19 @@ Item {
             }
 
             PopoutParts.PopupVolumeSlider {
+                id: volumeSlider
                 anchors.left: parent.left
                 anchors.right: parent.right
                 implicitHeight: parent.implicitHeight
 
-                value: Audio.volume
-                onMoved: Audio.setVolume(value)
-
-                // Keep the displayed level synchronous with input and PipeWire updates.
+                PopoutParts.VolumeSliderSync {
+                    id: volumeSync
+                    slider: volumeSlider
+                    backendValue: Audio.volume
+                    backendPending: Audio.volumePending
+                    deviceId: Audio.sink?.id ?? -1
+                    onRequested: value => Audio.setVolume(value)
+                }
             }
         }
 

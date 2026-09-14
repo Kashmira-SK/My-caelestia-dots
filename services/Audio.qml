@@ -4,6 +4,7 @@ import qs.config
 import Caelestia.Services
 import Caelestia
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 import QtQuick
 
@@ -39,6 +40,7 @@ Singleton {
 
     readonly property bool muted: !!sink?.audio?.muted
     readonly property real volume: sink?.audio?.volume ?? 0
+    readonly property bool volumePending: volumeQueue.pending
 
     readonly property bool sourceMuted: !!source?.audio?.muted
     readonly property real sourceVolume: source?.audio?.volume ?? 0
@@ -48,18 +50,15 @@ Singleton {
 
     function setVolume(newVolume: real): void {
         const vol = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
-        if (sink?.audio) {
-            sink.audio.muted = false;
-        }
-        Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", vol.toFixed(2)]);
+        volumeQueue.enqueue(vol);
     }
 
     function incrementVolume(amount: real): void {
-        setVolume(volume + (amount || Config.services.audioIncrement));
+        setVolume((volumeQueue.pending && volumeQueue.latestDeviceId === sink?.id ? volumeQueue.latestValue : volume) + (amount || Config.services.audioIncrement));
     }
 
     function decrementVolume(amount: real): void {
-        setVolume(volume - (amount || Config.services.audioIncrement));
+        setVolume((volumeQueue.pending && volumeQueue.latestDeviceId === sink?.id ? volumeQueue.latestValue : volume) - (amount || Config.services.audioIncrement));
     }
 
     function setSourceVolume(newVolume: real): void {
@@ -141,6 +140,26 @@ Singleton {
     Component.onCompleted: {
         previousSinkName = sink?.description || sink?.name || qsTr("Unknown Device");
         previousSourceName = source?.description || source?.name || qsTr("Unknown Device");
+    }
+
+    VolumeWriteQueue {
+        id: volumeQueue
+        deviceId: root.sink?.id ?? -1
+        onWriteRequested: (value, device) => {
+            if (root.sink?.id === device && root.sink.audio)
+                root.sink.audio.muted = false;
+            volumeWriter.command = ["wpctl", "set-volume", String(device), value.toFixed(2)];
+            volumeWriter.running = true;
+        }
+    }
+
+    Process {
+        id: volumeWriter
+        onExited: (exitCode, exitStatus) => {
+            volumeQueue.complete();
+            if (exitCode !== 0)
+                console.warn("Output volume command failed:", exitCode);
+        }
     }
 
     PwObjectTracker {
