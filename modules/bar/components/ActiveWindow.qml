@@ -22,9 +22,14 @@ Item {
     }
 
     readonly property alias current: title
+    readonly property real titleLimit: {
+        const otherModules = bar.children.filter(c => c.id && c.item !== root && c.id !== "spacer");
+        const usedHeight = otherModules.reduce((total, c) => total + (c.item?.nonAnimHeight ?? c.height), 0);
+        return Math.max(0, Math.min(160, bar.height - usedHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2 - icon.height - Appearance.spacing.small));
+    }
 
     implicitWidth: Config.bar.sizes.innerWidth
-    implicitHeight: icon.implicitHeight + Appearance.spacing.small + title.implicitHeight
+    implicitHeight: icon.implicitHeight + Appearance.spacing.small + titleSlot.implicitHeight
 
     MaterialIcon {
         id: icon
@@ -34,19 +39,28 @@ Item {
         color: root.colour
     }
 
-    StyledText {
-        id: title
+    Item {
+        id: titleSlot
         anchors.top: icon.bottom
         anchors.topMargin: Appearance.spacing.small
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width
-        text: root.appName
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
-        font.family: Appearance.font.family.sans
-        font.pointSize: Appearance.font.size.small * 0.85
-        font.weight: 400
-        color: root.colour
+        implicitHeight: Math.min(title.implicitWidth, root.titleLimit)
+
+        StyledText {
+            id: title
+            anchors.centerIn: parent
+            width: titleSlot.height
+            rotation: Config.bar.activeWindow.inverted ? 270 : 90
+            text: root.appName
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            renderType: Text.CurveRendering
+            font.family: Appearance.font.family.mono
+            font.pointSize: Appearance.font.size.smaller
+            font.weight: 400
+            color: root.colour
+        }
     }
 
     StateLayer {
