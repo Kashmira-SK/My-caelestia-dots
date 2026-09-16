@@ -21,7 +21,7 @@ Item {
         triggeredOnStart: true
         onTriggered: Players.active?.positionChanged()
     }
-    Station {
+    Celestial {
         anchors.fill: parent
         timeText: Qt.formatDateTime(Time.date, "HH:mm")
         dateText: Qt.formatDateTime(Time.date, "dddd, MMMM d")
