@@ -72,14 +72,6 @@ StyledClippingRect {
                     c.fillStyle = colour;
                     c.fill();
                 };
-                const haze = (x, y, r, colour, alpha) => {
-                    const g = c.createRadialGradient(x, y, 0, x, y, r);
-                    g.addColorStop(0, Qt.alpha(colour, alpha));
-                    g.addColorStop(0.5, Qt.alpha(colour, alpha * 0.35));
-                    g.addColorStop(1, Qt.alpha(colour, 0));
-                    c.fillStyle = g;
-                    c.fillRect(x - r, y - r, r * 2, r * 2);
-                };
                 // Stars have a slight depth-dependent response to pointer movement.
                 for (let i = 0; i < 145; i++) {
                     const depth = noise(i + 300);
@@ -111,10 +103,10 @@ StyledClippingRect {
                 };
                 const levelAt = index => root.playing && root.audioLevels.length ? Math.max(0, Math.min(1, root.audioLevels[index % root.audioLevels.length] ?? 0)) : 0;
                 const ring = front => {
-                    // A broad, granular ring gives the planet material and depth.
-                    for (let lane = 0; lane < 16; lane++) {
-                        const radius = 207 + lane * 5.3;
-                        const depth = 57 + lane * 1.7;
+                    // Flat orbital ribbons, with restrained audio-driven particles.
+                    for (let lane = 0; lane < 4; lane++) {
+                        const radius = 221 + lane * 16;
+                        const depth = 61 + lane * 5;
                         c.beginPath();
                         for (let step = 0; step <= 78; step++) {
                             const angle = (front ? 0 : Math.PI) + step / 78 * Math.PI;
@@ -124,11 +116,11 @@ StyledClippingRect {
                             else
                                 c.lineTo(p.x, p.y);
                         }
-                        c.strokeStyle = Qt.alpha(lane % 4 === 0 ? root.secondary : root.primary, front ? 0.08 + noise(lane) * 0.13 : 0.05 + noise(lane) * 0.10);
-                        c.lineWidth = lane % 4 === 0 ? 2 : 0.7;
+                        c.strokeStyle = Qt.alpha(lane % 4 === 0 ? root.secondary : root.primary, front ? 0.14 : 0.08);
+                        c.lineWidth = lane === 1 ? 3 : 1;
                         c.stroke();
                     }
-                    for (let i = 0; i < 430; i++) {
+                    for (let i = 0; i < 140; i++) {
                         const angle = noise(i + 101) * Math.PI * 2 + root.phase * (0.022 + noise(i + 66) * 0.018);
                         const a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
                         if ((a < Math.PI) !== front)
@@ -136,67 +128,50 @@ StyledClippingRect {
                         const spread = noise(i + 400);
                         const level = levelAt(i);
                         const p = ringPoint(a, 204 + spread * 93 + level * 12, 57 + spread * 25 + level * 5);
-                        circle(p.x, p.y, 0.35 + noise(i + 700) * 0.9 + level * 0.65, Qt.alpha(i % 3 === 0 ? root.secondary : root.primary, (front ? 0.25 : 0.15) + noise(i + 800) * 0.22 + level * 0.22));
+                        circle(p.x, p.y, 0.35 + noise(i + 700) * 0.9 + level * 0.65, Qt.alpha(i % 3 === 0 ? root.secondary : root.primary, (front ? 0.16 : 0.10) + noise(i + 800) * 0.12 + level * 0.2));
                     }
                 };
                 ring(false);
 
-                // The globe is a shaded solid, with clipped moving cloud strata.
-                const globe = c.createRadialGradient(px - 65, py - 69, 12, px + 18, py + 15, pr * 1.08);
-                globe.addColorStop(0, Qt.alpha(root.secondary, 0.34));
-                globe.addColorStop(0.46, Colours.palette.m3surfaceContainerHigh);
-                globe.addColorStop(1, root.surface);
-                circle(px, py, pr, globe);
+                // Flat illustration: a solid disc and three offset cloud strokes.
+                circle(px, py, pr, Colours.palette.m3surfaceContainerHigh);
                 c.save();
                 c.beginPath();
                 c.arc(px, py, pr, 0, Math.PI * 2);
                 c.clip();
-                for (let band = 0; band < 34; band++) {
-                    const y = py - pr + band * 10;
+                c.strokeStyle = Qt.alpha(root.secondary, 0.055);
+                c.lineWidth = 8;
+                c.lineCap = "round";
+                for (let band = 0; band < 3; band++) {
+                    const y = py - 108 + band * 105;
+                    const drift = Math.sin(root.phase * 0.1 + band) * 5;
                     c.beginPath();
-                    for (let step = 0; step <= 40; step++) {
-                        const x = px - pr + step / 40 * pr * 2;
-                        const warp = Math.sin(step * 0.13 + band * 0.33 + root.phase * 0.035) * 5;
-                        const yy = y + Math.pow((x - px) / pr, 2) * 15 + warp;
-                        if (step === 0)
-                            c.moveTo(x, yy);
-                        else
-                            c.lineTo(x, yy);
-                    }
-                    c.strokeStyle = Qt.alpha(root.secondary, 0.022 + noise(band + 500) * 0.042);
-                    c.lineWidth = 2 + noise(band + 99) * 6;
+                    c.moveTo(px - 112 + drift, y);
+                    c.lineTo(px + 42 + drift, y);
                     c.stroke();
                 }
-                for (let i = 0; i < 210; i++) {
-                    circle(px - pr + noise(i + 900) * pr * 2, py - pr + noise(i + 1200) * pr * 2, 0.45, Qt.alpha(root.secondary, 0.04 + noise(i + 1400) * 0.065));
-                }
-                // The day progresses around the lit atmospheric edge.
                 c.restore();
+                // A fine day-progress arc, without a glow or simulated lighting.
                 c.beginPath();
                 c.arc(px, py, pr + 2, -Math.PI / 2, -Math.PI / 2 + root.dayProgress * Math.PI * 2);
-                c.strokeStyle = Qt.alpha(root.primary, 0.75);
-                c.lineWidth = 1.8;
+                c.strokeStyle = Qt.alpha(root.primary, 0.36);
+                c.lineWidth = 1;
                 c.stroke();
                 const sunAngle = -Math.PI / 2 + root.dayProgress * Math.PI * 2;
                 const sx = px + Math.cos(sunAngle) * (pr + 2), sy = py + Math.sin(sunAngle) * (pr + 2);
-                haze(sx, sy, 21, root.primary, 0.3);
                 circle(sx, sy, 3.2, root.primary);
                 ring(true);
 
                 // A small inhabited moon gives the system identity a place in the scene.
                 const mx = 645, my = 198, mr = 48;
-                const moon = c.createRadialGradient(mx - 22, my - 23, 1, mx + 10, my + 9, 64);
-                moon.addColorStop(0, Qt.alpha(root.secondary, 0.42));
-                moon.addColorStop(0.7, Colours.palette.m3surfaceContainerHigh);
-                moon.addColorStop(1, root.surface);
-                circle(mx, my, mr, moon);
+                circle(mx, my, mr, Colours.palette.m3surfaceContainerHigh);
                 c.save();
                 c.beginPath();
                 c.arc(mx, my, mr, 0, Math.PI * 2);
                 c.clip();
                 for (let i = 0; i < 20; i++) {
                     const x = mx - 45 + noise(i + 1800) * 90, y = my - 45 + noise(i + 1900) * 90;
-                    circle(x, y, 1 + noise(i + 2000) * 6, Qt.alpha(root.surface, 0.15));
+                    circle(x, y, 1 + noise(i + 2000) * 6, Qt.alpha(root.secondary, 0.035));
                 }
                 c.restore();
                 c.strokeStyle = Qt.alpha(root.secondary, 0.38);
@@ -242,54 +217,27 @@ StyledClippingRect {
             }
         }
 
-        // Time uses two large, light-weight lines instead of an instrument readout.
         Column {
-            x: 204
-            y: 166
-            width: 117
-            spacing: -13
-            Text {
-                text: root.timeText.split(":")[0]
-                font.family: Appearance.font.family.sans
-                font.pointSize: 58
-                font.weight: Font.Light
-                font.letterSpacing: -3
-                color: Colours.palette.m3onSurface
-                renderType: Text.QtRendering
-            }
-            Text {
-                text: root.timeText.split(":")[1] ?? "00"
-                font.family: Appearance.font.family.sans
-                font.pointSize: 58
-                font.weight: Font.Light
-                font.letterSpacing: -3
-                color: Colours.palette.m3onSurfaceVariant
-                renderType: Text.QtRendering
-            }
-        }
-        Column {
-            x: 330
-            y: 205
-            width: 94
-            spacing: 9
+            x: 197
+            y: 230
+            width: 208
+            spacing: 7
             Label {
-                text: root.dateText.split(",")[0]
                 width: parent.width
-                wrapMode: Text.Wrap
-                font.pointSize: 10.5
-                color: Colours.palette.m3onSurface
-            }
-            Rectangle {
-                width: 23
-                height: 1
-                color: Qt.alpha(root.primary, 0.55)
+                text: root.timeText
+                font.pointSize: 23
+                font.weight: Font.Normal
+                horizontalAlignment: Text.AlignHCenter
+                color: Colours.palette.m3onSurfaceVariant
             }
             Label {
-                text: root.dateText.split(",").slice(1).join(",").trim()
                 width: parent.width
-                wrapMode: Text.Wrap
-                font.pointSize: 10.5
+                text: root.dateText
+                font.pointSize: 9
+                horizontalAlignment: Text.AlignHCenter
                 color: Colours.palette.m3onSurfaceVariant
+                opacity: 0.7
+                elide: Text.ElideRight
             }
         }
         Row {
@@ -304,7 +252,7 @@ StyledClippingRect {
             }
             Label {
                 text: Math.floor(root.dayProgress * 100) + "%"
-                font.pointSize: 12
+                font.pointSize: 9
                 color: root.primary
                 Accessible.name: qsTr("Day progress: %1 percent").arg(Math.floor(root.dayProgress * 100))
             }
@@ -318,16 +266,16 @@ StyledClippingRect {
             Label {
                 width: parent.width
                 text: root.osText
-                font.pointSize: 17
-                font.weight: Font.Medium
+                font.pointSize: 10
+                font.weight: Font.Normal
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
-                color: Colours.palette.m3onSurface
+                color: Colours.palette.m3onSurfaceVariant
             }
             Label {
                 width: parent.width
                 text: root.wmText
-                font.pointSize: 11
+                font.pointSize: 9.5
                 horizontalAlignment: Text.AlignHCenter
                 color: Colours.palette.m3onSurfaceVariant
                 elide: Text.ElideRight
@@ -338,8 +286,8 @@ StyledClippingRect {
             y: 76
             width: 231
             text: root.uptimeText
-            font.pointSize: 11
-            font.italic: true
+            font.pointSize: 9
+            opacity: 0.7
             color: Colours.palette.m3onSurfaceVariant
             elide: Text.ElideRight
             Accessible.name: qsTr("Uptime: %1").arg(root.uptimeText)
@@ -356,23 +304,23 @@ StyledClippingRect {
                 Label {
                     width: parent.width
                     text: root.trackTitle
-                    font.pointSize: 19
-                    font.weight: Font.Medium
+                    font.pointSize: 9.5
+                    font.weight: Font.Normal
                     maximumLineCount: 1
                     elide: Text.ElideRight
-                    color: Colours.palette.m3onSurface
+                    color: Colours.palette.m3onSurfaceVariant
                 }
                 Row {
                     spacing: 8
                     MaterialIcon {
                         text: root.playing ? "music_note" : "music_off"
-                        font.pointSize: 11
+                        font.pointSize: 9.5
                         color: root.secondary
                     }
                     Label {
                         width: music.width - 28
                         text: root.hasPlayer ? root.trackArtist : qsTr("Nothing playing")
-                        font.pointSize: 11
+                        font.pointSize: 9.5
                         color: Colours.palette.m3onSurfaceVariant
                         elide: Text.ElideRight
                     }
@@ -425,6 +373,7 @@ StyledClippingRect {
         }
     }
     component Label: StyledText {
+        font.family: "sans-serif"
         renderType: Text.QtRendering
     }
 }
