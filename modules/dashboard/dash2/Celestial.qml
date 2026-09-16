@@ -66,161 +66,198 @@ StyledClippingRect {
                     const v = Math.sin(n * 127.1 + 311.7) * 43758.5453;
                     return v - Math.floor(v);
                 };
-                const circle = (x, y, r, colour) => {
+                const disc = (x, y, r, fill) => {
                     c.beginPath();
                     c.arc(x, y, r, 0, Math.PI * 2);
-                    c.fillStyle = colour;
+                    c.fillStyle = fill;
                     c.fill();
                 };
-                // Stars have a slight depth-dependent response to pointer movement.
-                for (let i = 0; i < 145; i++) {
+                const line = (x, y, xx, yy, colour) => {
+                    c.beginPath();
+                    c.moveTo(x, y);
+                    c.lineTo(xx, yy);
+                    c.strokeStyle = colour;
+                    c.lineWidth = 1;
+                    c.stroke();
+                };
+                const safeAreas = [[82, 240, 236, 76], [166, 344, 76, 27], [528, 228, 225, 55], [305, 84, 240, 28], [506, 355, 286, 91]];
+                const clearOfText = (x, y) => !safeAreas.some(a => x > a[0] - 8 && x < a[0] + a[2] + 8 && y > a[1] - 8 && y < a[1] + a[3] + 8);
+
+                // Two broad, flat dust ribbons establish a diagonal across the entire scene.
+                c.beginPath();
+                c.moveTo(-20, 433);
+                c.bezierCurveTo(300, 483, 372, 34, 870, 65);
+                c.lineTo(870, 124);
+                c.bezierCurveTo(389, 89, 323, 544, -20, 481);
+                c.closePath();
+                c.fillStyle = Qt.alpha(root.secondary, 0.055);
+                c.fill();
+                c.beginPath();
+                c.moveTo(-20, 456);
+                c.bezierCurveTo(310, 499, 420, 92, 870, 97);
+                c.lineTo(870, 110);
+                c.bezierCurveTo(425, 104, 315, 519, -20, 469);
+                c.closePath();
+                c.fillStyle = Qt.alpha(root.primary, 0.035);
+                c.fill();
+
+                for (let i = 0; i < 155; i++) {
                     const depth = noise(i + 300);
-                    const x = 18 + noise(i) * 804 + root.pointerX * depth * 5;
-                    const y = 16 + noise(i + 200) * 488 + root.pointerY * depth * 4;
-                    const twinkle = 0.65 + Math.sin(root.phase * (0.3 + depth) + i) * 0.2;
-                    circle(x, y, 0.4 + depth * 0.7, Qt.alpha(root.secondary, (0.15 + depth * 0.5) * twinkle));
-                    if (i % 31 === 0) {
-                        c.strokeStyle = Qt.alpha(root.primary, 0.18 * twinkle);
-                        c.lineWidth = 0.7;
+                    const x = 18 + noise(i) * 804 + root.pointerX * depth * 3;
+                    const y = 16 + noise(i + 200) * 488 + root.pointerY * depth * 3;
+                    if (!clearOfText(x, y))
+                        continue;
+                    const alpha = (0.10 + depth * 0.4) * (0.75 + Math.sin(root.phase * 0.4 + i) * 0.2);
+                    if (i % 19 === 0) {
                         c.beginPath();
-                        c.moveTo(x - 3, y);
-                        c.lineTo(x + 3, y);
                         c.moveTo(x, y - 3);
+                        c.lineTo(x + 1.4, y);
                         c.lineTo(x, y + 3);
-                        c.stroke();
-                    }
+                        c.lineTo(x - 1.4, y);
+                        c.closePath();
+                        c.fillStyle = Qt.alpha(root.secondary, alpha);
+                        c.fill();
+                    } else
+                        disc(x, y, 0.4 + depth * 0.65, Qt.alpha(root.secondary, alpha));
                 }
 
-                const px = 301, py = 266, pr = 153;
-                const tilt = -0.39;
-                const ringPoint = (angle, radius, depth) => {
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * depth;
-                    return {
-                        x: px + x * Math.cos(tilt) - y * Math.sin(tilt),
-                        y: py + x * Math.sin(tilt) + y * Math.cos(tilt)
-                    };
-                };
-                const levelAt = index => root.playing && root.audioLevels.length ? Math.max(0, Math.min(1, root.audioLevels[index % root.audioLevels.length] ?? 0)) : 0;
-                const ring = front => {
-                    // Flat orbital ribbons, with restrained audio-driven particles.
-                    for (let lane = 0; lane < 4; lane++) {
-                        const radius = 221 + lane * 16;
-                        const depth = 61 + lane * 5;
-                        c.beginPath();
-                        for (let step = 0; step <= 78; step++) {
-                            const angle = (front ? 0 : Math.PI) + step / 78 * Math.PI;
-                            const p = ringPoint(angle, radius, depth);
-                            if (step === 0)
-                                c.moveTo(p.x, p.y);
-                            else
-                                c.lineTo(p.x, p.y);
-                        }
-                        c.strokeStyle = Qt.alpha(lane % 4 === 0 ? root.secondary : root.primary, front ? 0.14 : 0.08);
-                        c.lineWidth = lane === 1 ? 3 : 1;
-                        c.stroke();
-                    }
-                    for (let i = 0; i < 140; i++) {
-                        const angle = noise(i + 101) * Math.PI * 2 + root.phase * (0.022 + noise(i + 66) * 0.018);
-                        const a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-                        if ((a < Math.PI) !== front)
-                            continue;
-                        const spread = noise(i + 400);
-                        const level = levelAt(i);
-                        const p = ringPoint(a, 204 + spread * 93 + level * 12, 57 + spread * 25 + level * 5);
-                        circle(p.x, p.y, 0.35 + noise(i + 700) * 0.9 + level * 0.65, Qt.alpha(i % 3 === 0 ? root.secondary : root.primary, (front ? 0.16 : 0.10) + noise(i + 800) * 0.12 + level * 0.2));
-                    }
-                };
-                ring(false);
-
-                // Flat illustration: a solid disc and three offset cloud strokes.
-                circle(px, py, pr, Colours.palette.m3surfaceContainerHigh);
+                // A compact illustrated planet, with decoration confined to its edges.
+                const px = 202, py = 290, pr = 117;
+                disc(px, py, pr, Colours.palette.m3surfaceContainerHigh);
                 c.save();
                 c.beginPath();
                 c.arc(px, py, pr, 0, Math.PI * 2);
                 c.clip();
-                c.strokeStyle = Qt.alpha(root.secondary, 0.055);
-                c.lineWidth = 8;
+                c.strokeStyle = Qt.alpha(root.secondary, 0.11);
+                c.lineWidth = 6;
                 c.lineCap = "round";
-                for (let band = 0; band < 3; band++) {
-                    const y = py - 108 + band * 105;
-                    const drift = Math.sin(root.phase * 0.1 + band) * 5;
-                    c.beginPath();
-                    c.moveTo(px - 112 + drift, y);
-                    c.lineTo(px + 42 + drift, y);
-                    c.stroke();
-                }
-                c.restore();
-                // A fine day-progress arc, without a glow or simulated lighting.
                 c.beginPath();
-                c.arc(px, py, pr + 2, -Math.PI / 2, -Math.PI / 2 + root.dayProgress * Math.PI * 2);
-                c.strokeStyle = Qt.alpha(root.primary, 0.36);
-                c.lineWidth = 1;
+                c.moveTo(95, 219);
+                c.bezierCurveTo(142, 213, 175, 220, 209, 205);
+                c.bezierCurveTo(225, 198, 249, 193, 272, 199);
                 c.stroke();
-                const sunAngle = -Math.PI / 2 + root.dayProgress * Math.PI * 2;
-                const sx = px + Math.cos(sunAngle) * (pr + 2), sy = py + Math.sin(sunAngle) * (pr + 2);
-                circle(sx, sy, 3.2, root.primary);
-                ring(true);
+                c.beginPath();
+                c.moveTo(80, 233);
+                c.bezierCurveTo(139, 226, 150, 240, 171, 228);
+                c.stroke();
+                c.beginPath();
+                c.moveTo(216, 378);
+                c.bezierCurveTo(246, 357, 279, 376, 321, 350);
+                c.stroke();
+                c.strokeStyle = Qt.alpha(root.secondary, 0.07);
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(219, 390);
+                c.bezierCurveTo(257, 369, 285, 387, 321, 363);
+                c.stroke();
+                disc(286, 245, 9, Qt.alpha(root.secondary, 0.05));
+                disc(114, 329, 14, Qt.alpha(root.secondary, 0.04));
+                c.restore();
 
-                // A small inhabited moon gives the system identity a place in the scene.
-                const mx = 645, my = 198, mr = 48;
-                circle(mx, my, mr, Colours.palette.m3surfaceContainerHigh);
+                // The day follows an open arc beneath the globe, away from the clock.
+                c.beginPath();
+                c.arc(px, py, pr + 9, 0.10, Math.PI - 0.10);
+                c.lineWidth = 1;
+                c.strokeStyle = Qt.alpha(root.primary, 0.14);
+                c.stroke();
+                const dayAngle = Math.PI - 0.10 - root.dayProgress * (Math.PI - 0.2);
+                c.beginPath();
+                c.arc(px, py, pr + 9, dayAngle, Math.PI - 0.10);
+                c.strokeStyle = Qt.alpha(root.primary, 0.58);
+                c.stroke();
+                disc(px + Math.cos(dayAngle) * (pr + 9), py + Math.sin(dayAngle) * (pr + 9), 2.5, root.primary);
+
+                // The second world and its two small companions balance the upper right.
+                const mx = 633, my = 147, mr = 64;
+                disc(mx, my, mr, Colours.palette.m3surfaceContainerHigh);
                 c.save();
                 c.beginPath();
                 c.arc(mx, my, mr, 0, Math.PI * 2);
                 c.clip();
-                for (let i = 0; i < 20; i++) {
-                    const x = mx - 45 + noise(i + 1800) * 90, y = my - 45 + noise(i + 1900) * 90;
-                    circle(x, y, 1 + noise(i + 2000) * 6, Qt.alpha(root.secondary, 0.035));
-                }
+                disc(mx - 21, my - 24, 12, Qt.alpha(root.secondary, 0.08));
+                disc(mx + 23, my + 14, 18, Qt.alpha(root.secondary, 0.05));
+                disc(mx - 11, my + 34, 5, Qt.alpha(root.secondary, 0.07));
+                c.strokeStyle = Qt.alpha(root.secondary, 0.08);
+                c.lineWidth = 2;
+                c.beginPath();
+                c.arc(mx - 21, my - 24, 17, 0.3, Math.PI * 1.3);
+                c.stroke();
                 c.restore();
-                c.strokeStyle = Qt.alpha(root.secondary, 0.38);
-                c.lineWidth = 1;
-                c.beginPath();
-                c.moveTo(mx - 15, my - 45);
-                c.lineTo(mx - 21, my - 62);
-                c.lineTo(mx - 17, my - 69);
-                c.stroke();
-                circle(mx - 17, my - 69, 1.8, Qt.alpha(root.primary, 0.65 + Math.sin(root.phase * 2) * 0.25));
-                // Satellite panels articulate slowly, with a moving pinpoint beacon.
-                const satX = 480 + Math.cos(root.phase * 0.13) * 6, satY = 91 + Math.sin(root.phase * 0.13) * 4;
-                c.save();
-                c.translate(satX, satY);
-                c.rotate(-0.3);
-                c.fillStyle = Qt.alpha(root.secondary, 0.45);
-                c.fillRect(-23, -5, 15, 10);
-                c.fillRect(8, -5, 15, 10);
-                c.strokeStyle = Qt.alpha(root.surface, 0.55);
-                c.lineWidth = 1;
-                for (let x = -20; x < 23; x += 5) {
+                disc(738, 176, 12, Qt.alpha(root.secondary, 0.16));
+                disc(568, 67, 5, Qt.alpha(root.primary, 0.23));
+                line(680, 95, 696, 78, Qt.alpha(root.secondary, 0.25));
+                disc(699, 74, 2, Qt.alpha(root.primary, 0.5));
+
+                // A chain of irregular flat rocks follows the broad diagonal current.
+                for (let i = 0; i < 14; i++) {
+                    const t = i / 13;
+                    const x = 328 + t * 201 + Math.sin(t * 9) * 10;
+                    const y = 342 - t * 223 + Math.cos(t * 14) * 14;
+                    const r = 2 + noise(i + 400) * 7;
                     c.beginPath();
-                    c.moveTo(x, -5);
-                    c.lineTo(x, 5);
-                    c.stroke();
+                    for (let side = 0; side < 6; side++) {
+                        const a = side / 6 * Math.PI * 2;
+                        const rr = r * (0.7 + noise(side + i * 7) * 0.35);
+                        const xx = x + Math.cos(a) * rr, yy = y + Math.sin(a) * rr;
+                        if (side === 0)
+                            c.moveTo(xx, yy);
+                        else
+                            c.lineTo(xx, yy);
+                    }
+                    c.closePath();
+                    c.fillStyle = Qt.alpha(root.secondary, 0.08 + noise(i + 600) * 0.09);
+                    c.fill();
                 }
-                c.strokeStyle = Qt.alpha(root.primary, 0.7);
-                c.beginPath();
-                c.moveTo(-8, 0);
-                c.lineTo(8, 0);
-                c.stroke();
-                circle(0, 0, 4, root.secondary);
+
+                // The small satellite belongs to the uptime annotation.
+                c.save();
+                c.translate(271, 99 + Math.sin(root.phase * 0.4) * 2);
+                c.rotate(-0.15);
+                c.fillStyle = Qt.alpha(root.secondary, 0.35);
+                c.fillRect(-24, -7, 15, 14);
+                c.fillRect(9, -7, 15, 14);
+                for (const x of [-21, -16, 12, 17])
+                    line(x, -7, x, 7, Qt.alpha(root.surface, 0.45));
+                line(-9, 0, 9, 0, Qt.alpha(root.primary, 0.6));
+                disc(0, 0, 4, root.secondary);
                 c.restore();
 
-                // Occasional meteors are brief, rather than a continuously flashing backdrop.
-                const meteor = root.phase % 15;
-                if (meteor > 7 && meteor < 8.2) {
-                    const t = (meteor - 7) / 1.2;
-                    const x = 780 - t * 220, y = 36 + t * 66;
-                    for (let i = 0; i < 16; i++)
-                        circle(x + i * 3, y - i * 0.9, i === 0 ? 1.4 : 0.7, Qt.alpha(root.primary, Math.sin(t * Math.PI) * (1 - i / 16) * 0.65));
+                // Audio powers a comet-like exhaust behind the media craft.
+                for (let i = 0; i < 105; i++) {
+                    const t = ((noise(i + 900) + root.phase * 0.10) % 1 + 1) % 1;
+                    const level = root.playing && root.audioLevels.length ? Math.max(0, Math.min(1, root.audioLevels[i % root.audioLevels.length] ?? 0)) : 0;
+                    const x = 458 - t * 156;
+                    const y = 388 + t * 67 + Math.sin(i * 2.1 + root.phase) * ((root.playing ? 5 : 2) + level * 18) * t;
+                    disc(x, y, 0.5 + level * 1.1, Qt.alpha(root.secondary, (1 - t) * (root.playing ? 0.45 : 0.16)));
+                }
+                c.save();
+                c.translate(467, 383);
+                c.rotate(-0.36);
+                c.beginPath();
+                c.moveTo(17, 0);
+                c.lineTo(-10, -9);
+                c.lineTo(-6, 0);
+                c.lineTo(-10, 9);
+                c.closePath();
+                c.fillStyle = Qt.alpha(root.secondary, 0.48);
+                c.fill();
+                line(-6, 0, 10, 0, Qt.alpha(root.surface, 0.6));
+                c.restore();
+
+                const meteor = root.phase % 17;
+                if (meteor > 8 && meteor < 9.1) {
+                    const t = (meteor - 8) / 1.1;
+                    const x = 154 + t * 133, y = 28 + t * 29;
+                    for (let i = 0; i < 12; i++)
+                        disc(x - i * 3, y - i * 0.65, i === 0 ? 1.2 : 0.5, Qt.alpha(root.primary, Math.sin(t * Math.PI) * (1 - i / 12) * 0.45));
                 }
             }
         }
 
         Column {
-            x: 197
-            y: 230
-            width: 208
+            x: 91
+            y: 249
+            width: 222
             spacing: 7
             Label {
                 width: parent.width
@@ -241,8 +278,8 @@ StyledClippingRect {
             }
         }
         Row {
-            x: 189
-            y: 375
+            x: 174
+            y: 349
             spacing: 7
             MaterialIcon {
                 text: "light_mode"
@@ -259,9 +296,9 @@ StyledClippingRect {
         }
 
         Column {
-            x: 550
-            y: 255
-            width: 190
+            x: 528
+            y: 230
+            width: 210
             spacing: 3
             Label {
                 width: parent.width
@@ -282,8 +319,8 @@ StyledClippingRect {
             }
         }
         Label {
-            x: 517
-            y: 76
+            x: 305
+            y: 87
             width: 231
             text: root.uptimeText
             font.pointSize: 9
@@ -294,9 +331,9 @@ StyledClippingRect {
         }
         Item {
             id: music
-            x: 343
-            y: 380
-            width: 412
+            x: 513
+            y: 361
+            width: 264
             height: 92
             Column {
                 width: parent.width
