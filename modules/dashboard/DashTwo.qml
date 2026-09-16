@@ -21,7 +21,7 @@ Item {
         triggeredOnStart: true
         onTriggered: Players.active?.positionChanged()
     }
-    Cockpit {
+    Station {
         anchors.fill: parent
         timeText: Qt.formatDateTime(Time.date, "HH:mm")
         dateText: Qt.formatDateTime(Time.date, "dddd, MMMM d")
