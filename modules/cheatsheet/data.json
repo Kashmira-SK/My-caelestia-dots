@@ -126,7 +126,7 @@
         { "name": "caelestia-gtk", "path": "~/git/caelestia-gtk", "remote": "", "desc": "GTK theme for Caelestia" },
         { "name": "caelestia-qt", "path": "~/git/caelestia-qt", "remote": "", "desc": "Qt/qt6ct theme for Caelestia" },
         { "name": "dotfiles", "path": "~/git/dotfiles", "remote": "", "desc": "zshrc, hyprland.conf, starship.toml symlinks" },
-        { "name": "TerminalChat", "path": "~/AI_Projects/TerminalChat", "remote": "", "desc": "Serena AI terminal chat (Python)" }
+        { "name": "TerminalChat", "path": "~/git/TerminalChat", "remote": "", "desc": "Serena AI terminal chat (Python)" }
       ]
     },
     {

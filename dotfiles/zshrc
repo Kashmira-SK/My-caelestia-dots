@@ -77,9 +77,11 @@ ytmp3() {
 function cheat() { curl "cheat.sh/$1" }
 
 # Serena AI Terminal Chat
+TERMINAL_CHAT_DIR="$HOME/git/TerminalChat"
+
 chat() {
     # Go to the project folder
-    cd ~/AI_Projects/TerminalChat
+    cd "$TERMINAL_CHAT_DIR" || return
     
     # Activate the virtual environment
     source venv/bin/activate
@@ -92,7 +94,7 @@ chat() {
 }
 
 chat-ui() {
-    cd ~/AI_Projects/TerminalChat
+    cd "$TERMINAL_CHAT_DIR" || return
     source venv/bin/activate
     clear
     python -m interfaces.terminal.app
