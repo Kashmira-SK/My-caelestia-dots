@@ -17,8 +17,8 @@ local fileManager = "nautilus"
 
 -- ENV
 hl.env("XCURSOR_PATH", "~/.local/share/icons:~/.icons:/usr/share/icons")
-hl.env("XCURSOR_THEME", "ShorekeeperV2")
-hl.env("XCURSOR_SIZE", 48)
+hl.env("XCURSOR_THEME", "Adwaita")
+hl.env("XCURSOR_SIZE", 24)
 hl.env("HYPRCURSOR_SIZE", 48)
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("XDG_MENU_PREFIX", "arch-")
@@ -49,7 +49,7 @@ hl.config({
 			color = "rgba(00000099)",
 		},
 		blur = {
-			enabled = false,
+			enabled = true,
 			size = 2,
 			passes = 2,
 			vibrancy = 0.0,
@@ -200,6 +200,21 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 
 -- WINDOW RULES
 hl.window_rule({
+	name = "float-default-size-center",
+	match = { float = true },
+	center = true,
+	size = { "monitor_w * 0.6", "monitor_h * 0.6" },
+})
+
+hl.window_rule({
+	name = "file-picker-portal",
+	match = { class = "^xdg-desktop-portal.*$" },
+	float = true,
+	center = true,
+	size = "1000 650",
+})
+
+hl.window_rule({
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
 	suppress_event = "maximize",
@@ -246,6 +261,29 @@ hl.window_rule({
 	float = true,
 	move = { 1549, 12 },
 	size = { 360, 325 },
+})
+
+hl.window_rule({
+	name = "dbeaver-update-popup",
+	match = { class = "^DBeaver.*$", title = ".*[Uu]pdate.*" },
+	float = true,
+	center = true,
+	size = "600 400",
+})
+
+hl.window_rule({
+	name = "steam-main",
+	match = { class = "^steam$", title = "^Steam$" },
+	float = true,
+	center = true,
+	size = "1200 800",
+})
+
+hl.window_rule({
+	name = "steam-other",
+	match = { class = "^steam$" },
+	float = true,
+	center = true,
 })
 
 hl.window_rule({
