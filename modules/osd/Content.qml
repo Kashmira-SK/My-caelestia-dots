@@ -41,9 +41,10 @@ Item {
                     Audio.decrementVolume();
             }
 
-            FilledSlider {
+            SpaceSlider {
                 anchors.fill: parent
 
+                muted: root.muted
                 icon: Icons.getVolumeIcon(value, root.muted)
                 value: root.volume
                 to: Config.services.maxVolume
@@ -66,9 +67,10 @@ Item {
                         Audio.decrementSourceVolume();
                 }
 
-                FilledSlider {
+                SpaceSlider {
                     anchors.fill: parent
 
+                    muted: root.sourceMuted
                     icon: Icons.getMicVolumeIcon(value, root.sourceMuted)
                     value: root.sourceVolume
                     to: Config.services.maxVolume
@@ -95,9 +97,10 @@ Item {
                         monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
                 }
 
-                FilledSlider {
+                SpaceSlider {
                     anchors.fill: parent
 
+                    solar: true
                     icon: `brightness_${(Math.round(value * 6) + 1)}`
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)

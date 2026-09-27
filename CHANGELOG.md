@@ -2,6 +2,15 @@
 
 Newest entries at the top.
 
+## [2026-09-27] - Space-themed volume and brightness sliders
+
+### Added
+
+- Right-side OSD sliders with dotted level trails, shuttle audio handles, and an orbiting sun brightness handle, using the dynamic palette
+- Muted audio styling and compact value feedback while adjusting
+
+---
+
 ## [2026-09-14] - Left-side bar and popups
 
 ### Added
