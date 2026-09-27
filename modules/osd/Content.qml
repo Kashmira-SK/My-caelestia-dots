@@ -19,9 +19,6 @@ Item {
     required property bool sourceMuted
     required property real brightness
 
-    readonly property real rowWidth: Math.max(160, Config.osd.sizes.sliderHeight)
-    readonly property real rowHeight: Config.osd.sizes.sliderWidth + 18
-
     implicitWidth: layout.implicitWidth + Appearance.padding.large * 2
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
 
@@ -33,8 +30,8 @@ Item {
 
         // Speaker volume
         CustomMouseArea {
-            implicitWidth: root.rowWidth
-            implicitHeight: root.rowHeight
+            implicitWidth: Config.osd.sizes.sliderWidth
+            implicitHeight: Config.osd.sizes.sliderHeight
 
             function onWheel(event: WheelEvent) {
                 if (event.angleDelta.y > 0)
@@ -47,7 +44,7 @@ Item {
                 anchors.fill: parent
 
                 muted: root.muted
-                label: qsTr("Volume")
+                label: qsTr("VOL")
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
@@ -59,8 +56,8 @@ Item {
             shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
 
             sourceComponent: CustomMouseArea {
-                implicitWidth: root.rowWidth
-                implicitHeight: root.rowHeight
+                implicitWidth: Config.osd.sizes.sliderWidth
+                implicitHeight: Config.osd.sizes.sliderHeight
 
                 function onWheel(event: WheelEvent) {
                     if (event.angleDelta.y > 0)
@@ -73,7 +70,7 @@ Item {
                     anchors.fill: parent
 
                     muted: root.sourceMuted
-                    label: qsTr("Microphone")
+                    label: qsTr("MIC")
                     value: root.sourceVolume
                     to: Config.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
@@ -86,8 +83,8 @@ Item {
             shouldBeActive: Config.osd.enableBrightness
 
             sourceComponent: CustomMouseArea {
-                implicitWidth: root.rowWidth
-                implicitHeight: root.rowHeight
+                implicitWidth: Config.osd.sizes.sliderWidth
+                implicitHeight: Config.osd.sizes.sliderHeight
 
                 function onWheel(event: WheelEvent) {
                     const monitor = root.monitor;
@@ -102,7 +99,7 @@ Item {
                 SpaceSlider {
                     anchors.fill: parent
 
-                    label: qsTr("Brightness")
+                    label: qsTr("BRT")
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
                 }
@@ -113,7 +110,7 @@ Item {
     component WrappedLoader: Loader {
         required property bool shouldBeActive
 
-        Layout.preferredHeight: shouldBeActive ? root.rowHeight : 0
+        Layout.preferredHeight: shouldBeActive ? Config.osd.sizes.sliderHeight : 0
         opacity: shouldBeActive ? 1 : 0
         active: opacity > 0
         visible: active

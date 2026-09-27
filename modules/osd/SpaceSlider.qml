@@ -13,9 +13,9 @@ Slider {
     property bool muted
     readonly property color ink: muted ? Colours.palette.m3outline : Colours.palette.m3primary
 
-    orientation: Qt.Horizontal
-    topPadding: 24
-    bottomPadding: 4
+    orientation: Qt.Vertical
+    topPadding: 20
+    bottomPadding: 22
 
     Behavior on value {
         enabled: !root.pressed
@@ -25,10 +25,10 @@ Slider {
     }
 
     background: Item {
-        x: root.leftPadding + root.handle.width / 2
-        y: root.topPadding + root.availableHeight / 2 - height / 2
-        width: root.availableWidth - root.handle.width
-        height: 3
+        x: (root.width - width) / 2
+        y: root.topPadding + root.handle.height / 2
+        width: 3
+        height: root.availableHeight - root.handle.height
 
         Rectangle {
             anchors.fill: parent
@@ -37,25 +37,25 @@ Slider {
         }
 
         Rectangle {
-            x: root.mirrored ? parent.width - width : 0
-            width: parent.width * root.position
-            height: parent.height
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: parent.height * root.position
             radius: 1
             color: root.ink
         }
     }
 
     handle: Rectangle {
-        x: root.leftPadding + root.visualPosition * (root.availableWidth - width)
-        y: root.topPadding + (root.availableHeight - height) / 2
-        implicitWidth: 8
-        implicitHeight: root.pressed ? 18 : 14
+        x: (root.width - width) / 2
+        y: root.topPadding + root.visualPosition * (root.availableHeight - height)
+        implicitWidth: root.pressed ? 18 : 14
+        implicitHeight: 8
         radius: 2
         color: Colours.palette.m3surface
         border.color: root.ink
         border.width: 2
 
-        Behavior on implicitHeight {
+        Behavior on implicitWidth {
             Anim {
                 duration: Appearance.anim.durations.small
             }
@@ -69,19 +69,19 @@ Slider {
     }
 
     StyledText {
-        anchors.left: parent.left
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         text: root.label
         color: Colours.palette.m3onSurfaceVariant
-        font.pointSize: Appearance.font.size.small
+        font.pointSize: 7
     }
 
     StyledText {
-        anchors.right: parent.right
-        anchors.top: parent.top
-        text: root.muted ? qsTr("Muted") : Math.round(root.value * 100) + "%"
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        text: root.muted ? qsTr("MUTE") : Math.round(root.value * 100)
         color: root.ink
-        font.pointSize: Appearance.font.size.small
+        font.pointSize: root.muted ? 6 : 8
         font.family: Appearance.font.family.mono
     }
 }

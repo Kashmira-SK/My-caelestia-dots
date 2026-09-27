@@ -6,7 +6,7 @@ Newest entries at the top.
 
 ### Added
 
-- Compact horizontal volume and brightness controls with full labels, fixed percentages, and matching handles, using the dynamic palette
+- Narrow vertical volume and brightness controls with compact labels, fixed level readouts, and matching handles, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
 - Irregular nebula dust clusters with dark gaps and localized haze in the power rail, retaining its drift and animation timing
 
