@@ -4,7 +4,6 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import qs.utils
 import QtQuick
 import QtQuick.Layouts
 
@@ -45,7 +44,7 @@ Item {
                 anchors.fill: parent
 
                 muted: root.muted
-                icon: Icons.getVolumeIcon(value, root.muted)
+                label: qsTr("VOL")
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
@@ -71,7 +70,7 @@ Item {
                     anchors.fill: parent
 
                     muted: root.sourceMuted
-                    icon: Icons.getMicVolumeIcon(value, root.sourceMuted)
+                    label: qsTr("MIC")
                     value: root.sourceVolume
                     to: Config.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
@@ -100,8 +99,7 @@ Item {
                 SpaceSlider {
                     anchors.fill: parent
 
-                    solar: true
-                    icon: `brightness_${(Math.round(value * 6) + 1)}`
+                    label: qsTr("BRT")
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
                 }

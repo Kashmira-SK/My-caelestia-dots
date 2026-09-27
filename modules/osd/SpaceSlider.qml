@@ -9,131 +9,82 @@ import QtQuick.Templates
 Slider {
     id: root
 
-    required property string icon
-    orientation: Qt.Vertical
-
-    property bool solar
+    required property string label
     property bool muted
     readonly property color ink: muted ? Colours.palette.m3outline : Colours.palette.m3primary
+    readonly property real travel: Math.max(0, availableHeight - handle.height)
 
-    onValueChanged: feedback.restart()
-
-    Timer {
-        id: feedback
-        interval: 500
-    }
+    orientation: Qt.Vertical
+    topPadding: 20
+    bottomPadding: 22
 
     Behavior on value {
+        enabled: !root.pressed
         Anim {
             duration: Appearance.anim.durations.large
         }
     }
 
-    bottomPadding: 24
-
     background: Item {
-        // A dotted flight path, lit from the lower end up to the current level.
+        // A narrow instrument scale keeps the marker and level on one axis.
+        Rectangle {
+            x: (root.width - width) / 2
+            y: root.topPadding + root.handle.height / 2
+            width: 1
+            height: root.travel
+            color: Colours.palette.m3outlineVariant
+
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: parent.height * root.position
+                color: root.ink
+            }
+        }
+
         Repeater {
-            model: Math.max(2, Math.floor((root.availableHeight - root.handle.height) / 8) + 1)
+            model: 9
 
             Rectangle {
                 required property int index
-                readonly property real progress: index / (dots.count - 1)
+                readonly property real progress: index / 8
+                width: index % 4 === 0 ? 11 : 5
+                height: 1
                 x: (root.width - width) / 2
-                y: root.topPadding + root.handle.height / 2 + progress * (root.availableHeight - root.handle.height) - height / 2
-                width: 3
-                height: 3
-                radius: 1.5
+                y: root.topPadding + root.handle.height / 2 + progress * root.travel
                 color: progress >= root.visualPosition ? root.ink : Colours.palette.m3outlineVariant
-                opacity: progress >= root.visualPosition ? 0.9 : 0.5
+                opacity: 0.6
             }
-
-            id: dots
         }
     }
 
-    handle: Canvas {
-        id: marker
-
-        readonly property bool moving: root.pressed || feedback.running
-        property color ink: root.ink
-        property color windowInk: Colours.palette.m3onPrimary
-        property bool solar: root.solar
-        property bool thrust: root.pressed && !root.muted
-        property real level: root.position
-
+    handle: Item {
         x: (root.width - width) / 2
-        y: root.topPadding + root.visualPosition * (root.availableHeight - height)
+        y: root.topPadding + root.visualPosition * root.travel
         implicitWidth: root.width
-        implicitHeight: root.width
+        implicitHeight: 14
 
-        onInkChanged: requestPaint()
-        onWindowInkChanged: requestPaint()
-        onSolarChanged: requestPaint()
-        onThrustChanged: requestPaint()
-        onLevelChanged: requestPaint()
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width * 0.7
+            height: 2
+            color: root.ink
+        }
 
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.translate(width / 2, height / 2);
-            ctx.scale(width / 30, height / 30);
-            ctx.fillStyle = ink;
-            ctx.strokeStyle = ink;
-            ctx.lineWidth = 1.2;
-            if (solar) {
-                // The sun grows with luminance; its satellite follows the level.
-                ctx.beginPath();
-                ctx.arc(0, 0, 3 + level * 2, 0, Math.PI * 2);
-                ctx.fill();
-                for (let i = 0; i < 8; i++) {
-                    const angle = i * Math.PI / 4;
-                    ctx.beginPath();
-                    ctx.moveTo(Math.cos(angle) * 7, Math.sin(angle) * 7);
-                    ctx.lineTo(Math.cos(angle) * 9, Math.sin(angle) * 9);
-                    ctx.stroke();
-                }
-                ctx.globalAlpha = 0.35;
-                ctx.beginPath();
-                ctx.arc(0, 0, 12, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.globalAlpha = 1;
-                const orbit = -Math.PI / 2 + level * Math.PI * 2;
-                ctx.beginPath();
-                ctx.arc(Math.cos(orbit) * 12, Math.sin(orbit) * 12, 1.8, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                // Upright shuttle, matching the audio popout's swept wings.
-                ctx.beginPath();
-                ctx.moveTo(0, -12);
-                ctx.quadraticCurveTo(4, -8, 4, -2);
-                ctx.lineTo(11, 7);
-                ctx.lineTo(10, 10);
-                ctx.lineTo(4, 7);
-                ctx.lineTo(3, 10);
-                ctx.lineTo(-3, 10);
-                ctx.lineTo(-4, 7);
-                ctx.lineTo(-10, 10);
-                ctx.lineTo(-11, 7);
-                ctx.lineTo(-4, -2);
-                ctx.quadraticCurveTo(-4, -8, 0, -12);
-                ctx.fill();
-                ctx.fillStyle = windowInk;
-                ctx.beginPath();
-                ctx.arc(0, -4, 2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillRect(-2, 5, 1, 3);
-                ctx.fillRect(1, 5, 1, 3);
-                if (thrust) {
-                    ctx.fillStyle = ink;
-                    ctx.fillRect(-2, 12, 1, 2);
-                    ctx.fillRect(1, 12, 1, 2);
+        Rectangle {
+            anchors.centerIn: parent
+            width: root.pressed ? 8 : 6
+            height: width
+            rotation: 45
+            color: Colours.palette.m3surface
+            border.width: 1
+            border.color: root.ink
+
+            Behavior on width {
+                Anim {
+                    duration: Appearance.anim.durations.small
                 }
             }
-            ctx.restore();
         }
 
         MouseArea {
@@ -143,21 +94,20 @@ Slider {
         }
     }
 
-    MaterialIcon {
+    StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        text: root.icon
-        color: root.ink
-        font.pointSize: Appearance.font.size.normal
-        visible: !marker.moving || root.muted
+        anchors.top: parent.top
+        text: root.label
+        color: Colours.palette.m3onSurfaceVariant
+        font.pointSize: 7
+        font.letterSpacing: 1
     }
 
     StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        text: Math.round(root.value * 100)
+        text: root.muted ? qsTr("MUTE") : Math.round(root.value * 100)
         color: root.ink
-        font.pointSize: Appearance.font.size.small
-        visible: marker.moving && !root.muted
+        font.pointSize: root.muted ? 6 : 8
     }
 }

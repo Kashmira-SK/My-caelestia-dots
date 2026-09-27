@@ -6,8 +6,8 @@ Newest entries at the top.
 
 ### Added
 
-- Right-side OSD sliders with dotted level trails, shuttle audio handles, and an orbiting sun brightness handle, using the dynamic palette
-- Muted audio styling and compact value feedback while adjusting
+- Right-side OSD sliders with slim instrument scales, matching diamond markers, and compact text labels, using the dynamic palette
+- Persistent level readouts and muted audio styling without duplicate control icons
 
 ---
 
