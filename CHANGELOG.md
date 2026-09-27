@@ -6,7 +6,7 @@ Newest entries at the top.
 
 ### Added
 
-- Right-side OSD sliders with segmented level meters, continuous side markers, and compact text labels, using the dynamic palette
+- Right-side OSD sliders with moving value handles, slim illuminated tracks, and compact text labels, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
 
 ### Fixed

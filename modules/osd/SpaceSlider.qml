@@ -16,7 +16,7 @@ Slider {
 
     orientation: Qt.Vertical
     topPadding: 20
-    bottomPadding: 22
+    bottomPadding: 6
 
     Behavior on value {
         enabled: !root.pressed
@@ -26,20 +26,21 @@ Slider {
     }
 
     background: Item {
-        // Stacked cells read as a compact level meter; the cursor stays continuous.
-        Repeater {
-            model: 17
+        Rectangle {
+            x: (root.width - width) / 2
+            y: root.topPadding + root.handle.height / 2
+            width: 6
+            height: root.travel
+            radius: width / 2
+            color: Qt.alpha(Colours.palette.m3outlineVariant, 0.55)
 
             Rectangle {
-                required property int index
-                readonly property real progress: index / 16
-                width: 16
-                height: 3
-                radius: 0.5
-                x: (root.width - width) / 2 - 2
-                y: root.topPadding + root.handle.height / 2 + progress * root.travel - height / 2
-                color: progress >= root.visualPosition ? root.ink : Colours.palette.m3outlineVariant
-                opacity: progress >= root.visualPosition ? 0.9 : 0.55
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: 2
+                height: parent.height * root.position
+                radius: 1
+                color: root.ink
             }
         }
     }
@@ -48,28 +49,24 @@ Slider {
         x: (root.width - width) / 2
         y: root.topPadding + root.visualPosition * root.travel
         implicitWidth: root.width
-        implicitHeight: 14
+        implicitHeight: 22
 
+        // The readout itself is the handle: one moving focal point per control.
         Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            width: 4
-            height: root.pressed ? 10 : 6
-            radius: 1
-            color: root.ink
+            anchors.centerIn: parent
+            width: parent.width
+            height: 20
+            radius: 4
+            color: Colours.palette.m3surface
+            border.width: 1
+            border.color: root.ink
 
-            Behavior on height {
-                Anim {
-                    duration: Appearance.anim.durations.small
-                }
-            }
-
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.left
-                width: 4
-                height: 2
+            StyledText {
+                anchors.centerIn: parent
+                text: root.muted ? qsTr("MUTE") : Math.round(root.value * 100)
                 color: root.ink
+                font.pointSize: root.muted ? 6 : 8
+                font.family: Appearance.font.family.mono
             }
         }
 
@@ -89,11 +86,4 @@ Slider {
         font.letterSpacing: 1
     }
 
-    StyledText {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        text: root.muted ? qsTr("MUTE") : Math.round(root.value * 100)
-        color: root.ink
-        font.pointSize: root.muted ? 6 : 8
-    }
 }
