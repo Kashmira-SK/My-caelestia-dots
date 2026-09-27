@@ -8,7 +8,7 @@ Newest entries at the top.
 
 - Right-side OSD with moving audio readouts and a tapered brightness column with a crossbar handle, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
-- Nebula-like haze and scattered dust around the power trail, retaining its drift, sway, and animation timing
+- Separated nebula filaments with dark gaps and sparse glowing knots in the power rail, retaining its drift, sway, and animation timing
 
 ### Fixed
 
