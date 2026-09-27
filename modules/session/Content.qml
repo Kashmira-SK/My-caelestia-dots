@@ -104,7 +104,7 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.min(28, root.railWidth * 0.5)
+                width: Math.min(38, root.railWidth * 0.7)
                 ink: Colours.palette.m3primary
             }
         ]

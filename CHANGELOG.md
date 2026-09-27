@@ -8,7 +8,7 @@ Newest entries at the top.
 
 - Compact horizontal volume and brightness controls with full labels, fixed percentages, and matching handles, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
-- Separated nebula filaments with dark gaps and sparse glowing knots in the power rail, retaining its drift, sway, and animation timing
+- Irregular nebula dust clusters with dark gaps and localized haze in the power rail, retaining its drift and animation timing
 
 ### Fixed
 
