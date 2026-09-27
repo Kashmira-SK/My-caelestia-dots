@@ -26,34 +26,20 @@ Slider {
     }
 
     background: Item {
-        // A narrow instrument scale keeps the marker and level on one axis.
-        Rectangle {
-            x: (root.width - width) / 2
-            y: root.topPadding + root.handle.height / 2
-            width: 1
-            height: root.travel
-            color: Colours.palette.m3outlineVariant
-
-            Rectangle {
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: parent.height * root.position
-                color: root.ink
-            }
-        }
-
+        // Stacked cells read as a compact level meter; the cursor stays continuous.
         Repeater {
-            model: 9
+            model: 17
 
             Rectangle {
                 required property int index
-                readonly property real progress: index / 8
-                width: index % 4 === 0 ? 11 : 5
-                height: 1
-                x: (root.width - width) / 2
-                y: root.topPadding + root.handle.height / 2 + progress * root.travel
+                readonly property real progress: index / 16
+                width: 16
+                height: 3
+                radius: 0.5
+                x: (root.width - width) / 2 - 2
+                y: root.topPadding + root.handle.height / 2 + progress * root.travel - height / 2
                 color: progress >= root.visualPosition ? root.ink : Colours.palette.m3outlineVariant
-                opacity: 0.6
+                opacity: progress >= root.visualPosition ? 0.9 : 0.55
             }
         }
     }
@@ -65,25 +51,25 @@ Slider {
         implicitHeight: 14
 
         Rectangle {
-            anchors.centerIn: parent
-            width: parent.width * 0.7
-            height: 2
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            width: 4
+            height: root.pressed ? 10 : 6
+            radius: 1
             color: root.ink
-        }
 
-        Rectangle {
-            anchors.centerIn: parent
-            width: root.pressed ? 8 : 6
-            height: width
-            rotation: 45
-            color: Colours.palette.m3surface
-            border.width: 1
-            border.color: root.ink
-
-            Behavior on width {
+            Behavior on height {
                 Anim {
                     duration: Appearance.anim.durations.small
                 }
+            }
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.left
+                width: 4
+                height: 2
+                color: root.ink
             }
         }
 
