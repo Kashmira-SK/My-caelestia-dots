@@ -6,7 +6,7 @@ Newest entries at the top.
 
 ### Added
 
-- Right-side OSD sliders with moving value handles, slim illuminated tracks, and compact text labels, using the dynamic palette
+- Right-side OSD with moving audio readouts and a tapered brightness column with a crossbar handle, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
 - Nebula-like haze and scattered dust around the power trail, retaining its drift, sway, and animation timing
 
