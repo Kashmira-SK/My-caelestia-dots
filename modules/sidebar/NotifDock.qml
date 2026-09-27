@@ -77,7 +77,7 @@ Item {
             anchors.fill: parent
             active: root.notifCount === 0
             sourceComponent: SpaceScene {
-                ink: Colours.palette.m3outlineVariant
+                ink: Colours.palette.m3primary
             }
         }
 

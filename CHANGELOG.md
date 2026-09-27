@@ -12,6 +12,7 @@ Newest entries at the top.
 ### Fixed
 
 - Power-panel swirl is easier to see on smaller displays, with brighter palette ink and larger dots
+- Empty notification space scene uses brighter palette ink and clearer particles without changing animation paths or timing
 
 ---
 

@@ -31,7 +31,7 @@ Canvas {
             ctx.globalAlpha = dot.alpha;
             const x = width / 2 + dot.x * surroundingScale;
             const y = height / 2 + dot.y * surroundingScale;
-            const size = Math.max(0.7, dot.size * surroundingScale);
+            const size = Math.max(1.1, dot.size * surroundingScale * 1.15);
             ctx.fillRect(x, y, size, size);
             if (dot.star) {
                 ctx.globalAlpha = dot.alpha * 0.6;
@@ -44,7 +44,7 @@ Canvas {
             if (!dot)
                 continue;
             ctx.globalAlpha = dot.alpha;
-            const size = Math.max(0.8, dot.size * scale);
+            const size = Math.max(1.1, dot.size * scale * 1.15);
             ctx.fillRect(width / 2 + dot.x * scale, height / 2 + dot.y * scale, size, size);
         }
         ctx.globalAlpha = 1;

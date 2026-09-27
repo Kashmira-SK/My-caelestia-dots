@@ -30,7 +30,8 @@ Item {
 
             function dot(x, y, alpha, size) {
                 ctx.globalAlpha = alpha;
-                ctx.fillRect(x - size / 2, y - size / 2, size, size);
+                const visibleSize = Math.max(1.2, size * 1.2);
+                ctx.fillRect(x - visibleSize / 2, y - visibleSize / 2, visibleSize, visibleSize);
             }
 
             function dottedLine(x1, y1, x2, y2, alpha) {
