@@ -6,7 +6,7 @@ Newest entries at the top.
 
 ### Added
 
-- Right-side OSD with moving audio readouts and a tapered brightness column with a crossbar handle, using the dynamic palette
+- Compact horizontal volume and brightness controls with full labels, fixed percentages, and matching handles, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
 - Separated nebula filaments with dark gaps and sparse glowing knots in the power rail, retaining its drift, sway, and animation timing
 
