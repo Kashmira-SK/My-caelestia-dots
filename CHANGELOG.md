@@ -8,10 +8,11 @@ Newest entries at the top.
 
 - Right-side OSD sliders with moving value handles, slim illuminated tracks, and compact text labels, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
+- Nebula-like haze and scattered dust around the power trail, retaining its drift, sway, and animation timing
 
 ### Fixed
 
-- Power-panel swirl is easier to see on smaller displays, with brighter palette ink and larger dots
+- Power-panel space effect is easier to see on smaller displays with brighter palette ink
 - Empty notification space scene uses brighter palette ink and clearer particles without changing animation paths or timing
 
 ---
