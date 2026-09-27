@@ -2,12 +2,16 @@
 
 Newest entries at the top.
 
-## [2026-09-27] - Space-themed volume and brightness sliders
+## [2026-09-27] - Right-side sliders and space accents
 
 ### Added
 
 - Right-side OSD sliders with segmented level meters, continuous side markers, and compact text labels, using the dynamic palette
 - Persistent level readouts and muted audio styling without duplicate control icons
+
+### Fixed
+
+- Power-panel swirl is easier to see on smaller displays, with brighter palette ink and larger dots
 
 ---
 

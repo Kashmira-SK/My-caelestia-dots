@@ -28,8 +28,8 @@ Canvas {
             const sway = Math.sin(progress * Math.PI * 2 + phase * 0.12);
             const x = width / 2 + (sway * 0.18 + (seed - 0.5) * 0.18) * width;
             const y = (1 - progress) * Math.max(0, height - 2) + 1;
-            const size = 0.8 + seed * 0.6;
-            ctx.globalAlpha = taper * (0.3 + seed * 0.45);
+            const size = 1.4 + seed * 0.8;
+            ctx.globalAlpha = taper * (0.5 + seed * 0.4);
             ctx.fillRect(x - size / 2, y - size / 2, size, size);
         }
         ctx.globalAlpha = 1;

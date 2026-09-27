@@ -105,7 +105,7 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(28, root.railWidth * 0.5)
-                ink: Colours.palette.m3outlineVariant
+                ink: Colours.palette.m3primary
             }
         ]
     }
