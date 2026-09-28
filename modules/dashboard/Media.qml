@@ -60,6 +60,11 @@ Item {
         return identity;
     }
 
+    function cleanMetadata(value, fallback: string): string {
+        const text = (value ?? "").toString().replace(/\s+/g, " ").trim();
+        return text || fallback;
+    }
+
     implicitWidth: 840
     implicitHeight: 255
 
@@ -289,20 +294,16 @@ Item {
                 }
             }
 
-            Item {
-                Layout.preferredHeight:
-                    Appearance.spacing.smaller
-            }
-
             StyledText {
                 Layout.fillWidth: true
 
                 text:
-                    (
-                        Players.active?.trackTitle
-                        ?? qsTr("No media")
+                    root.cleanMetadata(
+                        Players.active?.trackTitle,
+                        Players.active
+                            ? qsTr("Unknown title")
+                            : qsTr("No media")
                     )
-                    || qsTr("Unknown title")
 
                 color:
                     Players.active
@@ -326,11 +327,12 @@ Item {
                 Layout.fillWidth: true
 
                 text:
-                    (
-                        Players.active?.trackArtist
-                        ?? qsTr("Play something to start.")
+                    root.cleanMetadata(
+                        Players.active?.trackArtist,
+                        Players.active
+                            ? qsTr("Unknown artist")
+                            : qsTr("Play something to start.")
                     )
-                    || qsTr("Unknown artist")
 
                 color:
                     Players.active
@@ -349,14 +351,13 @@ Item {
                 font.weight: 400
 
                 wrapMode: Text.WordWrap
-                maximumLineCount: 2
+                maximumLineCount: 1
                 elide: Text.ElideRight
             }
 
             Item {
                 Layout.fillHeight: true
-                Layout.minimumHeight:
-                    Appearance.spacing.smaller
+                Layout.minimumHeight: 0
             }
 
             RowLayout {
