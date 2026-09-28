@@ -17,7 +17,7 @@ Newest entries at the top.
 
 ---
 
-## [2026-09-14] - Left-side bar and popups
+## [2026-09-14] - Left-side bar, popups, and shell fixes
 
 ### Added
 
@@ -32,6 +32,8 @@ Newest entries at the top.
 - Removed Forget from the quick Bluetooth popup; device removal remains available in settings
 - Volume dragging no longer jumps with delayed backend updates; queued volume writes are serialized and coalesced
 - Special-workspace clicks account for scrolling, and window-preview titles wrap within the popup
+- Multi-line media metadata no longer pushes the dashboard timeline and time labels below the tab
+- Idle-triggered locks use the current wallpaper for a reliable blurred background instead of an intermittent black screen capture
 
 ---
 
