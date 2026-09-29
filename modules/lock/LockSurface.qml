@@ -161,20 +161,42 @@ WlSessionLockSurface {
         }
     }
 
-    ScreencopyView {
+    Item {
         id: background
 
         anchors.fill: parent
-        captureSource: root.screen
         opacity: 0
 
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            autoPaddingEnabled: false
-            blurEnabled: true
-            blur: 1
-            blurMax: 64
-            blurMultiplier: 1
+        Image {
+            anchors.fill: parent
+            source: Qt.resolvedUrl(Wallpapers.current)
+            asynchronous: false
+            cache: true
+            fillMode: Image.PreserveAspectCrop
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blur: 1
+                blurMax: 64
+                blurMultiplier: 1
+            }
+        }
+
+        ScreencopyView {
+            anchors.fill: parent
+            captureSource: root.screen
+            visible: hasContent
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blur: 1
+                blurMax: 64
+                blurMultiplier: 1
+            }
         }
     }
 
