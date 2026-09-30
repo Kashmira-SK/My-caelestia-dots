@@ -6,8 +6,8 @@ Newest entries at the top.
 
 ### Added
 
-- Static constellation tracks that illuminate with volume and brightness levels, with small position markers and percentage readouts
-- Compact outline control symbols replace crowded text labels; the vertical OSD has no decorative idle animation
+- Quiet orbital tracks with small level markers and percentage readouts in the narrow vertical OSD
+- Short lowercase sound/light labels replace icons and crowded names; sliders remain still when idle
 
 ### Fixed
 

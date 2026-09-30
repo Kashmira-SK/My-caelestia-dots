@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.effects
 import qs.services
 import QtQuick
 import QtQuick.Templates
@@ -10,7 +9,7 @@ Slider {
     id: root
 
     required property string label
-    required property string glyph
+    required property string caption
     property bool muted
     readonly property color ink: muted ? Colours.palette.m3outline : Colours.palette.m3primary
 
@@ -19,8 +18,7 @@ Slider {
     bottomPadding: 24
     Accessible.name: label
 
-    // The constellation is the track itself. Only level/size/palette changes
-    // repaint it; no timer, twinkling, orbit, or independent moving illustration.
+    // A quiet orbital track responds only to the level; nothing animates at rest.
     background: Canvas {
         property real level: root.visualPosition
         property real span: root.availableHeight
@@ -40,42 +38,35 @@ Slider {
             const start = root.topPadding + root.handle.height / 2;
             const travel = root.availableHeight - root.handle.height;
             const boundary = start + level * travel;
-            const nodes = [];
-            for (let i = 0; i < 10; i++)
-                nodes.push({ x: width / 2 + Math.sin(i * 1.9 + 0.4) * 6,
-                    y: start + i / 9 * travel });
+            const cx = width / 2;
+            const cy = start + travel / 2;
+            const rx = 5;
+            const ry = travel / 2;
 
-            function constellation(colour, strength) {
+            function orbit(colour, strength) {
                 ctx.strokeStyle = colour;
                 ctx.fillStyle = colour;
-                ctx.lineWidth = 0.7;
-                ctx.globalAlpha = strength * 0.42;
+                ctx.lineWidth = 0.8;
+                ctx.globalAlpha = strength * 0.5;
                 ctx.beginPath();
-                ctx.moveTo(nodes[0].x, nodes[0].y);
-                for (let i = 1; i < nodes.length; i++)
-                    ctx.lineTo(nodes[i].x, nodes[i].y);
+                ctx.ellipse(cx - rx, cy - ry, rx * 2, ry * 2);
                 ctx.stroke();
                 ctx.globalAlpha = strength;
-                for (let i = 0; i < nodes.length; i++) {
-                    const n = nodes[i];
-                    const major = i === 2 || i === 7;
-                    const size = major ? 2 : 1.5;
-                    ctx.fillRect(n.x - size / 2, n.y - size / 2, size, size);
-                    if (major) {
-                        ctx.globalAlpha = strength * 0.5;
-                        ctx.fillRect(n.x - 3, n.y - 0.5, 6, 1);
-                        ctx.fillRect(n.x - 0.5, n.y - 3, 1, 6);
-                        ctx.globalAlpha = strength;
-                    }
+                for (const angle of [-2.35, -0.65, 0.8, 2.4]) {
+                    const x = cx + Math.cos(angle) * rx;
+                    const y = cy + Math.sin(angle) * ry;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
 
-            constellation(dim, 0.45);
+            orbit(dim, 0.3);
             ctx.save();
             ctx.beginPath();
             ctx.rect(0, boundary, width, Math.max(0, height - boundary));
             ctx.clip();
-            constellation(ink, 1);
+            orbit(ink, 0.85);
             ctx.restore();
             ctx.globalAlpha = 1;
         }
@@ -110,12 +101,12 @@ Slider {
         }
     }
 
-    ColouredIcon {
+    StyledText {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        implicitSize: 14
-        source: Qt.resolvedUrl("../../assets/icons/lucide/" + root.glyph + ".svg")
-        colour: Colours.palette.m3onSurfaceVariant
+        text: root.caption
+        color: Colours.palette.m3onSurfaceVariant
+        font.pointSize: 7
     }
 
     StyledText {
