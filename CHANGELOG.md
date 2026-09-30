@@ -6,8 +6,8 @@ Newest entries at the top.
 
 ### Added
 
-- Fine vertical star trails with simple level markers and percentage readouts in the narrow OSD
-- Compact lowercase vol/bri labels replace icons and crowded names; sliders remain still when idle
+- Stationary deep-space level fields with rising illumination, clear boundary markers, and percentage readouts in the narrow OSD
+- Compact VOL/BRT labels; no icon labels, moving illustrations, or decorative idle animation
 
 ### Fixed
 

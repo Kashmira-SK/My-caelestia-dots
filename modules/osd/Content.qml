@@ -45,7 +45,7 @@ Item {
 
                 muted: root.muted
                 label: qsTr("Volume")
-                caption: qsTr("vol")
+                caption: qsTr("VOL")
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
@@ -72,7 +72,7 @@ Item {
 
                     muted: root.sourceMuted
                     label: qsTr("Mic")
-                    caption: qsTr("mic")
+                    caption: qsTr("MIC")
                     value: root.sourceVolume
                     to: Config.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
@@ -102,7 +102,7 @@ Item {
                     anchors.fill: parent
 
                     label: qsTr("Brightness")
-                    caption: qsTr("bri")
+                    caption: qsTr("BRT")
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
                 }
