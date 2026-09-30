@@ -6,7 +6,8 @@ Newest entries at the top.
 
 ### Added
 
-- Comet volume handle and animated black-hole brightness handle with star trails, compact labels, and level readouts in the narrow vertical OSD
+- Comet volume handle with a curved luminous tail and animated black-hole brightness handle with a clearer dark center and dust ring
+- Full Volume and Brightness labels, percentage readouts, and quieter star trails within the narrow vertical OSD
 
 ### Fixed
 

@@ -44,7 +44,7 @@ Item {
                 anchors.fill: parent
 
                 muted: root.muted
-                label: qsTr("VOL")
+                label: qsTr("Volume")
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
@@ -70,7 +70,7 @@ Item {
                     anchors.fill: parent
 
                     muted: root.sourceMuted
-                    label: qsTr("MIC")
+                    label: qsTr("Mic")
                     value: root.sourceVolume
                     to: Config.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
@@ -99,7 +99,7 @@ Item {
                 SpaceSlider {
                     anchors.fill: parent
 
-                    label: qsTr("BRT")
+                    label: qsTr("Brightness")
                     blackHole: true
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
