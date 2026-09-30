@@ -28,13 +28,15 @@ Canvas {
             const dot = Field.surroundingPoint(i, phase);
             if (!dot)
                 continue;
-            ctx.globalAlpha = dot.alpha;
+            ctx.globalAlpha = dot.alpha * 0.6;
             const x = width / 2 + dot.x * surroundingScale;
             const y = height / 2 + dot.y * surroundingScale;
-            const size = Math.max(1.1, dot.size * surroundingScale * 1.15);
-            ctx.fillRect(x, y, size, size);
+            const size = Math.max(0.7, dot.size * surroundingScale);
+            ctx.beginPath();
+            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+            ctx.fill();
             if (dot.star) {
-                ctx.globalAlpha = dot.alpha * 0.6;
+                ctx.globalAlpha = dot.alpha * 0.3;
                 ctx.fillRect(x - size * 2, y, size * 5, size);
                 ctx.fillRect(x, y - size * 2, size, size * 5);
             }
@@ -43,9 +45,11 @@ Canvas {
             const dot = Field.point(i, phase);
             if (!dot)
                 continue;
-            ctx.globalAlpha = dot.alpha;
-            const size = Math.max(1.1, dot.size * scale * 1.15);
-            ctx.fillRect(width / 2 + dot.x * scale, height / 2 + dot.y * scale, size, size);
+            ctx.globalAlpha = dot.alpha * 0.9;
+            const size = Math.max(0.85, dot.size * scale);
+            ctx.beginPath();
+            ctx.arc(width / 2 + dot.x * scale, height / 2 + dot.y * scale, size / 2, 0, Math.PI * 2);
+            ctx.fill();
         }
         ctx.globalAlpha = 1;
     }

@@ -29,9 +29,11 @@ Item {
             ctx.fillStyle = root.ink;
 
             function dot(x, y, alpha, size) {
-                ctx.globalAlpha = alpha;
-                const visibleSize = Math.max(1.2, size * 1.2);
-                ctx.fillRect(x - visibleSize / 2, y - visibleSize / 2, visibleSize, visibleSize);
+                ctx.globalAlpha = alpha * 0.8;
+                const visibleSize = Math.max(0.75, size);
+                ctx.beginPath();
+                ctx.arc(x, y, visibleSize / 2, 0, Math.PI * 2);
+                ctx.fill();
             }
 
             function dottedLine(x1, y1, x2, y2, alpha) {

@@ -2,7 +2,7 @@
 
 Newest entries at the top.
 
-## [2026-09-30] - Space sliders and nebula alignment
+## [2026-09-30] - Calmer space controls and notification scene
 
 ### Added
 
@@ -12,6 +12,7 @@ Newest entries at the top.
 ### Fixed
 
 - Power nebula aligns its visible dust with the power-button axis, correcting the rightward bias while retaining its animation timing
+- Notification space scene retains improved visibility with finer round particles, dimmer distant stars, and softer contrast; motion and timing are unchanged
 
 ---
 

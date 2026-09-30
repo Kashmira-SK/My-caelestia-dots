@@ -77,7 +77,7 @@ Item {
             anchors.fill: parent
             active: root.notifCount === 0
             sourceComponent: SpaceScene {
-                ink: Colours.palette.m3primary
+                ink: Qt.alpha(Colours.palette.m3primary, 0.72)
             }
         }
 
