@@ -19,6 +19,10 @@ Canvas {
         const ctx = getContext("2d");
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = ink;
+        const particles = [];
+        let weightSum = 0;
+        let weightedX = 0;
+        let weightedY = 0;
         const count = Math.min(64, Math.max(12, Math.floor(height / 2.5)));
         for (let i = 0; i < count; i++) {
             const value = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
@@ -43,20 +47,36 @@ Canvas {
                 if (cloud < -0.35 || scatter < 0.12)
                     continue;
                 const density = Math.min(1, (cloud + 0.35) / 1.5);
-                if (grain === 0 && seed > 0.65 && taper > 0.01) {
-                    const radius = (3 + seed * 2) * taper;
-                    const glow = ctx.createRadialGradient(px, py, 0, px, py, radius);
-                    glow.addColorStop(0, ink);
-                    glow.addColorStop(1, Qt.alpha(ink, 0));
-                    ctx.fillStyle = glow;
-                    ctx.globalAlpha = taper * density * 0.12;
-                    ctx.fillRect(px - radius, py - radius, radius * 2, radius * 2);
-                }
-                ctx.fillStyle = ink;
                 const size = scatter > 0.94 ? 1.7 : 0.8 + scatter * 0.45;
-                ctx.globalAlpha = taper * density * (0.5 + scatter * 0.45);
-                ctx.fillRect(px - size / 2, py - size / 2, size, size);
+                const alpha = taper * density * (0.5 + scatter * 0.45);
+                const weight = alpha * size * size;
+                particles.push({ x: px, y: py, size: size, alpha: alpha,
+                    glow: grain === 0 && seed > 0.65 && taper > 0.01,
+                    radius: (3 + seed * 2) * taper, haze: taper * density * 0.12 });
+                weightSum += weight;
+                weightedX += px * weight;
+                weightedY += py * weight;
             }
+        }
+        // Center the visible dust, not just its canvas: density cuts otherwise
+        // bias the cloud toward one side of the power icons' shared axis.
+        const dx = weightSum > 0 ? width / 2 - weightedX / weightSum : 0;
+        const dy = weightSum > 0 ? height / 2 - weightedY / weightSum : 0;
+        for (const particle of particles) {
+            const px = particle.x + dx;
+            const py = particle.y + dy;
+            if (particle.glow) {
+                const r = particle.radius;
+                const glow = ctx.createRadialGradient(px, py, 0, px, py, r);
+                glow.addColorStop(0, ink);
+                glow.addColorStop(1, Qt.alpha(ink, 0));
+                ctx.fillStyle = glow;
+                ctx.globalAlpha = particle.haze;
+                ctx.fillRect(px - r, py - r, r * 2, r * 2);
+            }
+            ctx.fillStyle = ink;
+            ctx.globalAlpha = particle.alpha;
+            ctx.fillRect(px - particle.size / 2, py - particle.size / 2, particle.size, particle.size);
         }
         ctx.globalAlpha = 1;
     }

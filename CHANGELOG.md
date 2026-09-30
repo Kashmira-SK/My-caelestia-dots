@@ -2,11 +2,15 @@
 
 Newest entries at the top.
 
-## [2026-09-30] - Space-slider comparison
+## [2026-09-30] - Space sliders and nebula alignment
 
 ### Added
 
 - Comet volume handle and animated black-hole brightness handle with star trails, compact labels, and level readouts in the narrow vertical OSD
+
+### Fixed
+
+- Power nebula aligns its visible dust with the power-button axis, correcting the rightward bias while retaining its animation timing
 
 ---
 
