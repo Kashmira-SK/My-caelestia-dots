@@ -45,7 +45,7 @@ Item {
 
                 muted: root.muted
                 label: qsTr("Volume")
-                caption: qsTr("sound")
+                caption: qsTr("vol")
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
@@ -102,7 +102,7 @@ Item {
                     anchors.fill: parent
 
                     label: qsTr("Brightness")
-                    caption: qsTr("light")
+                    caption: qsTr("bri")
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
                 }

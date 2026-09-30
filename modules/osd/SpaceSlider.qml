@@ -18,7 +18,7 @@ Slider {
     bottomPadding: 24
     Accessible.name: label
 
-    // A quiet orbital track responds only to the level; nothing animates at rest.
+    // Fine stationary dust marks the level without a surrounding silhouette.
     background: Canvas {
         property real level: root.visualPosition
         property real span: root.availableHeight
@@ -38,36 +38,19 @@ Slider {
             const start = root.topPadding + root.handle.height / 2;
             const travel = root.availableHeight - root.handle.height;
             const boundary = start + level * travel;
-            const cx = width / 2;
-            const cy = start + travel / 2;
-            const rx = 5;
-            const ry = travel / 2;
-
-            function orbit(colour, strength) {
-                ctx.strokeStyle = colour;
-                ctx.fillStyle = colour;
-                ctx.lineWidth = 0.8;
-                ctx.globalAlpha = strength * 0.5;
+            for (let i = 0; i <= 18; i++) {
+                const y = start + i / 18 * travel;
+                if (Math.abs(y - boundary) < 3)
+                    continue;
+                const x = width / 2 + (i % 3 - 1) * 0.6;
+                const active = y >= boundary;
+                ctx.fillStyle = active ? ink : dim;
+                ctx.globalAlpha = active ? 0.8 : 0.3;
+                const radius = i % 6 === 0 ? 0.85 : 0.6;
                 ctx.beginPath();
-                ctx.ellipse(cx - rx, cy - ry, rx * 2, ry * 2);
-                ctx.stroke();
-                ctx.globalAlpha = strength;
-                for (const angle of [-2.35, -0.65, 0.8, 2.4]) {
-                    const x = cx + Math.cos(angle) * rx;
-                    const y = cy + Math.sin(angle) * ry;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 0.9, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
             }
-
-            orbit(dim, 0.3);
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(0, boundary, width, Math.max(0, height - boundary));
-            ctx.clip();
-            orbit(ink, 0.85);
-            ctx.restore();
             ctx.globalAlpha = 1;
         }
     }
@@ -79,18 +62,10 @@ Slider {
         implicitHeight: 12
 
         Rectangle {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 4
+            anchors.centerIn: parent
+            width: 12
             height: 1.5
-            color: root.ink
-        }
-
-        Rectangle {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            width: 4
-            height: 1.5
+            radius: 0.75
             color: root.ink
         }
 

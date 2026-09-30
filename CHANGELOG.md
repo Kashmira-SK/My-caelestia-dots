@@ -6,8 +6,8 @@ Newest entries at the top.
 
 ### Added
 
-- Quiet orbital tracks with small level markers and percentage readouts in the narrow vertical OSD
-- Short lowercase sound/light labels replace icons and crowded names; sliders remain still when idle
+- Fine vertical star trails with simple level markers and percentage readouts in the narrow OSD
+- Compact lowercase vol/bri labels replace icons and crowded names; sliders remain still when idle
 
 ### Fixed
 
