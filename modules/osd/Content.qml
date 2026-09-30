@@ -100,6 +100,7 @@ Item {
                     anchors.fill: parent
 
                     label: qsTr("BRT")
+                    blackHole: true
                     value: root.brightness
                     onMoved: root.monitor?.setBrightness(value)
                 }

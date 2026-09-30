@@ -2,6 +2,14 @@
 
 Newest entries at the top.
 
+## [2026-09-30] - Space-slider comparison
+
+### Added
+
+- Comet volume handle and animated black-hole brightness handle with star trails, compact labels, and level readouts in the narrow vertical OSD
+
+---
+
 ## [2026-09-27] - Right-side sliders and space accents
 
 ### Added
