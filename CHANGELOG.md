@@ -2,6 +2,15 @@
 
 Newest entries at the top.
 
+## [2026-10-01] - Clearer OSD levels
+
+### Added
+
+- Continuous volume and brightness columns with a visible empty track, quarter-level marks, and a marker aligned to the fill boundary
+- Retained the narrow vertical panel, VOL/BRT labels, percentage readouts, and static idle appearance
+
+---
+
 ## [2026-09-30] - Calmer space controls and notification scene
 
 ### Added
