@@ -6,12 +6,11 @@ Newest entries at the top.
 
 ### Added
 
-- Thin-framed notification popups with compact sender headers, outline expand/dismiss controls, and dynamic theme colors matching the right-side panels
-- Wrapped outline action buttons and a distinct critical-notification border, retaining images, hover-to-pause, and swipe dismissal
+- Thin notification frames, outline expand/action controls, and dynamic theme colors matching the right-side panels
 
 ### Fixed
 
-- Expanded popup summaries display their full text; long action labels wrap within the popup
+- Restored the original compact popup layout after the theme rewrite made stacked notifications too tall; retained the original sizing, expansion, images, and dismissal behavior
 
 ---
 
