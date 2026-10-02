@@ -2,6 +2,19 @@
 
 Newest entries at the top.
 
+## [2026-10-02] - Notification popup theme
+
+### Added
+
+- Thin-framed notification popups with compact sender headers, outline expand/dismiss controls, and dynamic theme colors matching the right-side panels
+- Wrapped outline action buttons and a distinct critical-notification border, retaining images, hover-to-pause, and swipe dismissal
+
+### Fixed
+
+- Expanded popup summaries display their full text; long action labels wrap within the popup
+
+---
+
 ## [2026-10-01] - Clearer OSD levels
 
 ### Added
