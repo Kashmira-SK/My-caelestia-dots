@@ -52,13 +52,43 @@ Searcher {
             weights = [1];
 
             if (!search.startsWith(`${prefix}t `))
-                return query(search).map(e => e.entry);
+                return rankedResults(query(search), search);
         }
 
-        const results = query(search.slice(prefix.length + 2)).map(e => e.entry);
+        const term = search.slice(prefix.length + 2);
+        let results = query(term);
         if (search.startsWith(`${prefix}t `))
-            return results.filter(a => a.runInTerminal);
-        return results;
+            results = results.filter(a => a.entry.runInTerminal);
+        return rankedResults(results, term);
+    }
+
+    function rankedResults(results: list<var>, term: string): list<var> {
+        const needle = term.trim().toLocaleLowerCase();
+        // Keep AppEntry wrappers until sorting is done: they hold persisted usage.
+        return [...results].sort((a, b) => {
+            const aName = a.name.trim().toLocaleLowerCase();
+            const bName = b.name.trim().toLocaleLowerCase();
+
+            if (needle) {
+                const aExact = aName === needle;
+                const bExact = bName === needle;
+                if (aExact !== bExact)
+                    return aExact ? -1 : 1;
+            } else {
+                const aFavourite = Strings.testRegexList(Config.launcher.favouriteApps, a.id);
+                const bFavourite = Strings.testRegexList(Config.launcher.favouriteApps, b.id);
+                if (aFavourite !== bFavourite)
+                    return aFavourite ? -1 : 1;
+
+                if (!aFavourite) {
+                    const letterOrder = aName.charAt(0).localeCompare(bName.charAt(0));
+                    if (letterOrder)
+                        return letterOrder;
+                }
+            }
+
+            return b.frequency - a.frequency || aName.localeCompare(bName) || a.id.localeCompare(b.id);
+        }).map(a => a.entry);
     }
 
     function selector(item: var): string {

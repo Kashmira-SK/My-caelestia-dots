@@ -2,6 +2,15 @@
 
 Newest entries at the top.
 
+## [2026-10-03] - Launcher usage ranking
+
+### Added
+
+- Launcher apps stay grouped alphabetically by first letter, with most-used apps first within each letter and favorites ranked by usage at the top
+- Filtered app suggestions rank by saved launch counts, prioritizing exact names and breaking usage ties alphabetically
+
+---
+
 ## [2026-10-02] - Notification popup theme
 
 ### Added
