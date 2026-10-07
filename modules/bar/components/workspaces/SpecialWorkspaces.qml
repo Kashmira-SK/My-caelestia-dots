@@ -239,7 +239,7 @@ Item {
 
             const ws = view.itemAt(event.x + view.contentX, event.y + view.contentY);
             if (ws?.modelData)
-                Hypr.dispatch(`togglespecialworkspace ${ws.modelData.name.slice(8)}`);
+                Hypr.dispatch(`hl.dsp.workspace.toggle_special(${JSON.stringify(ws.modelData.name.slice(8))})`);
 
         }
     }

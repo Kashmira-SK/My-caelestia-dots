@@ -2,6 +2,14 @@
 
 Newest entries at the top.
 
+## [2026-10-07] - Restore sidebar workspace clicks
+
+### Fixed
+
+- Restored sidebar workspace switching and special-workspace clicks with commands compatible with the Hyprland Lua configuration
+
+---
+
 ## [2026-10-03] - Launcher usage ranking
 
 ### Added
