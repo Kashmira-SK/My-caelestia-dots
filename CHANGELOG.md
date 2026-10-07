@@ -2,7 +2,11 @@
 
 Newest entries at the top.
 
-## [2026-10-07] - Restore sidebar workspace clicks
+## [2026-10-07] - Workspace clicks and dashboard cleanup
+
+### Added
+
+- Saved pending Dash 2 orbital backdrop and audio visualiser components, including removal of the old navigation-array files, as a recoverable checkpoint
 
 ### Fixed
 
