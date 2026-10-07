@@ -47,21 +47,16 @@ Item {
 
         Tab {
             indexText: "02"
-            text: qsTr("DASH 2")
-        }
-
-        Tab {
-            indexText: "03"
             text: qsTr("MEDIA")
         }
 
         Tab {
-            indexText: "04"
+            indexText: "03"
             text: qsTr("PERFORMANCE")
         }
 
         Tab {
-            indexText: "05"
+            indexText: "04"
             text: qsTr("CALENDAR")
         }
     }

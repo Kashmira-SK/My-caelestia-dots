@@ -102,7 +102,7 @@ Item {
         Flickable {
             id: view
 
-            readonly property int currentIndex: root.state.currentTab
+            readonly property int currentIndex: Math.max(0, Math.min(root.state.currentTab, tabs.count - 1))
             readonly property Item currentItem: row.children[currentIndex]
 
             anchors.fill: parent
@@ -152,25 +152,18 @@ Item {
 
                 Pane {
                     index: 1
-                    sourceComponent: DashTwo {
-                        state: root.state
-                    }
-                }
-
-                Pane {
-                    index: 2
                     sourceComponent: Media {
                       state: root.state
                     }
                 }
 
                 Pane {
-                    index: 3
+                    index: 2
                     sourceComponent: Performance {}
                 }
 
                 Pane {
-                    index: 4
+                    index: 3
 
                     sourceComponent: CalendarPage {
                         state: root.state
