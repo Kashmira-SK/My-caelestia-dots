@@ -68,7 +68,7 @@ Item {
             Layout.preferredHeight: navRail.implicitHeight
 
             color:
-                Colours.tPalette.m3surface
+                root.floating ? Colours.tPalette.m3surface : "transparent"
 
             NavRail {
                 id: navRail
@@ -129,7 +129,7 @@ Item {
                 root.rounding
 
             color:
-                Colours.tPalette.m3surface
+                root.floating ? Colours.tPalette.m3surface : "transparent"
 
             Panes {
                 id: panes

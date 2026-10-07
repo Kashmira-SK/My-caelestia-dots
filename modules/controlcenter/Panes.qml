@@ -22,7 +22,7 @@ ClippingRectangle {
     readonly property bool initialOpeningComplete:
         layout.initialOpeningComplete
 
-    color: Colours.tPalette.m3surface
+    color: session.floating ? Colours.tPalette.m3surface : "transparent"
 
     clip: true
     focus: false

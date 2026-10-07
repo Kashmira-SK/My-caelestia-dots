@@ -11,7 +11,7 @@ Newest entries at the top.
 ### Fixed
 
 - Restored sidebar workspace switching and special-workspace clicks with commands compatible with the Hyprland Lua configuration
-- Utilities Settings now opens the same floating settings window as Super+G, inheriting Hyprland's normal window transparency
+- Utilities Settings retains its original overlay and uses the shared shell transparency without stacking extra surface backgrounds; Super+G retains its separate window
 - Settings initializes the displayed page to match the selected tab when opened
 - Removed the Dash 2 tab and module after preserving its pending work in git; Dashboard, Media, Performance, and Calendar remain available
 - Excluded local preview artifacts in `test/` from git
