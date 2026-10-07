@@ -17,6 +17,8 @@ QtObject {
     readonly property LauncherState launcher: LauncherState {}
     readonly property VpnState vpn: VpnState {}
 
+    Component.onCompleted: activeIndex = Math.max(0, panes.indexOf(active))
+
     onActiveChanged: activeIndex = Math.max(0, panes.indexOf(active))
     onActiveIndexChanged: if (panes[activeIndex])
         active = panes[activeIndex]
