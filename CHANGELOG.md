@@ -12,6 +12,8 @@ Newest entries at the top.
 
 - Restored sidebar workspace switching and special-workspace clicks with commands compatible with the Hyprland Lua configuration
 - Removed the Dash 2 tab and module after preserving its pending work in git; Dashboard, Media, Performance, and Calendar remain available
+- Excluded local preview artifacts in `test/` from git
+- Recorded the existing disabled Hyprland blur setting in `dotfiles/hyprland.lua`
 
 ---
 
