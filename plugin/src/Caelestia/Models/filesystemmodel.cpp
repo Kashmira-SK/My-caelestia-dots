@@ -79,7 +79,9 @@ FileSystemModel::FileSystemModel(QObject* parent)
     , m_showHidden(false)
     , m_filter(NoFilter) {
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::watchDirIfRecursive);
-    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::updateEntriesForDir);
+    // Entries cover the entire root. Comparing them with only a changed
+    // subdirectory would remove every entry outside that subdirectory.
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::updateEntries);
 }
 
 int FileSystemModel::rowCount(const QModelIndex& parent) const {

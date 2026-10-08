@@ -13,6 +13,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Recursive wallpaper discovery retains still images outside `Live/` when nested files are added or removed
 - Static wallpaper transitions start immediately without waiting for theme generation; an older background operation cannot replace a newer selection
 - Video switches reuse the wallpaper transition between cached stills, with short fades from outgoing playback to its still and from the incoming still to ready playback
 
