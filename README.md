@@ -51,7 +51,8 @@ SDDM's login wallpaper remains independently configured.
 If playback fails, the shell shows the cached still and an error notification.
 Select the video again to retry. Video switches reuse the normal wallpaper effects
 between cached stills. Outgoing playback pauses while its still fades in; incoming
-playback is revealed after the still transition and player startup finish. Only
+playback is revealed after every screen finishes its still transition and the
+player is ready. Selection IDs reject outdated results during rapid switching. Only
 one player runs at a time. The short fade softens the change, but a cached still
 can depict a different moment from the video. For status and controller tests:
 

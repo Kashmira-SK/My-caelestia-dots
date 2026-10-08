@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.images
 import qs.components.effects
 import qs.components.filedialog
 import qs.services
@@ -13,9 +12,18 @@ Item {
     id: root
 
     property string source: Wallpapers.current
+    property int generation: 0
     property Item current: one
     readonly property bool transitioning: !current || current.path !== source
         || current.wallpaperItem.status !== Image.Ready || current.transitionProgress < 1
+
+    onTransitioningChanged: {
+        if (!transitioning && current) {
+            const previous = current === one ? two : one;
+            previous.stopAnimations();
+            previous.path = "";
+        }
+    }
 
     property Item rippleFrom
     property Item rippleTo
@@ -28,6 +36,7 @@ Item {
     }
 
     onSourceChanged: {
+        generation++;
         if (!source)
             current = null;
         else if (current === one)
@@ -166,6 +175,7 @@ Item {
         id: img
 
         property alias path: wallpaper.path
+        property int generation: -1
         property real transitionProgress: 0
         property string activeTransition: "radial"
 
@@ -233,6 +243,7 @@ Item {
         }
 
         function update(): void {
+            generation = root.generation;
             if (path === root.source) {
                 if (wallpaper.status === Image.Ready)
                     showLoaded();
@@ -245,7 +256,8 @@ Item {
         }
 
         function showLoaded(): void {
-            if (path !== root.source)
+            if (generation !== root.generation || path !== root.source
+                    || (root.current === img && transitionProgress === 1))
                 return;
             stopAnimations();
 
@@ -275,6 +287,7 @@ Item {
 
         anchors.fill: parent
         z: root.current === img ? 1 : 0
+        visible: root.current === img || root.transitioning
 
         Component {
             id: maskLayerEffect
@@ -293,8 +306,16 @@ Item {
             width: root.width
             height: root.height
 
-            CachingImage {
+            Image {
                 id: wallpaper
+
+                // Direct source binding makes readiness belong to this path;
+                // a hashing/cache callback cannot replay an earlier image.
+                property string path: ""
+                source: path ? Qt.resolvedUrl(path.split("/").map(encodeURIComponent).join("/")) : ""
+                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
+                asynchronous: true
+                fillMode: Image.PreserveAspectCrop
 
                 width: root.width
                 height: root.height

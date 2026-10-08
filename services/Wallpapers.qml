@@ -19,7 +19,10 @@ Searcher {
     property bool liveRunning: false
     property bool paused: false
     property bool busy: false
-    property bool handoff: false
+    readonly property bool handoff: phase === "cover" || phase === "apply" || phase === "transition"
+    property string phase: "idle"
+    property int selectionId: 0
+    property var surfaces: []
     property string requestedWallpaper: ""
     property bool locked: false
     property bool sleeping: false
@@ -46,17 +49,43 @@ Searcher {
         if (!controllerReady)
             return;
         requestedWallpaper = path;
-        if (liveRunning || handoff) {
-            handoff = true;
-            coverTimer.restart();
-        } else {
+        selectionId++;
+        controller.write(JSON.stringify({ action: "supersede", revision: selectionId }) + "\n");
+        phase = live || liveRunning ? "cover" : "apply";
+        if (phase === "apply")
             dispatchSelection();
-        }
+        else
+            Qt.callLater(checkTransition);
     }
 
     function dispatchSelection(): void {
-        controller.write(JSON.stringify({ action: "select", path: requestedWallpaper, smart: Config.services.smartScheme }) + "\n");
+        phase = "apply";
+        controller.write(JSON.stringify({ action: "select", revision: selectionId,
+            path: requestedWallpaper, smart: Config.services.smartScheme }) + "\n");
     }
+
+    function registerSurface(surface: var): void {
+        surfaces = [...surfaces, surface];
+    }
+
+    function unregisterSurface(surface: var): void {
+        surfaces = surfaces.filter(s => s !== surface);
+        Qt.callLater(checkTransition);
+    }
+
+    function checkTransition(): void {
+        const active = surfaces.filter(s => s && s.active);
+        if (phase === "cover" && active.every(s => s.covered))
+            dispatchSelection();
+        else if (phase === "transition" && active.every(s => s.transitioned)
+                && (!live || liveRunning || error || !playbackEnabled))
+            phase = live && liveRunning ? "reveal" : "idle";
+        else if (phase === "reveal" && active.every(s => s.revealed))
+            phase = "idle";
+    }
+
+    onPhaseChanged: Qt.callLater(checkTransition)
+    onLiveRunningChanged: Qt.callLater(checkTransition)
 
     onHandoffChanged: sendStatus()
     onLockedChanged: sendStatus()
@@ -83,9 +112,9 @@ Searcher {
             root.sendStatus();
         }
         onExited: {
-            coverTimer.stop();
-            root.handoff = false;
             root.controllerReady = false;
+            root.phase = "idle";
+            root.selectionId = 0;
             root.liveRunning = false;
             root.busy = false;
             root.error = qsTr("Wallpaper controller stopped. Reload the shell to restart it.");
@@ -96,29 +125,26 @@ Searcher {
             onRead: data => {
                 try {
                     const state = JSON.parse(data);
-                    root.current = state.current;
-                    root.actualCurrent = state.selected;
                     if (JSON.stringify(root.videos) !== JSON.stringify(state.videos))
                         root.videos = state.videos;
-                    root.live = state.live;
-                    root.liveRunning = state.running;
-                    root.paused = state.paused;
-                    root.busy = state.busy;
-                    root.error = state.error;
-                    if (!coverTimer.running && !state.busy && (state.selected === root.requestedWallpaper || state.error))
-                        root.handoff = false;
+                    // Results from a superseded request must not change the display.
+                    if (state.revision === root.selectionId) {
+                        root.current = state.current;
+                        root.actualCurrent = state.selected;
+                        root.live = state.live;
+                        root.liveRunning = state.running;
+                        root.paused = state.paused;
+                        root.busy = state.busy;
+                        root.error = state.error;
+                        if (root.phase === "apply" && !state.busy)
+                            root.phase = "transition";
+                        Qt.callLater(root.checkTransition);
+                    }
                 } catch (error) {
                     console.warn("Invalid wallpaper controller response:", error);
                 }
             }
         }
-    }
-
-    Timer {
-        id: coverTimer
-        // Let every screen fade to the outgoing poster before stopping mpvpaper.
-        interval: 300
-        onTriggered: root.dispatchSelection()
     }
 
     Timer {
@@ -134,7 +160,7 @@ Searcher {
         function list(): string { return root.list.map(w => w.path).join("\n"); }
         function status(): string {
             return JSON.stringify({ selected: root.actualCurrent, still: root.current, live: root.live,
-                running: root.liveRunning, paused: root.paused, locked: root.locked, sleeping: root.sleeping, busy: root.busy, error: root.error });
+                phase: root.phase, revision: root.selectionId, running: root.liveRunning, paused: root.paused, locked: root.locked, sleeping: root.sleeping, busy: root.busy, error: root.error });
         }
     }
 

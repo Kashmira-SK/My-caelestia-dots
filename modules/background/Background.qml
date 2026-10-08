@@ -44,6 +44,42 @@ Loader {
                     active: Config.background.wallpaperEnabled
                     opacity: !Wallpapers.liveRunning || Wallpapers.handoff || !item || item.transitioning ? 1 : 0
                     visible: opacity > 0
+                    readonly property bool settled: !!item && !item.transitioning
+                    property bool covered: false
+                    property bool revealed: false
+                    property bool transitioned: false
+                    property int stableFrames: 0
+                    readonly property bool coverReady: opacity === 1 && settled
+                    readonly property bool revealReady: opacity === 0
+                    function resetAcknowledgement(): void {
+                        stableFrames = 0;
+                        covered = false;
+                        revealed = false;
+                        transitioned = false;
+                    }
+                    onCoverReadyChanged: resetAcknowledgement()
+                    onRevealReadyChanged: resetAcknowledgement()
+                    onSettledChanged: resetAcknowledgement()
+                    Component.onCompleted: Wallpapers.registerSurface(wallpaper)
+                    Component.onDestruction: Wallpapers.unregisterSurface(wallpaper)
+
+                    Connections {
+                        target: Wallpapers
+                        function onSelectionIdChanged(): void { wallpaper.resetAcknowledgement(); }
+                    }
+
+                    // Acknowledge stable rendered frames, not elapsed wall time.
+                    FrameAnimation {
+                        running: ["cover", "transition", "reveal"].includes(Wallpapers.phase)
+                        onTriggered: {
+                            if (++wallpaper.stableFrames >= 2) {
+                                wallpaper.covered = wallpaper.coverReady;
+                                wallpaper.transitioned = wallpaper.coverReady;
+                                wallpaper.revealed = wallpaper.revealReady;
+                                Wallpapers.checkTransition();
+                            }
+                        }
+                    }
 
                     Behavior on opacity {
                         NumberAnimation { duration: 220 }

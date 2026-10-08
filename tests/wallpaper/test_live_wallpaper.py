@@ -213,6 +213,33 @@ class WallpaperTests(unittest.TestCase):
             self.assertEqual(c.current, '/existing.jpg')
             self.assertIn('Invalid image', c.error)
 
+    def test_superseded_result_cannot_commit_while_covering_next_request(self):
+        c = self.controller()
+        c.current = c.selected = '/original.jpg'
+        c.latest_revision = c.applying_revision = 1
+        c.applying = live.concurrent.futures.Future()
+        c.path_file.parent.mkdir(parents=True, exist_ok=True)
+        c.path_file.write_text('/old-worker.jpg')
+        with patch.object(c, 'emit'), patch.object(c, 'start_player') as start:
+            c.receive({'action': 'supersede', 'revision': 2})
+            c.applying.set_result(('/old-worker.jpg', '/old-worker.jpg'))
+            c.tick()
+            self.assertEqual(c.current, '/original.jpg')
+            self.assertTrue(c.awaiting_selection)
+            start.assert_not_called()
+
+    def test_stale_selection_and_error_do_not_override_latest_request(self):
+        c = self.controller()
+        c.latest_revision = c.applying_revision = 1
+        c.applying = live.concurrent.futures.Future()
+        with patch.object(c, 'emit'):
+            c.receive({'action': 'supersede', 'revision': 3})
+            c.receive({'action': 'select', 'revision': 2, 'path': '/old.jpg'})
+            self.assertIsNone(c.pending)
+            c.applying.set_exception(ValueError('old failure'))
+            c.tick()
+            self.assertEqual(c.error, '')
+
 
 if __name__ == '__main__':
     unittest.main()

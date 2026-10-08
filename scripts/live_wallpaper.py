@@ -124,6 +124,11 @@ class Controller:
         self.monitor_names = None
         self.videos = []
         self.pending = None
+        self.latest_revision = 0
+        self.revision = 0
+        self.pending_revision = 0
+        self.applying_revision = 0
+        self.awaiting_selection = False
         self.applying = None
         self.scanning = None
         self.error = ''
@@ -142,7 +147,7 @@ class Controller:
             pass
 
     def emit(self):
-        payload = dict(current=self.current, selected=self.selected, videos=self.videos,
+        payload = dict(revision=self.revision, current=self.current, selected=self.selected, videos=self.videos,
                        live=self.live, running=self.ready, paused=self.paused,
                        busy=self.applying is not None or self.pending is not None, error=self.error)
         if payload != self.last_payload:
@@ -208,7 +213,16 @@ class Controller:
 
     def receive(self, message):
         action = message.get('action')
-        if action == 'select':
+        if action == 'supersede':
+            self.latest_revision = int(message['revision'])
+            self.pending = None
+            self.awaiting_selection = True
+        elif action == 'select':
+            revision = int(message.get('revision', self.latest_revision + 1))
+            if revision < self.latest_revision:
+                return
+            self.latest_revision = self.pending_revision = revision
+            self.awaiting_selection = False
             self.pending = (message['path'], message.get('smart', True))
             self.error = ''
             # Start static transitions on selection, independently of the
@@ -216,6 +230,7 @@ class Controller:
             source = Path(message['path']).resolve()
             if not self.live and not is_video(source) and source.is_file():
                 self.selected = self.current = str(source)
+                self.revision = revision
                 self.emit()
         elif action == 'status':
             self.smart = bool(message.get('smart', True))
@@ -244,27 +259,32 @@ class Controller:
             try:
                 self.videos = self.scanning.result()
                 selected = next((v for v in self.videos if v['path'] == self.selected), None)
-                if self.live and selected and selected['preview'] and selected['preview'] != self.current:
+                if not self.awaiting_selection and not self.applying and not self.pending and self.live and selected and selected['preview'] and selected['preview'] != self.current:
                     self.pending = (self.selected, self.smart)
+                    self.pending_revision = self.latest_revision
             except Exception as error:
                 self.error = str(error)
             self.scanning = None
         if self.applying and self.applying.done():
             try:
                 source, still = self.applying.result()
-                if self.pending is None:
+                if self.pending is None and self.applying_revision == self.latest_revision:
+                    self.revision = self.applying_revision
                     self.stop_player()
                     self.selected, self.current = source, still
                     self.live = is_video(source)
                     atomic_json(self.selection_file, {'source': source, 'still': still})
                     self.start_player()
             except Exception as error:
-                self.error = f'Wallpaper was not applied: {error}'
+                if self.applying_revision == self.latest_revision:
+                    self.revision = self.applying_revision
+                    self.error = f'Wallpaper was not applied: {error}'
             self.applying = None
         if self.pending and self.applying is None:
+            self.applying_revision = self.pending_revision
             self.applying = self.pool.submit(self.apply, *self.pending)
             self.pending = None
-        if self.applying is None:
+        if self.applying is None and not self.awaiting_selection:
             external = read_text(self.path_file)
             if external and external != self.current:
                 self.stop_player()
