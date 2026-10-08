@@ -29,9 +29,11 @@ Scope {
 
     LogindManager {
         onAboutToSleep: {
+            Wallpapers.sleeping = true;
             if (Config.general.idle.lockBeforeSleep)
                 root.lock.lock.locked = true;
         }
+        onResumed: Wallpapers.sleeping = false
         onLockRequested: root.lock.lock.locked = true
         onUnlockRequested: root.lock.lock.unlock()
     }

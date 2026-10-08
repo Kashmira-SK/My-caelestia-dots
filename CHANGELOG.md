@@ -2,6 +2,22 @@
 
 Newest entries at the top.
 
+## [2026-10-08] - Live wallpapers
+
+### Added
+
+- Video wallpapers in the Super+U picker and Settings wallpaper grid, with play badges alongside static images
+- One cached still per video revision for previews, theme colours, and fallback; new videos in the wallpaper folder are discovered automatically
+- Muted, looping mpvpaper playback across connected monitors, with saved selection restored after shell reloads
+- Playback pauses while the Quickshell lock is active, during sleep, or while all displays are off; selecting a static wallpaper stops playback
+
+### Notes
+
+- Requires `mpvpaper`, `ffmpeg`, and Python 3; the same selected video plays on every monitor
+- Playback failures show the cached still; select the video again to retry. SDDM remains separately configured
+
+---
+
 ## [2026-10-07] - Workspace clicks and dashboard cleanup
 
 ### Added

@@ -65,7 +65,7 @@ Item {
         }
 
         CachingImage {
-            path: root.modelData.path
+            path: Wallpapers.previewPath(root.modelData.path)
             smooth: !root.PathView.view.moving
             cache: true
 

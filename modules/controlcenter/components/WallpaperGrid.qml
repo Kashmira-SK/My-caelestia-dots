@@ -70,7 +70,7 @@ GridView {
             CachingImage {
                 id: cachingImage
 
-                path: modelData.path
+                path: Wallpapers.previewPath(modelData.path)
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -197,6 +197,16 @@ GridView {
                 color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
             }
+        }
+
+        MaterialIcon {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: Appearance.padding.normal
+            visible: Wallpapers.isLive(modelData.path)
+            text: "play_circle"
+            color: Colours.palette.m3primary
+            font.pointSize: Appearance.font.size.large
         }
 
         StyledText {

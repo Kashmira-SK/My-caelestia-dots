@@ -23,6 +23,42 @@ Full change history is in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Live wallpapers
+
+Use **Super+U** to select images or videos from the same picker. Video cards have
+a play badge; the Settings wallpaper grid also supports them. Keep videos in
+`~/Pictures/Wallpapers/Live/` (or anywhere inside the configured wallpaper folder).
+Supported extensions are `.mp4`, `.webm`, `.mkv`, `.mov`, and `.m4v`.
+
+Requires `mpvpaper`, `ffmpeg` (including `ffprobe`), and Python 3, alongside the
+existing Caelestia CLI. Playback is muted and loops, requests `hwdec=auto`, and
+fills every connected monitor with the same selected video. 1080p is recommended
+for this setup; hardware decoding depends on the installed codec and driver.
+
+The controller discovers videos automatically and saves one poster per file
+revision in `~/.cache/caelestia/live-wallpapers/`. It reuses that image for previews,
+colour generation, and static fallback; changing a video's size or modification
+time generates a new poster. Deleted posters are regenerated. These paths honour
+`XDG_CACHE_HOME` and `XDG_STATE_HOME`.
+
+Selection is saved in `~/.local/state/caelestia/wallpaper/live-selection.json`.
+The existing `wallpaper/path.txt` continues to point to a still image. Playback
+pauses on Quickshell lock, suspend, and when all displays are off, and resumes
+when those conditions clear. Switching to an image stops the owned player.
+Reloading the shell restores the selection without leaving a player behind.
+SDDM's login wallpaper remains independently configured.
+
+If playback fails, the shell shows the cached still and an error notification.
+Select the video again to retry. The static wallpaper transition effects are not
+applied to live video. For status and controller tests:
+
+```sh
+quickshell -c caelestia ipc call wallpaper status
+python3 -m unittest discover -s tests/wallpaper -v
+```
+
+---
+
 ## Dynamic theme architecture
 
 The active palette is stored in:

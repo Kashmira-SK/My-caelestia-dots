@@ -9,11 +9,12 @@ Item {
     id: root
 
     property string imagePath: ""
+    readonly property string previewPath: Wallpapers.previewPath(imagePath)
     property real overlayOpacity: 0
     property int borderWidth: 1
     property color borderColour: Qt.alpha(Colours.palette.m3outlineVariant, 0.25)
     readonly property bool ready: image.status === Image.Ready
-    readonly property bool failed: image.status === Image.Error
+    readonly property bool failed: image.status === Image.Error || (!!imagePath && !previewPath)
 
     signal activated()
 
@@ -35,8 +36,8 @@ Item {
             id: image
 
             anchors.fill: parent
-            source: root.imagePath
-                ? Qt.resolvedUrl(root.imagePath.split("/").map(encodeURIComponent).join("/"))
+            source: root.previewPath
+                ? Qt.resolvedUrl(root.previewPath.split("/").map(encodeURIComponent).join("/"))
                 : ""
             // Fixed decode size: scaling a card must never trigger another load.
             sourceSize: Qt.size(660, 372)
@@ -53,6 +54,16 @@ Item {
             // Follow the slide directly; StyledRect animates changes to color.
             color: Colours.palette.m3surface
             opacity: root.overlayOpacity
+        }
+
+        MaterialIcon {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: Appearance.padding.normal
+            visible: Wallpapers.isLive(root.imagePath)
+            text: "play_circle"
+            color: Colours.palette.m3primary
+            font.pointSize: Appearance.font.size.extraLarge
         }
 
         MouseArea {

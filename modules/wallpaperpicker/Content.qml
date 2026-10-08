@@ -125,7 +125,7 @@ Item {
         pendingApply = false;
         if (!currentCard?.imagePath || !currentCard.ready)
             return;
-        if (currentCard.imagePath !== Wallpapers.actualCurrent)
+        if (currentCard.imagePath !== Wallpapers.actualCurrent || (Wallpapers.isLive(currentCard.imagePath) && !Wallpapers.liveRunning))
             Wallpapers.setWallpaper(currentCard.imagePath);
         visibilities.wallpaperPicker = false;
     }

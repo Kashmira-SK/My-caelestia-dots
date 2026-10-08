@@ -1,9 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import qs.components.misc
+import qs.services
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import QtQuick
 
 Scope {
     property alias lock: lock
@@ -13,10 +15,22 @@ Scope {
 
         signal unlock
 
+        onLockedChanged: Wallpapers.locked = lock.locked
+        Component.onCompleted: Wallpapers.locked = lock.locked
+
         LockSurface {
             lock: lock
             pam: pam
         }
+    }
+
+    // Reconcile the actual state after unlock surface teardown as well as
+    // handling the initial lock notification.
+    Timer {
+        interval: 250
+        repeat: true
+        running: Wallpapers.locked || lock.locked
+        onTriggered: Wallpapers.locked = lock.locked
     }
 
     Pam {
