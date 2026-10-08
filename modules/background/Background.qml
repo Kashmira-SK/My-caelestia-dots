@@ -22,8 +22,9 @@ Loader {
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: Config.background.wallpaperEnabled && !Wallpapers.liveRunning ? WlrLayer.Background : WlrLayer.Bottom
-            color: Config.background.wallpaperEnabled && !Wallpapers.liveRunning ? "black" : "transparent"
+            // Stay above mpvpaper so the poster can cover player replacement.
+            WlrLayershell.layer: WlrLayer.Bottom
+            color: "transparent"
             surfaceFormat.opaque: false
 
             anchors.top: true
@@ -41,7 +42,12 @@ Loader {
 
                     anchors.fill: parent
                     active: Config.background.wallpaperEnabled
-                    visible: !Wallpapers.liveRunning
+                    opacity: !Wallpapers.liveRunning || Wallpapers.handoff || !item || item.transitioning ? 1 : 0
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 220 }
+                    }
 
                     sourceComponent: Wallpaper {}
                 }

@@ -49,8 +49,11 @@ Reloading the shell restores the selection without leaving a player behind.
 SDDM's login wallpaper remains independently configured.
 
 If playback fails, the shell shows the cached still and an error notification.
-Select the video again to retry. The static wallpaper transition effects are not
-applied to live video. For status and controller tests:
+Select the video again to retry. Video switches reuse the normal wallpaper effects
+between cached stills. Outgoing playback pauses while its still fades in; incoming
+playback is revealed after the still transition and player startup finish. Only
+one player runs at a time. The short fade softens the change, but a cached still
+can depict a different moment from the video. For status and controller tests:
 
 ```sh
 quickshell -c caelestia ipc call wallpaper status

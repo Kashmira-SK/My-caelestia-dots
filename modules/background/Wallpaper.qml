@@ -14,6 +14,8 @@ Item {
 
     property string source: Wallpapers.current
     property Item current: one
+    readonly property bool transitioning: !current || current.path !== source
+        || current.wallpaperItem.status !== Image.Ready || current.transitionProgress < 1
 
     property Item rippleFrom
     property Item rippleTo
@@ -243,6 +245,8 @@ Item {
         }
 
         function showLoaded(): void {
+            if (path !== root.source)
+                return;
             stopAnimations();
 
             activeTransition = chooseTransition();

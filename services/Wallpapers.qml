@@ -19,6 +19,8 @@ Searcher {
     property bool liveRunning: false
     property bool paused: false
     property bool busy: false
+    property bool handoff: false
+    property string requestedWallpaper: ""
     property bool locked: false
     property bool sleeping: false
     property bool controllerReady: false
@@ -37,15 +39,26 @@ Searcher {
 
     function sendStatus(): void {
         if (controllerReady)
-            controller.write(JSON.stringify({ action: "status", locked, sleeping, enabled: playbackEnabled, smart: Config.services.smartScheme }) + "\n");
+            controller.write(JSON.stringify({ action: "status", locked, sleeping, handoff, enabled: playbackEnabled, smart: Config.services.smartScheme }) + "\n");
     }
 
     function setWallpaper(path: string): void {
         if (!controllerReady)
             return;
-        controller.write(JSON.stringify({ action: "select", path, smart: Config.services.smartScheme }) + "\n");
+        requestedWallpaper = path;
+        if (liveRunning || handoff) {
+            handoff = true;
+            coverTimer.restart();
+        } else {
+            dispatchSelection();
+        }
     }
 
+    function dispatchSelection(): void {
+        controller.write(JSON.stringify({ action: "select", path: requestedWallpaper, smart: Config.services.smartScheme }) + "\n");
+    }
+
+    onHandoffChanged: sendStatus()
     onLockedChanged: sendStatus()
     onSleepingChanged: sendStatus()
     onPlaybackEnabledChanged: sendStatus()
@@ -70,6 +83,8 @@ Searcher {
             root.sendStatus();
         }
         onExited: {
+            coverTimer.stop();
+            root.handoff = false;
             root.controllerReady = false;
             root.liveRunning = false;
             root.busy = false;
@@ -90,11 +105,20 @@ Searcher {
                     root.paused = state.paused;
                     root.busy = state.busy;
                     root.error = state.error;
+                    if (!coverTimer.running && !state.busy && (state.selected === root.requestedWallpaper || state.error))
+                        root.handoff = false;
                 } catch (error) {
                     console.warn("Invalid wallpaper controller response:", error);
                 }
             }
         }
+    }
+
+    Timer {
+        id: coverTimer
+        // Let every screen fade to the outgoing poster before stopping mpvpaper.
+        interval: 300
+        onTriggered: root.dispatchSelection()
     }
 
     Timer {

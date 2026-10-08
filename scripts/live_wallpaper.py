@@ -112,6 +112,7 @@ class Controller:
         self.live = False
         self.locked = False
         self.sleeping = False
+        self.handoff = False
         self.enabled = True
         self.initialized = False
         self.smart = True
@@ -193,7 +194,7 @@ class Controller:
         self.stop_player()
         if not self.live or not self.enabled or not Path(self.selected).is_file() or not Path(self.current).is_file():
             return
-        pause = self.locked or self.sleeping or not self.monitors_awake
+        pause = self.locked or self.sleeping or self.handoff or not self.monitors_awake
         options = ('no-config load-scripts=no no-audio loop-file=inf hwdec=auto panscan=1 '
                    f'input-ipc-server={self.socket_path} pause={"yes" if pause else "no"}')
         try:
@@ -220,6 +221,7 @@ class Controller:
             self.smart = bool(message.get('smart', True))
             self.locked = bool(message.get('locked', False))
             self.sleeping = bool(message.get('sleeping', False))
+            self.handoff = bool(message.get('handoff', False))
             enabled = bool(message.get('enabled', True))
             if enabled != self.enabled or not self.initialized:
                 self.initialized = True
@@ -274,7 +276,7 @@ class Controller:
                 self.stop_player()
                 self.error = 'Video playback stopped; showing its cached still image.'
             else:
-                pause = self.locked or self.sleeping or not self.monitors_awake
+                pause = self.locked or self.sleeping or self.handoff or not self.monitors_awake
                 try:
                     if pause != self.paused:
                         mpv_command(self.socket_path, ['set_property', 'pause', pause])

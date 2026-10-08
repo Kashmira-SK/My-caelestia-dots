@@ -118,6 +118,15 @@ class WallpaperTests(unittest.TestCase):
             c.tick()
             self.assertFalse(c.paused)
             ipc.assert_called_with(c.socket_path, ['set_property', 'pause', False])
+            c.receive({'action': 'status', 'handoff': True})
+            c.tick()
+            self.assertTrue(c.paused)
+            c.receive({'action': 'status', 'handoff': False, 'locked': True})
+            c.tick()
+            self.assertTrue(c.paused)
+            c.receive({'action': 'status', 'handoff': False})
+            c.tick()
+            self.assertFalse(c.paused)
 
     def test_player_exit_uses_still_without_restart_loop(self):
         c = self.controller()

@@ -14,6 +14,7 @@ Newest entries at the top.
 ### Fixed
 
 - Static wallpaper transitions start immediately without waiting for theme generation; an older background operation cannot replace a newer selection
+- Video switches reuse the wallpaper transition between cached stills, with short fades from outgoing playback to its still and from the incoming still to ready playback
 
 ### Notes
 
