@@ -30,6 +30,10 @@ a play badge; the Settings wallpaper grid also supports them. Keep videos in
 `~/Pictures/Wallpapers/Live/` (or anywhere inside the configured wallpaper folder).
 Supported extensions are `.mp4`, `.webm`, `.mkv`, `.mov`, and `.m4v`.
 
+**Super+Shift+U** pauses/resumes a live wallpaper and does nothing for images.
+Manual pause survives lock/unlock; choosing a different wallpaper clears it.
+Choose transition effects in **Settings → Appearance → Background**.
+
 Requires `mpvpaper`, `ffmpeg` (including `ffprobe`), and Python 3, alongside the
 existing Caelestia CLI. Playback is muted and loops, requests `hwdec=auto`, and
 fills every connected monitor with the same selected video. 1080p is recommended

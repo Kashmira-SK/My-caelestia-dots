@@ -36,6 +36,24 @@ CollapsibleSection {
         }
     }
 
+    SplitButtonRow {
+        label: qsTr("Wallpaper transition")
+        enabled: rootPane.wallpaperEnabled
+        active: menuItems.find(item => item.val === Config.background.wallpaperTransition) ?? menuItems[0]
+        menuItems: [
+            MenuItem { text: qsTr("Radial"); icon: "animation"; property string val: "radial" },
+            MenuItem { text: qsTr("Ripple"); icon: "animation"; property string val: "ripple" },
+            MenuItem { text: qsTr("Diagonal"); icon: "animation"; property string val: "diagonal" },
+            MenuItem { text: qsTr("Corner"); icon: "animation"; property string val: "corner" },
+            MenuItem { text: qsTr("Cross"); icon: "animation"; property string val: "cross" },
+            MenuItem { text: qsTr("Random"); icon: "animation"; property string val: "random" }
+        ]
+        onSelected: item => {
+            Config.background.wallpaperTransition = item.val;
+            Config.save();
+        }
+    }
+
     StyledText {
         Layout.topMargin: Appearance.spacing.normal
         text: qsTr("Desktop Clock")

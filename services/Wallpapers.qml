@@ -18,6 +18,7 @@ Searcher {
     property bool live: false
     property bool liveRunning: false
     property bool paused: false
+    property bool manualPaused: false
     property bool busy: false
     readonly property bool handoff: phase === "cover" || phase === "apply" || phase === "transition"
     property string phase: "idle"
@@ -134,6 +135,7 @@ Searcher {
                         root.live = state.live;
                         root.liveRunning = state.running;
                         root.paused = state.paused;
+                        root.manualPaused = state.manualPaused;
                         root.busy = state.busy;
                         root.error = state.error;
                         if (root.phase === "apply" && !state.busy)
@@ -155,12 +157,16 @@ Searcher {
 
     IpcHandler {
         target: "wallpaper"
+        function togglePause(): void {
+            if (root.controllerReady)
+                controller.write(JSON.stringify({ action: "togglePause" }) + "\n");
+        }
         function get(): string { return root.actualCurrent; }
         function set(path: string): void { root.setWallpaper(path); }
         function list(): string { return root.list.map(w => w.path).join("\n"); }
         function status(): string {
             return JSON.stringify({ selected: root.actualCurrent, still: root.current, live: root.live,
-                phase: root.phase, revision: root.selectionId, running: root.liveRunning, paused: root.paused, locked: root.locked, sleeping: root.sleeping, busy: root.busy, error: root.error });
+                phase: root.phase, revision: root.selectionId, running: root.liveRunning, paused: root.paused, manualPaused: root.manualPaused, locked: root.locked, sleeping: root.sleeping, busy: root.busy, error: root.error });
         }
     }
 

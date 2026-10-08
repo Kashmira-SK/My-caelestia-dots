@@ -141,6 +141,30 @@ class WallpaperTests(unittest.TestCase):
         self.assertEqual(c.current, '/poster.jpg')
         self.assertIn('cached still', c.error)
 
+    def test_manual_pause_composes_with_lock_and_ignores_static(self):
+        c = self.controller()
+        c.receive({'action': 'togglePause'})
+        self.assertFalse(c.manual_paused)
+        c.live = c.ready = c.initialized = True
+        c.player = Mock()
+        c.player.poll.return_value = None
+        with patch.object(live, 'mpv_command'), patch.object(c, 'emit'):
+            c.receive({'action': 'togglePause'})
+            c.tick()
+            self.assertTrue(c.paused)
+            c.receive({'action': 'status', 'locked': True})
+            c.receive({'action': 'status', 'locked': False})
+            c.tick()
+            self.assertTrue(c.paused)
+            c.receive({'action': 'status', 'locked': True})
+            c.receive({'action': 'togglePause'})
+            c.tick()
+            self.assertFalse(c.manual_paused)
+            self.assertTrue(c.paused)
+            c.receive({'action': 'status', 'locked': False})
+            c.tick()
+            self.assertFalse(c.paused)
+
     def test_player_dies_with_controller(self):
         # Exercise the real Linux parent-death guard without starting a wallpaper.
         script = "import subprocess,sys,os,time; p=subprocess.Popen([sys.executable,sys.argv[1],'--player',str(os.getpid()),sys.executable,'-c','import time; time.sleep(60)'],stdout=subprocess.DEVNULL); print(p.pid,flush=True); time.sleep(.4); os._exit(0)"

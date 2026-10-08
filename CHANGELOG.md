@@ -6,6 +6,7 @@ Newest entries at the top.
 
 ### Added
 
+- Super+Shift+U toggles live wallpaper pause; transition effects are selectable in Settings → Appearance → Background
 - Video wallpapers in the Super+U picker and Settings wallpaper grid, with play badges alongside static images
 - One cached still per video revision for previews, theme colours, and fallback; new videos in the wallpaper folder are discovered automatically
 - Muted, looping mpvpaper playback across connected monitors, with saved selection restored after shell reloads

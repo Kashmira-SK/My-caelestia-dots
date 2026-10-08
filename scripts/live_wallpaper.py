@@ -113,6 +113,7 @@ class Controller:
         self.locked = False
         self.sleeping = False
         self.handoff = False
+        self.manual_paused = False
         self.enabled = True
         self.initialized = False
         self.smart = True
@@ -148,7 +149,7 @@ class Controller:
 
     def emit(self):
         payload = dict(revision=self.revision, current=self.current, selected=self.selected, videos=self.videos,
-                       live=self.live, running=self.ready, paused=self.paused,
+                       live=self.live, running=self.ready, paused=self.paused, manualPaused=self.manual_paused,
                        busy=self.applying is not None or self.pending is not None, error=self.error)
         if payload != self.last_payload:
             print(json.dumps(payload), flush=True)
@@ -199,7 +200,7 @@ class Controller:
         self.stop_player()
         if not self.live or not self.enabled or not Path(self.selected).is_file() or not Path(self.current).is_file():
             return
-        pause = self.locked or self.sleeping or self.handoff or not self.monitors_awake
+        pause = self.locked or self.sleeping or self.handoff or self.manual_paused or not self.monitors_awake
         options = ('no-config load-scripts=no no-audio loop-file=inf hwdec=auto panscan=1 '
                    f'input-ipc-server={self.socket_path} pause={"yes" if pause else "no"}')
         try:
@@ -213,7 +214,10 @@ class Controller:
 
     def receive(self, message):
         action = message.get('action')
-        if action == 'supersede':
+        if action == 'togglePause':
+            if self.live and self.player is not None:
+                self.manual_paused = not self.manual_paused
+        elif action == 'supersede':
             self.latest_revision = int(message['revision'])
             self.pending = None
             self.awaiting_selection = True
@@ -271,6 +275,8 @@ class Controller:
                 if self.pending is None and self.applying_revision == self.latest_revision:
                     self.revision = self.applying_revision
                     self.stop_player()
+                    if source != self.selected:
+                        self.manual_paused = False
                     self.selected, self.current = source, still
                     self.live = is_video(source)
                     atomic_json(self.selection_file, {'source': source, 'still': still})
@@ -290,13 +296,14 @@ class Controller:
                 self.stop_player()
                 self.current = self.selected = external
                 self.live = False
+                self.manual_paused = False
                 atomic_json(self.selection_file, {'source': external, 'still': external})
         if self.player:
             if self.player.poll() is not None:
                 self.stop_player()
                 self.error = 'Video playback stopped; showing its cached still image.'
             else:
-                pause = self.locked or self.sleeping or self.handoff or not self.monitors_awake
+                pause = self.locked or self.sleeping or self.handoff or self.manual_paused or not self.monitors_awake
                 try:
                     if pause != self.paused:
                         mpv_command(self.socket_path, ['set_property', 'pause', pause])
