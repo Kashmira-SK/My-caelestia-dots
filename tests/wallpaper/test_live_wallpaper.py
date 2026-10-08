@@ -155,6 +155,55 @@ class WallpaperTests(unittest.TestCase):
             c.apply('/missing.mp4', True)
         self.assertEqual(c.current, '/existing.jpg')
 
+    def test_static_selection_visible_before_theme_work_finishes(self):
+        c = self.controller()
+        image = Path(live.thumbnail(self.video, c.cache))
+        future = live.concurrent.futures.Future()
+        with patch.object(c.pool, 'submit', return_value=future), patch.object(c, 'emit') as emit:
+            c.receive({'action': 'select', 'path': str(image)})
+            self.assertEqual(c.current, str(image))
+            emit.assert_called_once()
+            c.tick()
+            self.assertFalse(future.done())
+            self.assertEqual(c.selected, str(image))
+
+    def test_older_apply_cannot_replace_newer_static_selection(self):
+        c = self.controller()
+        first = Path(live.thumbnail(self.video, c.cache))
+        second = self.root / 'second.jpg'
+        second.write_bytes(first.read_bytes())
+        old = live.concurrent.futures.Future()
+        latest = live.concurrent.futures.Future()
+        with patch.object(c.pool, 'submit', side_effect=[old, latest]) as submit, patch.object(c, 'emit'):
+            c.receive({'action': 'select', 'path': str(first)})
+            c.tick()
+            c.receive({'action': 'select', 'path': str(second)})
+            c.tick()
+            self.assertEqual(submit.call_count, 1)
+            old.set_result((str(first), str(first)))
+            c.tick()
+            self.assertEqual(c.current, str(second))
+            self.assertIs(c.applying, latest)
+            c.path_file.parent.mkdir(parents=True, exist_ok=True)
+            c.path_file.write_text(str(second))
+            latest.set_result((str(second), str(second)))
+            c.tick()
+            self.assertEqual(c.selected, str(second))
+
+    def test_failed_static_apply_restores_persisted_wallpaper(self):
+        c = self.controller()
+        image = Path(live.thumbnail(self.video, c.cache))
+        c.path_file.parent.mkdir(parents=True, exist_ok=True)
+        c.path_file.write_text('/existing.jpg')
+        failed = live.concurrent.futures.Future()
+        with patch.object(c.pool, 'submit', return_value=failed), patch.object(c, 'emit'):
+            c.receive({'action': 'select', 'path': str(image)})
+            c.tick()
+            failed.set_exception(ValueError('Invalid image'))
+            c.tick()
+            self.assertEqual(c.current, '/existing.jpg')
+            self.assertIn('Invalid image', c.error)
+
 
 if __name__ == '__main__':
     unittest.main()

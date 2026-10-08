@@ -11,6 +11,10 @@ Newest entries at the top.
 - Muted, looping mpvpaper playback across connected monitors, with saved selection restored after shell reloads
 - Playback pauses while the Quickshell lock is active, during sleep, or while all displays are off; selecting a static wallpaper stops playback
 
+### Fixed
+
+- Static wallpaper transitions start immediately without waiting for theme generation; an older background operation cannot replace a newer selection
+
 ### Notes
 
 - Requires `mpvpaper`, `ffmpeg`, and Python 3; the same selected video plays on every monitor

@@ -210,6 +210,12 @@ class Controller:
         if action == 'select':
             self.pending = (message['path'], message.get('smart', True))
             self.error = ''
+            # Start static transitions on selection, independently of the
+            # serialized CLI/theme work. Keep the video handoff unchanged.
+            source = Path(message['path']).resolve()
+            if not self.live and not is_video(source) and source.is_file():
+                self.selected = self.current = str(source)
+                self.emit()
         elif action == 'status':
             self.smart = bool(message.get('smart', True))
             self.locked = bool(message.get('locked', False))
@@ -244,11 +250,11 @@ class Controller:
         if self.applying and self.applying.done():
             try:
                 source, still = self.applying.result()
-                self.stop_player()
-                self.selected, self.current = source, still
-                self.live = is_video(source)
-                atomic_json(self.selection_file, {'source': source, 'still': still})
                 if self.pending is None:
+                    self.stop_player()
+                    self.selected, self.current = source, still
+                    self.live = is_video(source)
+                    atomic_json(self.selection_file, {'source': source, 'still': still})
                     self.start_player()
             except Exception as error:
                 self.error = f'Wallpaper was not applied: {error}'
