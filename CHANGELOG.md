@@ -12,6 +12,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Notification cards use the former stack surface color and opacity from the dynamic theme for better readability
 - Notification popups float as separate spaced cards without a shared stack background; card layout and interactions are retained
 - Super+D opens the Quickshell popup instead of Fuzzel and takes precedence over the imported dashboard binding; unrelated Fuzzel functionality is unchanged
 

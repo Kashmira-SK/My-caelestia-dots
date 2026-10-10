@@ -21,7 +21,7 @@ StyledRect {
     readonly property color ink: modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.palette.m3primary
     property bool expanded: Config.notifs.openExpanded
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.layer(Colours.palette.m3surface, 0)
     radius: Appearance.rounding.panel
     border.width: 1
     border.color: root.modelData.urgency === NotificationUrgency.Critical ? root.ink : Colours.palette.m3outlineVariant
