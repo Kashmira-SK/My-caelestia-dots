@@ -18,7 +18,7 @@ SettingsPage {
     readonly property string section: session.sectionFor("appearance")
     anchors.fill: parent
     title: PaneRegistry.sectionLabel("appearance", section)
-    description: section === "colors" ? qsTr("Theme colors apply to the shell and connected apps.") : section === "text" ? qsTr("Choose the fonts and size used across the shell.") : section === "surfaces" ? qsTr("Adjust shell transparency and animation timing. Settings stays opaque.") : qsTr("Adjust spacing, corners, and the screen border.")
+    description: section === "colors" ? qsTr("Theme colors apply to the shell and connected apps.") : section === "text" ? qsTr("Choose the fonts and size used across the shell.") : section === "surfaces" ? qsTr("Adjust shell transparency and animation timing.") : qsTr("Adjust spacing, corners, and the screen border.")
     function setValue(settings: var, key: string, value: var): void { session.changeVisual(settings, key, value); }
     Timer { id: schemeReload; interval: 300; onTriggered: Schemes.reload() }
     Group {
@@ -165,7 +165,7 @@ SettingsPage {
             label: qsTr("Animation duration")
             settings: Config.appearance.anim.durations
             setting: "scale"
-            from: 0.1; to: 5; stepSize: 0.1; decimals: 1; suffix: "×"
+            from: 0.1; to: 5; stepSize: 0.1; decimals: 1
         }
     }
     Group {
@@ -174,17 +174,17 @@ SettingsPage {
         Adjustment {
             label: qsTr("Space inside controls")
             settings: Config.appearance.padding; setting: "scale"
-            from: 0.5; to: 2; stepSize: 0.1; suffix: "×"
+            from: 0.5; to: 2; stepSize: 0.1
         }
         Adjustment {
             label: qsTr("Space between controls")
             settings: Config.appearance.spacing; setting: "scale"
-            from: 0.1; to: 2; stepSize: 0.1; suffix: "×"
+            from: 0.1; to: 2; stepSize: 0.1
         }
         Adjustment {
             label: qsTr("Corner roundness")
             settings: Config.appearance.rounding; setting: "scale"
-            from: 0.1; to: 5; stepSize: 0.1; suffix: "×"
+            from: 0.1; to: 5; stepSize: 0.1
         }
     }
     Group {

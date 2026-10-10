@@ -431,9 +431,13 @@ StyledFlickable {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 1
+            Layout.minimumWidth: 0
+            Layout.preferredWidth: 1
+            spacing: 5
 
             StyledText {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
                 text: switchRow.label
                 color: Colours.palette.m3onSurface
                 font.pointSize: 9.75 * Appearance.font.size.scale
@@ -441,6 +445,8 @@ StyledFlickable {
 
             StyledText {
                 visible: switchRow.description !== ""
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
                 text: switchRow.description
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: 9 * Appearance.font.size.scale
@@ -448,6 +454,9 @@ StyledFlickable {
         }
 
         SettingsSwitch {
+            Layout.minimumWidth: 36
+            Layout.maximumWidth: 36
+            Accessible.name: switchRow.label
             checked: switchRow.checked
             cLayer: 2
             onToggled: switchRow.changed(checked)

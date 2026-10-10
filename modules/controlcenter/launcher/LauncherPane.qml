@@ -505,114 +505,13 @@ Item {
             Item {
                 id: rightLauncherPane
 
-                property var pane:
-                    root.session.launcher.active
-
-                property string paneId:
-                    pane
-                    ? (
-                        pane.id
-                        || pane.entry?.id
-                        || ""
-                    )
-                    : ""
-
-                property Component targetComponent:
-                    settings
-
-                property Component nextComponent:
-                    settings
-
-                property var displayedApp: null
-
-                function getComponentForPane() {
-                    return pane
-                        ? appDetails
-                        : settings;
-                }
-
-                Component.onCompleted: {
-                    displayedApp = pane;
-                    targetComponent =
-                        getComponentForPane();
-
-                    nextComponent =
-                        targetComponent;
-                }
-
+                readonly property var displayedApp: root.selectedApp
                 Loader {
                     id: rightLauncherLoader
-
                     anchors.fill: parent
-
-                    opacity: 1
-                    scale: 1
-
-                    transformOrigin: Item.Center
                     clip: true
-
-                    sourceComponent:
-                        rightLauncherPane.targetComponent
-
-                    active: true
-
-                    property var displayedApp:
-                        rightLauncherPane.displayedApp
-
-                    onItemChanged: {
-                        if (
-                            item
-                            && rightLauncherPane.pane
-                            && rightLauncherPane.displayedApp
-                                !== rightLauncherPane.pane
-                        ) {
-                            rightLauncherPane.displayedApp =
-                                rightLauncherPane.pane;
-                        }
-                    }
-                }
-
-                Behavior on paneId {
-                    PaneTransition {
-                        target: rightLauncherLoader
-
-                        propertyActions: [
-                            PropertyAction {
-                                target: rightLauncherPane
-                                property: "displayedApp"
-                                value: rightLauncherPane.pane
-                            },
-                            PropertyAction {
-                                target: rightLauncherLoader
-                                property: "active"
-                                value: false
-                            },
-                            PropertyAction {
-                                target: rightLauncherPane
-                                property: "targetComponent"
-                                value: rightLauncherPane.nextComponent
-                            },
-                            PropertyAction {
-                                target: rightLauncherLoader
-                                property: "active"
-                                value: true
-                            }
-                        ]
-                    }
-                }
-
-                onPaneChanged: {
-                    nextComponent =
-                        getComponentForPane();
-
-                    paneId =
-                        pane
-                        ? (
-                            pane.id
-                            || pane.entry?.id
-                            || ""
-                        )
-                        : "";
+                    property var displayedApp: rightLauncherPane.displayedApp
+                    sourceComponent: rightLauncherPane.displayedApp ? appDetails : settings
                 }
 
                 onDisplayedAppChanged: {

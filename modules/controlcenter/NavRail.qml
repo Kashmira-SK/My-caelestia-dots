@@ -15,7 +15,7 @@ Rectangle {
     required property Session session
     required property bool initialOpeningComplete
     implicitWidth: 210
-    color: Colours.palette.m3surfaceContainer
+    color: Qt.alpha(Colours.palette.m3surfaceContainer, Colours.transparency.enabled ? 0.35 : 1)
     StyledFlickable {
         boundsBehavior: Flickable.StopAtBounds
         boundsMovement: Flickable.StopAtBounds;

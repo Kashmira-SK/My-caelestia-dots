@@ -42,50 +42,12 @@ Item {
             Item {
                 id: rightPaneItem
 
-                property var pane: root.activeItem
-                property string paneId: root.paneIdGenerator(pane)
-                property Component targetComponent: root.rightSettingsComponent
-                property Component nextComponent: root.rightSettingsComponent
-
-                function getComponentForPane() {
-                    return pane ? root.rightDetailsComponent : root.rightSettingsComponent;
-                }
-
-                Component.onCompleted: {
-                    targetComponent = getComponentForPane();
-                    nextComponent = targetComponent;
-                }
-
                 Loader {
-                    id: rightLoader
-
                     anchors.fill: parent
-
-                    opacity: 1
-                    scale: 1
-                    transformOrigin: Item.Center
-
-                    clip: false
-                    sourceComponent: rightPaneItem.targetComponent
+                    clip: true
+                    sourceComponent: root.activeItem ? root.rightDetailsComponent : root.rightSettingsComponent
                 }
 
-                Behavior on paneId {
-                    PaneTransition {
-                        target: rightLoader
-                        propertyActions: [
-                            PropertyAction {
-                                target: rightPaneItem
-                                property: "targetComponent"
-                                value: rightPaneItem.nextComponent
-                            }
-                        ]
-                    }
-                }
-
-                onPaneChanged: {
-                    nextComponent = getComponentForPane();
-                    paneId = root.paneIdGenerator(pane);
-                }
             }
         }
     }

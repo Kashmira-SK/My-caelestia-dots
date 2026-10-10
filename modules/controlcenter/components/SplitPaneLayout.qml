@@ -7,10 +7,9 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
-RowLayout {
+Item {
     id: root
 
-    spacing: 0
     property bool singlePane: false
     property bool showRightPane: false
     property bool showBackButton: showRightPane
@@ -30,15 +29,13 @@ RowLayout {
     Item {
         id: leftPane
         visible: !root.singlePane || !root.showRightPane
-        Layout.fillWidth: root.singlePane
-
-        Layout.preferredWidth: root.singlePane ? -1 : Math.floor(parent.width * root.leftWidthRatio)
-        Layout.minimumWidth: root.singlePane ? 0 : root.leftMinimumWidth
-        Layout.fillHeight: true
+        width: root.singlePane ? root.width : Math.max(root.leftMinimumWidth, Math.floor(root.width * root.leftWidthRatio))
+        height: root.height
 
         Loader {
             id: leftLoader
 
+            clip: true
             anchors.fill: parent
             anchors.leftMargin: root.singlePane ? 28 : Appearance.padding.large
             anchors.rightMargin: root.singlePane ? 28 : Appearance.padding.large
@@ -56,8 +53,9 @@ RowLayout {
 
     Item {
         visible: !root.singlePane
-        Layout.preferredWidth: Appearance.spacing.large + 1
-        Layout.fillHeight: true
+        x: leftPane.width
+        width: Appearance.spacing.large + 1
+        height: root.height
 
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -88,12 +86,14 @@ RowLayout {
             leftPadding: 10
         }
 
-        Layout.fillWidth: true
-        Layout.fillHeight: true
+        x: root.singlePane ? 0 : leftPane.width + Appearance.spacing.large + 1
+        width: root.width - x
+        height: root.height
 
         Loader {
             id: rightLoader
 
+            clip: true
             anchors.fill: parent
             anchors.leftMargin: root.singlePane ? 28 : Appearance.padding.large
             anchors.rightMargin: root.singlePane ? 28 : Appearance.padding.large

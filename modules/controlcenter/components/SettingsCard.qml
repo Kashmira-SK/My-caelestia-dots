@@ -31,7 +31,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: body.implicitHeight + 2 + root.contentPadding * 2
         radius: 9
-        color: Colours.palette.m3surfaceContainerHigh
+        color: Qt.alpha(Colours.palette.m3surfaceContainerHigh, Colours.transparency.enabled ? 0.65 : 1)
         border.width: 1
         border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.65)
         ColumnLayout {

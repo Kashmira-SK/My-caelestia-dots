@@ -191,7 +191,7 @@ Item {
     StyledRect {
         anchors.fill: parent
 
-        color: Colours.palette.m3surfaceContainerLow
+        color: "transparent"
 
         ColumnLayout {
             anchors.fill: parent

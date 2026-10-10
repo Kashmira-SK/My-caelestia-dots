@@ -252,11 +252,13 @@ ColumnLayout {
                         }
                     }
 
-                    CustomSpinBox {
-                        min: 0
+                    SettingsSpinBox {
+                        Accessible.name: qsTr("Visibility timeout")
+                        from: 0
+                        to: 2147483647
                         value: root.selectedAdapter?.discoverableTimeout ?? 0
 
-                        onValueModified: value => {
+                        onValueModified: {
                             if (root.selectedAdapter)
                                 root.selectedAdapter.discoverableTimeout = value;
                         }
@@ -379,9 +381,13 @@ ColumnLayout {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 1
+            Layout.minimumWidth: 0
+            Layout.preferredWidth: 1
+            spacing: 5
 
             StyledText {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
                 text: switchRow.label
                 color: Colours.palette.m3onSurface
                 font.pointSize: 9.75 * Appearance.font.size.scale
@@ -389,6 +395,8 @@ ColumnLayout {
 
             StyledText {
                 visible: switchRow.description !== ""
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
                 text: switchRow.description
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: 9 * Appearance.font.size.scale
@@ -396,6 +404,9 @@ ColumnLayout {
         }
 
         SettingsSwitch {
+            Layout.minimumWidth: 36
+            Layout.maximumWidth: 36
+            Accessible.name: switchRow.label
             checked: switchRow.checked
             enabled: switchRow.enabled
             cLayer: 2

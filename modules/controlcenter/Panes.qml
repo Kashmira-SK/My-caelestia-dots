@@ -24,7 +24,7 @@ ClippingRectangle {
     readonly property bool initialOpeningComplete:
         layout.initialOpeningComplete
 
-    color: Colours.palette.m3surfaceContainerLow
+    color: "transparent"
 
     clip: true
     focus: false

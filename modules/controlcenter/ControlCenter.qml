@@ -23,7 +23,7 @@ Rectangle {
     // Use content-sized defaults; large monitors should not stretch the form.
     implicitWidth: Math.min(1000, screen.width - 40)
     implicitHeight: Math.min(660, screen.height - 40)
-    color: Colours.palette.m3surfaceContainerLow
+    color: Qt.alpha(Colours.palette.m3surfaceContainerLow, Colours.transparency.enabled ? Math.max(0.82, Colours.transparency.base) : 1)
     radius: rounding
 
     ColumnLayout {
