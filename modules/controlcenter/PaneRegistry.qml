@@ -81,7 +81,7 @@ QtObject {
         }
     ]
     readonly property var barSections: [
-        { id: "general", label: qsTr("General"), keywords: qsTr("visibility always show hover system tray background compact recolour") },
+        { id: "general", label: qsTr("General"), keywords: qsTr("sidebar appearance attached floating detached visibility always show hover system tray background compact recolour") },
         { id: "workspaces", label: qsTr("Workspaces"), keywords: qsTr("visible count monitor active occupied highlight application icons") },
         { id: "indicators", label: qsTr("Indicators"), keywords: qsTr("status speakers microphone keyboard network wifi Wi-Fi Bluetooth battery caps lock clock") },
         { id: "interaction", label: qsTr("Interaction"), keywords: qsTr("mouse gestures scroll volume brightness detail popups drag distance") }

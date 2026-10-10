@@ -16,9 +16,14 @@ Item {
 
     readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
     readonly property int contentWidth: Config.bar.sizes.innerWidth + padding * 2
+    readonly property bool floating: Config.bar.mode === "floating"
+    // Match the app frame: screen border plus Hyprland's 7px outer gap.
+    // Hyprland supplies the gap on the app-facing side of the reserved area.
+    readonly property int edgeGap: floating ? Config.border.thickness + 7 : 0
+    readonly property int expandedWidth: contentWidth + edgeGap
     
     // Reserve physical screen space only when pinned
-    readonly property int exclusiveZone: !disabled && visibilities.bar ? contentWidth : Config.border.thickness
+    readonly property int exclusiveZone: !disabled && visibilities.bar ? expandedWidth : Config.border.thickness
     
     // Render the bar if pinned or actively hovered
     readonly property bool shouldBeVisible: !disabled && (visibilities.bar || isHovered)
@@ -30,11 +35,11 @@ Item {
     }
 
     function checkPopout(y: real): void {
-        content.item?.checkPopout(y);
+        content.item?.checkPopout(y - edgeGap);
     }
 
     function handleWheel(y: real, angleDelta: point): void {
-        content.item?.handleWheel(y, angleDelta);
+        content.item?.handleWheel(y - edgeGap, angleDelta);
     }
 
     visible: width > Config.border.thickness
@@ -45,7 +50,7 @@ Item {
         when: root.shouldBeVisible
 
         PropertyChanges {
-            root.implicitWidth: root.contentWidth
+            root.implicitWidth: root.expandedWidth
         }
     }
 
@@ -79,6 +84,8 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+        anchors.topMargin: root.edgeGap
+        anchors.bottomMargin: root.edgeGap
 
         active: root.shouldBeVisible || root.visible
 

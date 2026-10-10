@@ -108,7 +108,7 @@ Item {
             if (isDetached)
                 return (root.height - nonAnimHeight) / 2;
 
-            const off = currentCenter - Config.border.thickness - nonAnimHeight / 2;
+            const off = currentCenter + root.bar.edgeGap - Config.border.thickness - nonAnimHeight / 2;
             const diff = root.height - Math.floor(off + nonAnimHeight);
             if (diff < 0)
                 return off + diff;

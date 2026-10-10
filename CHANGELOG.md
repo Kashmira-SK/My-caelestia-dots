@@ -29,6 +29,7 @@ Newest entries at the top.
 
 ### Added
 
+- Attached/Floating sidebar appearance in Bar & workspaces → General, with saved mode selection, rounded floating corners, and screen-edge spacing
 - Reference commands for starting/stopping Caelestia and setting battery charge limits to 80% or 100%
 - Compact theme profile and palette selectors, separate Sound volume/device groups, and full-width Reference groups with selectable command text
 - Shared grouped controls, typography, and page spacing across all settings pages, with direct sidebar subsections and full-width device/application lists and details
@@ -48,6 +49,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Floating sidebar aligns with app-window height and 6px corners, without an extra gap on the app-facing side
 - Application volume rows reserve separate space for names, values, mute controls, and sliders; Reference uses quiet Copy text actions
 - Removed the Reference question-mark help button and its hover popup; settings hints use compact, opaque tooltips
 - Maintenance groups distinguish package updates from battery charge limits without repeating the page heading

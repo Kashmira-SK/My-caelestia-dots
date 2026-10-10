@@ -7,6 +7,7 @@ import qs.components.controls
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
 StyledFlickable {
@@ -54,6 +55,48 @@ StyledFlickable {
             columns: 1
             columnSpacing: 18
             rowSpacing: 22
+            SettingsCard {
+                title: qsTr("Sidebar appearance")
+                contentPadding: 16
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    Repeater {
+                        model: [
+                            { mode: "attached", label: qsTr("Attached") },
+                            { mode: "floating", label: qsTr("Floating") }
+                        ]
+                        Controls.AbstractButton {
+                            id: modeButton
+                            required property var modelData
+                            readonly property bool selected: Config.bar.mode === modelData.mode
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            implicitHeight: 38
+                            Accessible.role: Accessible.RadioButton
+                            Accessible.name: modelData.label
+                            Accessible.checked: selected
+                            onClicked: {
+                                Config.bar.mode = modelData.mode;
+                                Config.save();
+                            }
+                            contentItem: StyledText {
+                                text: modeButton.modelData.label
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                font.pointSize: 10 * Appearance.font.size.scale
+                                color: modeButton.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                            }
+                            background: Rectangle {
+                                radius: 6
+                                color: modeButton.selected ? Qt.alpha(Colours.palette.m3primary, 0.12) : modeButton.hovered ? Qt.alpha(Colours.palette.m3onSurface, 0.06) : "transparent"
+                                border.width: 1
+                                border.color: modeButton.selected || modeButton.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
+                            }
+                        }
+                    }
+                }
+            }
             SettingsCard {
                 Layout.alignment: Qt.AlignTop
                 title: qsTr("Visibility")

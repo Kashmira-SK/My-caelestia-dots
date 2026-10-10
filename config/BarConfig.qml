@@ -1,6 +1,7 @@
 import Quickshell.Io
 
 JsonObject {
+    property string mode: "attached"
     property bool persistent: true
     property bool showOnHover: true
     property int dragThreshold: 20

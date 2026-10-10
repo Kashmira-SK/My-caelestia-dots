@@ -37,8 +37,20 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: Config.border.thickness
-            anchors.leftMargin: root.bar.implicitWidth
+            anchors.leftMargin: root.bar.floating ? Config.border.thickness : root.bar.implicitWidth
             radius: Config.border.rounding
         }
+    }
+
+    // Use the same surface/opacity pipeline as the attached border, but draw a
+    // separate rounded rail. Its width follows the existing reveal animation.
+    StyledRect {
+        visible: root.bar.floating && root.bar.visible
+        x: root.bar.edgeGap
+        y: root.bar.edgeGap
+        width: Math.max(0, root.bar.width - root.bar.edgeGap)
+        height: Math.max(0, root.height - root.bar.edgeGap * 2)
+        radius: Math.min(6, width / 2)
+        color: Colours.palette.m3surface
     }
 }
