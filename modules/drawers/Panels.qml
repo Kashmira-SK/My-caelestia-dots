@@ -109,6 +109,12 @@ Item {
                 return (root.height - nonAnimHeight) / 2;
 
             const off = currentCenter + root.bar.edgeGap - Config.border.thickness - nonAnimHeight / 2;
+            if (root.bar.floating) {
+                // The connecting curves extend beyond the content rectangle.
+                // Keep those curves inside the floating rail's screen inset too.
+                const inset = Math.max(0, root.bar.edgeGap - Config.border.thickness) + Config.border.rounding;
+                return Math.max(inset, Math.min(off, root.height - nonAnimHeight - inset));
+            }
             const diff = root.height - Math.floor(off + nonAnimHeight);
             if (diff < 0)
                 return off + diff;
