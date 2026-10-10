@@ -13,7 +13,7 @@ Newest entries at the top.
 
 ### Fixed
 
-- Floating sidebar hover panels keep the rail's top and bottom screen spacing, including their connecting curves; attached sidebar positioning is unchanged
+- Floating sidebar hover panels stay clear of screen edges and join the rail's straight side above its rounded corners; attached sidebar positioning is unchanged
 - Reference headings scroll with their page content, matching other settings pages; settings surfaces are slightly more transparent
 - Applications keeps its heading and search fixed above a bounded, rounded scrolling list; the settings sidebar shares the page surface with a subtler divider
 - Hidden scrollbar tracks and thumbs throughout the shell, including settings dropdowns, while retaining content scrolling

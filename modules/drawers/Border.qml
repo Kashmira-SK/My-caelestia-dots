@@ -50,7 +50,7 @@ Item {
         y: root.bar.edgeGap
         width: Math.max(0, root.bar.width - root.bar.edgeGap)
         height: Math.max(0, root.height - root.bar.edgeGap * 2)
-        radius: Math.min(6, width / 2)
+        radius: Math.min(root.bar.floatingRounding, width / 2)
         color: Colours.palette.m3surface
     }
 }

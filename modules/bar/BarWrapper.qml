@@ -17,6 +17,7 @@ Item {
     readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
     readonly property int contentWidth: Config.bar.sizes.innerWidth + padding * 2
     readonly property bool floating: Config.bar.mode === "floating"
+    readonly property int floatingRounding: 6
     // Match the app frame: screen border plus Hyprland's 7px outer gap.
     // Hyprland supplies the gap on the app-facing side of the reserved area.
     readonly property int edgeGap: floating ? Config.border.thickness + 7 : 0

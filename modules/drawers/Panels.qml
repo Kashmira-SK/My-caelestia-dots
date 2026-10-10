@@ -111,8 +111,8 @@ Item {
             const off = currentCenter + root.bar.edgeGap - Config.border.thickness - nonAnimHeight / 2;
             if (root.bar.floating) {
                 // The connecting curves extend beyond the content rectangle.
-                // Keep those curves inside the floating rail's screen inset too.
-                const inset = Math.max(0, root.bar.edgeGap - Config.border.thickness) + Config.border.rounding;
+                // Join the rail's straight side, before its own corner curves away.
+                const inset = Math.max(0, root.bar.edgeGap - Config.border.thickness) + Config.border.rounding + root.bar.floatingRounding;
                 return Math.max(inset, Math.min(off, root.height - nonAnimHeight - inset));
             }
             const diff = root.height - Math.floor(off + nonAnimHeight);
