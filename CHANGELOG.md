@@ -13,7 +13,8 @@ Newest entries at the top.
 
 ### Fixed
 
-- Reference and application-list headings scroll with their page content, matching other settings pages; settings surfaces are slightly more transparent
+- Reference headings scroll with their page content, matching other settings pages; settings surfaces are slightly more transparent
+- Applications keeps its heading and search fixed above a bounded, rounded scrolling list; the settings sidebar shares the page surface with a subtler divider
 - Hidden scrollbar tracks and thumbs throughout the shell, including settings dropdowns, while retaining content scrolling
 - Bluetooth switches align consistently, visibility timeout uses the shared plus/minus stepper, and scale controls omit ambiguous multiplication markers
 - Detail views clip scrolling below the Back to list action; application and device navigation avoid intermediate content, zooming, and layout resizing

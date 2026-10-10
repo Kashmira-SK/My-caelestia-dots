@@ -15,7 +15,8 @@ Rectangle {
     required property Session session
     required property bool initialOpeningComplete
     implicitWidth: 210
-    color: Qt.alpha(Colours.palette.m3surfaceContainer, Colours.transparency.enabled ? 0.35 : 1)
+    // Share the window surface so wallpaper does not create a dark sidebar slab.
+    color: "transparent"
     StyledFlickable {
         boundsBehavior: Flickable.StopAtBounds
         boundsMovement: Flickable.StopAtBounds;

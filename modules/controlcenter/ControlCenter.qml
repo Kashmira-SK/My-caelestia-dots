@@ -82,7 +82,7 @@ Rectangle {
                 session: root.session
                 initialOpeningComplete: root.initialOpeningComplete
             }
-            Rectangle { Layout.fillHeight: true; implicitWidth: 1; color: Qt.alpha(Colours.palette.m3outlineVariant, 0.6) }
+            Rectangle { Layout.fillHeight: true; implicitWidth: 1; color: Qt.alpha(Colours.palette.m3outlineVariant, 0.25) }
             Panes {
                 id: panes
                 Layout.fillWidth: true
