@@ -7,6 +7,11 @@ import QtQuick.Templates
 ScrollBar {
     id: root
 
+    // Keep the Flickable's scrolling, but hide the bar and its pointer target.
+    policy: ScrollBar.AlwaysOff
+    visible: false
+    interactive: false
+
     required property Flickable flickable
     property bool animatePosition: true
     property bool shouldBeActive

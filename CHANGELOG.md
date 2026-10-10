@@ -13,6 +13,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Hidden scrollbar tracks and thumbs throughout the shell, including settings dropdowns, while retaining content scrolling
 - Bluetooth switches align consistently, visibility timeout uses the shared plus/minus stepper, and scale controls omit ambiguous multiplication markers
 - Detail views clip scrolling below the Back to list action; application and device navigation avoid intermediate content, zooming, and layout resizing
 - Settings surfaces use restrained shell transparency while keeping text and controls fully legible

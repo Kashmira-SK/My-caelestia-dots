@@ -65,7 +65,7 @@ StyledTextField {
             model: root.results
             currentIndex: root.selectedResult
             onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
-            Controls.ScrollBar.vertical: Controls.ScrollBar {}
+            Controls.ScrollBar.vertical: Controls.ScrollBar { policy: Controls.ScrollBar.AlwaysOff }
             StyledText {
                 visible: resultList.count === 0
                 anchors.centerIn: parent

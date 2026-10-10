@@ -236,7 +236,7 @@ SettingsPage {
                 boundsMovement: Flickable.StopAtBounds;
                 model: selector.popup.visible ? selector.delegateModel : null
                 currentIndex: selector.highlightedIndex
-                Controls.ScrollBar.vertical: Controls.ScrollBar {}
+                Controls.ScrollBar.vertical: Controls.ScrollBar { policy: Controls.ScrollBar.AlwaysOff }
             }
         }
     }
