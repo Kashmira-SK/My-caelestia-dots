@@ -17,6 +17,10 @@ Item {
     required property Component rightSettingsComponent
 
     property var activeItem: null
+    property bool singlePane: false
+    property bool showRightPane: false
+    property bool showBackButton: false
+    signal backRequested
     property var paneIdGenerator: function (item) {
         return item ? String(item) : "";
     }
@@ -25,6 +29,10 @@ Item {
 
     SplitPaneLayout {
         id: splitLayout
+        singlePane: root.singlePane
+        showRightPane: root.showRightPane
+        showBackButton: root.showBackButton
+        onBackRequested: root.backRequested()
 
         anchors.fill: parent
 

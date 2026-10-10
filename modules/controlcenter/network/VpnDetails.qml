@@ -151,24 +151,24 @@ DeviceDetails {
                 SectionContainer {
                     contentSpacing: Appearance.spacing.small / 2
 
-                    PropertyRow {
+                    SettingsPropertyRow {
                         label: qsTr("Provider")
                         value: root.vpnProvider?.name ?? qsTr("Unknown")
                     }
 
-                    PropertyRow {
+                    SettingsPropertyRow {
                         showTopMargin: true
                         label: qsTr("Display name")
                         value: root.vpnProvider?.displayName ?? qsTr("Unknown")
                     }
 
-                    PropertyRow {
+                    SettingsPropertyRow {
                         showTopMargin: true
                         label: qsTr("Interface")
                         value: root.vpnProvider?.interface || qsTr("N/A")
                     }
 
-                    PropertyRow {
+                    SettingsPropertyRow {
                         showTopMargin: true
                         label: qsTr("Status")
                         value: {
@@ -182,7 +182,7 @@ DeviceDetails {
                         }
                     }
 
-                    PropertyRow {
+                    SettingsPropertyRow {
                         showTopMargin: true
                         label: qsTr("Enabled")
                         value: root.providerEnabled ? qsTr("Yes") : qsTr("No")
@@ -271,7 +271,7 @@ DeviceDetails {
 
             StyledText {
                 text: qsTr("Edit VPN Provider")
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: 16.5 * Appearance.font.size.scale
                 font.weight: 500
             }
 
@@ -281,7 +281,7 @@ DeviceDetails {
 
                 StyledText {
                     text: qsTr("Display Name")
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: 9.75 * Appearance.font.size.scale
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
@@ -317,7 +317,7 @@ DeviceDetails {
 
                 StyledText {
                     text: qsTr("Interface (e.g., wg0, torguard)")
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: 9.75 * Appearance.font.size.scale
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
@@ -355,7 +355,7 @@ DeviceDetails {
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("Cancel")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveColour: Colours.palette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: editVpnDialog.closeWithAnimation()
                 }

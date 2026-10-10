@@ -32,6 +32,8 @@ CollapsibleSection {
             active: materialFontSection.expanded
 
             sourceComponent: StyledListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: materialFontList
                 property alias contentHeight: materialFontList.contentHeight
 
@@ -40,6 +42,8 @@ CollapsibleSection {
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: materialFontList
                 }
 
@@ -111,6 +115,8 @@ CollapsibleSection {
             active: monoFontSection.expanded
 
             sourceComponent: StyledListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: monoFontList
                 property alias contentHeight: monoFontList.contentHeight
 
@@ -119,6 +125,8 @@ CollapsibleSection {
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: monoFontList
                 }
 
@@ -190,6 +198,8 @@ CollapsibleSection {
             active: sansFontSection.expanded
 
             sourceComponent: StyledListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: sansFontList
                 property alias contentHeight: sansFontList.contentHeight
 
@@ -198,6 +208,8 @@ CollapsibleSection {
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: sansFontList
                 }
 

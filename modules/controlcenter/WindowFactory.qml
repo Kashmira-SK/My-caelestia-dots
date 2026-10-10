@@ -25,7 +25,7 @@ Singleton {
             property alias active: cc.active
             property alias navExpanded: cc.navExpanded
 
-            color: Colours.tPalette.m3surface
+            color: Colours.palette.m3surfaceContainerLow
 
             onVisibleChanged: {
                 if (!visible)
@@ -35,12 +35,12 @@ Singleton {
             implicitWidth: cc.implicitWidth
             implicitHeight: cc.implicitHeight
 
-            minimumSize.width: implicitWidth
-            minimumSize.height: implicitHeight
-            maximumSize.width: implicitWidth
-            maximumSize.height: implicitHeight
+            minimumSize.width: Math.min(800, cc.screen.width - 40)
+            minimumSize.height: Math.min(540, cc.screen.height - 40)
+            maximumSize.width: cc.screen.width - 40
+            maximumSize.height: cc.screen.height - 40
 
-            title: qsTr("Caelestia Settings - %1").arg(cc.active.slice(0, 1).toUpperCase() + cc.active.slice(1))
+            title: qsTr("Caelestia Settings - %1").arg(PaneRegistry.getById(cc.active)?.label ?? cc.active)
 
             ControlCenter {
                 id: cc

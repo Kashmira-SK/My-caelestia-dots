@@ -11,9 +11,12 @@ import Caelestia.Models
 import QtQuick
 
 GridView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
     id: root
 
     required property Session session
+    property string query: ""
 
     readonly property int minCellWidth: 200 + Appearance.spacing.normal
     readonly property int columnsCount: Math.max(1, Math.floor(width / minCellWidth))
@@ -21,12 +24,25 @@ GridView {
     cellWidth: width / columnsCount
     cellHeight: 140 + Appearance.spacing.normal
 
-    model: Wallpapers.list
+    model: Wallpapers.list.filter(w => w.name.toLowerCase().includes(root.query.trim().toLowerCase()))
 
     clip: true
 
     StyledScrollBar.vertical: StyledScrollBar {
+
+        animatePosition: false
         flickable: root
+    }
+
+    StyledText {
+        x: Appearance.padding.large
+        y: root.contentY + Math.max(0, (root.height - height) / 2)
+        width: root.width - Appearance.padding.large * 2
+        visible: root.count === 0
+        text: root.query.trim() ? qsTr("No wallpapers match your search") : qsTr("No wallpapers found in your wallpaper folder")
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.WordWrap
+        color: Colours.palette.m3onSurfaceVariant
     }
 
     delegate: Item {
@@ -36,6 +52,7 @@ GridView {
         width: root.cellWidth
         height: root.cellHeight
 
+        readonly property string thumbnailPath: Wallpapers.previewPath(modelData.path)
         readonly property bool isCurrent: modelData && modelData.path === Wallpapers.actualCurrent
         readonly property real itemMargin: Appearance.spacing.normal / 2
         readonly property real itemRadius: Appearance.rounding.normal
@@ -70,7 +87,7 @@ GridView {
             CachingImage {
                 id: cachingImage
 
-                path: Wallpapers.previewPath(modelData.path)
+                path: thumbnailPath
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -94,7 +111,8 @@ GridView {
                 id: fallbackImage
 
                 anchors.fill: parent
-                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? modelData.path : ""
+                // Video entries must use their cached still, never decode the video as an image.
+                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? thumbnailPath : ""
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
                 cache: true

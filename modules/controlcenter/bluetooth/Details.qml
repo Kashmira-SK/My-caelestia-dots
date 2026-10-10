@@ -14,6 +14,8 @@ import QtQuick
 import QtQuick.Layouts
 
 StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
     id: root
 
     required property Session session
@@ -29,6 +31,8 @@ StyledFlickable {
     contentHeight: detailsWrapper.height
 
     StyledScrollBar.vertical: StyledScrollBar {
+
+        animatePosition: false
         flickable: root
     }
 
@@ -59,9 +63,9 @@ StyledFlickable {
                         text: Icons.getBluetoothIcon(root.device?.icon ?? "")
                         color: root.connected
                             ? Colours.palette.m3primary
-                            : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.58)
+                            : Colours.palette.m3onSurfaceVariant
                         fill: root.connected ? 1 : 0
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: 16.5 * Appearance.font.size.scale
                     }
 
                     ColumnLayout {
@@ -72,7 +76,7 @@ StyledFlickable {
                             Layout.fillWidth: true
                             text: root.device?.name ?? qsTr("Unknown device")
                             color: Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.larger
+                            font.pointSize: 12 * Appearance.font.size.scale
                             font.weight: 500
                             elide: Text.ElideRight
                         }
@@ -87,8 +91,8 @@ StyledFlickable {
                                         : qsTr("Available")
                             color: root.connected
                                 ? Colours.palette.m3primary
-                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.44)
-                            font.pointSize: Appearance.font.size.smaller
+                                : Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                             font.weight: root.connected ? 500 : 400
                         }
                     }
@@ -96,9 +100,9 @@ StyledFlickable {
                     StyledText {
                         visible: root.device?.batteryAvailable ?? false
                         text: qsTr("%1%").arg(Math.round((root.device?.battery ?? 0) * 100))
-                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
+                        color: Colours.palette.m3onSurfaceVariant
                         font.family: Appearance.font.family.mono
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                     }
                 }
             }
@@ -282,86 +286,86 @@ StyledFlickable {
                     ColumnLayout {
                         spacing: Appearance.spacing.normal
 
-                        SectionHeading {
+                        CollapsibleSection {
                             title: qsTr("Device information")
                             description: qsTr("Technical details")
-                        }
+                            flatStyle: true
+                            SectionBox {
+                                contentHeight: infoContent.implicitHeight
 
-                        SectionBox {
-                            contentHeight: infoContent.implicitHeight
+                                ColumnLayout {
+                                    id: infoContent
 
-                            ColumnLayout {
-                                id: infoContent
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.small / 2
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.small / 2
-
-                                RowLayout {
-                                    visible: root.device?.batteryAvailable ?? false
-                                    Layout.fillWidth: true
-                                    Layout.bottomMargin: Appearance.spacing.normal
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        text: qsTr("Battery")
-                                        color: Colours.palette.m3onSurface
-                                    }
-
-                                    Item {
+                                    RowLayout {
+                                        visible: root.device?.batteryAvailable ?? false
                                         Layout.fillWidth: true
-                                    }
+                                        Layout.bottomMargin: Appearance.spacing.normal
+                                        spacing: Appearance.spacing.small
 
-                                    StyledText {
-                                        text: qsTr("%1%").arg(Math.round((root.device?.battery ?? 0) * 100))
-                                        color: Colours.palette.m3primary
-                                        font.family: Appearance.font.family.mono
-                                        font.pointSize: Appearance.font.size.small
-                                        font.weight: 500
-                                    }
-                                }
+                                        StyledText {
+                                            text: qsTr("Battery")
+                                            color: Colours.palette.m3onSurface
+                                        }
 
-                                StyledRect {
-                                    visible: root.device?.batteryAvailable ?? false
-                                    Layout.fillWidth: true
-                                    Layout.bottomMargin: Appearance.spacing.normal
-                                    implicitHeight: 4
-                                    radius: 2
-                                    color: Qt.alpha(Colours.palette.m3outlineVariant, 0.24)
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        StyledText {
+                                            text: qsTr("%1%").arg(Math.round((root.device?.battery ?? 0) * 100))
+                                            color: Colours.palette.m3primary
+                                            font.family: Appearance.font.family.mono
+                                            font.pointSize: 9.75 * Appearance.font.size.scale
+                                            font.weight: 500
+                                        }
+                                    }
 
                                     StyledRect {
-                                        anchors.left: parent.left
-                                        anchors.top: parent.top
-                                        anchors.bottom: parent.bottom
-                                        width: parent.width * Math.max(0, Math.min(1, root.device?.battery ?? 0))
-                                        radius: parent.radius
-                                        color: Colours.palette.m3primary
+                                        visible: root.device?.batteryAvailable ?? false
+                                        Layout.fillWidth: true
+                                        Layout.bottomMargin: Appearance.spacing.normal
+                                        implicitHeight: 4
+                                        radius: 2
+                                        color: Qt.alpha(Colours.palette.m3outlineVariant, 0.24)
+
+                                        StyledRect {
+                                            anchors.left: parent.left
+                                            anchors.top: parent.top
+                                            anchors.bottom: parent.bottom
+                                            width: parent.width * Math.max(0, Math.min(1, root.device?.battery ?? 0))
+                                            radius: parent.radius
+                                            color: Colours.palette.m3primary
+                                        }
                                     }
-                                }
 
-                                PropertyRow {
-                                    label: qsTr("MAC address")
-                                    value: root.device?.address ?? ""
-                                }
+                                    SettingsPropertyRow {
+                                        label: qsTr("MAC address")
+                                        value: root.device?.address ?? ""
+                                    }
 
-                                PropertyRow {
-                                    showTopMargin: true
-                                    label: qsTr("System name")
-                                    value: root.device?.deviceName ?? ""
-                                }
+                                    SettingsPropertyRow {
+                                        showTopMargin: true
+                                        label: qsTr("System name")
+                                        value: root.device?.deviceName ?? ""
+                                    }
 
-                                PropertyRow {
-                                    showTopMargin: true
-                                    label: qsTr("Bonded")
-                                    value: root.device?.bonded ? qsTr("Yes") : qsTr("No")
-                                }
+                                    SettingsPropertyRow {
+                                        showTopMargin: true
+                                        label: qsTr("Bonded")
+                                        value: root.device?.bonded ? qsTr("Yes") : qsTr("No")
+                                    }
 
-                                PropertyRow {
-                                    showTopMargin: true
-                                    label: qsTr("D-Bus path")
-                                    value: root.device?.dbusPath ?? ""
+                                    SettingsPropertyRow {
+                                        showTopMargin: true
+                                        label: qsTr("D-Bus path")
+                                        value: root.device?.dbusPath ?? ""
+                                    }
                                 }
                             }
                         }
@@ -384,15 +388,15 @@ StyledFlickable {
         StyledText {
             text: heading.title
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: 12 * Appearance.font.size.scale
             font.weight: 500
         }
 
         StyledText {
             visible: heading.description !== ""
             text: heading.description
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
-            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
     }
 
@@ -402,7 +406,7 @@ StyledFlickable {
         Layout.fillWidth: true
         implicitHeight: contentHeight + Appearance.padding.large * 2
         radius: Appearance.rounding.small
-        color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
+        color: Colours.palette.m3surfaceContainerHigh
         border.width: 1
         border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
     }
@@ -432,18 +436,18 @@ StyledFlickable {
             StyledText {
                 text: switchRow.label
                 color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
                 visible: switchRow.description !== ""
                 text: switchRow.description
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.38)
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9 * Appearance.font.size.scale
             }
         }
 
-        StyledSwitch {
+        SettingsSwitch {
             checked: switchRow.checked
             cLayer: 2
             onToggled: switchRow.changed(checked)
@@ -490,7 +494,7 @@ StyledFlickable {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -498,7 +502,7 @@ StyledFlickable {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: action.active ? 500 : 400
             }
         }
@@ -539,7 +543,7 @@ StyledFlickable {
                 Colours.palette.m3onSurface,
                 smallButtonMouse.containsMouse ? 1 : 0.65
             )
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
 
         MouseArea {

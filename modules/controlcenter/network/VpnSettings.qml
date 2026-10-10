@@ -52,6 +52,8 @@ ColumnLayout {
         contentSpacing: Appearance.spacing.normal
 
         ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             Layout.fillWidth: true
             Layout.preferredHeight: contentHeight
 
@@ -82,7 +84,7 @@ ColumnLayout {
                     required property int index
 
                     width: ListView.view ? ListView.view.width : undefined
-                    color: Colours.tPalette.m3surfaceContainerHigh
+                    color: Colours.palette.m3surfaceContainerHigh
                     radius: Appearance.rounding.normal
 
                     RowLayout {
@@ -94,7 +96,7 @@ ColumnLayout {
 
                         MaterialIcon {
                             text: modelData.isActive ? "vpn_key" : "vpn_key_off"
-                            font.pointSize: Appearance.font.size.large
+                            font.pointSize: 16.5 * Appearance.font.size.scale
                             color: modelData.isActive ? Colours.palette.m3primary : Colours.palette.m3outline
                         }
 
@@ -109,7 +111,7 @@ ColumnLayout {
 
                             StyledText {
                                 text: qsTr("%1 • %2").arg(modelData.name).arg(modelData.interface || qsTr("No interface"))
-                                font.pointSize: Appearance.font.size.small
+                                font.pointSize: 9.75 * Appearance.font.size.scale
                                 color: Colours.palette.m3outline
                             }
                         }
@@ -178,7 +180,7 @@ ColumnLayout {
         TextButton {
             Layout.fillWidth: true
             text: qsTr("+ Add NetBird")
-            inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+            inactiveColour: Colours.palette.m3surfaceContainerHigh
             inactiveOnColour: Colours.palette.m3onSurface
 
             onClicked: {
@@ -196,7 +198,7 @@ ColumnLayout {
         TextButton {
             Layout.fillWidth: true
             text: qsTr("+ Add Tailscale")
-            inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+            inactiveColour: Colours.palette.m3surfaceContainerHigh
             inactiveOnColour: Colours.palette.m3onSurface
 
             onClicked: {
@@ -214,7 +216,7 @@ ColumnLayout {
         TextButton {
             Layout.fillWidth: true
             text: qsTr("+ Add Cloudflare WARP")
-            inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+            inactiveColour: Colours.palette.m3surfaceContainerHigh
             inactiveOnColour: Colours.palette.m3onSurface
 
             onClicked: {

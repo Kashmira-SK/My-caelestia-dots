@@ -81,7 +81,7 @@ ColumnLayout {
         StyledText {
             text: qsTr("Wi-Fi")
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: 16.5 * Appearance.font.size.scale
             font.weight: 500
         }
 
@@ -93,12 +93,14 @@ ColumnLayout {
             text: Nmcli.scanning
                 ? qsTr("Scanning…")
                 : qsTr("%1 networks").arg(Nmcli.networks.length)
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
-            font.pointSize: Appearance.font.size.smaller
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
         }
     }
 
     ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
         id: view
 
         Layout.fillWidth: true
@@ -169,8 +171,8 @@ ColumnLayout {
                     fill: modelData.active ? 1 : 0
                     color: modelData.active
                         ? Colours.palette.m3primary
-                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
-                    font.pointSize: Appearance.font.size.normal
+                        : Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 10.5 * Appearance.font.size.scale
                 }
 
                 ColumnLayout {
@@ -181,7 +183,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         text: modelData.ssid || qsTr("Unknown")
                         color: Colours.palette.m3onSurface
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         font.weight: modelData.active ? 500 : 400
                         elide: Text.ElideRight
                         maximumLineCount: 1
@@ -209,22 +211,22 @@ ColumnLayout {
                             }
                             color: modelData.active
                                 ? Colours.palette.m3primary
-                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.40)
-                            font.pointSize: Appearance.font.size.smaller
+                                : Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                             font.weight: modelData.active ? 500 : 400
                         }
 
                         StyledText {
                             text: "·"
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.22)
-                            font.pointSize: Appearance.font.size.smaller
+                            color: Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                         }
 
                         StyledText {
                             text: qsTr("%1%").arg(modelData.strength)
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
+                            color: Colours.palette.m3onSurfaceVariant
                             font.family: Appearance.font.family.mono
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize: 9 * Appearance.font.size.scale
                         }
                     }
                 }
@@ -254,7 +256,7 @@ ColumnLayout {
                                 Colours.palette.m3onSurfaceVariant,
                                 connectMouse.containsMouse ? 0.72 : 0.46
                             )
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                     }
 
                     MouseArea {
@@ -317,8 +319,8 @@ ColumnLayout {
                     ? qsTr("Looking for networks…")
                     : qsTr("No networks found")
                 : qsTr("Wi-Fi is off")
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-            font.pointSize: Appearance.font.size.smaller
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
         }
     }
 }

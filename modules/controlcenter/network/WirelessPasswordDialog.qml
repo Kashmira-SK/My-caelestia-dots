@@ -61,7 +61,7 @@ Item {
         implicitHeight: content.implicitHeight + Appearance.padding.large * 2
 
         radius: Appearance.rounding.normal
-        color: Colours.tPalette.m3surface
+        color: Colours.palette.m3surface
         opacity: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0
         scale: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0.7
 
@@ -109,13 +109,13 @@ Item {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "lock"
-                font.pointSize: Appearance.font.size.extraLarge * 2
+                font.pointSize: 18 * Appearance.font.size.scale * 2
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: qsTr("Enter password")
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: 16.5 * Appearance.font.size.scale
                 font.weight: 500
             }
 
@@ -123,7 +123,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.network ? qsTr("Network: %1").arg(root.network.ssid) : ""
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -142,7 +142,7 @@ Item {
                     return "";
                 }
                 color: connectButton.hasError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: 400
                 wrapMode: Text.WordWrap
                 Layout.maximumWidth: parent.width - Appearance.padding.large * 2
@@ -211,7 +211,7 @@ Item {
                 StyledRect {
                     anchors.fill: parent
                     radius: Appearance.rounding.normal
-                    color: passwordContainer.activeFocus ? Qt.lighter(Colours.tPalette.m3surfaceContainer, 1.05) : Colours.tPalette.m3surfaceContainer
+                    color: passwordContainer.activeFocus ? Qt.lighter(Colours.palette.m3surfaceContainer, 1.05) : Colours.palette.m3surfaceContainer
                     border.width: passwordContainer.activeFocus || connectButton.hasError ? 4 : (root.visible ? 1 : 0)
                     border.color: {
                         if (connectButton.hasError) {
@@ -250,7 +250,7 @@ Item {
                     anchors.centerIn: parent
                     text: qsTr("Password")
                     color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: 10.5 * Appearance.font.size.scale
                     font.family: Appearance.font.family.mono
                     opacity: passwordContainer.passwordBuffer ? 0 : 1
 
@@ -260,6 +260,8 @@ Item {
                 }
 
                 ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                     id: charList
 
                     readonly property int fullWidth: count * (implicitHeight + spacing) - spacing

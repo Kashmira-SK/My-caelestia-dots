@@ -205,6 +205,16 @@ hl.window_rule({
 	size = { "monitor_w * 0.6", "monitor_h * 0.6" },
 })
 
+-- Keep settings readable and compact without changing other shell windows.
+hl.window_rule({
+	name = "caelestia-settings",
+	match = { class = "^org\\.quickshell$", title = "^Caelestia Settings - .*" },
+	float = true,
+	center = true,
+	size = { 1000, 660 },
+	opacity = "1 override 1 override 1 override",
+})
+
 hl.window_rule({
 	name = "file-picker-portal",
 	match = { class = "^xdg-desktop-portal.*$" },

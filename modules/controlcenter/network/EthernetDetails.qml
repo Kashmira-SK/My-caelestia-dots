@@ -41,9 +41,9 @@ DeviceDetails {
                 text: "cable"
                 color: root.connected
                     ? Colours.palette.m3primary
-                    : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.56)
+                    : Colours.palette.m3onSurfaceVariant
                 fill: root.connected ? 1 : 0
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: 16.5 * Appearance.font.size.scale
             }
 
             ColumnLayout {
@@ -54,7 +54,7 @@ DeviceDetails {
                     Layout.fillWidth: true
                     text: root.ethernetDevice?.interface ?? qsTr("Unknown interface")
                     color: Colours.palette.m3onSurface
-                    font.pointSize: Appearance.font.size.larger
+                    font.pointSize: 12 * Appearance.font.size.scale
                     font.weight: 500
                     elide: Text.ElideRight
                 }
@@ -65,8 +65,8 @@ DeviceDetails {
                         : qsTr("Disconnected")
                     color: root.connected
                         ? Colours.palette.m3primary
-                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.44)
-                    font.pointSize: Appearance.font.size.smaller
+                        : Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9 * Appearance.font.size.scale
                     font.weight: root.connected ? 500 : 400
                 }
             }
@@ -88,7 +88,7 @@ DeviceDetails {
                     implicitHeight: connectionContent.implicitHeight + Appearance.padding.large * 2
 
                     radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
+                    color: Colours.palette.m3surfaceContainerHigh
                     border.width: 1
                     border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
@@ -140,13 +140,13 @@ DeviceDetails {
                                 StyledText {
                                     text: qsTr("State")
                                     color: Colours.palette.m3onSurface
-                                    font.pointSize: Appearance.font.size.small
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
                                 }
 
                                 StyledText {
                                     text: root.ethernetDevice?.state ?? qsTr("Unknown")
-                                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.40)
-                                    font.pointSize: Appearance.font.size.smaller
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    font.pointSize: 9 * Appearance.font.size.scale
                                 }
                             }
 
@@ -154,9 +154,9 @@ DeviceDetails {
                                 text: root.connected ? "check_circle" : "radio_button_unchecked"
                                 color: root.connected
                                     ? Colours.palette.m3primary
-                                    : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
+                                    : Colours.palette.m3onSurfaceVariant
                                 fill: root.connected ? 1 : 0
-                                font.pointSize: Appearance.font.size.small
+                                font.pointSize: 9.75 * Appearance.font.size.scale
                             }
                         }
                     }
@@ -167,44 +167,44 @@ DeviceDetails {
             ColumnLayout {
                 spacing: Appearance.spacing.normal
 
-                SectionHeading {
+                CollapsibleSection {
                     title: qsTr("Device properties")
                     description: qsTr("Ethernet interface information")
-                }
+                    flatStyle: true
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: propertiesContent.implicitHeight + Appearance.padding.large * 2
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: propertiesContent.implicitHeight + Appearance.padding.large * 2
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3surfaceContainerHigh
+                        border.width: 1
+                        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
-                    radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-                    border.width: 1
-                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
+                        ColumnLayout {
+                            id: propertiesContent
 
-                    ColumnLayout {
-                        id: propertiesContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.small / 2
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.large
-                        spacing: Appearance.spacing.small / 2
+                            SettingsPropertyRow {
+                                label: qsTr("Interface")
+                                value: root.ethernetDevice?.interface ?? qsTr("Unknown")
+                            }
 
-                        PropertyRow {
-                            label: qsTr("Interface")
-                            value: root.ethernetDevice?.interface ?? qsTr("Unknown")
-                        }
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("Connection")
+                                value: root.ethernetDevice?.connection || qsTr("Not connected")
+                            }
 
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("Connection")
-                            value: root.ethernetDevice?.connection || qsTr("Not connected")
-                        }
-
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("State")
-                            value: root.ethernetDevice?.state ?? qsTr("Unknown")
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("State")
+                                value: root.ethernetDevice?.state ?? qsTr("Unknown")
+                            }
                         }
                     }
                 }
@@ -214,33 +214,33 @@ DeviceDetails {
             ColumnLayout {
                 spacing: Appearance.spacing.normal
 
-                SectionHeading {
+                CollapsibleSection {
                     title: qsTr("Connection information")
                     description: root.connected
                         ? qsTr("Current IP configuration")
                         : qsTr("Available when connected")
-                }
+                    flatStyle: true
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: infoContent.implicitHeight + Appearance.padding.large * 2
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: infoContent.implicitHeight + Appearance.padding.large * 2
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3surfaceContainerHigh
+                        border.width: 1
+                        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
-                    radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-                    border.width: 1
-                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
+                        ColumnLayout {
+                            id: infoContent
 
-                    ColumnLayout {
-                        id: infoContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Appearance.padding.large
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.large
-
-                        ConnectionInfoSection {
-                            Layout.fillWidth: true
-                            deviceDetails: Nmcli.ethernetDeviceDetails
+                            ConnectionInfoSection {
+                                Layout.fillWidth: true
+                                deviceDetails: Nmcli.ethernetDeviceDetails
+                            }
                         }
                     }
                 }
@@ -261,15 +261,15 @@ DeviceDetails {
         StyledText {
             text: heading.title
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: 12 * Appearance.font.size.scale
             font.weight: 500
         }
 
         StyledText {
             visible: heading.description !== ""
             text: heading.description
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
-            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
     }
 
@@ -309,7 +309,7 @@ DeviceDetails {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -317,7 +317,7 @@ DeviceDetails {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: action.active ? 500 : 400
             }
         }

@@ -80,7 +80,7 @@ Item {
                 toggle: false
                 onClicked: {
                     root.visibilities.utilities = false;
-                    root.popouts.detach("network");
+                    WindowFactory.create(null, { active: "network" });
                 }
             }
 

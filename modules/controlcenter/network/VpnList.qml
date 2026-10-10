@@ -64,6 +64,8 @@ ColumnLayout {
     }
 
     ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
         id: listView
 
         Layout.fillWidth: true
@@ -98,7 +100,7 @@ ColumnLayout {
 
                 width: ListView.view ? ListView.view.width : undefined
 
-                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (root.session && root.session.vpn && root.session.vpn.active === modelData) ? Colours.tPalette.m3surfaceContainer.a : 0)
+                color: Qt.alpha(Colours.palette.m3surfaceContainer, (root.session && root.session.vpn && root.session.vpn.active === modelData) ? Colours.palette.m3surfaceContainer.a : 0)
                 radius: Appearance.rounding.normal
 
                 StateLayer {
@@ -124,14 +126,14 @@ ColumnLayout {
                         implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
 
                         radius: Appearance.rounding.normal
-                        color: modelData.enabled && VPN.connected ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                        color: modelData.enabled && VPN.connected ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
 
                         MaterialIcon {
                             id: icon
 
                             anchors.centerIn: parent
                             text: modelData.enabled && VPN.connected ? "vpn_key" : "vpn_key_off"
-                            font.pointSize: Appearance.font.size.large
+                            font.pointSize: 16.5 * Appearance.font.size.scale
                             fill: modelData.enabled && VPN.connected ? 1 : 0
                             color: modelData.enabled && VPN.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                         }
@@ -166,7 +168,7 @@ ColumnLayout {
                                     return qsTr("Disabled");
                                 }
                                 color: modelData.enabled ? (VPN.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface) : Colours.palette.m3outline
-                                font.pointSize: Appearance.font.size.small
+                                font.pointSize: 9.75 * Appearance.font.size.scale
                                 font.weight: modelData.enabled && VPN.connected ? 500 : 400
                                 elide: Text.ElideRight
                             }
@@ -442,7 +444,7 @@ ColumnLayout {
 
                 StyledText {
                     text: qsTr("Add VPN Provider")
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: 16.5 * Appearance.font.size.scale
                     font.weight: 500
                 }
 
@@ -451,14 +453,14 @@ ColumnLayout {
                     text: qsTr("Choose a provider to add")
                     wrapMode: Text.WordWrap
                     color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: 9.75 * Appearance.font.size.scale
                 }
 
                 TextButton {
                     Layout.topMargin: Appearance.spacing.normal
                     Layout.fillWidth: true
                     text: qsTr("NetBird")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveColour: Colours.palette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         const providers = [];
@@ -479,7 +481,7 @@ ColumnLayout {
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("Tailscale")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveColour: Colours.palette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         const providers = [];
@@ -500,7 +502,7 @@ ColumnLayout {
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("Cloudflare WARP")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveColour: Colours.palette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         const providers = [];
@@ -521,7 +523,7 @@ ColumnLayout {
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("WireGuard (Custom)")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveColour: Colours.palette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         vpnDialog.showAddForm("wireguard", "WireGuard");
@@ -555,7 +557,7 @@ ColumnLayout {
 
                 StyledText {
                     text: vpnDialog.editIndex >= 0 ? qsTr("Edit VPN Provider") : qsTr("Add %1 VPN").arg(vpnDialog.displayName)
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: 16.5 * Appearance.font.size.scale
                     font.weight: 500
                 }
 
@@ -565,7 +567,7 @@ ColumnLayout {
 
                     StyledText {
                         text: qsTr("Display Name")
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         color: Colours.palette.m3onSurfaceVariant
                     }
 
@@ -601,7 +603,7 @@ ColumnLayout {
 
                     StyledText {
                         text: qsTr("Interface (e.g., wg0, torguard)")
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         color: Colours.palette.m3onSurfaceVariant
                     }
 
@@ -639,7 +641,7 @@ ColumnLayout {
                     TextButton {
                         Layout.fillWidth: true
                         text: qsTr("Cancel")
-                        inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                        inactiveColour: Colours.palette.m3surfaceContainerHigh
                         inactiveOnColour: Colours.palette.m3onSurface
                         onClicked: vpnDialog.closeWithAnimation()
                     }

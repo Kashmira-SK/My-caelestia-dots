@@ -36,9 +36,9 @@ ColumnLayout {
             text: "bluetooth"
             color: root.adapter?.enabled
                 ? Colours.palette.m3primary
-                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48)
+                : Colours.palette.m3onSurfaceVariant
             fill: root.adapter?.enabled ? 1 : 0
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: 16.5 * Appearance.font.size.scale
         }
 
         ColumnLayout {
@@ -48,7 +48,7 @@ ColumnLayout {
             StyledText {
                 text: qsTr("Bluetooth")
                 color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.larger
+                font.pointSize: 12 * Appearance.font.size.scale
                 font.weight: 500
             }
 
@@ -68,17 +68,14 @@ ColumnLayout {
 
                     return qsTr("Adapter ready");
                 }
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.44)
-                font.pointSize: Appearance.font.size.small
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
         }
     }
 
-    SectionHeading {
-        title: qsTr("Adapter controls")
-        description: qsTr("Power and incoming Bluetooth visibility")
-    }
-
+    SettingsGroup {
+        title: qsTr("Bluetooth & pairing")
     SectionBox {
         contentHeight: controlsContent.implicitHeight
 
@@ -106,7 +103,7 @@ ColumnLayout {
             ThinLine {}
 
             SwitchRow {
-                label: qsTr("Discoverable")
+                label: qsTr("Visible to nearby devices")
                 description: qsTr("Allow other devices to find this computer")
                 checked: root.adapter?.discoverable ?? false
                 enabled: root.adapter?.enabled ?? false
@@ -118,7 +115,7 @@ ColumnLayout {
             }
 
             SwitchRow {
-                label: qsTr("Pairable")
+                label: qsTr("Allow new pairings")
                 description: qsTr("Allow new devices to request pairing")
                 checked: root.adapter?.pairable ?? false
                 enabled: root.adapter?.enabled ?? false
@@ -130,190 +127,191 @@ ColumnLayout {
             }
         }
     }
-
-    SectionHeading {
-        title: qsTr("Adapters")
-        description: qsTr("Choose which adapter to configure")
     }
 
-    SectionBox {
-        contentHeight: adaptersContent.implicitHeight
+    SettingsGroup {
+        title: qsTr("Adapters")
+        description: qsTr("Choose which adapter to configure")
+        SectionBox {
+            contentHeight: adaptersContent.implicitHeight
 
-        ColumnLayout {
-            id: adaptersContent
+            ColumnLayout {
+                id: adaptersContent
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Appearance.padding.large
-            spacing: 1
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Appearance.padding.large
+                spacing: 1
 
-            Repeater {
-                model: Bluetooth.adapters
+                Repeater {
+                    model: Bluetooth.adapters
 
-                Item {
-                    id: adapterRow
+                    Item {
+                        id: adapterRow
 
-                    required property BluetoothAdapter modelData
+                        required property BluetoothAdapter modelData
 
-                    Layout.fillWidth: true
-                    implicitHeight: 42
+                        Layout.fillWidth: true
+                        implicitHeight: 42
 
-                    readonly property bool selected:
-                        adapterRow.modelData === root.selectedAdapter
+                        readonly property bool selected:
+                            adapterRow.modelData === root.selectedAdapter
 
-                    StyledRect {
-                        anchors.fill: parent
-                        radius: Appearance.rounding.small
-                        color: Qt.alpha(
-                            Colours.palette.m3primary,
-                            adapterRow.selected
-                                ? 0.065
-                                : adapterMouse.containsMouse
-                                    ? 0.025
-                                    : 0
-                        )
+                        StyledRect {
+                            anchors.fill: parent
+                            radius: Appearance.rounding.small
+                            color: Qt.alpha(
+                                Colours.palette.m3primary,
+                                adapterRow.selected
+                                    ? 0.065
+                                    : adapterMouse.containsMouse
+                                        ? 0.025
+                                        : 0
+                            )
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: Appearance.padding.normal
+                            anchors.rightMargin: Appearance.padding.normal
+                            spacing: Appearance.spacing.small
+
+                            MaterialIcon {
+                                text: adapterRow.selected ? "radio_button_checked" : "radio_button_unchecked"
+                                color: adapterRow.selected
+                                    ? Colours.palette.m3primary
+                                    : Colours.palette.m3onSurfaceVariant
+                                font.pointSize: 9.75 * Appearance.font.size.scale
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: adapterRow.modelData.name || qsTr("Unnamed adapter")
+                                color: Colours.palette.m3onSurface
+                                font.pointSize: 9.75 * Appearance.font.size.scale
+                                font.weight: adapterRow.selected ? 500 : 400
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                text: adapterRow.modelData.adapterId || ""
+                                color: Colours.palette.m3onSurfaceVariant
+                                font.family: Appearance.font.family.mono
+                                font.pointSize: 9 * Appearance.font.size.scale
+                            }
+                        }
+
+                        MouseArea {
+                            id: adapterMouse
+
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: root.session.bt.currentAdapter = adapterRow.modelData
+                        }
                     }
+                }
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: Appearance.padding.normal
-                        anchors.rightMargin: Appearance.padding.normal
-                        spacing: Appearance.spacing.small
+                StyledText {
+                    visible: !root.selectedAdapter
+                    Layout.fillWidth: true
+                    text: qsTr("No Bluetooth adapters found")
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9.75 * Appearance.font.size.scale
+                }
 
-                        MaterialIcon {
-                            text: adapterRow.selected ? "radio_button_checked" : "radio_button_unchecked"
-                            color: adapterRow.selected
-                                ? Colours.palette.m3primary
-                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
-                            font.pointSize: Appearance.font.size.small
+                ThinLine {
+                    visible: root.selectedAdapter !== null
+                    Layout.topMargin: Appearance.spacing.small
+                    Layout.bottomMargin: Appearance.spacing.small
+                }
+
+                RowLayout {
+                    visible: root.selectedAdapter !== null
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.normal
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        StyledText {
+                            text: qsTr("Visibility timeout")
+                            color: Colours.palette.m3onSurface
+                            font.pointSize: 9.75 * Appearance.font.size.scale
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: adapterRow.modelData.name || qsTr("Unnamed adapter")
-                            color: Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.small
-                            font.weight: adapterRow.selected ? 500 : 400
-                            elide: Text.ElideRight
-                        }
-
-                        StyledText {
-                            text: adapterRow.modelData.adapterId || ""
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-                            font.family: Appearance.font.family.mono
-                            font.pointSize: Appearance.font.size.smaller
+                            wrapMode: Text.WordWrap
+                            text: qsTr("Seconds before visibility expires; 0 keeps it on")
+                            color: Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                         }
                     }
 
-                    MouseArea {
-                        id: adapterMouse
+                    CustomSpinBox {
+                        min: 0
+                        value: root.selectedAdapter?.discoverableTimeout ?? 0
 
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-
-                        onClicked: root.session.bt.currentAdapter = adapterRow.modelData
-                    }
-                }
-            }
-
-            StyledText {
-                visible: !root.selectedAdapter
-                Layout.fillWidth: true
-                text: qsTr("No Bluetooth adapters found")
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.38)
-                font.pointSize: Appearance.font.size.small
-            }
-
-            ThinLine {
-                visible: root.selectedAdapter !== null
-                Layout.topMargin: Appearance.spacing.small
-                Layout.bottomMargin: Appearance.spacing.small
-            }
-
-            RowLayout {
-                visible: root.selectedAdapter !== null
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-
-                    StyledText {
-                        text: qsTr("Discoverable timeout")
-                        color: Colours.palette.m3onSurface
-                        font.pointSize: Appearance.font.size.small
-                    }
-
-                    StyledText {
-                        text: qsTr("Seconds before discoverable mode expires; 0 keeps it enabled")
-                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.38)
-                        font.pointSize: Appearance.font.size.smaller
-                    }
-                }
-
-                CustomSpinBox {
-                    min: 0
-                    value: root.selectedAdapter?.discoverableTimeout ?? 0
-
-                    onValueModified: value => {
-                        if (root.selectedAdapter)
-                            root.selectedAdapter.discoverableTimeout = value;
+                        onValueModified: value => {
+                            if (root.selectedAdapter)
+                                root.selectedAdapter.discoverableTimeout = value;
+                        }
                     }
                 }
             }
         }
     }
 
-    SectionHeading {
+    SettingsGroup {
         title: qsTr("Adapter information")
         description: qsTr("Technical details for the selected adapter")
-    }
+        SectionBox {
+            contentHeight: adapterInfoContent.implicitHeight
 
-    SectionBox {
-        contentHeight: adapterInfoContent.implicitHeight
+            ColumnLayout {
+                id: adapterInfoContent
 
-        ColumnLayout {
-            id: adapterInfoContent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Appearance.padding.large
+                spacing: Appearance.spacing.small / 2
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.small / 2
+                SettingsPropertyRow {
+                    label: qsTr("Adapter name")
+                    value: root.selectedAdapter?.name ?? qsTr("None")
+                }
 
-            PropertyRow {
-                label: qsTr("Adapter name")
-                value: root.selectedAdapter?.name ?? qsTr("None")
-            }
+                SettingsPropertyRow {
+                    showTopMargin: true
+                    label: qsTr("Adapter state")
+                    value: root.selectedAdapter
+                        ? BluetoothAdapterState.toString(root.selectedAdapter.state)
+                        : qsTr("Unknown")
+                }
 
-            PropertyRow {
-                showTopMargin: true
-                label: qsTr("Adapter state")
-                value: root.selectedAdapter
-                    ? BluetoothAdapterState.toString(root.selectedAdapter.state)
-                    : qsTr("Unknown")
-            }
+                SettingsPropertyRow {
+                    showTopMargin: true
+                    label: qsTr("Adapter id")
+                    value: root.selectedAdapter?.adapterId ?? ""
+                }
 
-            PropertyRow {
-                showTopMargin: true
-                label: qsTr("Adapter id")
-                value: root.selectedAdapter?.adapterId ?? ""
-            }
+                SettingsPropertyRow {
+                    showTopMargin: true
+                    label: qsTr("D-Bus path")
+                    value: root.selectedAdapter?.dbusPath ?? ""
+                }
 
-            PropertyRow {
-                showTopMargin: true
-                label: qsTr("D-Bus path")
-                value: root.selectedAdapter?.dbusPath ?? ""
-            }
-
-            StyledText {
-                Layout.topMargin: Appearance.spacing.normal
-                text: qsTr("Adapter renaming is currently read-only in this backend.")
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-                font.pointSize: Appearance.font.size.smaller
+                StyledText {
+                    Layout.topMargin: Appearance.spacing.normal
+                    text: qsTr("Adapter names are read-only.")
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9 * Appearance.font.size.scale
+                }
             }
         }
     }
@@ -336,15 +334,15 @@ ColumnLayout {
         StyledText {
             text: heading.title
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: 12 * Appearance.font.size.scale
             font.weight: 500
         }
 
         StyledText {
             visible: heading.description !== ""
             text: heading.description
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
-            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
     }
 
@@ -354,8 +352,8 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: contentHeight + Appearance.padding.large * 2
         radius: Appearance.rounding.small
-        color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-        border.width: 1
+        color: "transparent"
+        border.width: 0
         border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
     }
 
@@ -367,6 +365,7 @@ ColumnLayout {
 
     component SwitchRow: RowLayout {
         id: switchRow
+        Layout.minimumHeight: 56
 
         required property string label
         property string description: ""
@@ -385,18 +384,18 @@ ColumnLayout {
             StyledText {
                 text: switchRow.label
                 color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
                 visible: switchRow.description !== ""
                 text: switchRow.description
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.38)
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9 * Appearance.font.size.scale
             }
         }
 
-        StyledSwitch {
+        SettingsSwitch {
             checked: switchRow.checked
             enabled: switchRow.enabled
             cLayer: 2

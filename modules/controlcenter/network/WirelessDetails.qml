@@ -121,9 +121,9 @@ DeviceDetails {
                 text: root.network?.isSecure ? "lock" : "wifi"
                 color: root.connected
                     ? Colours.palette.m3primary
-                    : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.56)
+                    : Colours.palette.m3onSurfaceVariant
                 fill: root.connected ? 1 : 0
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: 16.5 * Appearance.font.size.scale
             }
 
             ColumnLayout {
@@ -134,7 +134,7 @@ DeviceDetails {
                     Layout.fillWidth: true
                     text: root.network?.ssid ?? qsTr("Unknown network")
                     color: Colours.palette.m3onSurface
-                    font.pointSize: Appearance.font.size.larger
+                    font.pointSize: 12 * Appearance.font.size.scale
                     font.weight: 500
                     elide: Text.ElideRight
                 }
@@ -147,8 +147,8 @@ DeviceDetails {
                             : qsTr("Available network")
                     color: root.connected
                         ? Colours.palette.m3primary
-                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.44)
-                    font.pointSize: Appearance.font.size.smaller
+                        : Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9 * Appearance.font.size.scale
                     font.weight: root.connected ? 500 : 400
                 }
             }
@@ -156,9 +156,9 @@ DeviceDetails {
             StyledText {
                 visible: root.network !== null
                 text: root.network ? qsTr("%1%").arg(root.network.strength) : ""
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
+                color: Colours.palette.m3onSurfaceVariant
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
         }
     }
@@ -178,7 +178,7 @@ DeviceDetails {
                     implicitHeight: connectionContent.implicitHeight + Appearance.padding.large * 2
 
                     radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
+                    color: Colours.palette.m3surfaceContainerHigh
                     border.width: 1
                     border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
@@ -247,7 +247,7 @@ DeviceDetails {
                                 StyledText {
                                     text: qsTr("Security")
                                     color: Colours.palette.m3onSurface
-                                    font.pointSize: Appearance.font.size.small
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
                                 }
 
                                 StyledText {
@@ -256,15 +256,15 @@ DeviceDetails {
                                             ? root.network.security
                                             : qsTr("Open network"))
                                         : qsTr("Unknown")
-                                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.40)
-                                    font.pointSize: Appearance.font.size.smaller
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    font.pointSize: 9 * Appearance.font.size.scale
                                 }
                             }
 
                             MaterialIcon {
                                 text: root.network?.isSecure ? "lock" : "lock_open"
-                                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48)
-                                font.pointSize: Appearance.font.size.small
+                                color: Colours.palette.m3onSurfaceVariant
+                                font.pointSize: 9.75 * Appearance.font.size.scale
                             }
                         }
                     }
@@ -275,65 +275,65 @@ DeviceDetails {
             ColumnLayout {
                 spacing: Appearance.spacing.normal
 
-                SectionHeading {
+                CollapsibleSection {
                     title: qsTr("Network properties")
                     description: qsTr("Wireless network information")
-                }
+                    flatStyle: true
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: propertiesContent.implicitHeight + Appearance.padding.large * 2
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: propertiesContent.implicitHeight + Appearance.padding.large * 2
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3surfaceContainerHigh
+                        border.width: 1
+                        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
-                    radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-                    border.width: 1
-                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
+                        ColumnLayout {
+                            id: propertiesContent
 
-                    ColumnLayout {
-                        id: propertiesContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Appearance.padding.large
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.small / 2
 
-                        spacing: Appearance.spacing.small / 2
+                            SettingsPropertyRow {
+                                label: qsTr("SSID")
+                                value: root.network?.ssid ?? qsTr("Unknown")
+                            }
 
-                        PropertyRow {
-                            label: qsTr("SSID")
-                            value: root.network?.ssid ?? qsTr("Unknown")
-                        }
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("BSSID")
+                                value: root.network?.bssid ?? qsTr("Unknown")
+                            }
 
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("BSSID")
-                            value: root.network?.bssid ?? qsTr("Unknown")
-                        }
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("Signal strength")
+                                value: root.network
+                                    ? qsTr("%1%").arg(root.network.strength)
+                                    : qsTr("N/A")
+                            }
 
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("Signal strength")
-                            value: root.network
-                                ? qsTr("%1%").arg(root.network.strength)
-                                : qsTr("N/A")
-                        }
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("Frequency")
+                                value: root.network
+                                    ? qsTr("%1 MHz").arg(root.network.frequency)
+                                    : qsTr("N/A")
+                            }
 
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("Frequency")
-                            value: root.network
-                                ? qsTr("%1 MHz").arg(root.network.frequency)
-                                : qsTr("N/A")
-                        }
-
-                        PropertyRow {
-                            showTopMargin: true
-                            label: qsTr("Security")
-                            value: root.network
-                                ? (root.network.isSecure
-                                    ? root.network.security
-                                    : qsTr("Open"))
-                                : qsTr("N/A")
+                            SettingsPropertyRow {
+                                showTopMargin: true
+                                label: qsTr("Security")
+                                value: root.network
+                                    ? (root.network.isSecure
+                                        ? root.network.security
+                                        : qsTr("Open"))
+                                    : qsTr("N/A")
+                            }
                         }
                     }
                 }
@@ -343,33 +343,33 @@ DeviceDetails {
             ColumnLayout {
                 spacing: Appearance.spacing.normal
 
-                SectionHeading {
+                CollapsibleSection {
                     title: qsTr("Connection information")
                     description: root.connected
                         ? qsTr("Current IP configuration")
                         : qsTr("Available when connected")
-                }
+                    flatStyle: true
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: connectionInfoContent.implicitHeight + Appearance.padding.large * 2
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: connectionInfoContent.implicitHeight + Appearance.padding.large * 2
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3surfaceContainerHigh
+                        border.width: 1
+                        border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
 
-                    radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-                    border.width: 1
-                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.16)
+                        ColumnLayout {
+                            id: connectionInfoContent
 
-                    ColumnLayout {
-                        id: connectionInfoContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Appearance.padding.large
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.large
-
-                        ConnectionInfoSection {
-                            Layout.fillWidth: true
-                            deviceDetails: Nmcli.wirelessDeviceDetails
+                            ConnectionInfoSection {
+                                Layout.fillWidth: true
+                                deviceDetails: Nmcli.wirelessDeviceDetails
+                            }
                         }
                     }
                 }
@@ -390,15 +390,15 @@ DeviceDetails {
         StyledText {
             text: heading.title
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: 12 * Appearance.font.size.scale
             font.weight: 500
         }
 
         StyledText {
             visible: heading.description !== ""
             text: heading.description
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.46)
-            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
     }
 
@@ -438,7 +438,7 @@ DeviceDetails {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -446,7 +446,7 @@ DeviceDetails {
                 color: action.active
                     ? Colours.palette.m3primary
                     : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: action.active ? 500 : 400
             }
         }

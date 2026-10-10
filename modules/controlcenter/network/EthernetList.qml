@@ -31,7 +31,7 @@ ColumnLayout {
         StyledText {
             text: qsTr("Ethernet")
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: 16.5 * Appearance.font.size.scale
             font.weight: 500
         }
 
@@ -41,19 +41,21 @@ ColumnLayout {
 
         StyledText {
             text: qsTr("%1 devices").arg(Nmcli.ethernetDevices.length)
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.42)
-            font.pointSize: Appearance.font.size.smaller
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
         }
     }
 
     ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
         id: view
 
         Layout.fillWidth: true
         Layout.preferredHeight: contentHeight
         interactive: false
         spacing: 1
-        model: Nmcli.ethernetDevices
+        model: [...Nmcli.ethernetDevices].sort((a, b) => Number(b.connected) - Number(a.connected))
 
         delegate: Item {
             id: ethernetItem
@@ -104,8 +106,8 @@ ColumnLayout {
                     fill: modelData.connected ? 1 : 0
                     color: modelData.connected
                         ? Colours.palette.m3primary
-                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
-                    font.pointSize: Appearance.font.size.normal
+                        : Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 10.5 * Appearance.font.size.scale
                 }
 
                 ColumnLayout {
@@ -116,7 +118,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         text: modelData.interface || qsTr("Unknown")
                         color: Colours.palette.m3onSurface
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         font.weight: modelData.connected ? 500 : 400
                         elide: Text.ElideRight
                     }
@@ -127,8 +129,8 @@ ColumnLayout {
                             : qsTr("Disconnected")
                         color: modelData.connected
                             ? Colours.palette.m3primary
-                            : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.40)
-                        font.pointSize: Appearance.font.size.smaller
+                            : Colours.palette.m3onSurfaceVariant
+                        font.pointSize: 9 * Appearance.font.size.scale
                         font.weight: modelData.connected ? 500 : 400
                     }
                 }
@@ -157,7 +159,7 @@ ColumnLayout {
                                 Colours.palette.m3onSurfaceVariant,
                                 connectMouse.containsMouse ? 0.72 : 0.46
                             )
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                     }
 
                     MouseArea {
@@ -219,8 +221,8 @@ ColumnLayout {
             anchors.left: parent.left
             anchors.leftMargin: Appearance.padding.normal
             text: qsTr("No Ethernet devices")
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.32)
-            font.pointSize: Appearance.font.size.smaller
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
         }
     }
 }

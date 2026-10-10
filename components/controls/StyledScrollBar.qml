@@ -8,6 +8,7 @@ ScrollBar {
     id: root
 
     required property Flickable flickable
+    property bool animatePosition: true
     property bool shouldBeActive
     property real nonAnimPosition
     property bool animating
@@ -183,7 +184,7 @@ ScrollBar {
     }
 
     Behavior on position {
-        enabled: !fullMouse.pressed
+        enabled: root.animatePosition && !fullMouse.pressed
 
         Anim {}
     }

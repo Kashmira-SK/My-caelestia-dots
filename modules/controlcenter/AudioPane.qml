@@ -25,11 +25,15 @@ Item {
         leftContent: Component {
 
             StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: leftAudioFlickable
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: leftContent.height
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: leftAudioFlickable
                 }
 
@@ -216,11 +220,15 @@ Item {
 
         rightContent: Component {
             StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: rightAudioFlickable
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: contentLayout.height
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: rightAudioFlickable
                 }
 

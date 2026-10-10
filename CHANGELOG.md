@@ -25,11 +25,56 @@ Newest entries at the top.
 
 ---
 
-## [2026-10-08] - Live wallpapers
+## [2026-10-09] - Settings page redesign
 
 ### Added
 
-- Super+Shift+U toggles live wallpaper pause; transition effects are selectable in Settings → Appearance → Background
+- Reference commands for starting/stopping Caelestia and setting battery charge limits to 80% or 100%
+- Compact theme profile and palette selectors, separate Sound volume/device groups, and full-width Reference groups with selectable command text
+- Shared grouped controls, typography, and page spacing across all settings pages, with direct sidebar subsections and full-width device/application lists and details
+- Header search opens matching subsections across settings, with keyboard selection and scrollable results
+- Undo for Theme & style configuration and desktop widget/transition edits, preserving external changes and returning to the edited subsection
+- Sound separates output, microphone, and application volumes, with device choices directly visible
+- Network and Bluetooth use grouped device lists, dedicated settings sections, and a back action from device details
+- Reference categories use sidebar navigation and shared content groups while retaining command copy actions
+- Compact, resizable settings window with an integrated header, opaque theme surfaces, and consistent sidebar navigation
+- Bar & workspaces now has General, Workspaces, Indicators, and Interaction sections with grouped switches and compact number controls
+- Dashboard opening behavior, supported performance-resource controls, and separate resource/media refresh timing
+- Launcher separates general preferences, search, applications, and layout information
+- Desktop settings now separate wallpaper browsing, clock placement, and visualiser controls; disabled features hide their dependent options
+- Searchable wallpaper gallery, direct transition choices, and a nine-position desktop clock selector with clock-size adjustment
+- Visible color and text controls, searchable installed fonts, and separate transparency and motion groups
+- Direct spacing, screen-border, font, and refresh-timing sections replace unnecessary advanced accordions
+
+### Fixed
+
+- Application volume rows reserve separate space for names, values, mute controls, and sliders; Reference uses quiet Copy text actions
+- Removed the Reference question-mark help button and its hover popup; settings hints use compact, opaque tooltips
+- Maintenance groups distinguish package updates from battery charge limits without repeating the page heading
+- Reference command rows separate muted descriptions from selectable commands in aligned columns, with wrapping for long commands
+- Settings scrolling stops at the edges without rebound or scrollbar-thumb easing
+- Sound device selection and mute buttons support keyboard focus; Reference copy actions have explicit accessible labels
+- Utilities Settings and the settings keybind use the same window; removed the duplicate title strip and illustrative bar preview
+- Settings-specific Hyprland rule keeps the window floating at 1000 × 660 and overrides global window opacity
+- Bar settings save only the edited value without replacing the configured bar entries
+- Removed the launcher hover toggle and drag-distance display because launcher edge gestures are disabled
+- Settings wallpaper thumbnails use cached stills for video fallbacks instead of trying to decode video files as images
+- Shared numeric controls preserve decimal precision and units; each control saves only its own setting
+- Desktop and Dashboard settings keep their section imports available after the Appearance split
+
+### Notes
+
+- `ThemePreview.qml` and `BarPreview.qml` are retained prototype components; the current settings pages do not display them
+
+---
+
+## [2026-10-08] - Live wallpapers and settings navigation
+
+### Added
+
+- Settings sidebar grouped into Personalise and Connections, with clearer page names and Reference & help
+- Separate Theme & style, Desktop, and Dashboard settings pages; wallpaper, clock, and visualiser controls now live under Desktop
+- Super+Shift+U toggles live wallpaper pause; transition effects are selectable in Settings → Desktop → Desktop controls
 - Video wallpapers in the Super+U picker and Settings wallpaper grid, with play badges alongside static images
 - One cached still per video revision for previews, theme colours, and fallback; new videos in the wallpaper folder are discovered automatically
 - Muted, looping mpvpaper playback across connected monitors, with saved selection restored after shell reloads

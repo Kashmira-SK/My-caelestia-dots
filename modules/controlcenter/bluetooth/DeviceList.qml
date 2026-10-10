@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "."
+import "../components"
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -120,6 +121,7 @@ ColumnLayout {
         }
     }
 
+    StyledText { text: qsTr("Devices"); font.pointSize: 16.5 * Appearance.font.size.scale; font.weight: 600; Layout.bottomMargin: 12 }
     RowLayout {
         Layout.fillWidth: true
         Layout.bottomMargin: Appearance.spacing.small
@@ -138,7 +140,7 @@ ColumnLayout {
                     radius: 3
                     color: {
                         if (!root.adapter || !root.adapter.enabled)
-                            return Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.28);
+                            return Colours.palette.m3onSurfaceVariant;
 
                         if (root.adapter.discovering)
                             return Colours.palette.m3secondary;
@@ -146,7 +148,7 @@ ColumnLayout {
                         if (root.connectedCount > 0)
                             return Colours.palette.m3primary;
 
-                        return Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48);
+                        return Colours.palette.m3onSurfaceVariant;
                     }
                 }
 
@@ -166,8 +168,8 @@ ColumnLayout {
 
                         return qsTr("%1 known devices").arg(Bluetooth.devices.values.length);
                     }
-                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48)
-                    font.pointSize: Appearance.font.size.smaller
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9 * Appearance.font.size.scale
                     font.weight: 400
                 }
             }
@@ -208,23 +210,15 @@ ColumnLayout {
             onClicked: root.startScan()
         }
 
-        ActionItem {
-            icon: "tune"
-            label: qsTr("Overview")
-            active: !root.session.bt.active
 
-            onClicked: root.session.bt.active = null
-        }
     }
 
-    SectionLabel {
-        text: qsTr("DEVICES")
-        detail: root.adapter?.discovering
-            ? qsTr("SCANNING")
-            : qsTr("%1 FOUND").arg(Bluetooth.devices.values.length)
-    }
-
+    SettingsGroup {
+        title: qsTr("Devices")
+        contentPadding: 8
     ListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
         id: view
 
         Layout.fillWidth: true
@@ -305,8 +299,8 @@ ColumnLayout {
                     fill: device.connected ? 1 : 0
                     color: device.connected
                         ? Colours.palette.m3primary
-                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
-                    font.pointSize: Appearance.font.size.normal
+                        : Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 10.5 * Appearance.font.size.scale
                 }
 
                 ColumnLayout {
@@ -317,7 +311,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         text: device.modelData?.name || qsTr("Unknown")
                         color: Colours.palette.m3onSurface
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         font.weight: device.connected ? 500 : 400
                         elide: Text.ElideRight
                         maximumLineCount: 1
@@ -342,32 +336,32 @@ ColumnLayout {
                             }
                             color: device.connected
                                 ? Colours.palette.m3primary
-                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.40)
-                            font.pointSize: Appearance.font.size.smaller
+                                : Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                             font.weight: device.connected ? 500 : 400
                         }
 
                         StyledText {
                             text: "·"
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.22)
-                            font.pointSize: Appearance.font.size.smaller
+                            color: Colours.palette.m3onSurfaceVariant
+                            font.pointSize: 9 * Appearance.font.size.scale
                         }
 
                         StyledText {
                             Layout.fillWidth: true
                             text: device.modelData?.address || ""
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
+                            color: Colours.palette.m3onSurfaceVariant
                             font.family: Appearance.font.family.mono
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize: 9 * Appearance.font.size.scale
                             elide: Text.ElideRight
                         }
 
                         StyledText {
                             visible: device.modelData?.batteryAvailable ?? false
                             text: qsTr("%1%").arg(Math.round((device.modelData?.battery ?? 0) * 100))
-                            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
+                            color: Colours.palette.m3onSurfaceVariant
                             font.family: Appearance.font.family.mono
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize: 9 * Appearance.font.size.scale
                         }
                     }
                 }
@@ -402,7 +396,7 @@ ColumnLayout {
                                 Colours.palette.m3onSurfaceVariant,
                                 connectMouse.containsMouse ? 0.72 : 0.46
                             )
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                         opacity: device.loading ? 0 : 1
 
                         Behavior on opacity {
@@ -464,6 +458,7 @@ ColumnLayout {
             }
         }
     }
+    }
 
     Item {
         visible: Bluetooth.devices.values.length === 0
@@ -484,8 +479,8 @@ ColumnLayout {
 
                 return qsTr("No devices found");
             }
-            color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-            font.pointSize: Appearance.font.size.smaller
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
         }
     }
 
@@ -509,8 +504,8 @@ ColumnLayout {
 
             StyledText {
                 text: section.text
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: 500
                 font.letterSpacing: 0.7
             }
@@ -524,9 +519,9 @@ ColumnLayout {
             StyledText {
                 visible: section.detail !== ""
                 text: section.detail
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.30)
+                color: Colours.palette.m3onSurfaceVariant
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: 400
             }
         }
@@ -569,7 +564,7 @@ ColumnLayout {
                         Colours.palette.m3onSurfaceVariant,
                         actionMouse.containsMouse ? 0.72 : 0.48
                     )
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -580,7 +575,7 @@ ColumnLayout {
                         Colours.palette.m3onSurfaceVariant,
                         actionMouse.containsMouse ? 0.72 : 0.48
                     )
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: action.active ? 500 : 400
             }
         }

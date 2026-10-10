@@ -25,7 +25,7 @@ ColumnLayout {
     StyledText {
         Layout.topMargin: Appearance.spacing.large
         text: qsTr("Ethernet devices")
-        font.pointSize: Appearance.font.size.larger
+        font.pointSize: 12 * Appearance.font.size.scale
         font.weight: 500
     }
 
@@ -39,7 +39,7 @@ ColumnLayout {
         implicitHeight: ethernetInfo.implicitHeight + Appearance.padding.large * 2
 
         radius: Appearance.rounding.normal
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.palette.m3surfaceContainer
 
         ColumnLayout {
             id: ethernetInfo
@@ -58,7 +58,7 @@ ColumnLayout {
             StyledText {
                 text: qsTr("%1").arg(Nmcli.ethernetDevices.length)
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -69,7 +69,7 @@ ColumnLayout {
             StyledText {
                 text: qsTr("%1").arg(Nmcli.ethernetDevices.filter(d => d.connected).length)
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
         }
     }

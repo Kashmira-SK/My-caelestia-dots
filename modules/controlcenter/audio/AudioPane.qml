@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import "../components"
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -9,6 +10,7 @@ import qs.services
 import qs.config
 import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
 Item {
@@ -18,349 +20,147 @@ Item {
 
     anchors.fill: parent
 
-    RowLayout {
+    SettingsPage {
+        title: root.session.sectionFor("audio") === "output" ? qsTr("Speakers & headphones") : root.session.sectionFor("audio") === "input" ? qsTr("Microphone") : qsTr("Application volumes")
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.large
-        anchors.rightMargin: Appearance.padding.large
-        anchors.topMargin: Appearance.padding.normal
-        anchors.bottomMargin: Appearance.padding.large
-        spacing: Appearance.spacing.large
-
-        // devices
-        StyledFlickable {
-            id: devicesFlickable
-
-            Layout.preferredWidth: Math.max(260, root.width * 0.34)
-            Layout.minimumWidth: 240
-            Layout.fillHeight: true
-
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: devicesColumn.implicitHeight
-            clip: true
-
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: devicesFlickable
-            }
-
-            ColumnLayout {
-                id: devicesColumn
-
-                width: devicesFlickable.width
-                spacing: Appearance.spacing.larger
-
-
-                SectionLabel {
-                    text: qsTr("OUTPUT")
-                    detail: qsTr("%1").arg(Audio.sinks.length)
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-
-                    Repeater {
-                        model: Audio.sinks
-
-                        delegate: DeviceRow {
-                            required property var modelData
-
-                            Layout.fillWidth: true
-
-                            device: modelData
-                            selected: modelData
-                                && Audio.sink
-                                && Audio.sink.id === modelData.id
-                            icon: selected ? "speaker" : "speaker_group"
-                            fallbackName: qsTr("Unknown output")
-
-                            onClicked: {
-                                if (modelData)
-                                    Audio.setAudioSink(modelData);
-                            }
-                        }
-                    }
-
-                    StyledText {
-                        visible: Audio.sinks.length === 0
-                        Layout.fillWidth: true
-                        Layout.topMargin: Appearance.spacing.normal
-                        Layout.bottomMargin: Appearance.spacing.normal
-                        text: qsTr("No output devices")
-                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-                        font.pointSize: Appearance.font.size.smaller
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                }
-
-                SectionLabel {
-                    Layout.topMargin: Appearance.spacing.normal
-                    text: qsTr("INPUT")
-                    detail: qsTr("%1").arg(Audio.sources.length)
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-
-                    Repeater {
-                        model: Audio.sources
-
-                        delegate: DeviceRow {
-                            required property var modelData
-
-                            Layout.fillWidth: true
-
-                            device: modelData
-                            selected: modelData
-                                && Audio.source
-                                && Audio.source.id === modelData.id
-                            icon: "mic"
-                            fallbackName: qsTr("Unknown input")
-
-                            onClicked: {
-                                if (modelData)
-                                    Audio.setAudioSource(modelData);
-                            }
-                        }
-                    }
-
-                    StyledText {
-                        visible: Audio.sources.length === 0
-                        Layout.fillWidth: true
-                        Layout.topMargin: Appearance.spacing.normal
-                        Layout.bottomMargin: Appearance.spacing.normal
-                        text: qsTr("No input devices")
-                        color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.34)
-                        font.pointSize: Appearance.font.size.smaller
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: Appearance.padding.normal
-                }
+        SettingsGroup {
+            visible: root.session.sectionFor("audio") === "output"
+            title: qsTr("Volume")
+            VolumeBox {
+                outputMode: true
+                enabled: !!Audio.sink
+                opacity: enabled ? 1 : 0.45
             }
         }
-
-        Rectangle {
-            Layout.fillHeight: true
-            implicitWidth: 1
-            color: Colours.palette.m3outlineVariant
-            opacity: 0.18
-        }
-
-        // mixer
-        StyledFlickable {
-            id: mixerFlickable
-
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: mixerColumn.implicitHeight
-            clip: true
-
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: mixerFlickable
-            }
-
-            ColumnLayout {
-                id: mixerColumn
-
-                width: mixerFlickable.width
-                spacing: Appearance.spacing.larger
-
-
-                SectionHeading {
-                    title: qsTr("Output")
-                    description: Audio.sink?.description
-                        || qsTr("Default output device")
-                }
-
-                VolumeBox {
-                    outputMode: true
-                }
-
-                SectionHeading {
-                    title: qsTr("Input")
-                    description: Audio.source?.description
-                        || qsTr("Default input device")
-                }
-
-                VolumeBox {
-                    outputMode: false
-                }
-
-                SectionHeading {
-                    title: qsTr("Applications")
-                    description: qsTr("Per-application playback volume")
-                }
-
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: streamsColumn.implicitHeight
-                        + Appearance.padding.large * 2
-
-                    radius: Appearance.rounding.small
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-                    border.width: 1
-                    border.color: Qt.alpha(
-                        Colours.palette.m3outlineVariant,
-                        0.16
-                    )
-
-                    ColumnLayout {
-                        id: streamsColumn
-
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.larger
-                        spacing: Appearance.spacing.normal
-
-                        Repeater {
-                            model: Audio.streams
-
-                            delegate: StreamRow {
-                                required property var modelData
-
-                                Layout.fillWidth: true
-                                stream: modelData
-                            }
-                        }
-
-                        StyledText {
-                            visible: Audio.streams.length === 0
-                            Layout.fillWidth: true
-                            Layout.topMargin: Appearance.spacing.small
-                            Layout.bottomMargin: Appearance.spacing.small
-                            text: qsTr("No applications currently playing audio")
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.34
-                            )
-                            font.pointSize: Appearance.font.size.smaller
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: Appearance.padding.normal
-                }
-            }
-        }
-    }
-
-    component DeviceRow: Item {
-        id: deviceRow
-
-        required property var device
-        required property bool selected
-        required property string icon
-        required property string fallbackName
-
-        signal clicked
-
-        implicitHeight: 48
-
-        StyledRect {
-            anchors.fill: parent
-            radius: Appearance.rounding.small
-            color: Qt.alpha(
-                Colours.palette.m3primary,
-                deviceRow.selected
-                    ? 0.055
-                    : deviceMouse.containsMouse
-                        ? 0.025
-                        : 0
-            )
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 2
-            height: deviceRow.selected ? 22 : 0
-            radius: 1
-            color: Colours.palette.m3primary
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.normal
-            anchors.rightMargin: Appearance.padding.normal
-            spacing: Appearance.spacing.small
-
-            MaterialIcon {
-                text: deviceRow.icon
-                fill: deviceRow.selected ? 1 : 0
-                color: deviceRow.selected
-                    ? Colours.palette.m3primary
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.48
-                    )
-                font.pointSize: Appearance.font.size.normal
-            }
-
+        SettingsGroup {
+            visible: root.session.sectionFor("audio") === "output"
+            contentPadding: 12
+            title: qsTr("Output device")
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
-
+                spacing: 4
+                // Available devices stay visible beside their active selection.
+                property string title: qsTr("Choose device")
+                property string description: qsTr("%1 available").arg(Audio.sinks.length)
+                Repeater {
+                    // Keep the current device first while retaining every available device.
+                    model: [...Audio.sinks].sort((a, b) => Number(b.id === Audio.sink?.id) - Number(a.id === Audio.sink?.id))
+                    DeviceRow {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        device: modelData
+                        selected: !!Audio.sink && Audio.sink.id === modelData.id
+                        iconName: "speaker"
+                        fallbackName: qsTr("Unknown device")
+                        onClicked: Audio.setAudioSink(modelData)
+                    }
+                }
                 StyledText {
+                    visible: Audio.sinks.length === 0
                     Layout.fillWidth: true
-                    text: deviceRow.device?.description
-                        || deviceRow.fallbackName
-                    color: Colours.palette.m3onSurface
-                    font.pointSize: Appearance.font.size.small
-                    font.weight: deviceRow.selected ? 500 : 400
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
+                    text: qsTr("Connect a device to select it here.")
+                    color: Colours.palette.m3onSurfaceVariant
+                    wrapMode: Text.WordWrap
                 }
+            }
 
+        }
+        SettingsGroup {
+            visible: root.session.sectionFor("audio") === "input"
+            title: qsTr("Volume")
+            VolumeBox {
+                outputMode: false
+                enabled: !!Audio.source
+                opacity: enabled ? 1 : 0.45
+            }
+        }
+        SettingsGroup {
+            visible: root.session.sectionFor("audio") === "input"
+            contentPadding: 12
+            title: qsTr("Input device")
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                // Available devices stay visible beside their active selection.
+                property string title: qsTr("Choose device")
+                property string description: qsTr("%1 available").arg(Audio.sources.length)
+                Repeater {
+                    // Keep the current device first while retaining every available device.
+                    model: [...Audio.sources].sort((a, b) => Number(b.id === Audio.source?.id) - Number(a.id === Audio.source?.id))
+                    DeviceRow {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        device: modelData
+                        selected: !!Audio.source && Audio.source.id === modelData.id
+                        iconName: "mic"
+                        fallbackName: qsTr("Unknown device")
+                        onClicked: Audio.setAudioSource(modelData)
+                    }
+                }
                 StyledText {
-                    text: deviceRow.selected
-                        ? qsTr("Selected")
-                        : qsTr("Available")
-                    color: deviceRow.selected
-                        ? Colours.palette.m3primary
-                        : Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.34
-                        )
-                    font.pointSize: Appearance.font.size.smaller
+                    visible: Audio.sources.length === 0
+                    Layout.fillWidth: true
+                    text: qsTr("Connect a device to select it here.")
+                    color: Colours.palette.m3onSurfaceVariant
+                    wrapMode: Text.WordWrap
                 }
             }
 
-            MaterialIcon {
-                visible: deviceRow.selected
-                text: "check"
-                color: Colours.palette.m3primary
-                font.pointSize: Appearance.font.size.small
+        }
+        SettingsGroup {
+            visible: root.session.sectionFor("audio") === "applications"
+            contentPadding: 16
+            title: qsTr("Playing applications")
+            Repeater {
+                model: Audio.streams
+                StreamRow {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    stream: modelData
+                }
             }
-        }
-
-        MouseArea {
-            id: deviceMouse
-
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: deviceRow.clicked()
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 1
-            color: Qt.alpha(Colours.palette.m3outlineVariant, 0.14)
+            StyledText {
+                visible: Audio.streams.length === 0
+                Layout.fillWidth: true
+                text: qsTr("Applications appear here when they play audio.")
+                color: Colours.palette.m3onSurfaceVariant
+                wrapMode: Text.WordWrap
+            }
         }
     }
+
+    component DeviceRow: Controls.AbstractButton {
+        id: deviceRow
+        required property var device
+        required property bool selected
+        required property string iconName
+        required property string fallbackName
+        implicitHeight: Math.max(56, deviceLabel.implicitHeight + 24)
+        Accessible.name: deviceLabel.text
+        Accessible.role: Accessible.RadioButton
+        Accessible.checked: selected
+        background: Rectangle {
+            radius: 6
+            color: Qt.alpha(Colours.palette.m3primary, deviceRow.selected ? 0.12 : deviceRow.hovered ? 0.06 : 0)
+            border.width: deviceRow.activeFocus ? 1 : 0
+            border.color: Colours.palette.m3primary
+        }
+        contentItem: RowLayout {
+            spacing: 12
+            MaterialIcon { text: deviceRow.iconName; color: Colours.palette.m3onSurfaceVariant; font.pointSize: 12 }
+            StyledText {
+                id: deviceLabel
+                Layout.fillWidth: true
+                text: deviceRow.device?.description || deviceRow.device?.name || deviceRow.fallbackName
+                wrapMode: Text.WordWrap
+                font.pointSize: 10.5 * Appearance.font.size.scale
+            }
+            MaterialIcon { text: deviceRow.selected ? "radio_button_checked" : "radio_button_unchecked"; color: deviceRow.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant; font.pointSize: 12 }
+        }
+        leftPadding: 12
+        rightPadding: 12
+    }
+
 
     component SectionLabel: Item {
         id: section
@@ -377,11 +177,8 @@ Item {
 
             StyledText {
                 text: section.text
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.52
-                )
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: 500
                 font.letterSpacing: 0.7
             }
@@ -398,12 +195,9 @@ Item {
             StyledText {
                 visible: section.detail !== ""
                 text: section.detail
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.30
-                )
+                color: Colours.palette.m3onSurfaceVariant
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
             }
         }
     }
@@ -422,7 +216,7 @@ Item {
         StyledText {
             text: heading.title
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: 12 * Appearance.font.size.scale
             font.weight: 500
         }
 
@@ -430,11 +224,8 @@ Item {
             visible: heading.description !== ""
             Layout.fillWidth: true
             text: heading.description
-            color: Qt.alpha(
-                Colours.palette.m3onSurfaceVariant,
-                0.44
-            )
-            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9.75 * Appearance.font.size.scale
             elide: Text.ElideRight
         }
     }
@@ -455,8 +246,8 @@ Item {
             + Appearance.padding.large * 2
 
         radius: Appearance.rounding.small
-        color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 0.58)
-        border.width: 1
+        color: "transparent"
+        border.width: 0
         border.color: Qt.alpha(
             Colours.palette.m3outlineVariant,
             0.16
@@ -484,13 +275,10 @@ Item {
                             ? "mic_off"
                             : "mic")
                     color: volumeBox.currentMuted
-                        ? Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.42
-                        )
+                        ? Colours.palette.m3onSurfaceVariant
                         : Colours.palette.m3primary
                     fill: volumeBox.currentMuted ? 0 : 1
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: 10.5 * Appearance.font.size.scale
                 }
 
                 StyledText {
@@ -502,12 +290,12 @@ Item {
                         )
                     color: Colours.palette.m3onSurface
                     font.family: Appearance.font.family.mono
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: 9.75 * Appearance.font.size.scale
                     font.weight: 500
                 }
 
                 CompactButton {
-                    icon: volumeBox.currentMuted
+                    iconName: volumeBox.currentMuted
                         ? (volumeBox.outputMode
                             ? "volume_up"
                             : "mic")
@@ -536,7 +324,7 @@ Item {
 
                 value: volumeBox.currentVolume
                 enabled: !volumeBox.currentMuted
-                opacity: enabled ? 1 : 0.38
+                opacity: enabled ? 1 : 0.6
 
                 onMoved: {
                     if (volumeBox.outputMode)
@@ -548,147 +336,75 @@ Item {
         }
     }
 
-    component StreamRow: ColumnLayout {
+    component StreamRow: Item {
         id: streamRow
-
         required property var stream
-
-        readonly property bool streamMuted:
-            stream ? Audio.getStreamMuted(stream) : false
-        readonly property real streamVolume:
-            stream ? Audio.getStreamVolume(stream) : 0
-
+        readonly property bool streamMuted: stream ? Audio.getStreamMuted(stream) : false
+        readonly property real streamVolume: stream ? Audio.getStreamVolume(stream) : 0
         Layout.fillWidth: true
-        spacing: Appearance.spacing.smaller
-
+        // Give every stream its own measured space, even with long app names.
+        implicitHeight: streamHeader.implicitHeight + 62
         RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.spacing.small
-
-            MaterialIcon {
-                text: "apps"
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.48
-                )
-                font.pointSize: Appearance.font.size.small
-            }
-
+            id: streamHeader
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: 12
+            spacing: 12
+            MaterialIcon { text: "apps"; font.pointSize: 12; color: Colours.palette.m3onSurfaceVariant }
             StyledText {
                 Layout.fillWidth: true
-                text: streamRow.stream
-                    ? Audio.getStreamName(streamRow.stream)
-                    : qsTr("Unknown application")
-                color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.small
-                font.weight: 500
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
+                text: streamRow.stream ? Audio.getStreamName(streamRow.stream) : qsTr("Unknown application")
+                font.pointSize: 10.5 * Appearance.font.size.scale
                 elide: Text.ElideRight
+                wrapMode: Text.NoWrap
                 maximumLineCount: 1
             }
-
             StyledText {
-                text: qsTr("%1%").arg(
-                    Math.round(streamRow.streamVolume * 100)
-                )
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.42
-                )
+                Layout.minimumWidth: 48
+                text: qsTr("%1%").arg(Math.round(streamRow.streamVolume * 100))
+                horizontalAlignment: Text.AlignRight
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
             }
-
             CompactButton {
-                icon: streamRow.streamMuted
-                    ? "volume_up"
-                    : "volume_off"
+                iconName: streamRow.streamMuted ? "volume_up" : "volume_off"
                 active: streamRow.streamMuted
-
-                onClicked: {
-                    if (streamRow.stream) {
-                        Audio.setStreamMuted(
-                            streamRow.stream,
-                            !streamRow.streamMuted
-                        );
-                    }
-                }
+                onClicked: if (streamRow.stream) Audio.setStreamMuted(streamRow.stream, !streamRow.streamMuted)
             }
         }
-
         StyledSlider {
-            Layout.fillWidth: true
-            implicitHeight: Appearance.padding.normal * 2.6
-
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: streamHeader.bottom
+            anchors.topMargin: 8
+            height: 26
             value: streamRow.streamVolume
             enabled: !streamRow.streamMuted
-            opacity: enabled ? 1 : 0.38
-
-            onMoved: {
-                if (streamRow.stream)
-                    Audio.setStreamVolume(streamRow.stream, value);
-            }
-
-            Connections {
-                target: streamRow.stream?.audio ?? null
-
-                function onVolumeChanged() {
-                    if (streamRow.stream?.audio)
-                        parent.value = streamRow.stream.audio.volume;
-                }
-            }
+            opacity: enabled ? 1 : 0.6
+            onMoved: if (streamRow.stream) Audio.setStreamVolume(streamRow.stream, value)
         }
-
         Rectangle {
-            Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.small
-            implicitHeight: 1
-            color: Qt.alpha(
-                Colours.palette.m3outlineVariant,
-                0.14
-            )
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: Qt.alpha(Colours.palette.m3outlineVariant, 0.35)
         }
     }
 
-    component CompactButton: Item {
-        id: compactButton
-
-        required property string icon
+    component CompactButton: Controls.AbstractButton {
+        id: button
+        required property string iconName
         property bool active: false
-
-        signal clicked
-
-        implicitWidth: 30
-        implicitHeight: 30
-
-        StyledRect {
-            anchors.fill: parent
-            radius: Appearance.rounding.small
-            color: Qt.alpha(
-                Colours.palette.m3primary,
-                compactMouse.containsMouse ? 0.07 : 0
-            )
-        }
-
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: compactButton.icon
-            color: compactButton.active
-                ? Colours.palette.m3primary
-                : Qt.alpha(
-                    Colours.palette.m3onSurface,
-                    compactMouse.containsMouse ? 1 : 0.62
-                )
-            font.pointSize: Appearance.font.size.small
-        }
-
-        MouseArea {
-            id: compactMouse
-
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: compactButton.clicked()
-        }
+        implicitWidth: 36
+        implicitHeight: 32
+        Accessible.name: active ? qsTr("Unmute") : qsTr("Mute")
+        SettingsToolTip { visible: button.hovered; text: button.Accessible.name }
+        background: Rectangle { radius: 6; color: Qt.alpha(Colours.palette.m3primary, button.active ? 0.14 : button.hovered ? 0.1 : 0.04); border.width: button.activeFocus ? 1 : 0; border.color: Colours.palette.m3primary }
+        contentItem: MaterialIcon { text: button.iconName; color: button.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant; font.pointSize: 13.5 }
     }
 }

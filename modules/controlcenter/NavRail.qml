@@ -1,227 +1,126 @@
 pragma ComponentBehavior: Bound
-
 import qs.components
+import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
-import qs.modules.controlcenter
 import Quickshell
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
-Item {
+Rectangle {
     id: root
-
     required property ShellScreen screen
     required property Session session
     required property bool initialOpeningComplete
-
-    implicitHeight: 44
-
-    RowLayout {
+    implicitWidth: 210
+    color: Colours.palette.m3surfaceContainer
+    StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
+        id: scroll
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.normal
-        anchors.rightMargin: Appearance.padding.normal
-
-        spacing: Appearance.spacing.small
-
-        Repeater {
-            model: PaneRegistry.count
-
-            NavItem {
-                required property int index
-
-                Layout.fillWidth: true
-
-                paneIndex: index
-                icon: PaneRegistry.getByIndex(index).icon
-                label: PaneRegistry.getByIndex(index).label
-            }
-        }
-
-        Loader {
-            active: !root.session.floating
-            visible: active
-
-            sourceComponent: Item {
-                implicitWidth: 30
-                implicitHeight: 30
-
-                MaterialIcon {
-                    anchors.centerIn: parent
-
-                    text: "select_window"
-
-                    color: Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        floatMouse.containsMouse ? 0.84 : 0.46
-                    )
-
-                    font.pointSize: Appearance.font.size.small
-                }
-
-                MouseArea {
-                    id: floatMouse
-
-                    anchors.fill: parent
-
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        root.session.root.close();
-
-                        WindowFactory.create(null, {
-                            active: root.session.active,
-                            navExpanded: root.session.navExpanded
-                        });
+        anchors.margins: 12
+        contentHeight: navigation.implicitHeight + 8
+        clip: true
+        StyledScrollBar.vertical: StyledScrollBar { animatePosition: false; flickable: scroll }
+        ColumnLayout {
+            id: navigation
+            width: scroll.width
+            spacing: 3
+            Repeater {
+                model: PaneRegistry.count
+                ColumnLayout {
+                    id: entry
+                    required property int index
+                    readonly property var pane: PaneRegistry.getByIndex(index)
+                    readonly property bool startsGroup: index === 0 || pane.group !== PaneRegistry.getByIndex(index - 1).group
+                    Layout.fillWidth: true
+                    spacing: 3
+                    StyledText {
+                        visible: entry.startsGroup && entry.pane.group !== ""
+                        Layout.leftMargin: 12
+                        Layout.topMargin: entry.index === 0 ? 7 : 18
+                        Layout.bottomMargin: 7
+                        text: entry.pane.group.toLocaleUpperCase()
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: 8.25 * Appearance.font.size.scale
+                        font.weight: 600
+                    }
+                    Rectangle {
+                        visible: entry.startsGroup && entry.pane.group === ""
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.bottomMargin: 8
+                        implicitHeight: 1
+                        color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
+                    }
+                    Controls.AbstractButton {
+                        id: button
+                        Layout.fillWidth: true
+                        implicitHeight: Math.max(32, label.implicitHeight + 10)
+                        readonly property bool selected: root.session.active === entry.pane.id
+                        Accessible.name: entry.pane.label
+                        onClicked: if (root.initialOpeningComplete) root.session.active = entry.pane.id
+                        background: Rectangle {
+                            radius: 6
+                            color: Qt.alpha(Colours.palette.m3primary, button.selected && PaneRegistry.sectionsFor(entry.pane.id).length === 0 ? 0.14 : button.hovered ? 0.06 : 0)
+                            border.width: button.activeFocus ? 1 : 0
+                            border.color: Colours.palette.m3primary
+                        }
+                        contentItem: RowLayout {
+                            spacing: 10
+                            MaterialIcon { text: entry.pane.icon; font.pointSize: 12.0; color: button.selected ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant }
+                            StyledText {
+                                id: label
+                                Layout.fillWidth: true
+                                text: entry.pane.label
+                                color: button.selected ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
+                                font.pointSize: 9.75 * Appearance.font.size.scale
+                                font.weight: button.selected ? 600 : 400
+                                elide: Text.ElideRight
+                            }
+                        }
+                        leftPadding: 12
+                        rightPadding: 8
+                    }
+                    ColumnLayout {
+                        visible: root.session.active === entry.pane.id && PaneRegistry.sectionsFor(entry.pane.id).length > 0
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 28
+                        Layout.topMargin: 2
+                        Layout.bottomMargin: 6
+                        spacing: 3
+                        Repeater {
+                            model: PaneRegistry.sectionsFor(entry.pane.id)
+                            Controls.AbstractButton {
+                                id: subsection
+                                required property var modelData
+                                Layout.fillWidth: true
+                                implicitHeight: Math.max(32, subLabel.implicitHeight + 10)
+                                readonly property bool selected: root.session.sectionFor(entry.pane.id) === modelData.id
+                                Accessible.name: modelData.label
+                                onClicked: root.session.setSection(entry.pane.id, modelData.id)
+                                background: Rectangle {
+                                    radius: 6
+                                    color: Qt.alpha(Colours.palette.m3primary, subsection.selected ? 0.14 : subsection.hovered ? 0.06 : 0)
+                                    border.width: subsection.activeFocus ? 1 : 0
+                                    border.color: Colours.palette.m3primary
+                                }
+                                contentItem: StyledText {
+                                    id: subLabel
+                                    text: subsection.modelData.label
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
+                                    font.weight: subsection.selected ? 600 : 400
+                                    color: subsection.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                                leftPadding: 12
+                            }
+                        }
                     }
                 }
-            }
-        }
-    }
-
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-
-        height: 1
-
-        color: Qt.alpha(
-            Colours.palette.m3outlineVariant,
-            0.24
-        )
-    }
-
-    component NavItem: Item {
-        id: item
-
-        required property int paneIndex
-        required property string icon
-        required property string label
-
-        readonly property bool active:
-            root.session.active === label
-
-        implicitHeight: 43
-
-        RowLayout {
-            id: itemContent
-
-            anchors.centerIn: parent
-
-            spacing: 6
-
-            StyledText {
-                text:
-                    String(
-                        item.paneIndex + 1
-                    ).padStart(2, "0")
-
-                color:
-                    item.active
-                    ? Colours.palette.m3primary
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.26
-                    )
-
-                font.family:
-                    Appearance.font.family.mono
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight: 500
-            }
-
-            MaterialIcon {
-                text: item.icon
-
-                fill:
-                    item.active ? 1 : 0
-
-                color:
-                    item.active
-                    ? Qt.alpha(
-                        Colours.palette.m3primary,
-                        0.82
-                    )
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        navMouse.containsMouse ? 0.68 : 0.40
-                    )
-
-                font.pointSize:
-                    Appearance.font.size.small
-
-                Behavior on fill {
-                    Anim {}
-                }
-            }
-
-            StyledText {
-                text: item.label
-
-                font.capitalization:
-                    Font.Capitalize
-
-                color:
-                    item.active
-                    ? Colours.palette.m3onSurface
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        navMouse.containsMouse ? 0.68 : 0.42
-                    )
-
-                font.pointSize:
-                    Appearance.font.size.smaller
-
-                font.weight:
-                    item.active ? 500 : 400
-            }
-        }
-
-        Rectangle {
-            anchors.horizontalCenter:
-                parent.horizontalCenter
-
-            anchors.bottom:
-                parent.bottom
-
-            width:
-                item.active
-                ? Math.max(
-                    24,
-                    itemContent.implicitWidth * 0.36
-                )
-                : 0
-
-            height: 2
-            radius: 1
-
-            color:
-                Colours.palette.m3primary
-
-            Behavior on width {
-                Anim {}
-            }
-        }
-
-        MouseArea {
-            id: navMouse
-
-            anchors.fill: parent
-
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: {
-                if (!root.initialOpeningComplete)
-                    return;
-
-                root.session.active =
-                    item.label;
             }
         }
     }

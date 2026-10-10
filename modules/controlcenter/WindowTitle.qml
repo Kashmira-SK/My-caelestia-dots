@@ -56,27 +56,6 @@ StyledRect {
                 )
         }
 
-        StyledText {
-            text:
-                `${String(
-                    root.session.activeIndex + 1
-                ).padStart(2, "0")} / ${String(
-                    root.session.panes.length
-                ).padStart(2, "0")}`
-
-            color:
-                Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.32
-                )
-
-            font.family:
-                Appearance.font.family.mono
-
-            font.pointSize:
-                Appearance.font.size.smaller
-        }
-
         Item {
             implicitWidth: 26
             implicitHeight: 26

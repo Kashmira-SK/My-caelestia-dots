@@ -47,24 +47,24 @@ ColumnLayout {
     SectionContainer {
         contentSpacing: Appearance.spacing.small / 2
 
-        PropertyRow {
+        SettingsPropertyRow {
             label: qsTr("Connected network")
             value: Nmcli.active ? Nmcli.active.ssid : qsTr("Not connected")
         }
 
-        PropertyRow {
+        SettingsPropertyRow {
             showTopMargin: true
             label: qsTr("Signal strength")
             value: Nmcli.active ? qsTr("%1%").arg(Nmcli.active.strength) : qsTr("N/A")
         }
 
-        PropertyRow {
+        SettingsPropertyRow {
             showTopMargin: true
             label: qsTr("Security")
             value: Nmcli.active ? (Nmcli.active.isSecure ? qsTr("Secured") : qsTr("Open")) : qsTr("N/A")
         }
 
-        PropertyRow {
+        SettingsPropertyRow {
             showTopMargin: true
             label: qsTr("Frequency")
             value: Nmcli.active ? qsTr("%1 MHz").arg(Nmcli.active.frequency) : qsTr("N/A")

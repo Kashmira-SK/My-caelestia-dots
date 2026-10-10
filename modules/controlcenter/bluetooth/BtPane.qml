@@ -18,6 +18,10 @@ SplitPaneWithDetails {
 
     anchors.fill: parent
 
+    singlePane: true
+    showRightPane: session.sectionFor("bluetooth") === "settings" || !!session.bt.active
+    showBackButton: !!session.bt.active
+    onBackRequested: session.bt.active = null
     activeItem: session.bt.active
     paneIdGenerator: function (item) {
         return item ? (item.address || "") : "";
@@ -25,12 +29,16 @@ SplitPaneWithDetails {
 
     leftContent: Component {
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: leftFlickable
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: deviceList.implicitHeight
 
             StyledScrollBar.vertical: StyledScrollBar {
+
+                animatePosition: false
                 flickable: leftFlickable
             }
 
@@ -51,12 +59,16 @@ SplitPaneWithDetails {
 
     rightSettingsComponent: Component {
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: settingsFlickable
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: settingsInner.height
 
             StyledScrollBar.vertical: StyledScrollBar {
+
+                animatePosition: false
                 flickable: settingsFlickable
             }
 

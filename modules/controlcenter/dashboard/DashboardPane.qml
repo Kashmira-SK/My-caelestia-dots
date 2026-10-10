@@ -4,93 +4,48 @@ import ".."
 import "../components"
 import qs.components
 import qs.components.controls
-import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
-import qs.utils
-import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.UPower
 
-Item {
+SettingsPage {
     id: root
-
+    readonly property string section: session.sectionFor("dashboard")
+    title: PaneRegistry.sectionLabel("dashboard", section)
     required property Session session
-
-    // General Settings
-    property bool enabled: Config.dashboard.enabled ?? true
-    property bool showOnHover: Config.dashboard.showOnHover ?? true
-    property int updateInterval: Config.dashboard.updateInterval ?? 1000
-    property int dragThreshold: Config.dashboard.dragThreshold ?? 50
-
-    // Performance Resources
-    property bool showBattery: Config.dashboard.performance.showBattery ?? false
-    property bool showGpu: Config.dashboard.performance.showGpu ?? true
-    property bool showCpu: Config.dashboard.performance.showCpu ?? true
-    property bool showMemory: Config.dashboard.performance.showMemory ?? true
-    property bool showStorage: Config.dashboard.performance.showStorage ?? true
-    property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
-
     anchors.fill: parent
-
-    function saveConfig() {
-        Config.dashboard.enabled = root.enabled;
-        Config.dashboard.showOnHover = root.showOnHover;
-        Config.dashboard.updateInterval = root.updateInterval;
-        Config.dashboard.dragThreshold = root.dragThreshold;
-        Config.dashboard.performance.showBattery = root.showBattery;
-        Config.dashboard.performance.showGpu = root.showGpu;
-        Config.dashboard.performance.showCpu = root.showCpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
-        Config.dashboard.performance.showStorage = root.showStorage;
-        Config.dashboard.performance.showNetwork = root.showNetwork;
-        Config.save();
+    SettingsGroup {
+        visible: root.section === "general"
+        title: qsTr("Opening behavior")
+        SettingsToggle { label: qsTr("Enable dashboard"); settings: Config.dashboard; setting: "enabled" }
+        SettingsToggle { label: qsTr("Open on hover"); settings: Config.dashboard; setting: "showOnHover"; enabled: Config.dashboard.enabled }
     }
 
-    StyledFlickable {
-        id: dashboardFlickable
+    SettingsGroup {
+        visible: root.section === "general"
+        title: qsTr("Drag gesture")
+        SettingsAdjustment { label: qsTr("Drag distance to open"); settings: Config.dashboard; setting: "dragThreshold"; from: 0; to: 100; stepSize: 1; decimals: 0; suffix: "px" }
+    }
 
-        anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.large
-        anchors.rightMargin: Appearance.padding.large
-        anchors.topMargin: Appearance.padding.normal
-        anchors.bottomMargin: Appearance.padding.large
+    SettingsGroup {
+        visible: root.section === "performance"
+        title: qsTr("Performance information")
+        description: qsTr("Choose which resources appear on the Performance page.")
+        SettingsToggle { label: qsTr("CPU"); settings: Config.dashboard.performance; setting: "showCpu" }
+        SettingsToggle { label: qsTr("GPU"); settings: Config.dashboard.performance; setting: "showGpu"; visible: SystemUsage.gpuType !== "NONE" }
+        SettingsToggle { label: qsTr("Memory"); settings: Config.dashboard.performance; setting: "showMemory" }
+        SettingsToggle { label: qsTr("Storage"); settings: Config.dashboard.performance; setting: "showStorage" }
+        SettingsToggle { label: qsTr("Network"); settings: Config.dashboard.performance; setting: "showNetwork" }
+        SettingsToggle { label: qsTr("Battery"); settings: Config.dashboard.performance; setting: "showBattery"; visible: UPower.displayDevice.isLaptopBattery }
+    }
 
-        flickableDirection: Flickable.VerticalFlick
-        contentHeight: dashboardLayout.height
-
-        StyledScrollBar.vertical: StyledScrollBar {
-            flickable: dashboardFlickable
-        }
-
-        ColumnLayout {
-            id: dashboardLayout
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            spacing: Appearance.spacing.normal
-
-            RowLayout {
-                spacing: Appearance.spacing.smaller
-
-                StyledText {
-                    text: qsTr("Dashboard")
-                    font.pointSize: Appearance.font.size.large
-                    font.weight: 500
-                }
-            }
-
-            GeneralSection {
-                rootItem: root
-            }
-
-            PerformanceSection {
-                rootItem: root
-            }
-        }
+    SettingsGroup {
+        visible: root.section === "timing"
+        title: qsTr("Refresh timing & gestures")
+        description: qsTr("Shorter intervals refresh more often; longer intervals reduce background work.")
+        SettingsAdjustment { label: qsTr("Resource refresh interval"); settings: Config.dashboard; setting: "resourceUpdateInterval"; from: 100; to: 10000; stepSize: 100; decimals: 0; suffix: "ms" }
+        SettingsAdjustment { label: qsTr("Media refresh interval"); settings: Config.dashboard; setting: "mediaUpdateInterval"; from: 100; to: 10000; stepSize: 100; decimals: 0; suffix: "ms" }
     }
 }

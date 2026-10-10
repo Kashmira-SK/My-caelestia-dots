@@ -4,12 +4,17 @@ import qs.components
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
 RowLayout {
     id: root
 
     spacing: 0
+    property bool singlePane: false
+    property bool showRightPane: false
+    property bool showBackButton: showRightPane
+    signal backRequested
 
     property Component leftContent: null
     property Component rightContent: null
@@ -24,19 +29,21 @@ RowLayout {
 
     Item {
         id: leftPane
+        visible: !root.singlePane || !root.showRightPane
+        Layout.fillWidth: root.singlePane
 
-        Layout.preferredWidth: Math.floor(parent.width * root.leftWidthRatio)
-        Layout.minimumWidth: root.leftMinimumWidth
+        Layout.preferredWidth: root.singlePane ? -1 : Math.floor(parent.width * root.leftWidthRatio)
+        Layout.minimumWidth: root.singlePane ? 0 : root.leftMinimumWidth
         Layout.fillHeight: true
 
         Loader {
             id: leftLoader
 
             anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.large
+            anchors.leftMargin: root.singlePane ? 28 : Appearance.padding.large
+            anchors.rightMargin: root.singlePane ? 28 : Appearance.padding.large
+            anchors.topMargin: root.singlePane ? 25 : Appearance.padding.normal
+            anchors.bottomMargin: root.singlePane ? 25 : Appearance.padding.large
 
             sourceComponent: root.leftContent
 
@@ -48,6 +55,7 @@ RowLayout {
     }
 
     Item {
+        visible: !root.singlePane
         Layout.preferredWidth: Appearance.spacing.large + 1
         Layout.fillHeight: true
 
@@ -55,8 +63,8 @@ RowLayout {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.large
+            anchors.topMargin: root.singlePane ? 25 : Appearance.padding.normal
+            anchors.bottomMargin: root.singlePane ? 25 : Appearance.padding.large
 
             width: 1
             color: Colours.palette.m3outlineVariant
@@ -66,6 +74,19 @@ RowLayout {
 
     Item {
         id: rightPane
+        visible: !root.singlePane || root.showRightPane
+        Controls.AbstractButton {
+            id: back
+            visible: root.singlePane && root.showBackButton
+            x: 28; y: 18
+            implicitWidth: backText.implicitWidth + 20
+            implicitHeight: 32
+            Accessible.name: qsTr("Back to list")
+            onClicked: root.backRequested()
+            background: Rectangle { radius: 6; color: Qt.alpha(Colours.palette.m3primary, back.hovered ? 0.12 : 0.05); border.width: back.activeFocus ? 1 : 0; border.color: Colours.palette.m3primary }
+            contentItem: StyledText { id: backText; text: qsTr("‹  Back to list"); font.pointSize: 9.75 * Appearance.font.size.scale; color: Colours.palette.m3primary; verticalAlignment: Text.AlignVCenter }
+            leftPadding: 10
+        }
 
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -74,10 +95,10 @@ RowLayout {
             id: rightLoader
 
             anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.large
+            anchors.leftMargin: root.singlePane ? 28 : Appearance.padding.large
+            anchors.rightMargin: root.singlePane ? 28 : Appearance.padding.large
+            anchors.topMargin: root.singlePane ? (root.showBackButton ? 64 : 25) : Appearance.padding.normal
+            anchors.bottomMargin: root.singlePane ? 25 : Appearance.padding.large
 
             sourceComponent: root.rightContent
 

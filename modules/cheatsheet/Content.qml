@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import "../controlcenter"
+import "../controlcenter/components"
 import qs.components
 import qs.components.containers
 import qs.components.controls
@@ -9,6 +10,7 @@ import qs.config
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
 Item {
@@ -18,15 +20,16 @@ Item {
 
     anchors.fill: parent
 
-    property string activePage: "tools"
+    readonly property string activePage: session.sectionFor("cheatsheet")
+    onActivePageChanged: flick.contentY = 0
 
     readonly property var pages: [
-        { id: "tools",   index: "01", label: "TOOLS",   icon: "terminal" },
-        { id: "network", index: "02", label: "NETWORK", icon: "wifi" },
-        { id: "system",  index: "03", label: "SYSTEM",  icon: "settings" },
-        { id: "shell",   index: "04", label: "SHELL",   icon: "bolt" },
-        { id: "paths",   index: "05", label: "PATHS",   icon: "folder_open" },
-        { id: "fun",     index: "06", label: "FUN",     icon: "auto_awesome" }
+        { id: "tools",   index: "01", label: qsTr("Everyday tools"),   icon: "terminal" },
+        { id: "network", index: "02", label: qsTr("Networking"), icon: "wifi" },
+        { id: "system",  index: "03", label: qsTr("Maintenance"),  icon: "settings" },
+        { id: "shell",   index: "04", label: qsTr("Shell & shortcuts"),   icon: "bolt" },
+        { id: "paths",   index: "05", label: qsTr("Files & folders"),   icon: "folder_open" },
+        { id: "fun",     index: "06", label: qsTr("Extras"),     icon: "auto_awesome" }
     ]
 
     function pageData(): var {
@@ -38,92 +41,7 @@ Item {
         return pages[0]
     }
 
-    component CategoryTab: Item {
-        id: tab
 
-        required property var page
-
-        readonly property bool active:
-            root.activePage === page.id
-
-        implicitWidth:
-            tabContent.implicitWidth
-            + Appearance.padding.normal * 2
-
-        implicitHeight: 36
-
-        RowLayout {
-            id: tabContent
-
-            anchors.centerIn: parent
-            spacing: 6
-
-            StyledText {
-                text: tab.page.index
-
-                color:
-                    tab.active
-                    ? Colours.palette.m3primary
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.34
-                    )
-
-                font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.smaller
-                font.weight: 500
-            }
-
-            StyledText {
-                text: tab.page.label
-
-                color:
-                    tab.active
-                    ? Colours.palette.m3onSurface
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.58
-                    )
-
-                font.pointSize: Appearance.font.size.smaller
-                font.weight: tab.active ? 500 : 400
-                font.letterSpacing: 0.7
-            }
-        }
-
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-
-            width:
-                tab.active
-                ? Math.max(
-                    24,
-                    tabContent.implicitWidth * 0.42
-                )
-                : 0
-
-            height: 2
-            radius: 1
-            color: Colours.palette.m3primary
-
-            Behavior on width {
-                Anim {}
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: {
-                root.activePage = tab.page.id
-                flick.contentY = 0
-            }
-        }
-    }
 
     component InfoRow: Item {
         id: row
@@ -138,7 +56,7 @@ Item {
                 labelText.implicitHeight,
                 valueText.implicitHeight
             )
-            + Appearance.padding.normal * 1.4
+            + 24
 
         RowLayout {
             anchors.fill: parent
@@ -153,8 +71,8 @@ Item {
             StyledText {
                 id: labelText
 
-                Layout.preferredWidth: 170
-                Layout.maximumWidth: 170
+                Layout.preferredWidth: Math.min(180, row.width * 0.3)
+                Layout.maximumWidth: Math.min(180, row.width * 0.3)
                 Layout.alignment: Qt.AlignTop
 
                 text: row.label
@@ -162,7 +80,7 @@ Item {
                 color: Colours.palette.m3onSurface
 
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: 500
 
                 wrapMode: Text.WordWrap
@@ -176,12 +94,9 @@ Item {
 
                 text: row.value
 
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.64
-                )
+                color: Colours.palette.m3onSurfaceVariant
 
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
                 font.weight: 400
 
                 wrapMode: Text.WordWrap
@@ -204,326 +119,97 @@ Item {
 
     component CmdRow: Item {
         id: row
-
         required property string label
         required property string cmd
-
         property bool copied: false
-
         Layout.fillWidth: true
-
-        implicitHeight:
-            Math.max(
-                labelText.implicitHeight,
-                commandText.implicitHeight,
-                copyButton.implicitHeight
-            )
-            + Appearance.padding.normal * 1.4
-
+        implicitHeight: Math.max(commandLabel.implicitHeight, commandText.implicitHeight, copyButton.implicitHeight) + 28
         RowLayout {
             anchors.fill: parent
-
-            anchors.leftMargin: Appearance.padding.small
-            anchors.rightMargin: Appearance.padding.smaller
-            anchors.topMargin: Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.small
-
-            spacing: Appearance.spacing.normal
-
+            anchors.margins: 12
+            spacing: 20
+            // Keep descriptions in a separate column so commands scan as a list.
             StyledText {
-                id: labelText
-
-                Layout.preferredWidth: 135
-                Layout.maximumWidth: 135
-                Layout.alignment: Qt.AlignTop
-
+                id: commandLabel
+                Layout.preferredWidth: Math.min(145, row.width * 0.24)
+                Layout.minimumWidth: Layout.preferredWidth
+                Layout.maximumWidth: Layout.preferredWidth
                 text: row.label
-
-                color: Qt.alpha(
-                    Colours.palette.m3onSurfaceVariant,
-                    0.54
-                )
-
-                font.pointSize: Appearance.font.size.smaller
-                font.weight: 400
-
                 wrapMode: Text.WordWrap
+                font.pointSize: 9.75 * Appearance.font.size.scale
+                color: Colours.palette.m3onSurfaceVariant
             }
-
-            StyledText {
+            TextEdit {
                 id: commandText
-
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
-
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
                 text: row.cmd
-
+                readOnly: true
+                selectByMouse: true
+                wrapMode: TextEdit.WrapAnywhere
+                textFormat: TextEdit.PlainText
                 color: Colours.palette.m3onSurface
-
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.small
-
-                wrapMode: Text.WrapAnywhere
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
-
-            IconButton {
+            Controls.AbstractButton {
                 id: copyButton
-
-                Layout.alignment: Qt.AlignTop
-
-                type: IconButton.Text
-                icon: row.copied ? "check" : "content_copy"
-                label.animate: true
-
+                Layout.preferredWidth: 66
+                Layout.minimumWidth: 66
+                implicitHeight: 28
+                Accessible.name: row.copied ? qsTr("Copied") : qsTr("Copy %1").arg(row.label)
                 onClicked: {
-                    Quickshell.execDetached([
-                        "wl-copy",
-                        row.cmd
-                    ])
-
-                    row.copied = true
-                    copiedTimer.restart()
+                    Quickshell.execDetached(["wl-copy", row.cmd]);
+                    row.copied = true;
+                    copiedTimer.restart();
+                }
+                background: Rectangle {
+                    radius: 5
+                    color: copyButton.hovered || copyButton.down ? Qt.alpha(Colours.palette.m3onSurface, 0.07) : "transparent"
+                    border.width: copyButton.activeFocus ? 1 : 0
+                    border.color: Colours.palette.m3primary
+                }
+                contentItem: StyledText {
+                    text: row.copied ? qsTr("Copied") : qsTr("Copy")
+                    font.pointSize: 9 * Appearance.font.size.scale
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    color: row.copied ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 }
             }
         }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-
-            height: 1
-
-            color: Qt.alpha(
-                Colours.palette.m3outlineVariant,
-                0.20
-            )
-        }
-
-        Timer {
-            id: copiedTimer
-
-            interval: 1100
-            repeat: false
-
-            onTriggered:
-                row.copied = false
-        }
+        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.alpha(Colours.palette.m3outlineVariant, 0.4) }
+        Timer { id: copiedTimer; interval: 1100; onTriggered: row.copied = false }
     }
 
-    component BorderSection: Item {
-        id: section
-
-        required property string title
-        required property string icon
-
-        default property alias content:
-            sectionContent.data
-
-        Layout.fillWidth: true
-
-        implicitHeight:
-            sectionContent.implicitHeight
-            + 46
-
-        MaterialIcon {
-            id: sectionIcon
-
-            x: 16
-            y: -height / 2 + 1
-
-            text: section.icon
-
-            color: Qt.alpha(
-                Colours.palette.m3primary,
-                0.78
-            )
-
-            font.pointSize: Appearance.font.size.small
-        }
-
-        StyledText {
-            id: sectionLabel
-
-            x:
-                sectionIcon.x
-                + sectionIcon.width
-                + 7
-
-            y: -height / 2
-
-            text: section.title
-
-            color: Qt.alpha(
-                Colours.palette.m3onSurfaceVariant,
-                0.72
-            )
-
-            font.pointSize: Appearance.font.size.smaller
-            font.weight: 500
-            font.letterSpacing: 0.8
-
-            onPaintedWidthChanged:
-                sectionBorder.requestPaint()
-        }
-
-        Canvas {
-            id: sectionBorder
-
-            anchors.fill: parent
-
-            onWidthChanged:
-                requestPaint()
-
-            onHeightChanged:
-                requestPaint()
-
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.reset()
-
-                const w = width
-                const h = height
-                const inset = 0.5
-                const r = Math.min(
-                    Appearance.rounding.normal,
-                    14
-                )
-
-                const gapLeft = Math.max(
-                    r + 8,
-                    sectionIcon.x - 7
-                )
-
-                const gapRight = Math.min(
-                    w - r - 8,
-                    sectionLabel.x
-                    + sectionLabel.paintedWidth
-                    + 8
-                )
-
-                ctx.strokeStyle =
-                    Qt.alpha(
-                        Colours.palette.m3outlineVariant,
-                        0.48
-                    )
-
-                ctx.lineWidth = 1
-                ctx.beginPath()
-
-                ctx.moveTo(
-                    gapRight,
-                    inset
-                )
-
-                ctx.lineTo(
-                    w - r,
-                    inset
-                )
-
-                ctx.quadraticCurveTo(
-                    w - inset,
-                    inset,
-                    w - inset,
-                    r
-                )
-
-                ctx.lineTo(
-                    w - inset,
-                    h - r
-                )
-
-                ctx.quadraticCurveTo(
-                    w - inset,
-                    h - inset,
-                    w - r,
-                    h - inset
-                )
-
-                ctx.lineTo(
-                    r,
-                    h - inset
-                )
-
-                ctx.quadraticCurveTo(
-                    inset,
-                    h - inset,
-                    inset,
-                    h - r
-                )
-
-                ctx.lineTo(
-                    inset,
-                    r
-                )
-
-                ctx.quadraticCurveTo(
-                    inset,
-                    inset,
-                    r,
-                    inset
-                )
-
-                ctx.lineTo(
-                    gapLeft,
-                    inset
-                )
-
-                ctx.stroke()
-            }
-        }
-
-        ColumnLayout {
-            id: sectionContent
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            anchors.leftMargin: Appearance.padding.normal
-            anchors.rightMargin: Appearance.padding.normal
-            anchors.topMargin: 20
-            anchors.bottomMargin: Appearance.padding.normal
-
-            spacing: 0
-        }
+    component BorderSection: SettingsCard {
+        property string icon: ""
+        contentPadding: 8
     }
 
     StyledRect {
         anchors.fill: parent
 
-        color: Colours.palette.m3surface
+        color: Colours.palette.m3surfaceContainerLow
 
         ColumnLayout {
             anchors.fill: parent
 
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
+            anchors.leftMargin: 28
+            anchors.rightMargin: 28
+            anchors.topMargin: 25
             anchors.bottomMargin: Appearance.padding.normal
 
             spacing: 0
 
 
-            RowLayout {
+            StyledText {
                 Layout.fillWidth: true
-                Layout.bottomMargin: Appearance.spacing.normal
-
-                spacing: Appearance.spacing.small
-
-                Repeater {
-                    model: root.pages
-
-                    CategoryTab {
-                        required property var modelData
-
-                        page: modelData
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
+                Layout.bottomMargin: 12
+                text: PaneRegistry.sectionLabel("cheatsheet", root.activePage)
+                font.pointSize: 16.5 * Appearance.font.size.scale
+                font.weight: 600
             }
 
             ClippingRectangle {
@@ -533,6 +219,8 @@ Item {
                 color: "transparent"
 
                 StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                     id: flick
 
                     anchors.fill: parent
@@ -547,6 +235,7 @@ Item {
 
                     StyledScrollBar.vertical:
                         StyledScrollBar {
+                            animatePosition: false
                             flickable: flick
                         }
 
@@ -556,13 +245,6 @@ Item {
                         width: flick.width
                         spacing: Appearance.spacing.normal
 
-                        // Top breathing room for border labels.
-                        // Labels intentionally sit partly above their section border,
-                        // so the first section must not begin at y: 0.
-                        Item {
-                            Layout.preferredHeight: Appearance.padding.normal
-                        }
-
                         ColumnLayout {
                             visible:
                                 root.activePage === "tools"
@@ -571,8 +253,11 @@ Item {
                             spacing: Appearance.spacing.normal
 
                             BorderSection {
-                                title: qsTr("QUICK")
+                                title: qsTr("Quick")
                                 icon: "priority_high"
+
+                                CmdRow { label: qsTr("Start Caelestia"); cmd: "qs -c caelestia" }
+                                CmdRow { label: qsTr("Stop Caelestia"); cmd: "qs -c caelestia kill" }
 
                                 CmdRow {
                                     label: "restart quickshell"
@@ -585,7 +270,7 @@ Item {
                                 }
                             }
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignTop
 
@@ -595,7 +280,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("EVERYDAY")
+                                    title: qsTr("Everyday")
                                     icon: "terminal"
 
                                     InfoRow { label: "speedtest-cli"; value: "network speed test" }
@@ -612,7 +297,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("INSPECT")
+                                    title: qsTr("Inspect")
                                     icon: "search"
 
                                     InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
@@ -634,7 +319,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: Appearance.spacing.normal
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignTop
 
@@ -644,7 +329,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("WIFI")
+                                    title: qsTr("Wifi")
                                     icon: "wifi"
 
                                     CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
@@ -657,7 +342,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("BLUETOOTH")
+                                    title: qsTr("Bluetooth")
                                     icon: "bluetooth"
 
                                     CmdRow { label: "scan"; cmd: "bluetoothctl scan on" }
@@ -675,7 +360,7 @@ Item {
                             spacing: Appearance.spacing.normal
 
                             BorderSection {
-                                title: qsTr("MAINTENANCE")
+                                title: qsTr("Packages & updates")
                                 icon: "update"
 
                                 CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
@@ -684,6 +369,14 @@ Item {
                                 CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
                                 CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
                                 CmdRow { label: "check .pacnew"; cmd: "sudo pacdiff" }
+                            }
+
+                            BorderSection {
+                                title: qsTr("Battery charge limit")
+                                icon: "battery_charging_full"
+
+                                CmdRow { label: qsTr("Limit charge to 80%"); cmd: "echo 80 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
+                                CmdRow { label: qsTr("Allow charge to 100%"); cmd: "echo 100 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
                             }
                         }
 
@@ -694,7 +387,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: Appearance.spacing.normal
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignTop
 
@@ -704,7 +397,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("CONFIG")
+                                    title: qsTr("Config")
                                     icon: "edit"
 
                                     InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
@@ -718,7 +411,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("SHORTCUTS")
+                                    title: qsTr("Shortcuts")
                                     icon: "bolt"
 
                                     InfoRow { label: "caefiles"; value: "cd to dots repo" }
@@ -737,7 +430,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: Appearance.spacing.normal
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignTop
 
@@ -747,7 +440,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("CONFIG")
+                                    title: qsTr("Config")
                                     icon: "folder_open"
 
                                     InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
@@ -760,7 +453,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("LOCAL")
+                                    title: qsTr("Local")
                                     icon: "folder"
 
                                     InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
@@ -778,7 +471,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: Appearance.spacing.normal
 
-                            RowLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignTop
 
@@ -788,7 +481,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("TOYS")
+                                    title: qsTr("Toys")
                                     icon: "auto_awesome"
 
                                     InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased matrix rain" }
@@ -807,7 +500,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignTop
 
-                                    title: qsTr("GAMES")
+                                    title: qsTr("Games")
                                     icon: "sports_esports"
 
                                     InfoRow { label: "nsnake"; value: "snake" }

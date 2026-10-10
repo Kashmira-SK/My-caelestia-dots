@@ -28,16 +28,24 @@ Item {
     }
 
     SplitPaneLayout {
+        singlePane: true
+        showRightPane: root.session.sectionFor("network") === "settings" || !!root.session.network.active || !!root.session.ethernet.active
+        showBackButton: !!root.session.network.active || !!root.session.ethernet.active
+        onBackRequested: { root.session.network.active = null; root.session.ethernet.active = null; }
         anchors.fill: parent
 
         leftContent: Component {
             StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                 id: leftFlickable
 
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: leftContent.implicitHeight
 
                 StyledScrollBar.vertical: StyledScrollBar {
+
+                    animatePosition: false
                     flickable: leftFlickable
                 }
 
@@ -46,6 +54,7 @@ Item {
 
                     width: leftFlickable.width
                     spacing: Appearance.spacing.normal
+                    StyledText { text: qsTr("Connections"); font.pointSize: 16.5 * Appearance.font.size.scale; font.weight: 600; Layout.bottomMargin: 12 }
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -65,15 +74,15 @@ Item {
                                     radius: 3
                                     color: Nmcli.active || Nmcli.activeEthernet
                                         ? Colours.palette.m3primary
-                                        : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.28)
+                                        : Colours.palette.m3onSurfaceVariant
                                 }
 
                                 StyledText {
                                     text: Nmcli.active || Nmcli.activeEthernet
                                         ? qsTr("Connected")
                                         : qsTr("No active connection")
-                                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.48)
-                                    font.pointSize: Appearance.font.size.smaller
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    font.pointSize: 9 * Appearance.font.size.scale
                                     font.weight: 400
                                 }
                             }
@@ -85,7 +94,7 @@ Item {
 
                         ActionItem {
                             icon: Nmcli.wifiEnabled ? "wifi" : "wifi_off"
-                            label: Nmcli.wifiEnabled ? qsTr("WiFi on") : qsTr("WiFi off")
+                            label: Nmcli.wifiEnabled ? qsTr("Wi-Fi on") : qsTr("Wi-Fi off")
                             active: Nmcli.wifiEnabled
 
                             onClicked: {
@@ -107,44 +116,27 @@ Item {
                             onClicked: Nmcli.rescanWifi()
                         }
 
-                        ActionItem {
-                            icon: "tune"
-                            label: qsTr("Overview")
-                            active: !root.session.ethernet.active && !root.session.network.active
 
-                            onClicked: {
-                                root.session.ethernet.active = null;
-                                root.session.network.active = null;
-
-                                if (root.session.vpn)
-                                    root.session.vpn.active = null;
-                            }
-                        }
                     }
 
-                    SectionLabel {
-                        text: qsTr("ETHERNET")
-                        detail: qsTr("%1").arg(Nmcli.ethernetDevices.length)
-                    }
-
+                    SettingsGroup {
+                        title: qsTr("Ethernet")
+                        contentPadding: 8
                     EthernetList {
                         Layout.fillWidth: true
                         session: root.session
                         showHeader: false
                     }
-
-                    SectionLabel {
-                        Layout.topMargin: Appearance.spacing.small
-                        text: qsTr("WI-FI")
-                        detail: Nmcli.scanning
-                            ? qsTr("SCANNING")
-                            : qsTr("%1 FOUND").arg(Nmcli.networks.length)
                     }
 
+                    SettingsGroup {
+                        title: qsTr("Wi-Fi")
+                        contentPadding: 8
                     WirelessList {
                         Layout.fillWidth: true
                         session: root.session
                         showHeader: false
+                    }
                     }
 
                     Item {
@@ -263,12 +255,16 @@ Item {
         id: settingsComponent
 
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: settingsFlickable
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: settingsInner.height
 
             StyledScrollBar.vertical: StyledScrollBar {
+
+                animatePosition: false
                 flickable: settingsFlickable
             }
 
@@ -287,12 +283,16 @@ Item {
         id: ethernetDetailsComponent
 
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: ethernetFlickable
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: ethernetDetailsInner.height
 
             StyledScrollBar.vertical: StyledScrollBar {
+
+                animatePosition: false
                 flickable: ethernetFlickable
             }
 
@@ -311,12 +311,16 @@ Item {
         id: wirelessDetailsComponent
 
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: wirelessFlickable
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: wirelessDetailsInner.height
 
             StyledScrollBar.vertical: StyledScrollBar {
+
+                animatePosition: false
                 flickable: wirelessFlickable
             }
 
@@ -352,8 +356,8 @@ Item {
 
             StyledText {
                 text: section.text
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.52)
-                font.pointSize: Appearance.font.size.smaller
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: 500
                 font.letterSpacing: 0.7
             }
@@ -367,9 +371,9 @@ Item {
             StyledText {
                 visible: section.detail !== ""
                 text: section.detail
-                color: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.30)
+                color: Colours.palette.m3onSurfaceVariant
                 font.family: Appearance.font.family.mono
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: 400
             }
         }
@@ -412,7 +416,7 @@ Item {
                         Colours.palette.m3onSurfaceVariant,
                         actionMouse.containsMouse ? 0.72 : 0.48
                     )
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -423,7 +427,7 @@ Item {
                         Colours.palette.m3onSurfaceVariant,
                         actionMouse.containsMouse ? 0.72 : 0.48
                     )
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
                 font.weight: action.active ? 500 : 400
             }
         }

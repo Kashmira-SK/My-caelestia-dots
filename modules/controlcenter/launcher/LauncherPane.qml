@@ -14,6 +14,7 @@ import Caelestia
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import "../../../utils/scripts/fuzzysort.js" as Fuzzy
 
@@ -21,6 +22,8 @@ Item {
     id: root
 
     required property Session session
+
+    readonly property bool showingPreferences: root.session.sectionFor("launcher") !== "applications"
 
     property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
@@ -166,8 +169,27 @@ Item {
         }
     }
 
+
+
+    SettingsPage {
+        title: PaneRegistry.sectionLabel("launcher", root.session.sectionFor("launcher"))
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        visible: root.showingPreferences
+        Settings { session: root.session; Layout.fillWidth: true }
+    }
+
     SplitPaneLayout {
-        anchors.fill: parent
+        singlePane: true
+        showRightPane: !!root.selectedApp
+        onBackRequested: root.selectedApp = null
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        visible: !root.showingPreferences
 
         leftContent: Component {
             ColumnLayout {
@@ -183,13 +205,9 @@ Item {
 
                     StyledText {
                         text:
-                            qsTr("APPLICATIONS")
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.72
-                        )
-                        font.pointSize:
-                            Appearance.font.size.smaller
+                            qsTr("Applications")
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: 9 * Appearance.font.size.scale
                         font.weight: 500
                         font.letterSpacing: 0.8
                     }
@@ -213,35 +231,14 @@ Item {
                                 : allAppsDb.apps.length
                             )
 
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.46
-                        )
+                        color: Colours.palette.m3onSurfaceVariant
 
                         font.family:
                             Appearance.font.family.mono
 
-                        font.pointSize:
-                            Appearance.font.size.smaller
+                        font.pointSize: 9 * Appearance.font.size.scale
                     }
-
-                    ToolButton {
-                        active:
-                            root.session.launcher.active === null
-
-                        icon: "settings"
-                        text: qsTr("Settings")
-
-                        onClicked: {
-                            if (root.session.launcher.active) {
-                                root.session.launcher.active = null;
-                            } else if (root.filteredApps.length > 0) {
-                                root.session.launcher.active =
-                                    root.filteredApps[0];
-                            }
-                        }
-                    }
-}
+                }
 
                 Item {
                     Layout.fillWidth: true
@@ -273,11 +270,8 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
 
                         text: "search"
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.62
-                        )
-                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: 9.75 * Appearance.font.size.scale
                     }
 
                     StyledTextField {
@@ -316,7 +310,7 @@ Item {
                             clearMouse.containsMouse ? 0.86 : 0.58
                         )
 
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: 9.75 * Appearance.font.size.scale
 
                         MouseArea {
                             id: clearMouse
@@ -331,8 +325,17 @@ Item {
                     }
                 }
 
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    radius: 9
+                    color: Colours.palette.m3surfaceContainerHigh
+                    border.width: 1
+                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.65)
                 Loader {
                     id: appsListLoader
+                    anchors.fill: parent
+                    anchors.margins: 8
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -341,6 +344,8 @@ Item {
                     active: true
 
                     sourceComponent: StyledListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
                         id: appsListView
 
                         model: root.filteredApps
@@ -435,8 +440,7 @@ Item {
                                             0.82
                                         )
 
-                                    font.pointSize:
-                                        Appearance.font.size.small
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
 
                                     font.weight:
                                         isSelected ? 500 : 400
@@ -458,8 +462,7 @@ Item {
                                     color:
                                         Colours.palette.m3primary
 
-                                    font.pointSize:
-                                        Appearance.font.size.small
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
                                 }
 
                                 MaterialIcon {
@@ -476,8 +479,7 @@ Item {
                                     color:
                                         Colours.palette.m3primary
 
-                                    font.pointSize:
-                                        Appearance.font.size.small
+                                    font.pointSize: 9.75 * Appearance.font.size.scale
                                 }
                             }
 
@@ -494,6 +496,7 @@ Item {
                             }
                         }
                     }
+                }
                 }
             }
         }
@@ -644,24 +647,14 @@ Item {
 
     Component {
         id: settings
-
-        StyledFlickable {
-            id: settingsFlickable
-
-            flickableDirection:
-                Flickable.VerticalFlick
-
-            contentHeight:
-                settingsInner.height
-
-            Settings {
-                id: settingsInner
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-
-                session: root.session
+        Item {
+            StyledText {
+                anchors.centerIn: parent
+                width: parent.width - Appearance.padding.large * 2
+                text: qsTr("Select an application to manage its favorites and launcher visibility.")
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                color: Colours.palette.m3onSurfaceVariant
             }
         }
     }
@@ -670,6 +663,8 @@ Item {
         id: appDetails
 
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             id: appDetailsFlickable
 
             readonly property var displayedApp:
@@ -735,8 +730,7 @@ Item {
                                 )
                                 : ""
 
-                            font.pointSize:
-                                Appearance.font.size.large
+                            font.pointSize: 16.5 * Appearance.font.size.scale
 
                             font.weight: 500
                             elide: Text.ElideRight
@@ -754,30 +748,25 @@ Item {
                                 )
                                 : ""
 
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.52
-                            )
+                            color: Colours.palette.m3onSurfaceVariant
 
                             font.family:
                                 Appearance.font.family.mono
 
-                            font.pointSize:
-                                Appearance.font.size.smaller
+                            font.pointSize: 9 * Appearance.font.size.scale
 
                             elide: Text.ElideMiddle
                         }
                     }
                 }
 
-                SectionTitle {
-                    title: qsTr("APPLICATION")
-                }
-
+                SettingsGroup {
+                    title: qsTr("Application")
+                    contentPadding: 16
                 DetailRow {
                     label: qsTr("Favourite")
 
-                    StyledSwitch {
+                    SettingsSwitch {
                         checked:
                             root.favouriteChecked
 
@@ -831,11 +820,10 @@ Item {
                         }
                     }
                 }
-
                 DetailRow {
                     label: qsTr("Hide from launcher")
 
-                    StyledSwitch {
+                    SettingsSwitch {
                         checked:
                             root.hideFromLauncherChecked
 
@@ -888,6 +876,7 @@ Item {
                             Config.save();
                         }
                     }
+                }
                 }
             }
         }
@@ -951,13 +940,9 @@ Item {
 
                 color: toolButton.active
                     ? Colours.palette.m3primary
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.64
-                    )
+                    : Colours.palette.m3onSurfaceVariant
 
-                font.pointSize:
-                    Appearance.font.size.small
+                font.pointSize: 9.75 * Appearance.font.size.scale
             }
 
             StyledText {
@@ -965,13 +950,9 @@ Item {
 
                 color: toolButton.active
                     ? Colours.palette.m3primary
-                    : Qt.alpha(
-                        Colours.palette.m3onSurfaceVariant,
-                        0.72
-                    )
+                    : Colours.palette.m3onSurfaceVariant
 
-                font.pointSize:
-                    Appearance.font.size.smaller
+                font.pointSize: 9 * Appearance.font.size.scale
 
                 font.weight:
                     toolButton.active ? 500 : 400
@@ -1001,13 +982,9 @@ Item {
         StyledText {
             text: sectionTitle.title
 
-            color: Qt.alpha(
-                Colours.palette.m3onSurfaceVariant,
-                0.72
-            )
+            color: Colours.palette.m3onSurfaceVariant
 
-            font.pointSize:
-                Appearance.font.size.smaller
+            font.pointSize: 9 * Appearance.font.size.scale
 
             font.weight: 500
             font.letterSpacing: 0.8
@@ -1044,8 +1021,7 @@ Item {
             color:
                 Colours.palette.m3onSurface
 
-            font.pointSize:
-                Appearance.font.size.small
+            font.pointSize: 9.75 * Appearance.font.size.scale
         }
 
         RowLayout {

@@ -69,6 +69,8 @@ ColumnLayout {
     }
 
     StyledListView {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
         id: view
 
         Layout.fillWidth: true

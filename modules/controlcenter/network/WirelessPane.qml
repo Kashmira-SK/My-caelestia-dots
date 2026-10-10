@@ -34,6 +34,8 @@ SplitPaneWithDetails {
 
     rightSettingsComponent: Component {
         StyledFlickable {
+        boundsBehavior: Flickable.StopAtBounds
+        boundsMovement: Flickable.StopAtBounds;
             flickableDirection: Flickable.VerticalFlick
             contentHeight: settingsInner.height
             clip: true

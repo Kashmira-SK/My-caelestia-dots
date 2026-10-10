@@ -2,311 +2,292 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import "./sections"
 import "../../launcher/services"
 import qs.components
-import qs.components.controls
-import qs.components.effects
 import qs.components.containers
-import qs.components.images
+import qs.components.controls
 import qs.services
 import qs.config
-import qs.utils
-import Caelestia.Models
-import Quickshell
-import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls as Controls
 import QtQuick.Layouts
 
-Item {
+SettingsPage {
     id: root
-
     required property Session session
-
-    property real animDurationsScale: Config.appearance.anim.durations.scale ?? 1
-    property string fontFamilyMaterial: Config.appearance.font.family.material ?? "Material Symbols Rounded"
-    property string fontFamilyMono: Config.appearance.font.family.mono ?? "CaskaydiaCove NF"
-    property string fontFamilySans: Config.appearance.font.family.sans ?? "Rubik"
-    property real fontSizeScale: Config.appearance.font.size.scale ?? 1
-    property real paddingScale: Config.appearance.padding.scale ?? 1
-    property real roundingScale: Config.appearance.rounding.scale ?? 1
-    property real spacingScale: Config.appearance.spacing.scale ?? 1
-    property bool transparencyEnabled: Config.appearance.transparency.enabled ?? false
-    property real transparencyBase: Config.appearance.transparency.base ?? 0.85
-    property real transparencyLayers: Config.appearance.transparency.layers ?? 0.4
-    property real borderRounding: Config.border.rounding ?? 1
-    property real borderThickness: Config.border.thickness ?? 1
-
-    property bool desktopClockEnabled: Config.background.desktopClock.enabled ?? false
-    property real desktopClockScale: Config.background.desktopClock.scale ?? 1
-    property string desktopClockPosition: Config.background.desktopClock.position ?? "bottom-right"
-    property bool desktopClockShadowEnabled: Config.background.desktopClock.shadow.enabled ?? true
-    property real desktopClockShadowOpacity: Config.background.desktopClock.shadow.opacity ?? 0.7
-    property real desktopClockShadowBlur: Config.background.desktopClock.shadow.blur ?? 0.4
-    property bool desktopClockBackgroundEnabled: Config.background.desktopClock.background.enabled ?? false
-    property real desktopClockBackgroundOpacity: Config.background.desktopClock.background.opacity ?? 0.7
-    property bool desktopClockBackgroundBlur: Config.background.desktopClock.background.blur ?? false
-    property bool desktopClockInvertColors: Config.background.desktopClock.invertColors ?? false
-    property bool backgroundEnabled: Config.background.enabled ?? true
-    property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
-    property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
-    property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
-    property real visualiserRounding: Config.background.visualiser.rounding ?? 1
-    property real visualiserSpacing: Config.background.visualiser.spacing ?? 1
-
-    property bool dashboardEnabled: Config.dashboard.enabled ?? true
-    property bool dashboardShowOnHover: Config.dashboard.showOnHover ?? true
-
+    readonly property string section: session.sectionFor("appearance")
     anchors.fill: parent
-
-    function saveConfig() {
-        Config.appearance.anim.durations.scale = root.animDurationsScale;
-
-        Config.appearance.font.family.material = root.fontFamilyMaterial;
-        Config.appearance.font.family.mono = root.fontFamilyMono;
-        Config.appearance.font.family.sans = root.fontFamilySans;
-        Config.appearance.font.size.scale = root.fontSizeScale;
-
-        Config.appearance.padding.scale = root.paddingScale;
-        Config.appearance.rounding.scale = root.roundingScale;
-        Config.appearance.spacing.scale = root.spacingScale;
-
-        Config.appearance.transparency.enabled = root.transparencyEnabled;
-        Config.appearance.transparency.base = root.transparencyBase;
-        Config.appearance.transparency.layers = root.transparencyLayers;
-
-        Config.background.desktopClock.enabled = root.desktopClockEnabled;
-        Config.background.enabled = root.backgroundEnabled;
-        Config.background.desktopClock.scale = root.desktopClockScale;
-        Config.background.desktopClock.position = root.desktopClockPosition;
-        Config.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled;
-        Config.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity;
-        Config.background.desktopClock.shadow.blur = root.desktopClockShadowBlur;
-        Config.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled;
-        Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity;
-        Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur;
-        Config.background.desktopClock.invertColors = root.desktopClockInvertColors;
-
-        Config.background.wallpaperEnabled = root.wallpaperEnabled;
-
-        Config.background.visualiser.enabled = root.visualiserEnabled;
-        Config.background.visualiser.autoHide = root.visualiserAutoHide;
-        Config.background.visualiser.rounding = root.visualiserRounding;
-        Config.background.visualiser.spacing = root.visualiserSpacing;
-
-        Config.border.rounding = root.borderRounding;
-        Config.border.thickness = root.borderThickness;
-
-        Config.dashboard.enabled = root.dashboardEnabled;
-        Config.dashboard.showOnHover = root.dashboardShowOnHover;
-
-        Config.save();
-    }
-
-    Component {
-        id: appearanceRightContentComponent
-
-        Item {
-            id: rightAppearanceFlickable
-
-            ColumnLayout {
-                id: contentLayout
-
-                anchors.fill: parent
-                spacing: 0
-
-                                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Appearance.spacing.normal
-                    spacing: Appearance.spacing.small
-
-                    StyledText {
-                        text: qsTr("WALLPAPER")
-                        color: Qt.alpha(
-                            Colours.palette.m3onSurfaceVariant,
-                            0.72
-                        )
-                        font.pointSize: Appearance.font.size.smaller
-                        font.weight: 500
-                        font.letterSpacing: 0.9
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 1
-                        color: Qt.alpha(
-                            Colours.palette.m3outlineVariant,
-                            0.22
-                        )
-                    }
-                }
-
-                Loader {
-                    id: wallpaperLoader
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.bottomMargin: -Appearance.padding.large * 2
-
-                    active: {
-                        const appearanceIndex = root.session.panes.indexOf("appearance");
-                        const isActive = root.session.activeIndex === appearanceIndex;
-                        const isAdjacent = Math.abs(root.session.activeIndex - appearanceIndex) === 1;
-                        const splitLayout = root.children[0];
-                        const loader = splitLayout && splitLayout.rightLoader ? splitLayout.rightLoader : null;
-                        const shouldActivate = loader && loader.item !== null && (isActive || isAdjacent);
-                        return shouldActivate;
-                    }
-
-                    onStatusChanged: {
-                        if (status === Loader.Error) {
-                            console.error("[AppearancePane] Wallpaper loader error!");
-                        }
-                    }
-
-                    sourceComponent: WallpaperGrid {
-                        session: root.session
-                    }
+    title: PaneRegistry.sectionLabel("appearance", section)
+    description: section === "colors" ? qsTr("Theme colors apply to the shell and connected apps.") : section === "text" ? qsTr("Choose the fonts and size used across the shell.") : section === "surfaces" ? qsTr("Adjust shell transparency and animation timing. Settings stays opaque.") : qsTr("Adjust spacing, corners, and the screen border.")
+    function setValue(settings: var, key: string, value: var): void { session.changeVisual(settings, key, value); }
+    Timer { id: schemeReload; interval: 300; onTriggered: Schemes.reload() }
+    Group {
+        visible: root.section === "colors"
+        title: qsTr("Color theme")
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 16
+            RowLayout {
+                Layout.fillWidth: true
+                StyledText { Layout.fillWidth: true; text: qsTr("Mode"); font.pointSize: 10.5 * Appearance.font.size.scale }
+                RowLayout {
+                    spacing: 6
+                    Choice { Layout.preferredWidth: 110; text: qsTr("Light"); iconName: "light_mode"; selected: Colours.currentLight; onClicked: Colours.setMode("light") }
+                    Choice { Layout.preferredWidth: 110; text: qsTr("Dark"); iconName: "dark_mode"; selected: !Colours.currentLight; onClicked: Colours.setMode("dark") }
                 }
             }
-        }
-    }
-
-    SplitPaneLayout {
-        anchors.fill: parent
-
-        leftContent: Component {
-            StyledFlickable {
-                id: sidebarFlickable
-
-                readonly property var rootPane: root
-
-                flickableDirection: Flickable.VerticalFlick
-                contentHeight: sidebarLayout.height
-
-                StyledScrollBar.vertical: StyledScrollBar {
-                    flickable: sidebarFlickable
-                }
-
+            Rectangle { Layout.fillWidth: true; height: 1; color: Qt.alpha(Colours.palette.m3outlineVariant, 0.4) }
+            RowLayout {
+                Layout.fillWidth: true
                 ColumnLayout {
-                    id: sidebarLayout
-
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-
-                    spacing: Appearance.spacing.smaller
-
-                    readonly property var rootPane: sidebarFlickable.rootPane
-
-                    readonly property bool allSectionsExpanded:
-                        themeModeSection.expanded
-                        && colorVariantSection.expanded
-                        && colorSchemeSection.expanded
-                        && animationsSection.expanded
-                        && fontsSection.expanded
-                        && scalesSection.expanded
-                        && transparencySection.expanded
-                        && borderSection.expanded
-                        && backgroundSection.expanded
-                        && dashboardSection.expanded
-
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: 0
-                        spacing: Appearance.spacing.small
-
-                        StyledText {
-                            text: qsTr("THEME")
-                            color: Qt.alpha(
-                                Colours.palette.m3onSurfaceVariant,
-                                0.72
-                            )
-                            font.pointSize: Appearance.font.size.smaller
-                            font.weight: 500
-                            font.letterSpacing: 0.9
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: 1
-                            color: Qt.alpha(
-                                Colours.palette.m3outlineVariant,
-                                0.22
-                            )
-                        }
-                    }
-
-                    ThemeModeSection {
-                        id: themeModeSection
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    ColorVariantSection {
-                        id: colorVariantSection
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    ColorSchemeSection {
-                        id: colorSchemeSection
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    AnimationsSection {
-                        id: animationsSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    FontsSection {
-                        id: fontsSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    ScalesSection {
-                        id: scalesSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    TransparencySection {
-                        id: transparencySection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    BorderSection {
-                        id: borderSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    BackgroundSection {
-                        id: backgroundSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
-                    }
-
-                    DashboardSection {
-                        id: dashboardSection
-                        rootPane: sidebarFlickable.rootPane
-                        flatStyle: true
-                        showBackground: false
+                    Layout.fillWidth: true
+                    spacing: 5
+                    StyledText { text: qsTr("Color profile"); font.pointSize: 10.5 * Appearance.font.size.scale }
+                    StyledText { text: qsTr("How strongly wallpaper colors are used"); font.pointSize: 9 * Appearance.font.size.scale; color: Colours.palette.m3onSurfaceVariant; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                }
+                Selector {
+                    model: Schemes.list
+                    textRole: "flavour"
+                    selectedKey: Schemes.currentScheme
+                    keyFor: item => `${item.name} ${item.flavour}`
+                    Accessible.name: qsTr("Color profile")
+                    onActivated: index => {
+                        const item = Schemes.list[index];
+                        if (!item) return;
+                        Schemes.currentScheme = `${item.name} ${item.flavour}`;
+                        Colours.setScheme(item.name, item.flavour);
+                        schemeReload.restart();
                     }
                 }
             }
         }
+    }
+    Group {
+        visible: root.section === "colors"
+        title: qsTr("Palette")
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 24
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 5
+                StyledText { text: qsTr("Palette style"); font.pointSize: 10.5 * Appearance.font.size.scale }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: M3Variants.list.find(item => item.variant === Schemes.currentVariant)?.description ?? qsTr("Choose how colors are distributed across the interface.")
+                    wrapMode: Text.WordWrap
+                    font.pointSize: 9 * Appearance.font.size.scale
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+            }
+            Selector {
+                model: M3Variants.list
+                textRole: "name"
+                selectedKey: Schemes.currentVariant
+                keyFor: item => item.variant
+                Accessible.name: qsTr("Palette style")
+                onActivated: index => {
+                    const item = M3Variants.list[index];
+                    if (!item) return;
+                    Schemes.currentVariant = item.variant;
+                    Colours.setVariant(item.variant);
+                    schemeReload.restart();
+                }
+            }
+        }
+    }
 
-        rightContent: appearanceRightContentComponent
+    Group {
+        visible: root.section === "text"
+        title: qsTr("Text")
+        FontPicker {
+            label: qsTr("Interface font")
+            value: Config.appearance.font.family.sans
+            onSelected: family => root.setValue(Config.appearance.font.family, "sans", family)
+        }
+        Adjustment {
+            label: qsTr("Text size")
+            settings: Config.appearance.font.size
+            setting: "scale"
+            multiplier: 100
+            from: 70; to: 150; stepSize: 1; decimals: 0; suffix: "%"
+        }
+    }
+    Group {
+        visible: root.section === "text"
+        title: qsTr("Specialist fonts")
+        FontPicker {
+            label: qsTr("Monospace font")
+            value: Config.appearance.font.family.mono
+            onSelected: family => root.setValue(Config.appearance.font.family, "mono", family)
+        }
+        FontPicker {
+            label: qsTr("Icon font")
+            value: Config.appearance.font.family.material
+            onSelected: family => root.setValue(Config.appearance.font.family, "material", family)
+        }
+        StyledText {
+            Layout.fillWidth: true
+            text: qsTr("The icon font must support Material Symbols for shell icons to display correctly.")
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: 9 * Appearance.font.size.scale
+            wrapMode: Text.WordWrap
+        }
+    }
+    Group {
+        visible: root.section === "surfaces"
+        title: qsTr("Transparency")
+        SettingsToggle { label: qsTr("Translucent surfaces"); settings: Config.appearance.transparency; setting: "enabled"; edit: root.setValue }
+        ColumnLayout {
+            Layout.fillWidth: true
+            visible: Config.appearance.transparency.enabled
+            spacing: Appearance.spacing.normal
+            Adjustment {
+                label: qsTr("Panel opacity")
+                settings: Config.appearance.transparency
+                setting: "base"
+                multiplier: 100
+                from: 0; to: 100; stepSize: 1; decimals: 0; suffix: "%"
+            }
+            Adjustment {
+                label: qsTr("Inner surface opacity")
+                settings: Config.appearance.transparency
+                setting: "layers"
+                multiplier: 100
+                from: 0; to: 100; stepSize: 1; decimals: 0; suffix: "%"
+            }
+        }
+    }
+    Group {
+        visible: root.section === "surfaces"
+        title: qsTr("Motion")
+        Adjustment {
+            label: qsTr("Animation duration")
+            settings: Config.appearance.anim.durations
+            setting: "scale"
+            from: 0.1; to: 5; stepSize: 0.1; decimals: 1; suffix: "×"
+        }
+    }
+    Group {
+        visible: root.section === "layout"
+        title: qsTr("Spacing & corners")
+        Adjustment {
+            label: qsTr("Space inside controls")
+            settings: Config.appearance.padding; setting: "scale"
+            from: 0.5; to: 2; stepSize: 0.1; suffix: "×"
+        }
+        Adjustment {
+            label: qsTr("Space between controls")
+            settings: Config.appearance.spacing; setting: "scale"
+            from: 0.1; to: 2; stepSize: 0.1; suffix: "×"
+        }
+        Adjustment {
+            label: qsTr("Corner roundness")
+            settings: Config.appearance.rounding; setting: "scale"
+            from: 0.1; to: 5; stepSize: 0.1; suffix: "×"
+        }
+    }
+    Group {
+        visible: root.section === "layout"
+        title: qsTr("Screen border")
+        Adjustment {
+            label: qsTr("Corner radius")
+            settings: Config.border; setting: "rounding"
+            from: 0; to: 100; stepSize: 1; decimals: 0; suffix: "px"
+        }
+        Adjustment {
+            label: qsTr("Thickness")
+            settings: Config.border; setting: "thickness"
+            from: 0; to: 100; stepSize: 1; decimals: 0; suffix: "px"
+        }
+    }
+    component Selector: Controls.ComboBox {
+        id: selector
+        required property string selectedKey
+        required property var keyFor
+        Layout.preferredWidth: 220
+        implicitHeight: 38
+        enabled: count > 0
+        currentIndex: Array.from(model ?? []).findIndex(item => keyFor(item) === selectedKey)
+        displayText: count === 0 ? qsTr("Loading…") : currentIndex < 0 ? qsTr("Choose…") : currentText.charAt(0).toUpperCase() + currentText.slice(1)
+        leftPadding: 12
+        rightPadding: 32
+        contentItem: StyledText { text: selector.displayText; font.pointSize: 10.5 * Appearance.font.size.scale; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+        background: Rectangle { radius: 6; color: Colours.palette.m3surfaceContainerLow; border.width: 1; border.color: selector.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outlineVariant }
+        indicator: MaterialIcon { x: selector.width - width - 10; anchors.verticalCenter: parent.verticalCenter; text: "expand_more"; font.pointSize: 12; color: Colours.palette.m3onSurfaceVariant }
+        delegate: Controls.ItemDelegate {
+            required property int index
+            width: selector.width
+            height: 40
+            highlighted: selector.highlightedIndex === index
+            contentItem: StyledText { text: selector.textAt(parent.index); font.pointSize: 10.5 * Appearance.font.size.scale; verticalAlignment: Text.AlignVCenter }
+            background: Rectangle { color: Qt.alpha(Colours.palette.m3primary, parent.highlighted ? 0.14 : 0); radius: 4 }
+        }
+        popup: Controls.Popup {
+            y: selector.height + 4
+            width: selector.width
+            padding: 4
+            implicitHeight: Math.min(280, popupList.contentHeight + 8)
+            background: Rectangle { color: Colours.palette.m3surfaceContainerHigh; radius: 7; border.width: 1; border.color: Colours.palette.m3outlineVariant }
+            contentItem: ListView {
+                id: popupList
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds;
+                model: selector.popup.visible ? selector.delegateModel : null
+                currentIndex: selector.highlightedIndex
+                Controls.ScrollBar.vertical: Controls.ScrollBar {}
+            }
+        }
+    }
+    component Group: SettingsGroup { contentPadding: 12 }
+    component Adjustment: SettingsAdjustment { edit: root.setValue }
+    component Choice: Controls.AbstractButton {
+        id: choice
+        property string detail: ""
+        property string iconName: ""
+        property bool selected: false
+        Layout.fillWidth: true
+        implicitHeight: Math.max(44, choiceContent.implicitHeight + 20)
+        Accessible.name: text + (detail ? ". " + detail : "")
+        Accessible.role: Accessible.RadioButton
+        Accessible.checked: selected
+        background: Rectangle {
+            radius: Appearance.rounding.small
+            color: Qt.alpha(Colours.palette.m3primary, choice.selected ? 0.12 : choice.hovered ? 0.06 : 0)
+            border.width: 1
+            border.color: choice.selected || choice.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outlineVariant, 0.45)
+        }
+        contentItem: RowLayout {
+            id: choiceContent
+            spacing: Appearance.spacing.small
+            MaterialIcon {
+                visible: choice.iconName !== ""
+                text: choice.iconName
+                color: choice.selected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 3
+                StyledText { Layout.fillWidth: true; text: choice.text; wrapMode: Text.WordWrap }
+                StyledText {
+                    visible: choice.detail !== ""
+                    Layout.fillWidth: true
+                    text: choice.detail
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: 9 * Appearance.font.size.scale
+                    wrapMode: Text.WordWrap
+                }
+            }
+            MaterialIcon {
+                text: choice.selected ? "check_circle" : "radio_button_unchecked"
+                color: choice.selected ? Colours.palette.m3primary : Colours.palette.m3outline
+                font.pointSize: 10.5 * Appearance.font.size.scale
+            }
+        }
+        leftPadding: 12
+        rightPadding: 12
+        topPadding: 10
+        bottomPadding: 10
     }
 }

@@ -4,6 +4,8 @@ import "bluetooth"
 import "network"
 import "audio"
 import "appearance"
+import "desktop"
+import "dashboard"
 import "taskbar"
 import "launcher"
 import qs.components
@@ -22,7 +24,7 @@ ClippingRectangle {
     readonly property bool initialOpeningComplete:
         layout.initialOpeningComplete
 
-    color: session.floating ? Colours.tPalette.m3surface : "transparent"
+    color: Colours.palette.m3surfaceContainerLow
 
     clip: true
     focus: false
