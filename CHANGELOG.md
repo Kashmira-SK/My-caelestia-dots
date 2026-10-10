@@ -2,7 +2,7 @@
 
 Newest entries at the top.
 
-## [2026-10-10] - Quickshell clipboard popup
+## [2026-10-10] - Clipboard, notifications, and sidebar refinements
 
 ### Added
 
@@ -12,6 +12,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Notification popups float as separate spaced cards without a shared stack background; card layout and interactions are retained
 - Super+D opens the Quickshell popup instead of Fuzzel and takes precedence over the imported dashboard binding; unrelated Fuzzel functionality is unchanged
 
 ### Notes

@@ -1,7 +1,6 @@
 import qs.services
 import qs.config
 import qs.modules.osd as Osd
-import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.launcher as Launcher
 import qs.modules.dashboard as Dashboard
@@ -27,14 +26,6 @@ Shape {
 
         startX: root.width - root.panels.session.width - root.panels.sidebar.width
         startY: (root.height - wrapper.height) / 2 - rounding
-    }
-
-    Notifications.Background {
-        wrapper: root.panels.notifications
-        sidebar: sidebar
-
-        startX: root.width
-        startY: 0
     }
 
     Session.Background {
