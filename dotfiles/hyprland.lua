@@ -126,7 +126,6 @@ hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd("caelestia shell drawers toggle sessi
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("caelestia shell lock lock"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("caelestia shell drawers toggle sidebar"))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("caelestia shell drawers toggle bar"))
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
 hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("caelestia shell controlCenter open cheatsheet"))
 hl.bind(mainMod .. " + Slash", hl.dsp.exec_cmd("/home/kashmira/.local/bin/combo-pick"))
 hl.bind(mainMod .. " + equal", hl.dsp.exec_cmd("/home/kashmira/.local/bin/emoji-pick"))
@@ -337,6 +336,10 @@ end)
 
 -- Brain_ShellKeybinds
 dofile("/home/kashmira/.config/Brain_Shell/Brain_ShellKeybinds.lua")
+
+-- Reserve the clipboard shortcut after imported bindings.
+hl.unbind(mainMod .. " + D")
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("caelestia shell clipboard toggle"))
 
 -- Dynamic border colors
 pcall(dofile, "/home/kashmira/.config/hypr/border_colors.lua")

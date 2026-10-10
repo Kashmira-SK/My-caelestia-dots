@@ -22,7 +22,7 @@
 | Creative | Krita, Blender, OBS | |
 | Password manager | Proton Pass | Bitwarden also installed, still deciding |
 | Screenshots | grimblast | |
-| Clipboard | cliphist + fuzzel | Super+D |
+| Clipboard | Cliphist + Caelestia popup | Super+D |
 | Color picker | hyprpicker | |
 | Video download | yt-dlp | |
 | Login screen | SDDM | Japanese Aesthetic theme |

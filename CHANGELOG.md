@@ -2,6 +2,24 @@
 
 Newest entries at the top.
 
+## [2026-10-10] - Quickshell clipboard popup
+
+### Added
+
+- Themed Cliphist popup with image thumbnails, readable text and code previews, search, and keyboard navigation
+- Click or Enter to copy and close, individual deletion, and confirmed history clearing
+- Animated opening and closing, on-demand previews, and a bounded thumbnail cache; the popup unloads when closed
+
+### Fixed
+
+- Super+D opens the Quickshell popup instead of Fuzzel and takes precedence over the imported dashboard binding; unrelated Fuzzel functionality is unchanged
+
+### Notes
+
+- Requires Python 3 and Pillow alongside Cliphist and wl-clipboard; search matches Cliphist previews within its configured preview length
+
+---
+
 ## [2026-10-08] - Live wallpapers
 
 ### Added
