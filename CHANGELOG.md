@@ -12,6 +12,8 @@ Newest entries at the top.
 
 ### Fixed
 
+- Removed the sidebar Arch logo and app-name icon, moving workspaces to the top
+- Window previews reserve their capture area before the first frame, fade in without extra zoom, and avoid delayed vertical repositioning
 - Notification cards use the former stack surface color and opacity from the dynamic theme for better readability
 - Notification popups float as separate spaced cards without a shared stack background; card layout and interactions are retained
 - Super+D opens the Quickshell popup instead of Fuzzel and takes precedence over the imported dashboard binding; unrelated Fuzzel functionality is unchanged

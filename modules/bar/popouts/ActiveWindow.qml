@@ -11,6 +11,8 @@ Item {
     id: root
 
     required property Item wrapper
+    readonly property var windowSize: Hypr.activeToplevel?.lastIpcObject.size ?? [1, 1]
+    readonly property real previewAspect: Math.max(1, windowSize[0]) / Math.max(1, windowSize[1])
 
     implicitWidth: Hypr.activeToplevel ? Config.bar.sizes.windowPreviewSize : -Appearance.padding.large * 2
     implicitHeight: child.implicitHeight
@@ -74,12 +76,22 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "transparent"
             radius: Appearance.rounding.panel
+            // Reserve the capture area before the first frame arrives.
+            implicitWidth: Config.bar.sizes.windowPreviewSize * Math.min(1, root.previewAspect)
+            implicitHeight: Config.bar.sizes.windowPreviewSize / Math.max(1, root.previewAspect)
 
             ScreencopyView {
                 id: preview
 
                 captureSource: Hypr.activeToplevel?.wayland ?? null
                 live: visible
+                opacity: hasContent ? 1 : 0
+
+                Behavior on opacity {
+                    Anim {
+                        duration: Appearance.anim.durations.small
+                    }
+                }
 
                 constraintSize.width: Config.bar.sizes.windowPreviewSize
                 constraintSize.height: Config.bar.sizes.windowPreviewSize

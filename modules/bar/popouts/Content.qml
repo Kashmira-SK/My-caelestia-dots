@@ -173,7 +173,7 @@ Item {
         anchors.right: parent.right
 
         opacity: 0
-        scale: 0.8
+        scale: name === "activewindow" ? 1 : 0.8
         active: false
 
         states: State {

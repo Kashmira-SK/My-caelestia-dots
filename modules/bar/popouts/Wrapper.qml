@@ -141,7 +141,7 @@ Item {
     }
 
     Behavior on y {
-        enabled: root.implicitWidth > 0
+        enabled: root.implicitWidth > 0 && (root.currentName !== "activewindow" || root.isDetached)
 
         Anim {
             duration: root.animLength

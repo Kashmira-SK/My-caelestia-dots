@@ -119,7 +119,7 @@ ColumnLayout {
     Repeater {
         id: repeater
 
-        model: Config.bar.entries
+        model: Config.bar.entries.filter(entry => entry.id !== "logo")
 
         DelegateChooser {
             role: "id"
@@ -128,12 +128,6 @@ ColumnLayout {
                 roleValue: "spacer"
                 delegate: WrappedLoader {
                     Layout.fillHeight: enabled
-                }
-            }
-            DelegateChoice {
-                roleValue: "logo"
-                delegate: WrappedLoader {
-                    sourceComponent: OsIcon {}
                 }
             }
             DelegateChoice {
