@@ -6,6 +6,7 @@ Newest entries at the top.
 
 ### Added
 
+- Project instructions require a focused commit and changelog update for every change, without a separate reminder
 - Themed Cliphist popup with image thumbnails, readable text and code previews, search, and keyboard navigation
 - Click or Enter to copy and close, individual deletion, and confirmed history clearing
 - Animated opening and closing, on-demand previews, and a bounded thumbnail cache; the popup unloads when closed
