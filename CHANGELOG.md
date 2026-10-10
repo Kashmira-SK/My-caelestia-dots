@@ -13,6 +13,7 @@ Newest entries at the top.
 
 ### Fixed
 
+- Enabled Hyprland background blur in `dotfiles/hyprland.lua`, retaining the existing blur size and passes
 - Removed the sidebar Arch logo and app-name icon, moving workspaces to the top
 - Window previews reserve their capture area before the first frame, fade in without extra zoom, and avoid delayed vertical repositioning
 - Notification cards use the former stack surface color and opacity from the dynamic theme for better readability
