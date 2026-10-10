@@ -192,10 +192,17 @@ Item {
         visible: !root.showingPreferences
 
         leftContent: Component {
-            ColumnLayout {
-                id: leftLauncherLayout
-
+            StyledFlickable {
+                id: appsPage
                 anchors.fill: parent
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: leftLauncherLayout.implicitHeight
+                ColumnLayout {
+                id: leftLauncherLayout
+                width: appsPage.width
                 spacing: Appearance.spacing.normal
 
 
@@ -327,7 +334,7 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    Layout.preferredHeight: (appsListLoader.item?.contentHeight ?? 0) + 16
                     radius: 9
                     color: Colours.palette.m3surfaceContainerHigh
                     border.width: 1
@@ -347,6 +354,7 @@ Item {
         boundsBehavior: Flickable.StopAtBounds
         boundsMovement: Flickable.StopAtBounds;
                         id: appsListView
+                        interactive: false
 
                         model: root.filteredApps
                         spacing: 2
@@ -498,6 +506,7 @@ Item {
                     }
                 }
                 }
+            }
             }
         }
 

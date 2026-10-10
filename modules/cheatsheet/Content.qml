@@ -188,338 +188,281 @@ Item {
         contentPadding: 8
     }
 
-    StyledRect {
+    SettingsPage {
+        id: flick
         anchors.fill: parent
-
-        color: "transparent"
-
+        title: PaneRegistry.sectionLabel("cheatsheet", root.activePage)
         ColumnLayout {
-            anchors.fill: parent
-
-            anchors.leftMargin: 28
-            anchors.rightMargin: 28
-            anchors.topMargin: 25
-            anchors.bottomMargin: Appearance.padding.normal
-
-            spacing: 0
-
-
-            StyledText {
-                Layout.fillWidth: true
-                Layout.bottomMargin: 12
-                text: PaneRegistry.sectionLabel("cheatsheet", root.activePage)
-                font.pointSize: 16.5 * Appearance.font.size.scale
-                font.weight: 600
-            }
-
-            ClippingRectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                color: "transparent"
-
-                StyledFlickable {
-        boundsBehavior: Flickable.StopAtBounds
-        boundsMovement: Flickable.StopAtBounds;
-                    id: flick
-
-                    anchors.fill: parent
-
-                    clip: true
-
-                    contentHeight:
-                        pageContent.implicitHeight
-
-                    flickableDirection:
-                        Flickable.VerticalFlick
-
-                    StyledScrollBar.vertical:
-                        StyledScrollBar {
-                            animatePosition: false
-                            flickable: flick
-                        }
-
-                    ColumnLayout {
-                        id: pageContent
-
-                        width: flick.width
-                        spacing: Appearance.spacing.normal
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "tools"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            BorderSection {
-                                title: qsTr("Quick")
-                                icon: "priority_high"
-
-                                CmdRow { label: qsTr("Start Caelestia"); cmd: "qs -c caelestia" }
-                                CmdRow { label: qsTr("Stop Caelestia"); cmd: "qs -c caelestia kill" }
-
-                                CmdRow {
-                                    label: "restart quickshell"
-                                    cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown"
-                                }
-
-                                CmdRow {
-                                    label: "clear qml cache"
-                                    cmd: "rm -rf ~/.cache/quickshell/qmlcache"
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignTop
-
-                                spacing: Appearance.spacing.normal
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Everyday")
-                                    icon: "terminal"
-
-                                    InfoRow { label: "speedtest-cli"; value: "network speed test" }
-                                    InfoRow { label: "ncdu"; value: "disk usage analyzer" }
-                                    InfoRow { label: "duf"; value: "df but readable" }
-                                    InfoRow { label: "tldr"; value: "simplified man pages" }
-                                    InfoRow { label: "most"; value: "pager, alt to less" }
-                                    InfoRow { label: "jq"; value: "json processor" }
-                                    InfoRow { label: "yt-dlp"; value: "download video/audio" }
-                                    InfoRow { label: "gh"; value: "github from terminal" }
-                                }
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Inspect")
-                                    icon: "search"
-
-                                    InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
-                                    InfoRow { label: "ttyper"; value: "typing speed test" }
-                                    InfoRow { label: "exiftool"; value: "image/file metadata" }
-                                    InfoRow { label: "inxi"; value: "system info dump" }
-                                    InfoRow { label: "nvtop"; value: "gpu usage monitor" }
-                                    InfoRow { label: "termdown"; value: "countdown/stopwatch" }
-                                    InfoRow { label: "gum"; value: "shell script UI prompts" }
-                                    InfoRow { label: "epy"; value: "terminal ebook reader" }
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "network"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignTop
-
-                                spacing: Appearance.spacing.normal
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Wifi")
-                                    icon: "wifi"
-
-                                    CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
-                                    CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
-                                    CmdRow { label: "saved"; cmd: "nmcli connection show" }
-                                    CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
-                                }
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Bluetooth")
-                                    icon: "bluetooth"
-
-                                    CmdRow { label: "scan"; cmd: "bluetoothctl scan on" }
-                                    CmdRow { label: "paired"; cmd: "bluetoothctl devices" }
-                                    CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "system"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            BorderSection {
-                                title: qsTr("Packages & updates")
-                                icon: "update"
-
-                                CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
-                                CmdRow { label: "update + AUR"; cmd: "yay -Syu" }
-                                CmdRow { label: "refresh mirrors"; cmd: "sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist" }
-                                CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
-                                CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
-                                CmdRow { label: "check .pacnew"; cmd: "sudo pacdiff" }
-                            }
-
-                            BorderSection {
-                                title: qsTr("Battery charge limit")
-                                icon: "battery_charging_full"
-
-                                CmdRow { label: qsTr("Limit charge to 80%"); cmd: "echo 80 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
-                                CmdRow { label: qsTr("Allow charge to 100%"); cmd: "echo 100 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "shell"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignTop
-
-                                spacing: Appearance.spacing.normal
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Config")
-                                    icon: "edit"
-
-                                    InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
-                                    InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
-                                    InfoRow { label: "zshconf"; value: "edit .zshrc" }
-                                    InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
-                                    InfoRow { label: "caeconf"; value: "edit shell.json" }
-                                }
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Shortcuts")
-                                    icon: "bolt"
-
-                                    InfoRow { label: "caefiles"; value: "cd to dots repo" }
-                                    InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
-                                    InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
-                                    InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
-                                    InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "paths"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignTop
-
-                                spacing: Appearance.spacing.normal
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Config")
-                                    icon: "folder_open"
-
-                                    InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
-                                    InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
-                                    InfoRow { label: "zshrc"; value: "~/.zshrc" }
-                                    InfoRow { label: "starship"; value: "~/.config/starship.toml" }
-                                }
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Local")
-                                    icon: "folder"
-
-                                    InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
-                                    InfoRow { label: "startpage"; value: "~/.config/startpage/" }
-                                    InfoRow { label: "immich db"; value: "~/immich-db" }
-                                    InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible:
-                                root.activePage === "fun"
-
-                            Layout.fillWidth: true
-                            spacing: Appearance.spacing.normal
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignTop
-
-                                spacing: Appearance.spacing.normal
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Toys")
-                                    icon: "auto_awesome"
-
-                                    InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased matrix rain" }
-                                    InfoRow { label: "pipes"; value: "aliased animated pipes" }
-                                    InfoRow { label: "asciiquarium"; value: "aquarium animation" }
-                                    InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
-                                    InfoRow { label: "astroterm"; value: "starfield / space" }
-                                    InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
-                                    InfoRow { label: "tty-clock"; value: "big terminal clock" }
-                                    InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
-                                    InfoRow { label: "cowsay"; value: "cow says your text" }
-                                    InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
-                                }
-
-                                BorderSection {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-
-                                    title: qsTr("Games")
-                                    icon: "sports_esports"
-
-                                    InfoRow { label: "nsnake"; value: "snake" }
-                                    InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
-                                    InfoRow { label: "bastet"; value: "tetris that hates you" }
-                                    InfoRow { label: "tty-solitaire"; value: "solitaire" }
-                                    InfoRow { label: "2048-cli-git"; value: "2048" }
-                                    InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
-                                }
-                            }
-                        }
-
-                        Item {
-                            Layout.preferredHeight:
-                                Appearance.padding.large
-                        }
-                    }
+            visible:
+                root.activePage === "tools"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            BorderSection {
+                title: qsTr("Quick")
+                icon: "priority_high"
+
+                CmdRow { label: qsTr("Start Caelestia"); cmd: "qs -c caelestia" }
+                CmdRow { label: qsTr("Stop Caelestia"); cmd: "qs -c caelestia kill" }
+
+                CmdRow {
+                    label: "restart quickshell"
+                    cmd: "qs -c caelestia kill && qs -c caelestia >/tmp/quickshell.log 2>&1 & disown"
+                }
+
+                CmdRow {
+                    label: "clear qml cache"
+                    cmd: "rm -rf ~/.cache/quickshell/qmlcache"
                 }
             }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                spacing: Appearance.spacing.normal
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Everyday")
+                    icon: "terminal"
+
+                    InfoRow { label: "speedtest-cli"; value: "network speed test" }
+                    InfoRow { label: "ncdu"; value: "disk usage analyzer" }
+                    InfoRow { label: "duf"; value: "df but readable" }
+                    InfoRow { label: "tldr"; value: "simplified man pages" }
+                    InfoRow { label: "most"; value: "pager, alt to less" }
+                    InfoRow { label: "jq"; value: "json processor" }
+                    InfoRow { label: "yt-dlp"; value: "download video/audio" }
+                    InfoRow { label: "gh"; value: "github from terminal" }
+                }
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Inspect")
+                    icon: "search"
+
+                    InfoRow { label: "stripe"; value: "stripe-cli, webhook testing" }
+                    InfoRow { label: "ttyper"; value: "typing speed test" }
+                    InfoRow { label: "exiftool"; value: "image/file metadata" }
+                    InfoRow { label: "inxi"; value: "system info dump" }
+                    InfoRow { label: "nvtop"; value: "gpu usage monitor" }
+                    InfoRow { label: "termdown"; value: "countdown/stopwatch" }
+                    InfoRow { label: "gum"; value: "shell script UI prompts" }
+                    InfoRow { label: "epy"; value: "terminal ebook reader" }
+                }
+            }
+        }
+
+        ColumnLayout {
+            visible:
+                root.activePage === "network"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                spacing: Appearance.spacing.normal
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Wifi")
+                    icon: "wifi"
+
+                    CmdRow { label: "list networks"; cmd: "nmcli device wifi list" }
+                    CmdRow { label: "connect"; cmd: "nmcli device wifi connect \"<SSID>\" password \"<PASS>\"" }
+                    CmdRow { label: "saved"; cmd: "nmcli connection show" }
+                    CmdRow { label: "disconnect"; cmd: "nmcli device disconnect wlan0" }
+                }
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Bluetooth")
+                    icon: "bluetooth"
+
+                    CmdRow { label: "scan"; cmd: "bluetoothctl scan on" }
+                    CmdRow { label: "paired"; cmd: "bluetoothctl devices" }
+                    CmdRow { label: "connect"; cmd: "bluetoothctl connect <MAC>" }
+                }
+            }
+        }
+
+        ColumnLayout {
+            visible:
+                root.activePage === "system"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            BorderSection {
+                title: qsTr("Packages & updates")
+                icon: "update"
+
+                CmdRow { label: "full update"; cmd: "sudo pacman -Syu" }
+                CmdRow { label: "update + AUR"; cmd: "yay -Syu" }
+                CmdRow { label: "refresh mirrors"; cmd: "sudo reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist" }
+                CmdRow { label: "clean pkg cache"; cmd: "sudo paccache -r" }
+                CmdRow { label: "remove orphans"; cmd: "sudo pacman -Rns $(pacman -Qtdq)" }
+                CmdRow { label: "check .pacnew"; cmd: "sudo pacdiff" }
+            }
+
+            BorderSection {
+                title: qsTr("Battery charge limit")
+                icon: "battery_charging_full"
+
+                CmdRow { label: qsTr("Limit charge to 80%"); cmd: "echo 80 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
+                CmdRow { label: qsTr("Allow charge to 100%"); cmd: "echo 100 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold" }
+            }
+        }
+
+        ColumnLayout {
+            visible:
+                root.activePage === "shell"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                spacing: Appearance.spacing.normal
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Config")
+                    icon: "edit"
+
+                    InfoRow { label: "hyprconf"; value: "edit hyprland.conf" }
+                    InfoRow { label: "fetchconf"; value: "edit fastfetch config" }
+                    InfoRow { label: "zshconf"; value: "edit .zshrc" }
+                    InfoRow { label: "changelog"; value: "edit caelestia CHANGELOG.md" }
+                    InfoRow { label: "caeconf"; value: "edit shell.json" }
+                }
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Shortcuts")
+                    icon: "bolt"
+
+                    InfoRow { label: "caefiles"; value: "cd to dots repo" }
+                    InfoRow { label: "qsrestart"; value: "restart quickshell (safe)" }
+                    InfoRow { label: "unmount"; value: "unmount + poweroff Pirate Ship" }
+                    InfoRow { label: "ls / ll / la / lt"; value: "eza views" }
+                    InfoRow { label: "spotify"; value: "launch spotify (flatpak)" }
+                }
+            }
+        }
+
+        ColumnLayout {
+            visible:
+                root.activePage === "paths"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                spacing: Appearance.spacing.normal
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Config")
+                    icon: "folder_open"
+
+                    InfoRow { label: "dots root"; value: "~/.config/quickshell/caelestia/" }
+                    InfoRow { label: "hyprland"; value: "~/.config/hypr/hyprland.conf" }
+                    InfoRow { label: "zshrc"; value: "~/.zshrc" }
+                    InfoRow { label: "starship"; value: "~/.config/starship.toml" }
+                }
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Local")
+                    icon: "folder"
+
+                    InfoRow { label: "nvim dash"; value: "~/.config/nvim/lua/plugins/snacks.lua" }
+                    InfoRow { label: "startpage"; value: "~/.config/startpage/" }
+                    InfoRow { label: "immich db"; value: "~/immich-db" }
+                    InfoRow { label: "qs cache"; value: "~/.cache/quickshell/qmlcache" }
+                }
+            }
+        }
+
+        ColumnLayout {
+            visible:
+                root.activePage === "fun"
+
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                spacing: Appearance.spacing.normal
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Toys")
+                    icon: "auto_awesome"
+
+                    InfoRow { label: "matrix / matrixb / matrixc"; value: "aliased matrix rain" }
+                    InfoRow { label: "pipes"; value: "aliased animated pipes" }
+                    InfoRow { label: "asciiquarium"; value: "aquarium animation" }
+                    InfoRow { label: "cbonsai"; value: "grows a bonsai tree" }
+                    InfoRow { label: "astroterm"; value: "starfield / space" }
+                    InfoRow { label: "no-more-secrets"; value: "decrypt reveal effect" }
+                    InfoRow { label: "tty-clock"; value: "big terminal clock" }
+                    InfoRow { label: "toilet / figlet"; value: "ascii text banners" }
+                    InfoRow { label: "cowsay"; value: "cow says your text" }
+                    InfoRow { label: "pokemon-colorscripts"; value: "pokemon ascii art" }
+                }
+
+                BorderSection {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+
+                    title: qsTr("Games")
+                    icon: "sports_esports"
+
+                    InfoRow { label: "nsnake"; value: "snake" }
+                    InfoRow { label: "vitetris"; value: "tetris, vim-like controls" }
+                    InfoRow { label: "bastet"; value: "tetris that hates you" }
+                    InfoRow { label: "tty-solitaire"; value: "solitaire" }
+                    InfoRow { label: "2048-cli-git"; value: "2048" }
+                    InfoRow { label: "ascii-patrol"; value: "ascii shooter" }
+                }
+            }
+        }
+
+        Item {
+            Layout.preferredHeight:
+                Appearance.padding.large
         }
     }
 }
